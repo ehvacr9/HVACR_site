@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="PyCool 飽和水蒸汽性質計算器：輸入壓力或溫度，查詢飽和液體與蒸汽的密度及比熱。">
+  <meta name="description" content="PyCool Web 冷媒與水的物性計算器：查詢飽和性質或指定任兩項已知性質求狀態點。">
   <title>PyCool Web | 能源與冷凍空調小站</title>
   <style>
     :root {
@@ -39,7 +39,8 @@
 
     a:focus-visible,
     button:focus-visible,
-    input:focus-visible {
+    input:focus-visible,
+    select:focus-visible {
       outline: 3px solid #9ab952;
       outline-offset: 3px;
     }
@@ -545,9 +546,9 @@
   </header>
 
   <main class="wrap page">
-    <p class="eyebrow">Water Properties · CoolProp</p>
+    <p class="eyebrow">Fluid Properties · CoolProp</p>
     <h1>PyCool Web</h1>
-    <p class="intro">查詢水的飽和性質，或指定任兩項已知性質求出完整狀態點。</p>
+    <p class="intro">選擇水或冷媒，查詢飽和性質，或指定任兩項已知性質求出完整狀態點。</p>
 
     <div class="mode-switch" role="radiogroup" aria-label="計算模式">
       <label class="mode-option">
@@ -562,6 +563,16 @@
 
     <section class="calculator" aria-label="PyCool 性質計算器">
       <form class="input-panel" id="calculator-form">
+        <div class="field">
+          <label for="fluid">流體</label>
+          <select id="fluid" name="fluid">
+            <option value="Water">水 (Water)</option>
+            <option value="R134a">R134a</option>
+            <option value="R22">R22</option>
+            <option value="R410A">R410A</option>
+          </select>
+        </div>
+
         <div id="saturation-inputs">
           <h2>飽和輸入</h2>
           <p class="panel-intro">只需填入壓力或溫度其中一項。</p>
@@ -612,7 +623,7 @@
               <input id="property-two-value" type="number" inputmode="decimal" step="any" autocomplete="off" aria-label="已知性質 2 數值">
             </div>
           </div>
-          <p class="field-hint">密度與比容代表同一種物性，不能同時選取。CoolProp 水模型溫度範圍：<span id="state-temperature-range">載入中…</span>；實際可解狀態依輸入性質而定。</p>
+          <p class="field-hint">密度與比容代表同一種物性，不能同時選取。CoolProp 模型溫度範圍：<span id="state-temperature-range">載入中…</span>；實際可解狀態依輸入性質而定。</p>
         </div>
 
         <div class="actions">
@@ -635,7 +646,7 @@
             </dl>
           </section>
           <section class="phase-card" aria-labelledby="vapor-title">
-            <h3 id="vapor-title">飽和蒸汽 (g)</h3>
+            <h3 id="vapor-title">飽和蒸氣 (g)</h3>
             <dl>
               <div class="result-row"><dt>密度 ρ (kg/m³)</dt><dd id="vapor-rho">—</dd></div>
               <div class="result-row"><dt>比熱 cp (kJ/kg·K)</dt><dd id="vapor-cp">—</dd></div>
@@ -660,8 +671,8 @@
           </dl>
         </section>
         <div class="notes">
-          <p>飽和輸入適用於水的汽液飽和狀態，範圍由三相點至臨界點以下；指定任兩性質可計算 CoolProp 水模型範圍內的過冷液體、過熱蒸汽及其他狀態，實際範圍依輸入性質而定。狀態點中的「—」表示該性質在該相態下無定義或無法計算。</p>
-          <p>性質計算由 <a href="https://github.com/CoolProp/CoolProp" target="_blank" rel="noopener noreferrer">CoolProp 8.1.0.dev</a>（WebAssembly）提供，水的狀態方程式採 IAPWS-95。運算模組由本站提供，不需連接第三方 CDN；首次使用時瀏覽器會載入約 10 MB 的模組。</p>
+          <p>飽和輸入適用於所選流體的汽液飽和狀態，溫度範圍由模型最低溫度至臨界點以下；指定任兩性質可計算模型範圍內的過冷液體、過熱蒸氣及其他狀態，實際範圍依輸入性質而定。狀態點中的「—」表示該性質在該相態下無定義或無法計算。</p>
+          <p>性質計算由 <a href="https://github.com/CoolProp/CoolProp" target="_blank" rel="noopener noreferrer">CoolProp 8.1.0.dev</a>（WebAssembly）提供，並使用所選流體對應的物性模型。運算模組由本站提供，不需連接第三方 CDN；首次使用時瀏覽器會載入約 10 MB 的模組。</p>
         </div>
       </div>
     </section>
@@ -679,6 +690,7 @@
     const modeInputs = document.querySelectorAll('input[name="calculation-mode"]');
     const saturationInputs = document.querySelector("#saturation-inputs");
     const stateInputs = document.querySelector("#state-inputs");
+    const fluidInput = document.querySelector("#fluid");
     const pressureInput = document.querySelector("#pressure");
     const temperatureInput = document.querySelector("#temperature");
     const propertyOne = document.querySelector("#property-one");
@@ -721,10 +733,12 @@
     const formatNumber = (value) => Number(value.toPrecision(6)).toString();
 
     let coolprop;
+    let activeFluid;
     let minimumTemperature;
     let maximumTemperature;
     let criticalTemperature;
     let criticalPressure;
+    let minimumSaturationPressure;
 
     const inputProperties = {
       T: { key: "T", convert: (value) => value + 273.15, label: "溫度 T" },
@@ -782,6 +796,33 @@
       status.textContent = isStateMode ? "請選擇兩項性質並輸入數值。" : "請輸入壓力或溫度。";
     }
 
+    function setFluid(fluid) {
+      const properties = {
+        minimumTemperature: coolprop.PropsSI("Tmin", "", 0, "", 0, fluid),
+        maximumTemperature: coolprop.PropsSI("Tmax", "", 0, "", 0, fluid),
+        criticalTemperature: coolprop.PropsSI("Tcrit", "", 0, "", 0, fluid),
+        criticalPressure: coolprop.PropsSI("pcrit", "", 0, "", 0, fluid),
+      };
+      properties.minimumSaturationPressure = coolprop.PropsSI(
+        "P",
+        "T",
+        properties.minimumTemperature,
+        "Q",
+        0,
+        fluid,
+      );
+      activeFluid = fluid;
+      ({
+        minimumTemperature,
+        maximumTemperature,
+        criticalTemperature,
+        criticalPressure,
+        minimumSaturationPressure,
+      } = properties);
+      temperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(criticalTemperature - 273.15)} °C 以下`;
+      stateTemperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(maximumTemperature - 273.15)} °C`;
+    }
+
     function calculateSaturation() {
       const pressureText = pressureInput.value.trim();
       const temperatureText = temperatureInput.value.trim();
@@ -808,7 +849,7 @@
             showError(`溫度須介於 ${formatNumber(minimumTemperature - 273.15)} °C 與臨界溫度 ${formatNumber(criticalTemperature - 273.15)} °C 之間。`);
             return;
           }
-          pressure = coolprop.PropsSI("P", "T", temperature, "Q", 0, "Water");
+          pressure = coolprop.PropsSI("P", "T", temperature, "Q", 0, activeFluid);
           if (enteredPressure !== null) {
             mismatch = Math.abs(enteredPressure * 1000 - pressure) / pressure > 0.01;
           }
@@ -818,9 +859,9 @@
             showError(`壓力須低於臨界壓力 ${formatNumber(criticalPressure / 1000)} kPa。`);
             return;
           }
-          temperature = coolprop.PropsSI("T", "P", pressure, "Q", 0, "Water");
+          temperature = coolprop.PropsSI("T", "P", pressure, "Q", 0, activeFluid);
           if (temperature < minimumTemperature) {
-            showError(`壓力低於三相點壓力 ${formatNumber(coolprop.PropsSI("P", "T", minimumTemperature, "Q", 0, "Water") / 1000)} kPa，無法計算汽液飽和性質。`);
+            showError(`壓力低於模型最低飽和壓力 ${formatNumber(minimumSaturationPressure / 1000)} kPa，無法計算汽液飽和性質。`);
             return;
           }
         }
@@ -828,9 +869,9 @@
         const phases = { liquid: 0, vapor: 1 };
         for (const [phase, quality] of Object.entries(phases)) {
           const properties = {
-            rho: coolprop.PropsSI("D", "T", temperature, "Q", quality, "Water"),
-            cp: coolprop.PropsSI("C", "T", temperature, "Q", quality, "Water") / 1000,
-            cv: coolprop.PropsSI("O", "T", temperature, "Q", quality, "Water") / 1000,
+            rho: coolprop.PropsSI("D", "T", temperature, "Q", quality, activeFluid),
+            cp: coolprop.PropsSI("C", "T", temperature, "Q", quality, activeFluid) / 1000,
+            cv: coolprop.PropsSI("O", "T", temperature, "Q", quality, activeFluid) / 1000,
           };
           for (const [key, value] of Object.entries(properties)) {
             if (!Number.isFinite(value)) {
@@ -903,7 +944,7 @@
           inputOne,
           propertyTwoSpec.key,
           inputTwo,
-          "Water",
+          activeFluid,
         );
         if (phaseNames[phase] === undefined) {
           throw new Error("輸入可能位於飽和邊界，無法只靠這兩項判定液相或汽相；請改用壓力與乾度等性質組合。");
@@ -921,7 +962,7 @@
               inputOne,
               propertyTwoSpec.key,
               inputTwo,
-              "Water",
+              activeFluid,
             );
             if (!Number.isFinite(raw)) {
               values[field] = "—";
@@ -977,6 +1018,24 @@
       input.addEventListener("change", () => setMode(input.value));
     }
 
+    fluidInput.addEventListener("change", () => {
+      if (!coolprop) return;
+      try {
+        setFluid(fluidInput.value);
+        pressureInput.value = "";
+        temperatureInput.value = "";
+        propertyOneValue.value = "";
+        propertyTwoValue.value = "";
+        clearResults();
+        calculateButton.disabled = false;
+        status.dataset.kind = "success";
+        status.textContent = `已切換至 ${fluidInput.options[fluidInput.selectedIndex].text}。`;
+      } catch (error) {
+        calculateButton.disabled = true;
+        showError(`無法載入所選流體資料：${error instanceof Error ? error.message : String(error)}`);
+      }
+    });
+
     clearButton.addEventListener("click", () => {
       pressureInput.value = "";
       temperatureInput.value = "";
@@ -993,12 +1052,7 @@
     try {
       const { default: initCoolProp } = await import("./assets/coolprop/coolprop.js");
       coolprop = await initCoolProp();
-      minimumTemperature = coolprop.PropsSI("Tmin", "", 0, "", 0, "Water");
-      maximumTemperature = coolprop.PropsSI("Tmax", "", 0, "", 0, "Water");
-      criticalTemperature = coolprop.PropsSI("Tcrit", "", 0, "", 0, "Water");
-      criticalPressure = coolprop.PropsSI("pcrit", "", 0, "", 0, "Water");
-      temperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(criticalTemperature - 273.15)} °C 以下`;
-      stateTemperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(maximumTemperature - 273.15)} °C`;
+      setFluid(fluidInput.value);
       calculateButton.disabled = false;
       calculateButton.textContent = "計算";
       status.dataset.kind = "success";
