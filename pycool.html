@@ -207,6 +207,14 @@
       margin-bottom: 0;
     }
 
+    .variation-fieldset {
+      margin-bottom: 16px;
+    }
+
+    .variation-options .mode-option span {
+      height: 100%;
+    }
+
     .calculator {
       display: grid;
       grid-template-columns: minmax(260px, .75fr) minmax(0, 1.25fr);
@@ -1050,15 +1058,27 @@
               </div>
               <p class="field-hint" id="saturation-line-hint"></p>
             </fieldset>
-            <div class="field">
-              <label for="table-variation">變化方式</label>
-              <select id="table-variation">
-                <option value="T">溫度變化</option>
-                <option value="P">壓力變化</option>
-                <option value="QT">固定溫度下變化乾度</option>
-                <option value="QP">固定壓力下變化乾度</option>
-              </select>
-            </div>
+            <fieldset class="saturation-type-fieldset variation-fieldset">
+              <legend>變化方式</legend>
+              <div class="mode-switch variation-options" role="radiogroup" aria-label="變化方式">
+                <label class="mode-option">
+                  <input type="radio" name="table-variation" value="T" checked>
+                  <span>溫度變化</span>
+                </label>
+                <label class="mode-option">
+                  <input type="radio" name="table-variation" value="P">
+                  <span>壓力變化</span>
+                </label>
+                <label class="mode-option">
+                  <input type="radio" name="table-variation" value="QT">
+                  <span>固定溫度下變化乾度</span>
+                </label>
+                <label class="mode-option">
+                  <input type="radio" name="table-variation" value="QP">
+                  <span>固定壓力下變化乾度</span>
+                </label>
+              </div>
+            </fieldset>
             <div class="table-range-fields" id="table-range-fields"></div>
           </div>
         </div>
@@ -1112,7 +1132,7 @@
     const stateTemperatureRange = document.querySelector("#state-temperature-range");
     const saturationTableForm = document.querySelector("#saturation-table-form");
     const tableSaturationTypes = document.querySelectorAll('input[name="saturation-type"]');
-    const tableVariation = document.querySelector("#table-variation");
+    const tableVariationInputs = document.querySelectorAll('input[name="table-variation"]');
     const tableRangeFields = document.querySelector("#table-range-fields");
     const saturationLineHint = document.querySelector("#saturation-line-hint");
     const ptDiagram = document.querySelector("#pt-diagram");
@@ -1246,6 +1266,10 @@
 
     function saturationType() {
       return document.querySelector('input[name="saturation-type"]:checked').value;
+    }
+
+    function tableVariation() {
+      return document.querySelector('input[name="table-variation"]:checked').value;
     }
 
     function setFluid(fluid) {
@@ -1416,30 +1440,30 @@
       } else {
         saturationLineHint.textContent = `此流體的汽液飽和範圍：${formatNumber(minimumTemperature - 273.15)} °C 至臨界溫度 ${formatNumber(criticalTemperature - 273.15)} °C 以下；壓力 ${formatNumber(minimumSaturationPressure / 1000)} kPa 至臨界壓力 ${formatNumber(criticalPressure / 1000)} kPa 以下。`;
       }
-      const variationOptions = Array.from(tableVariation.options);
-      for (const option of variationOptions) {
-        option.disabled = isSolidLine && !["T", "P"].includes(option.value);
+      for (const input of tableVariationInputs) {
+        input.disabled = isSolidLine && !["T", "P"].includes(input.value);
       }
-      if (isSolidLine && !["T", "P"].includes(tableVariation.value)) {
-        tableVariation.value = "T";
+      if (isSolidLine && !["T", "P"].includes(tableVariation())) {
+        document.querySelector('input[name="table-variation"][value="T"]').checked = true;
       }
+      const variation = tableVariation();
       const defaultsKey = isMeltingLine
-        ? `MELT_${tableVariation.value}`
+        ? `MELT_${variation}`
         : isSublimationLine
-          ? `SUBLIMATION_${tableVariation.value}`
-          : tableVariation.value;
+          ? `SUBLIMATION_${variation}`
+          : variation;
       const fields = saturationTableDefaults[defaultsKey] ?? [];
       tableRangeFields.replaceChildren();
       ptDiagram.dataset.saturationType = selectedType;
-      ptDiagram.dataset.variation = tableVariation.value;
+      ptDiagram.dataset.variation = variation;
       ptDiagramDescription.textContent = isSolidLine
-        ? `沿${isMeltingLine ? "固液熔化線" : "固氣昇華線"}依${tableVariation.value === "T" ? "溫度" : "壓力"}取樣。`
+        ? `沿${isMeltingLine ? "固液熔化線" : "固氣昇華線"}依${variation === "T" ? "溫度" : "壓力"}取樣。`
         : {
           T: "沿汽液飽和線依溫度取樣。",
           P: "沿汽液飽和線依壓力取樣。",
           QT: "固定溫度，沿乾度方向取樣汽液飽和狀態。",
           QP: "固定壓力，沿乾度方向取樣汽液飽和狀態。",
-        }[tableVariation.value];
+        }[variation];
       for (const [id, labelText, value] of fields) {
         const field = document.createElement("div");
         field.className = "field";
@@ -1602,7 +1626,7 @@
       clearSaturationTable();
       try {
         const saturationLineType = saturationType();
-        const variation = tableVariation.value;
+        const variation = tableVariation();
         const labels = {
           T: "溫度變化",
           P: "壓力變化",
@@ -1984,7 +2008,12 @@
       input.addEventListener("change", () => setMode(input.value));
     }
 
-    tableVariation.addEventListener("change", renderSaturationTableFields);
+    for (const input of tableVariationInputs) {
+      input.addEventListener("change", () => {
+        clearSaturationTable();
+        renderSaturationTableFields();
+      });
+    }
     for (const input of tableSaturationTypes) {
       input.addEventListener("change", () => {
         clearSaturationTable();
