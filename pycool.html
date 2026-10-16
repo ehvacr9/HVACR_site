@@ -1001,7 +1001,7 @@
                 <option value="vle">汽液飽和</option>
                 <option value="melt">固液飽和（熔化線）</option>
               </select>
-              <p class="field-hint" id="melting-line-hint">熔化線只在 CoolProp 有提供資料的流體中開放。</p>
+              <p class="field-hint" id="saturation-line-hint"></p>
             </div>
             <div class="field">
               <label for="table-variation">變化方式</label>
@@ -1067,7 +1067,7 @@
     const tableSaturationType = document.querySelector("#table-saturation-type");
     const tableVariation = document.querySelector("#table-variation");
     const tableRangeFields = document.querySelector("#table-range-fields");
-    const meltingLineHint = document.querySelector("#melting-line-hint");
+    const saturationLineHint = document.querySelector("#saturation-line-hint");
     const ptDiagram = document.querySelector("#pt-diagram");
     const ptDiagramDescription = document.querySelector("#pt-diagram-description");
     const generateTableButton = document.querySelector("#generate-table-button");
@@ -1300,11 +1300,12 @@
 
     function renderSaturationTableFields() {
       const isMeltingLine = tableSaturationType.value === "melt";
-      meltingLineHint.hidden = !isMeltingLine;
       if (isMeltingLine) {
-        meltingLineHint.textContent = meltingLineLimits
+        saturationLineHint.textContent = meltingLineLimits
           ? `此流體的熔化線範圍：${formatNumber(meltingLineLimits.temperatureMin - 273.15)} 至 ${formatNumber(meltingLineLimits.temperatureMax - 273.15)} °C，${formatNumber(meltingLineLimits.pressureMin / 1000)} 至 ${formatNumber(meltingLineLimits.pressureMax / 1000)} kPa。`
           : "此流體的 CoolProp 模型沒有熔化線資料。";
+      } else {
+        saturationLineHint.textContent = `此流體的汽液飽和範圍：${formatNumber(minimumTemperature - 273.15)} °C 至臨界溫度 ${formatNumber(criticalTemperature - 273.15)} °C 以下；壓力 ${formatNumber(minimumSaturationPressure / 1000)} kPa 至臨界壓力 ${formatNumber(criticalPressure / 1000)} kPa 以下。`;
       }
       const variationOptions = Array.from(tableVariation.options);
       for (const option of variationOptions) {
