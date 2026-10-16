@@ -597,6 +597,49 @@
       display: none;
     }
 
+    .basic-information-section {
+      margin-top: 24px;
+      padding: 28px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      box-shadow: 0 12px 32px rgba(23, 43, 43, .06);
+    }
+
+    .basic-information-section[hidden] {
+      display: none;
+    }
+
+    .basic-information-section h2 {
+      margin-top: 0;
+    }
+
+    .basic-information-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      border-left: 1px solid var(--line);
+    }
+
+    .basic-information-item {
+      min-width: 0;
+      padding: 12px 14px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .basic-information-item dt {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .basic-information-item dd {
+      margin: 3px 0 0;
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
     #pt-diagram[data-saturation-type="vle"][data-variation="T"] .pt-sample-points,
     #pt-diagram[data-saturation-type="vle"][data-variation="P"] .pt-sample-points,
     #pt-diagram[data-saturation-type="melt"][data-variation="T"] .pt-melt-sample-points,
@@ -814,6 +857,14 @@
         padding: 20px;
       }
 
+      .basic-information-section {
+        padding: 20px;
+      }
+
+      .basic-information-grid {
+        grid-template-columns: 1fr;
+      }
+
       .table-controls {
         grid-template-columns: 1fr;
       }
@@ -884,6 +935,10 @@
       <label class="mode-option">
         <input type="radio" name="calculation-mode" value="table">
         <span>產生飽和表</span>
+      </label>
+      <label class="mode-option">
+        <input type="radio" name="calculation-mode" value="basic-information">
+        <span>基本資訊</span>
       </label>
     </div>
 
@@ -1116,6 +1171,18 @@
         </div>
       </section>
     </section>
+    <section class="basic-information-section" id="basic-information-section" hidden aria-labelledby="basic-information-title">
+      <h2 id="basic-information-title">基本資訊</h2>
+      <dl class="basic-information-grid">
+        <div class="basic-information-item"><dt>化學名稱 (chemical-name)</dt><dd id="basic-chemical-name">—</dd></div>
+        <div class="basic-information-item"><dt>分子量 (g/mol)</dt><dd id="basic-molar-mass">—</dd></div>
+        <div class="basic-information-item"><dt>氣體常數 R (J/kg·K)</dt><dd id="basic-gas-constant">—</dd></div>
+        <div class="basic-information-item"><dt>三相點溫度 (°C)</dt><dd id="basic-triple-temperature">—</dd></div>
+        <div class="basic-information-item"><dt>三相點壓力 (kPa)</dt><dd id="basic-triple-pressure">—</dd></div>
+        <div class="basic-information-item"><dt>臨界點溫度 (°C)</dt><dd id="basic-critical-temperature">—</dd></div>
+        <div class="basic-information-item"><dt>臨界點壓力 (kPa)</dt><dd id="basic-critical-pressure">—</dd></div>
+      </dl>
+    </section>
   </main>
 
   <footer>
@@ -1130,6 +1197,7 @@
     const modeInputs = document.querySelectorAll('input[name="calculation-mode"]');
     const calculatorSection = document.querySelector("#calculator-section");
     const saturationTableSection = document.querySelector("#saturation-table-section");
+    const basicInformationSection = document.querySelector("#basic-information-section");
     const saturationInputs = document.querySelector("#saturation-inputs");
     const stateInputs = document.querySelector("#state-inputs");
     const fluidInput = document.querySelector("#fluid");
@@ -1160,6 +1228,15 @@
     const exportTableButton = document.querySelector("#export-table-button");
     const saturationResults = document.querySelector(".result-grid");
     const stateResults = document.querySelector("#state-results");
+    const basicInformationFields = {
+      chemicalName: document.querySelector("#basic-chemical-name"),
+      molarMass: document.querySelector("#basic-molar-mass"),
+      gasConstant: document.querySelector("#basic-gas-constant"),
+      tripleTemperature: document.querySelector("#basic-triple-temperature"),
+      triplePressure: document.querySelector("#basic-triple-pressure"),
+      criticalTemperature: document.querySelector("#basic-critical-temperature"),
+      criticalPressure: document.querySelector("#basic-critical-pressure"),
+    };
     const stateResultFields = {
       phase: document.querySelector("#state-phase"),
       T: document.querySelector("#state-t"),
@@ -1254,6 +1331,19 @@
       5: "過熱蒸汽",
       6: "飽和混合物（液汽共存）",
     };
+    const chemicalNames = {
+      Water: "Water",
+      R134a: "1,1,1,2-tetrafluoroethane",
+      R22: "Chlorodifluoromethane",
+      R410A: "Blend of R32 and R125 (50/50 mass fraction)",
+      R32: "Difluoromethane",
+      R125: "Pentafluoroethane",
+      R1234yf: "2,3,3,3-tetrafluoroprop-1-ene",
+      R290: "Propane",
+      R600a: "2-methylpropane (isobutane)",
+      R717: "Ammonia",
+      R744: "Carbon dioxide",
+    };
 
     function showError(message) {
       status.dataset.kind = "error";
@@ -1270,10 +1360,12 @@
 
     function setMode(mode) {
       const isTableMode = mode === "table";
+      const isBasicInformationMode = mode === "basic-information";
       const isStateMode = mode === "state";
-      calculatorSection.hidden = isTableMode;
+      calculatorSection.hidden = isTableMode || isBasicInformationMode;
       saturationTableSection.hidden = !isTableMode;
-      if (isTableMode) return;
+      basicInformationSection.hidden = !isBasicInformationMode;
+      if (isTableMode || isBasicInformationMode) return;
       saturationInputs.hidden = isStateMode;
       stateInputs.hidden = !isStateMode;
       saturationResults.hidden = isStateMode;
@@ -1307,6 +1399,28 @@
         fluid,
       );
       activeFluid = fluid;
+      const basicState = coolprop.factory("HEOS", fluid);
+      const molarMass = basicState.molar_mass();
+      if (!Number.isFinite(molarMass) || molarMass <= 0) {
+        throw new Error("CoolProp 無法取得有效的分子量。");
+      }
+      const basicInformation = {
+        chemicalName: chemicalNames[fluid],
+        molarMass: molarMass * 1000,
+        gasConstant: basicState.gas_constant() / molarMass,
+        tripleTemperature: basicState.Ttriple() - 273.15,
+        triplePressure: basicState.p_triple() / 1000,
+        criticalTemperature: basicState.T_critical() - 273.15,
+        criticalPressure: basicState.p_critical() / 1000,
+      };
+      for (const [key, value] of Object.entries(basicInformation)) {
+        if (typeof value === "number") {
+          if (!Number.isFinite(value)) throw new Error(`CoolProp 無法取得基本資訊：${key}。`);
+        } else if (typeof value !== "string" || !value) {
+          throw new Error(`尚未設定此流體的化學名稱：${fluid}。`);
+        }
+        basicInformationFields[key].textContent = typeof value === "number" ? formatNumber(value) : value;
+      }
       const meltingLineFluids = new Set(["Water", "R290", "R600a", "R744"]);
       meltingLineState = meltingLineFluids.has(fluid) ? coolprop.factory("HEOS", fluid) : null;
       meltingLineLimits = meltingLineState
