@@ -518,6 +518,11 @@
       stroke-width: 4;
     }
 
+    #pt-diagram[data-saturation-type="sublimation"] .pt-sublimation {
+      stroke: #3975a5;
+      stroke-width: 4;
+    }
+
     .pt-label {
       fill: var(--ink);
       font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
@@ -545,6 +550,7 @@
 
     .pt-sample-points,
     .pt-melt-sample-points,
+    .pt-sublimation-sample-points,
     .pt-fixed-temperature,
     .pt-fixed-pressure {
       display: none;
@@ -553,7 +559,9 @@
     #pt-diagram[data-saturation-type="vle"][data-variation="T"] .pt-sample-points,
     #pt-diagram[data-saturation-type="vle"][data-variation="P"] .pt-sample-points,
     #pt-diagram[data-saturation-type="melt"][data-variation="T"] .pt-melt-sample-points,
-    #pt-diagram[data-saturation-type="melt"][data-variation="P"] .pt-melt-sample-points {
+    #pt-diagram[data-saturation-type="melt"][data-variation="P"] .pt-melt-sample-points,
+    #pt-diagram[data-saturation-type="sublimation"][data-variation="T"] .pt-sublimation-sample-points,
+    #pt-diagram[data-saturation-type="sublimation"][data-variation="P"] .pt-sublimation-sample-points {
       display: inline;
     }
 
@@ -948,7 +956,7 @@
 
     <section class="saturation-table-section" aria-labelledby="saturation-table-title">
       <h2 id="saturation-table-title">產生飽和表</h2>
-      <p class="table-intro">依所選流體與飽和線類型產生表格；汽液飽和表列出液體與蒸氣性質，熔化線表列出液相側性質。可依溫度、壓力或乾度取樣。</p>
+      <p class="table-intro">依所選流體與飽和線類型產生表格；汽液飽和表列出液體與蒸氣性質，熔化線表列出液相側性質，昇華線列出溫度與壓力。可依溫度、壓力或乾度取樣。</p>
       <form id="saturation-table-form">
         <div class="table-controls">
           <figure class="pt-diagram">
@@ -973,6 +981,11 @@
                 <circle class="pt-point" cx="98" cy="177" r="4.5" />
                 <circle class="pt-point" cx="97" cy="130" r="4.5" />
                 <circle class="pt-point" cx="99" cy="77" r="4.5" />
+              </g>
+              <g class="pt-sublimation-sample-points" aria-hidden="true">
+                <circle class="pt-point" cx="55" cy="211" r="4.5" />
+                <circle class="pt-point" cx="74" cy="199" r="4.5" />
+                <circle class="pt-point" cx="94" cy="185" r="4.5" />
               </g>
               <g class="pt-sample-points" aria-hidden="true">
                 <circle class="pt-point" cx="148" cy="174" r="4.5" />
@@ -1000,6 +1013,7 @@
               <select id="table-saturation-type">
                 <option value="vle">汽液飽和</option>
                 <option value="melt">固液飽和（熔化線）</option>
+                <option value="sublimation">固氣飽和（昇華線）</option>
               </select>
               <p class="field-hint" id="saturation-line-hint"></p>
             </div>
@@ -1126,6 +1140,7 @@
         "T (°C)", "P (kPa)", "ρ (kg/m³)", "v (m³/kg)", "h (kJ/kg)",
         "s (kJ/kg·K)", "u (kJ/kg)", "cp (kJ/kg·K)", "cv (kJ/kg·K)",
       ],
+      SUBLIMATION: ["T (°C)", "P (kPa)"],
     };
 
     let coolprop;
@@ -1137,6 +1152,7 @@
     let minimumSaturationPressure;
     let meltingLineState;
     let meltingLineLimits;
+    let sublimationLineLimits;
     let saturationTableRows = [];
 
     const inputProperties = {
@@ -1235,6 +1251,19 @@
       if (!meltingLineLimits && tableSaturationType.value === "melt") {
         tableSaturationType.value = "vle";
       }
+      sublimationLineLimits = fluid === "Water"
+        ? {
+          temperatureMin: 130,
+          temperatureMax: 273.16,
+          pressureMin: iceSublimationPressure(130),
+          pressureMax: iceSublimationPressure(273.16),
+        }
+        : null;
+      const sublimationOption = tableSaturationType.querySelector('option[value="sublimation"]');
+      sublimationOption.disabled = !sublimationLineLimits;
+      if (!sublimationLineLimits && tableSaturationType.value === "sublimation") {
+        tableSaturationType.value = "vle";
+      }
       setSaturationTableDefaults();
     }
 
@@ -1289,6 +1318,22 @@
           ["table-step", "間隔 (kPa)", niceTableStep(meltEndP - meltStartP)],
         ];
       }
+      if (sublimationLineLimits) {
+        const sublimationStartC = sublimationLineLimits.temperatureMin - 273.15;
+        const sublimationEndC = sublimationLineLimits.temperatureMax - 273.15;
+        const sublimationStartP = sublimationLineLimits.pressureMin / 1000;
+        const sublimationEndP = sublimationLineLimits.pressureMax / 1000;
+        saturationTableDefaults.SUBLIMATION_T = [
+          ["table-start", "起始溫度 (°C)", sublimationStartC],
+          ["table-end", "終止溫度 (°C)", sublimationEndC],
+          ["table-step", "間隔 (°C)", niceTableStep(sublimationEndC - sublimationStartC)],
+        ];
+        saturationTableDefaults.SUBLIMATION_P = [
+          ["table-start", "起始壓力 (kPa)", sublimationStartP],
+          ["table-end", "終止壓力 (kPa)", sublimationEndP],
+          ["table-step", "間隔 (kPa)", niceTableStep(sublimationEndP - sublimationStartP)],
+        ];
+      }
       renderSaturationTableFields();
     }
 
@@ -1298,29 +1343,59 @@
       return Number((span / 20).toPrecision(3));
     }
 
+    function iceSublimationPressure(temperature) {
+      const theta = temperature / 273.16;
+      // CoolProp's Ice.cpp psub_Ice correlation for water ice.
+      const sum = -21.2144006 * theta ** 0.00333333333
+        + 27.3203819 * theta ** 1.20666667
+        - 6.1059813 * theta ** 1.70333333;
+      return 611.657 * Math.exp(sum / theta);
+    }
+
+    function iceSublimationTemperature(pressure) {
+      let low = sublimationLineLimits.temperatureMin;
+      let high = sublimationLineLimits.temperatureMax;
+      for (let iteration = 0; iteration < 64; iteration += 1) {
+        const middle = (low + high) / 2;
+        if (iceSublimationPressure(middle) < pressure) low = middle;
+        else high = middle;
+      }
+      return (low + high) / 2;
+    }
+
     function renderSaturationTableFields() {
       const isMeltingLine = tableSaturationType.value === "melt";
+      const isSublimationLine = tableSaturationType.value === "sublimation";
+      const isSolidLine = isMeltingLine || isSublimationLine;
       if (isMeltingLine) {
         saturationLineHint.textContent = meltingLineLimits
           ? `此流體的熔化線範圍：${formatNumber(meltingLineLimits.temperatureMin - 273.15)} 至 ${formatNumber(meltingLineLimits.temperatureMax - 273.15)} °C，${formatNumber(meltingLineLimits.pressureMin / 1000)} 至 ${formatNumber(meltingLineLimits.pressureMax / 1000)} kPa。`
           : "此流體的 CoolProp 模型沒有熔化線資料。";
+      } else if (isSublimationLine) {
+        saturationLineHint.textContent = sublimationLineLimits
+          ? `CoolProp 水冰昇華線範圍：${formatNumber(sublimationLineLimits.temperatureMin - 273.15)} 至 ${formatNumber(sublimationLineLimits.temperatureMax - 273.15)} °C，${formatNumber(sublimationLineLimits.pressureMin / 1000)} 至 ${formatNumber(sublimationLineLimits.pressureMax / 1000)} kPa。`
+          : "目前僅水的 CoolProp 模型提供昇華線資料。";
       } else {
         saturationLineHint.textContent = `此流體的汽液飽和範圍：${formatNumber(minimumTemperature - 273.15)} °C 至臨界溫度 ${formatNumber(criticalTemperature - 273.15)} °C 以下；壓力 ${formatNumber(minimumSaturationPressure / 1000)} kPa 至臨界壓力 ${formatNumber(criticalPressure / 1000)} kPa 以下。`;
       }
       const variationOptions = Array.from(tableVariation.options);
       for (const option of variationOptions) {
-        option.disabled = isMeltingLine && !["T", "P"].includes(option.value);
+        option.disabled = isSolidLine && !["T", "P"].includes(option.value);
       }
-      if (isMeltingLine && !["T", "P"].includes(tableVariation.value)) {
+      if (isSolidLine && !["T", "P"].includes(tableVariation.value)) {
         tableVariation.value = "T";
       }
-      const defaultsKey = isMeltingLine ? `MELT_${tableVariation.value}` : tableVariation.value;
+      const defaultsKey = isMeltingLine
+        ? `MELT_${tableVariation.value}`
+        : isSublimationLine
+          ? `SUBLIMATION_${tableVariation.value}`
+          : tableVariation.value;
       const fields = saturationTableDefaults[defaultsKey] ?? [];
       tableRangeFields.replaceChildren();
       ptDiagram.dataset.saturationType = tableSaturationType.value;
       ptDiagram.dataset.variation = tableVariation.value;
-      ptDiagramDescription.textContent = isMeltingLine
-        ? `沿固液熔化線依${tableVariation.value === "T" ? "溫度" : "壓力"}取樣。`
+      ptDiagramDescription.textContent = isSolidLine
+        ? `沿${isMeltingLine ? "固液熔化線" : "固氣昇華線"}依${tableVariation.value === "T" ? "溫度" : "壓力"}取樣。`
         : {
           T: "沿汽液飽和線依溫度取樣。",
           P: "沿汽液飽和線依壓力取樣。",
@@ -1499,7 +1574,56 @@
         let headers;
         let rows;
         let description;
-        if (saturationType === "melt") {
+        if (saturationType === "sublimation") {
+          if (!sublimationLineLimits) {
+            throw new Error("目前流體不支援固氣昇華線。");
+          }
+          if (variation !== "T" && variation !== "P") {
+            throw new Error("昇華線僅支援溫度或壓力變化。");
+          }
+          const start = tableNumber("table-start", "起始值");
+          const end = tableNumber("table-end", "終止值");
+          const step = tableNumber("table-step", "間隔");
+          if (variation === "T") {
+            checkTableRange(
+              start,
+              sublimationLineLimits.temperatureMin - 273.15,
+              sublimationLineLimits.temperatureMax - 273.15,
+              "溫度",
+            );
+            checkTableRange(
+              end,
+              sublimationLineLimits.temperatureMin - 273.15,
+              sublimationLineLimits.temperatureMax - 273.15,
+              "溫度",
+            );
+          } else {
+            checkTableRange(
+              start,
+              sublimationLineLimits.pressureMin / 1000,
+              sublimationLineLimits.pressureMax / 1000,
+              "壓力",
+            );
+            checkTableRange(
+              end,
+              sublimationLineLimits.pressureMin / 1000,
+              sublimationLineLimits.pressureMax / 1000,
+              "壓力",
+            );
+          }
+          rows = tableRangePoints(start, end, step).map((point) => {
+            const temperature = variation === "T"
+              ? point + 273.15
+              : iceSublimationTemperature(point * 1000);
+            const pressure = variation === "P" ? point * 1000 : iceSublimationPressure(temperature);
+            return variation === "P"
+              ? [pressure / 1000, temperature - 273.15]
+              : [temperature - 273.15, pressure / 1000];
+          });
+          headers = saturationTableHeaders.SUBLIMATION;
+          if (variation === "P") headers = [headers[1], headers[0]];
+          description = `${formatNumber(start)} 至 ${formatNumber(end)}，間隔 ${formatNumber(step)} ${variation === "T" ? "°C" : "kPa"}`;
+        } else if (saturationType === "melt") {
           if (!meltingLineState || !meltingLineLimits) {
             throw new Error("目前流體不支援固液熔化線。");
           }
@@ -1586,7 +1710,11 @@
         }
         renderSaturationTable(headers, rows);
         const fluidName = fluidInput.options[fluidInput.selectedIndex].text;
-        const lineName = saturationType === "melt" ? "固液熔化線" : "汽液飽和線";
+        const lineName = {
+          vle: "汽液飽和線",
+          melt: "固液熔化線",
+          sublimation: "固氣昇華線",
+        }[saturationType];
         saturationTableSummary.textContent = `${fluidName} · ${lineName} · ${labels[variation]} · 共 ${rows.length} 列 · ${description}`;
         tableStatus.dataset.kind = "success";
         tableStatus.textContent = "飽和表已產生。";
@@ -1608,7 +1736,11 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      const lineType = tableSaturationType.value === "melt" ? "melting-line" : "saturation";
+      const lineType = {
+        vle: "saturation",
+        melt: "melting-line",
+        sublimation: "sublimation-line",
+      }[tableSaturationType.value];
       link.download = `${lineType}-${activeFluid}.csv`;
       document.body.append(link);
       link.click();
