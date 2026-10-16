@@ -613,6 +613,15 @@
       margin-top: 0;
     }
 
+    .basic-information-group + .basic-information-group {
+      margin-top: 24px;
+    }
+
+    .basic-information-group h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
     .basic-information-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1173,19 +1182,32 @@
     </section>
     <section class="basic-information-section" id="basic-information-section" aria-labelledby="basic-information-title">
       <h2 id="basic-information-title">基本資訊</h2>
-      <dl class="basic-information-grid">
-        <div class="basic-information-item"><dt>化學名稱 (chemical-name)</dt><dd id="basic-chemical-name">載入中…</dd></div>
-        <div class="basic-information-item"><dt>化學式</dt><dd id="basic-formula">載入中…</dd></div>
-        <div class="basic-information-item"><dt>CAS 登錄號</dt><dd id="basic-cas">載入中…</dd></div>
-        <div class="basic-information-item"><dt>分子量 (g/mol)</dt><dd id="basic-molar-mass">載入中…</dd></div>
-        <div class="basic-information-item"><dt>氣體常數 R (J/kg·K)</dt><dd id="basic-gas-constant">載入中…</dd></div>
-        <div class="basic-information-item"><dt>Normal Point / 常壓沸點 (1 atm, °C)</dt><dd id="basic-normal-point">載入中…</dd></div>
-        <div class="basic-information-item"><dt>三相點溫度 (°C)</dt><dd id="basic-triple-temperature">載入中…</dd></div>
-        <div class="basic-information-item"><dt>三相點壓力 (kPa)</dt><dd id="basic-triple-pressure">載入中…</dd></div>
-        <div class="basic-information-item"><dt>臨界點溫度 (°C)</dt><dd id="basic-critical-temperature">載入中…</dd></div>
-        <div class="basic-information-item"><dt>臨界點壓力 (kPa)</dt><dd id="basic-critical-pressure">載入中…</dd></div>
-        <div class="basic-information-item"><dt>臨界點密度 (kg/m³)</dt><dd id="basic-critical-density">載入中…</dd></div>
-      </dl>
+      <div class="basic-information-group">
+        <h3>物質識別</h3>
+        <dl class="basic-information-grid">
+          <div class="basic-information-item"><dt>化學名稱 (chemical-name)</dt><dd id="basic-chemical-name">載入中…</dd></div>
+          <div class="basic-information-item"><dt>化學式</dt><dd id="basic-formula">載入中…</dd></div>
+          <div class="basic-information-item"><dt>CAS 登錄號</dt><dd id="basic-cas">載入中…</dd></div>
+        </dl>
+      </div>
+      <div class="basic-information-group">
+        <h3>基本物性</h3>
+        <dl class="basic-information-grid">
+          <div class="basic-information-item"><dt>分子量 (g/mol)</dt><dd id="basic-molar-mass">載入中…</dd></div>
+          <div class="basic-information-item"><dt>氣體常數 R (J/kg·K)</dt><dd id="basic-gas-constant">載入中…</dd></div>
+        </dl>
+      </div>
+      <div class="basic-information-group">
+        <h3>特徵點</h3>
+        <dl class="basic-information-grid">
+          <div class="basic-information-item"><dt>Normal Point / 常壓沸點 (1 atm, °C)</dt><dd id="basic-normal-point">載入中…</dd></div>
+          <div class="basic-information-item"><dt>三相點溫度 (°C)</dt><dd id="basic-triple-temperature">載入中…</dd></div>
+          <div class="basic-information-item"><dt>三相點壓力 (kPa)</dt><dd id="basic-triple-pressure">載入中…</dd></div>
+          <div class="basic-information-item"><dt>臨界點溫度 (°C)</dt><dd id="basic-critical-temperature">載入中…</dd></div>
+          <div class="basic-information-item"><dt>臨界點壓力 (kPa)</dt><dd id="basic-critical-pressure">載入中…</dd></div>
+          <div class="basic-information-item"><dt>臨界點密度 (kg/m³)</dt><dd id="basic-critical-density">載入中…</dd></div>
+        </dl>
+      </div>
     </section>
   </main>
 
