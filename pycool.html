@@ -995,12 +995,16 @@
       minimumTemperature = coolprop.PropsSI("Tmin", "", 0, "", 0, "Water");
       criticalTemperature = coolprop.PropsSI("Tcrit", "", 0, "", 0, "Water");
       criticalPressure = coolprop.PropsSI("pcrit", "", 0, "", 0, "Water");
-      temperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(criticalTemperature - 273.15)} °C 以下`;
+      const temperatureRangeText = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(criticalTemperature - 273.15)} °C 以下`;
+      temperatureRange.textContent = temperatureRangeText;
+      stateTemperatureRange.textContent = temperatureRangeText;
       calculateButton.disabled = false;
       calculateButton.textContent = "計算";
       status.dataset.kind = "success";
       status.textContent = "CoolProp 運算模組已就緒。";
     } catch (error) {
+      temperatureRange.textContent = "無法載入";
+      stateTemperatureRange.textContent = "無法載入";
       showError(`本站運算模組載入失敗：${error instanceof Error ? error.message : String(error)}。請重新整理頁面；若問題持續，請聯絡網站管理者。`);
       calculateButton.textContent = "模組載入失敗";
     }
