@@ -148,9 +148,72 @@
       font-size: 14px;
     }
 
+    .term-search {
+      max-width: 680px;
+      margin-bottom: 28px;
+    }
+
+    .term-search label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .search-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-controls input {
+      min-width: 0;
+      flex: 1;
+      padding: 11px 13px;
+      border: 1px solid #bcc9bd;
+      border-radius: 2px;
+      background: var(--surface);
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+    }
+
+    .search-controls input:focus-visible,
+    .search-controls button:focus-visible {
+      outline: 3px solid #9ab952;
+      outline-offset: 2px;
+    }
+
+    .search-controls button {
+      padding: 10px 15px;
+      border: 1px solid var(--green);
+      border-radius: 2px;
+      background: var(--green);
+      color: white;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .search-controls button:hover {
+      background: var(--green-dark);
+    }
+
+    .search-status {
+      min-height: 1.6em;
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
     .term-list {
       display: grid;
       gap: 22px;
+    }
+
+    .term-card[hidden] {
+      display: none;
     }
 
     .term-card {
@@ -397,7 +460,15 @@
     <p class="eyebrow">Terminology Dictionary of HVACR</p>
     <h1>冷凍空調術語辭典</h1>
     <p class="intro">整理冷凍、空調與能源領域常見術語，依英文詞條字母順序排列。每張卡片並列 IIR 與 ASHRAE 的英文解釋及中文翻譯。</p>
-    <div class="term-list" aria-label="按英文字母排序的 HVACR 術語">
+    <div class="term-search" role="search" aria-label="搜尋術語">
+      <label for="term-search-input">關鍵字搜尋</label>
+      <div class="search-controls">
+        <input id="term-search-input" type="search" placeholder="搜尋英文、中文、日文或定義" aria-controls="term-list" aria-describedby="search-status">
+        <button id="term-search-clear" type="button" hidden>清除</button>
+      </div>
+      <p class="search-status" id="search-status" aria-live="polite">載入詞條中</p>
+    </div>
+    <div class="term-list" id="term-list" aria-label="按英文字母排序的 HVACR 術語">
       <article class="term-card" aria-labelledby="term-accumulator">
         <header class="term-heading">
           <h2 id="term-accumulator">Accumulator</h2>
@@ -581,5 +652,36 @@
       <span><a href="index.html">回首頁</a></span>
     </div>
   </footer>
+  <script>
+    const searchInput = document.querySelector("#term-search-input");
+    const clearSearchButton = document.querySelector("#term-search-clear");
+    const searchStatus = document.querySelector("#search-status");
+    const termCards = [...document.querySelectorAll(".term-card")];
+
+    function filterTerms() {
+      const query = searchInput.value.trim().toLocaleLowerCase().replace(/\s+/g, " ");
+      let visibleCount = 0;
+
+      for (const card of termCards) {
+        const searchableText = card.textContent.toLocaleLowerCase().replace(/\s+/g, " ");
+        const matches = !query || searchableText.includes(query);
+        card.hidden = !matches;
+        if (matches) visibleCount += 1;
+      }
+
+      clearSearchButton.hidden = !query;
+      searchStatus.textContent = visibleCount
+        ? `顯示 ${visibleCount} / ${termCards.length} 個詞條`
+        : `找不到符合「${searchInput.value.trim()}」的詞條。`;
+    }
+
+    searchInput.addEventListener("input", filterTerms);
+    clearSearchButton.addEventListener("click", () => {
+      searchInput.value = "";
+      filterTerms();
+      searchInput.focus();
+    });
+    filterTerms();
+  </script>
 </body>
 </html>
