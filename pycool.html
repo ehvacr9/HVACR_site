@@ -508,6 +508,16 @@
       stroke-width: 1.5;
     }
 
+    #pt-diagram[data-saturation-type="melt"] .pt-saturation {
+      stroke: #84908a;
+      stroke-width: 1.5;
+    }
+
+    #pt-diagram[data-saturation-type="melt"] .pt-melting {
+      stroke: #b33a30;
+      stroke-width: 4;
+    }
+
     .pt-label {
       fill: var(--ink);
       font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
@@ -534,18 +544,21 @@
     }
 
     .pt-sample-points,
+    .pt-melt-sample-points,
     .pt-fixed-temperature,
     .pt-fixed-pressure {
       display: none;
     }
 
-    #pt-diagram[data-variation="T"] .pt-sample-points,
-    #pt-diagram[data-variation="P"] .pt-sample-points {
+    #pt-diagram[data-saturation-type="vle"][data-variation="T"] .pt-sample-points,
+    #pt-diagram[data-saturation-type="vle"][data-variation="P"] .pt-sample-points,
+    #pt-diagram[data-saturation-type="melt"][data-variation="T"] .pt-melt-sample-points,
+    #pt-diagram[data-saturation-type="melt"][data-variation="P"] .pt-melt-sample-points {
       display: inline;
     }
 
-    #pt-diagram[data-variation="QT"] .pt-fixed-temperature,
-    #pt-diagram[data-variation="QP"] .pt-fixed-pressure {
+    #pt-diagram[data-saturation-type="vle"][data-variation="QT"] .pt-fixed-temperature,
+    #pt-diagram[data-saturation-type="vle"][data-variation="QP"] .pt-fixed-pressure {
       display: inline;
     }
 
@@ -934,8 +947,8 @@
     </section>
 
     <section class="saturation-table-section" aria-labelledby="saturation-table-title">
-      <h2 id="saturation-table-title">產生氣液飽和表</h2>
-      <p class="table-intro">依所選流體列出飽和液體與飽和蒸氣性質；可依溫度、壓力或固定溫度／壓力下的乾度產生表格。</p>
+      <h2 id="saturation-table-title">產生飽和表</h2>
+      <p class="table-intro">依所選流體與飽和線類型產生表格；汽液飽和表列出液體與蒸氣性質，熔化線表列出液相側性質。可依溫度、壓力或乾度取樣。</p>
       <form id="saturation-table-form">
         <div class="table-controls">
           <figure class="pt-diagram">
@@ -956,6 +969,11 @@
               <text class="pt-label" x="68" y="202">三相點</text>
               <circle class="pt-critical" cx="285" cy="42" r="6" />
               <text class="pt-label" x="291" y="39" fill="#b33a30">臨界點</text>
+              <g class="pt-melt-sample-points" aria-hidden="true">
+                <circle class="pt-point" cx="98" cy="177" r="4.5" />
+                <circle class="pt-point" cx="97" cy="130" r="4.5" />
+                <circle class="pt-point" cx="99" cy="77" r="4.5" />
+              </g>
               <g class="pt-sample-points" aria-hidden="true">
                 <circle class="pt-point" cx="148" cy="174" r="4.5" />
                 <circle class="pt-point" cx="207" cy="137" r="4.5" />
@@ -974,9 +992,17 @@
                 <text class="pt-label" x="37" y="141">固定 P</text>
               </g>
             </svg>
-            <figcaption>汽液飽和線示意圖（非比例圖）</figcaption>
+            <figcaption>飽和線示意圖（非比例圖）</figcaption>
           </figure>
           <div class="table-settings">
+            <div class="field">
+              <label for="table-saturation-type">飽和線類型</label>
+              <select id="table-saturation-type">
+                <option value="vle">汽液飽和</option>
+                <option value="melt">固液飽和（熔化線）</option>
+              </select>
+              <p class="field-hint" id="melting-line-hint">熔化線只在 CoolProp 有提供資料的流體中開放。</p>
+            </div>
             <div class="field">
               <label for="table-variation">變化方式</label>
               <select id="table-variation">
@@ -997,12 +1023,12 @@
       <section class="saturation-table-result" id="saturation-table-result" hidden aria-labelledby="saturation-table-result-title">
         <div class="table-result-header">
           <div>
-            <h3 id="saturation-table-result-title">汽液飽和性質表</h3>
+            <h3 id="saturation-table-result-title">飽和性質表</h3>
             <p id="saturation-table-summary"></p>
           </div>
           <button class="secondary" id="export-table-button" type="button">匯出 CSV</button>
         </div>
-        <div class="table-scroll" role="region" aria-label="氣液飽和性質表格" tabindex="0">
+        <div class="table-scroll" role="region" aria-label="飽和性質表格" tabindex="0">
           <table class="saturation-table" id="saturation-table">
             <thead></thead>
             <tbody></tbody>
@@ -1038,8 +1064,10 @@
     const temperatureRange = document.querySelector("#temperature-range");
     const stateTemperatureRange = document.querySelector("#state-temperature-range");
     const saturationTableForm = document.querySelector("#saturation-table-form");
+    const tableSaturationType = document.querySelector("#table-saturation-type");
     const tableVariation = document.querySelector("#table-variation");
     const tableRangeFields = document.querySelector("#table-range-fields");
+    const meltingLineHint = document.querySelector("#melting-line-hint");
     const ptDiagram = document.querySelector("#pt-diagram");
     const ptDiagramDescription = document.querySelector("#pt-diagram-description");
     const generateTableButton = document.querySelector("#generate-table-button");
@@ -1094,6 +1122,10 @@
         "x", "T (°C)", "P (kPa)", "ρ (kg/m³)", "v (m³/kg)", "h (kJ/kg)",
         "s (kJ/kg·K)", "u (kJ/kg)", "cp (kJ/kg·K)", "cv (kJ/kg·K)",
       ],
+      MELT: [
+        "T (°C)", "P (kPa)", "ρ (kg/m³)", "v (m³/kg)", "h (kJ/kg)",
+        "s (kJ/kg·K)", "u (kJ/kg)", "cp (kJ/kg·K)", "cv (kJ/kg·K)",
+      ],
     };
 
     let coolprop;
@@ -1103,6 +1135,8 @@
     let criticalTemperature;
     let criticalPressure;
     let minimumSaturationPressure;
+    let meltingLineState;
+    let meltingLineLimits;
     let saturationTableRows = [];
 
     const inputProperties = {
@@ -1177,6 +1211,16 @@
         fluid,
       );
       activeFluid = fluid;
+      const meltingLineFluids = new Set(["Water", "R290", "R600a", "R744"]);
+      meltingLineState = meltingLineFluids.has(fluid) ? coolprop.factory("HEOS", fluid) : null;
+      meltingLineLimits = meltingLineState
+        ? {
+          pressureMin: meltingLineState.melting_line(coolprop.parameters.iP_min.value, 0, 0),
+          pressureMax: meltingLineState.melting_line(coolprop.parameters.iP_max.value, 0, 0),
+          temperatureMin: meltingLineState.melting_line(coolprop.parameters.iT_min.value, 0, 0),
+          temperatureMax: meltingLineState.melting_line(coolprop.parameters.iT_max.value, 0, 0),
+        }
+        : null;
       ({
         minimumTemperature,
         maximumTemperature,
@@ -1186,6 +1230,14 @@
       } = properties);
       temperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(criticalTemperature - 273.15)} °C 以下`;
       stateTemperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(maximumTemperature - 273.15)} °C`;
+      const meltingOption = tableSaturationType.querySelector('option[value="melt"]');
+      meltingOption.disabled = !meltingLineLimits;
+      if (!meltingLineLimits && tableSaturationType.value === "melt") {
+        tableSaturationType.value = "vle";
+      }
+      meltingLineHint.textContent = meltingLineLimits
+        ? `此流體的熔化線範圍：${formatNumber(meltingLineLimits.temperatureMin - 273.15)} 至 ${formatNumber(meltingLineLimits.temperatureMax - 273.15)} °C，${formatNumber(meltingLineLimits.pressureMin / 1000)} 至 ${formatNumber(meltingLineLimits.pressureMax / 1000)} kPa。`
+        : "此流體的 CoolProp 模型沒有熔化線資料。";
       setSaturationTableDefaults();
     }
 
@@ -1224,6 +1276,22 @@
           ["table-quality-step", "乾度間隔", 0.1],
         ],
       };
+      if (meltingLineLimits) {
+        const meltStartC = meltingLineLimits.temperatureMin - 273.15;
+        const meltEndC = meltingLineLimits.temperatureMax - 273.15;
+        const meltStartP = meltingLineLimits.pressureMin / 1000;
+        const meltEndP = meltingLineLimits.pressureMax / 1000;
+        saturationTableDefaults.MELT_T = [
+          ["table-start", "起始溫度 (°C)", meltStartC],
+          ["table-end", "終止溫度 (°C)", meltEndC],
+          ["table-step", "間隔 (°C)", niceTableStep(meltEndC - meltStartC)],
+        ];
+        saturationTableDefaults.MELT_P = [
+          ["table-start", "起始壓力 (kPa)", meltStartP],
+          ["table-end", "終止壓力 (kPa)", meltEndP],
+          ["table-step", "間隔 (kPa)", niceTableStep(meltEndP - meltStartP)],
+        ];
+      }
       renderSaturationTableFields();
     }
 
@@ -1234,15 +1302,27 @@
     }
 
     function renderSaturationTableFields() {
-      const fields = saturationTableDefaults[tableVariation.value] ?? [];
+      const isMeltingLine = tableSaturationType.value === "melt";
+      const variationOptions = Array.from(tableVariation.options);
+      for (const option of variationOptions) {
+        option.disabled = isMeltingLine && !["T", "P"].includes(option.value);
+      }
+      if (isMeltingLine && !["T", "P"].includes(tableVariation.value)) {
+        tableVariation.value = "T";
+      }
+      const defaultsKey = isMeltingLine ? `MELT_${tableVariation.value}` : tableVariation.value;
+      const fields = saturationTableDefaults[defaultsKey] ?? [];
       tableRangeFields.replaceChildren();
+      ptDiagram.dataset.saturationType = tableSaturationType.value;
       ptDiagram.dataset.variation = tableVariation.value;
-      ptDiagramDescription.textContent = {
-        T: "沿汽液飽和線依溫度取樣。",
-        P: "沿汽液飽和線依壓力取樣。",
-        QT: "固定溫度，沿乾度方向取樣汽液飽和狀態。",
-        QP: "固定壓力，沿乾度方向取樣汽液飽和狀態。",
-      }[tableVariation.value];
+      ptDiagramDescription.textContent = isMeltingLine
+        ? `沿固液熔化線依${tableVariation.value === "T" ? "溫度" : "壓力"}取樣。`
+        : {
+          T: "沿汽液飽和線依溫度取樣。",
+          P: "沿汽液飽和線依壓力取樣。",
+          QT: "固定溫度，沿乾度方向取樣汽液飽和狀態。",
+          QP: "固定壓力，沿乾度方向取樣汽液飽和狀態。",
+        }[tableVariation.value];
       for (const [id, labelText, value] of fields) {
         const field = document.createElement("div");
         field.className = "field";
@@ -1279,7 +1359,9 @@
     }
 
     function checkTableRange(value, minimum, maximum, label, exclusiveMaximum = false) {
-      if (value < minimum || (exclusiveMaximum ? value >= maximum : value > maximum)) {
+      const tolerance = 1e-9 * Math.max(1, Math.abs(minimum), Math.abs(maximum));
+      if (value < minimum - tolerance
+        || (exclusiveMaximum ? value >= maximum : value > maximum + tolerance)) {
         const upperText = exclusiveMaximum ? "以下（不含上限）" : "以下";
         throw new Error(`${label}須介於 ${formatNumber(minimum)} 至 ${formatNumber(maximum)} ${upperText}。`);
       }
@@ -1347,6 +1429,31 @@
       ];
     }
 
+    function meltingLineRow(variation, value) {
+      const parameters = coolprop.parameters;
+      const temperature = variation === "T"
+        ? value + 273.15
+        : meltingLineState.melting_line(parameters.iT.value, parameters.iP.value, value * 1000);
+      const pressure = variation === "P"
+        ? value * 1000
+        : meltingLineState.melting_line(parameters.iP.value, parameters.iT.value, temperature);
+      const property = (output) => {
+        try {
+          const result = coolprop.PropsSI(output, "P", pressure, "T", temperature, activeFluid);
+          return Number.isFinite(result) ? result : NaN;
+        } catch {
+          return NaN;
+        }
+      };
+      const density = property("D");
+      const specificVolume = Number.isFinite(density) && density > 0 ? 1 / density : NaN;
+      return [
+        temperature - 273.15, pressure / 1000, density, specificVolume,
+        property("H") / 1000, property("S") / 1000, property("U") / 1000,
+        property("C") / 1000, property("O") / 1000,
+      ];
+    }
+
     function renderSaturationTable(headers, rows) {
       const head = saturationTable.querySelector("thead");
       const body = saturationTable.querySelector("tbody");
@@ -1377,6 +1484,7 @@
     function generateSaturationTable() {
       clearSaturationTable();
       try {
+        const saturationType = tableSaturationType.value;
         const variation = tableVariation.value;
         const labels = {
           T: "溫度變化",
@@ -1387,7 +1495,51 @@
         let headers;
         let rows;
         let description;
-        if (variation === "T" || variation === "P") {
+        if (saturationType === "melt") {
+          if (!meltingLineState || !meltingLineLimits) {
+            throw new Error("目前流體不支援固液熔化線。");
+          }
+          if (variation !== "T" && variation !== "P") {
+            throw new Error("熔化線僅支援溫度或壓力變化。");
+          }
+          const start = tableNumber("table-start", "起始值");
+          const end = tableNumber("table-end", "終止值");
+          const step = tableNumber("table-step", "間隔");
+          if (variation === "T") {
+            checkTableRange(
+              start,
+              meltingLineLimits.temperatureMin - 273.15,
+              meltingLineLimits.temperatureMax - 273.15,
+              "溫度",
+            );
+            checkTableRange(
+              end,
+              meltingLineLimits.temperatureMin - 273.15,
+              meltingLineLimits.temperatureMax - 273.15,
+              "溫度",
+            );
+          } else {
+            checkTableRange(
+              start,
+              meltingLineLimits.pressureMin / 1000,
+              meltingLineLimits.pressureMax / 1000,
+              "壓力",
+            );
+            checkTableRange(
+              end,
+              meltingLineLimits.pressureMin / 1000,
+              meltingLineLimits.pressureMax / 1000,
+              "壓力",
+            );
+          }
+          rows = tableRangePoints(start, end, step).map((point) => meltingLineRow(variation, point));
+          headers = saturationTableHeaders.MELT;
+          if (variation === "P") {
+            headers = [headers[1], headers[0], ...headers.slice(2)];
+            rows = rows.map(([temperature, pressure, ...properties]) => [pressure, temperature, ...properties]);
+          }
+          description = `${formatNumber(start)} 至 ${formatNumber(end)}，間隔 ${formatNumber(step)} ${variation === "T" ? "°C" : "kPa"}；物性為熔化線液相側`;
+        } else if (variation === "T" || variation === "P") {
           const start = tableNumber("table-start", "起始值");
           const end = tableNumber("table-end", "終止值");
           const step = tableNumber("table-step", "間隔");
@@ -1430,7 +1582,8 @@
         }
         renderSaturationTable(headers, rows);
         const fluidName = fluidInput.options[fluidInput.selectedIndex].text;
-        saturationTableSummary.textContent = `${fluidName} · ${labels[variation]} · 共 ${rows.length} 列 · ${description}`;
+        const lineName = saturationType === "melt" ? "固液熔化線" : "汽液飽和線";
+        saturationTableSummary.textContent = `${fluidName} · ${lineName} · ${labels[variation]} · 共 ${rows.length} 列 · ${description}`;
         tableStatus.dataset.kind = "success";
         tableStatus.textContent = "飽和表已產生。";
       } catch (error) {
@@ -1451,7 +1604,8 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `saturation-${activeFluid}.csv`;
+      const lineType = tableSaturationType.value === "melt" ? "melting-line" : "saturation";
+      link.download = `${lineType}-${activeFluid}.csv`;
       document.body.append(link);
       link.click();
       link.remove();
@@ -1657,6 +1811,10 @@
     }
 
     tableVariation.addEventListener("change", renderSaturationTableFields);
+    tableSaturationType.addEventListener("change", () => {
+      clearSaturationTable();
+      renderSaturationTableFields();
+    });
 
     saturationTableForm.addEventListener("submit", (event) => {
       event.preventDefault();
