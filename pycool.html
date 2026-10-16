@@ -183,6 +183,30 @@
       outline-offset: 3px;
     }
 
+    .mode-option input:disabled + span {
+      border-color: var(--line);
+      background: #f0f1ec;
+      color: #87918d;
+      cursor: not-allowed;
+    }
+
+    .saturation-type-fieldset {
+      min-width: 0;
+      margin: 0 0 16px;
+      padding: 0;
+      border: 0;
+    }
+
+    .saturation-type-fieldset legend {
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .saturation-type-options {
+      margin-bottom: 0;
+    }
+
     .calculator {
       display: grid;
       grid-template-columns: minmax(260px, .75fr) minmax(0, 1.25fr);
@@ -1008,15 +1032,24 @@
             <figcaption>飽和線示意圖（非比例圖）</figcaption>
           </figure>
           <div class="table-settings">
-            <div class="field">
-              <label for="table-saturation-type">飽和線類型</label>
-              <select id="table-saturation-type">
-                <option value="vle">汽液飽和</option>
-                <option value="melt">固液飽和（熔化線）</option>
-                <option value="sublimation">固氣飽和（昇華線）</option>
-              </select>
+            <fieldset class="saturation-type-fieldset">
+              <legend>飽和線類型</legend>
+              <div class="mode-switch saturation-type-options" role="radiogroup" aria-label="飽和線類型">
+                <label class="mode-option">
+                  <input type="radio" name="saturation-type" value="vle" checked>
+                  <span>汽液飽和</span>
+                </label>
+                <label class="mode-option">
+                  <input type="radio" name="saturation-type" value="melt">
+                  <span>固液飽和（熔化線）</span>
+                </label>
+                <label class="mode-option">
+                  <input type="radio" name="saturation-type" value="sublimation">
+                  <span>固氣飽和（昇華線）</span>
+                </label>
+              </div>
               <p class="field-hint" id="saturation-line-hint"></p>
-            </div>
+            </fieldset>
             <div class="field">
               <label for="table-variation">變化方式</label>
               <select id="table-variation">
@@ -1078,7 +1111,7 @@
     const temperatureRange = document.querySelector("#temperature-range");
     const stateTemperatureRange = document.querySelector("#state-temperature-range");
     const saturationTableForm = document.querySelector("#saturation-table-form");
-    const tableSaturationType = document.querySelector("#table-saturation-type");
+    const tableSaturationTypes = document.querySelectorAll('input[name="saturation-type"]');
     const tableVariation = document.querySelector("#table-variation");
     const tableRangeFields = document.querySelector("#table-range-fields");
     const saturationLineHint = document.querySelector("#saturation-line-hint");
@@ -1211,6 +1244,10 @@
       status.textContent = isStateMode ? "請選擇兩項性質並輸入數值。" : "請輸入壓力或溫度。";
     }
 
+    function saturationType() {
+      return document.querySelector('input[name="saturation-type"]:checked').value;
+    }
+
     function setFluid(fluid) {
       const properties = {
         minimumTemperature: coolprop.PropsSI("Tmin", "", 0, "", 0, fluid),
@@ -1246,10 +1283,10 @@
       } = properties);
       temperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(criticalTemperature - 273.15)} °C 以下`;
       stateTemperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(maximumTemperature - 273.15)} °C`;
-      const meltingOption = tableSaturationType.querySelector('option[value="melt"]');
+      const meltingOption = document.querySelector('input[name="saturation-type"][value="melt"]');
       meltingOption.disabled = !meltingLineLimits;
-      if (!meltingLineLimits && tableSaturationType.value === "melt") {
-        tableSaturationType.value = "vle";
+      if (!meltingLineLimits && saturationType() === "melt") {
+        document.querySelector('input[name="saturation-type"][value="vle"]').checked = true;
       }
       sublimationLineLimits = fluid === "Water"
         ? {
@@ -1259,10 +1296,10 @@
           pressureMax: iceSublimationPressure(273.16),
         }
         : null;
-      const sublimationOption = tableSaturationType.querySelector('option[value="sublimation"]');
+      const sublimationOption = document.querySelector('input[name="saturation-type"][value="sublimation"]');
       sublimationOption.disabled = !sublimationLineLimits;
-      if (!sublimationLineLimits && tableSaturationType.value === "sublimation") {
-        tableSaturationType.value = "vle";
+      if (!sublimationLineLimits && saturationType() === "sublimation") {
+        document.querySelector('input[name="saturation-type"][value="vle"]').checked = true;
       }
       setSaturationTableDefaults();
     }
@@ -1364,8 +1401,9 @@
     }
 
     function renderSaturationTableFields() {
-      const isMeltingLine = tableSaturationType.value === "melt";
-      const isSublimationLine = tableSaturationType.value === "sublimation";
+      const selectedType = saturationType();
+      const isMeltingLine = selectedType === "melt";
+      const isSublimationLine = selectedType === "sublimation";
       const isSolidLine = isMeltingLine || isSublimationLine;
       if (isMeltingLine) {
         saturationLineHint.textContent = meltingLineLimits
@@ -1392,7 +1430,7 @@
           : tableVariation.value;
       const fields = saturationTableDefaults[defaultsKey] ?? [];
       tableRangeFields.replaceChildren();
-      ptDiagram.dataset.saturationType = tableSaturationType.value;
+      ptDiagram.dataset.saturationType = selectedType;
       ptDiagram.dataset.variation = tableVariation.value;
       ptDiagramDescription.textContent = isSolidLine
         ? `沿${isMeltingLine ? "固液熔化線" : "固氣昇華線"}依${tableVariation.value === "T" ? "溫度" : "壓力"}取樣。`
@@ -1563,7 +1601,7 @@
     function generateSaturationTable() {
       clearSaturationTable();
       try {
-        const saturationType = tableSaturationType.value;
+        const saturationLineType = saturationType();
         const variation = tableVariation.value;
         const labels = {
           T: "溫度變化",
@@ -1574,7 +1612,7 @@
         let headers;
         let rows;
         let description;
-        if (saturationType === "sublimation") {
+        if (saturationLineType === "sublimation") {
           if (!sublimationLineLimits) {
             throw new Error("目前流體不支援固氣昇華線。");
           }
@@ -1623,7 +1661,7 @@
           headers = saturationTableHeaders.SUBLIMATION;
           if (variation === "P") headers = [headers[1], headers[0]];
           description = `${formatNumber(start)} 至 ${formatNumber(end)}，間隔 ${formatNumber(step)} ${variation === "T" ? "°C" : "kPa"}`;
-        } else if (saturationType === "melt") {
+        } else if (saturationLineType === "melt") {
           if (!meltingLineState || !meltingLineLimits) {
             throw new Error("目前流體不支援固液熔化線。");
           }
@@ -1714,7 +1752,7 @@
           vle: "汽液飽和線",
           melt: "固液熔化線",
           sublimation: "固氣昇華線",
-        }[saturationType];
+        }[saturationLineType];
         saturationTableSummary.textContent = `${fluidName} · ${lineName} · ${labels[variation]} · 共 ${rows.length} 列 · ${description}`;
         tableStatus.dataset.kind = "success";
         tableStatus.textContent = "飽和表已產生。";
@@ -1740,7 +1778,7 @@
         vle: "saturation",
         melt: "melting-line",
         sublimation: "sublimation-line",
-      }[tableSaturationType.value];
+      }[saturationType()];
       link.download = `${lineType}-${activeFluid}.csv`;
       document.body.append(link);
       link.click();
@@ -1947,10 +1985,12 @@
     }
 
     tableVariation.addEventListener("change", renderSaturationTableFields);
-    tableSaturationType.addEventListener("change", () => {
-      clearSaturationTable();
-      renderSaturationTableFields();
-    });
+    for (const input of tableSaturationTypes) {
+      input.addEventListener("change", () => {
+        clearSaturationTable();
+        renderSaturationTableFields();
+      });
+    }
 
     saturationTableForm.addEventListener("submit", (event) => {
       event.preventDefault();
