@@ -456,15 +456,107 @@
 
     .table-controls {
       display: grid;
-      grid-template-columns: minmax(180px, .7fr) minmax(0, 1.3fr);
+      grid-template-columns: minmax(230px, .75fr) minmax(0, 1.25fr);
       gap: 16px;
       align-items: start;
+    }
+
+    .pt-diagram {
+      min-width: 0;
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .pt-diagram svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .pt-diagram figcaption {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .pt-axis {
+      stroke: #354b46;
+      stroke-width: 2;
+    }
+
+    .pt-guide {
+      fill: none;
+      stroke: #82928c;
+      stroke-dasharray: 3 4;
+      stroke-width: 1.5;
+    }
+
+    .pt-saturation {
+      fill: none;
+      stroke: #b33a30;
+      stroke-linecap: round;
+      stroke-width: 4;
+    }
+
+    .pt-sublimation,
+    .pt-melting {
+      fill: none;
+      stroke: #84908a;
+      stroke-width: 1.5;
+    }
+
+    .pt-label {
+      fill: var(--ink);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      font-size: 13px;
+    }
+
+    .pt-region {
+      fill: #53645e;
+      font-family: Georgia, serif;
+      font-size: 19px;
+      font-weight: 700;
+    }
+
+    .pt-point {
+      fill: #202c29;
+      stroke: #fff;
+      stroke-width: 1.5;
+    }
+
+    .pt-critical {
+      fill: #c22d25;
+      stroke: #fff;
+      stroke-width: 1.5;
+    }
+
+    .pt-sample-points,
+    .pt-fixed-temperature,
+    .pt-fixed-pressure {
+      display: none;
+    }
+
+    #pt-diagram[data-variation="T"] .pt-sample-points,
+    #pt-diagram[data-variation="P"] .pt-sample-points {
+      display: inline;
+    }
+
+    #pt-diagram[data-variation="QT"] .pt-fixed-temperature,
+    #pt-diagram[data-variation="QP"] .pt-fixed-pressure {
+      display: inline;
     }
 
     .table-range-fields {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 10px;
+    }
+
+    .table-settings {
+      min-width: 0;
     }
 
     .table-range-fields .field {
@@ -846,16 +938,56 @@
       <p class="table-intro">依所選流體列出飽和液體與飽和蒸氣性質；可依溫度、壓力或固定溫度／壓力下的乾度產生表格。</p>
       <form id="saturation-table-form">
         <div class="table-controls">
-          <div class="field">
-            <label for="table-variation">變化方式</label>
-            <select id="table-variation">
-              <option value="T">溫度變化</option>
-              <option value="P">壓力變化</option>
-              <option value="QT">固定溫度下變化乾度</option>
-              <option value="QP">固定壓力下變化乾度</option>
-            </select>
+          <figure class="pt-diagram">
+            <svg id="pt-diagram" data-variation="T" viewBox="0 0 360 250" role="img" aria-labelledby="pt-diagram-title pt-diagram-description">
+              <title id="pt-diagram-title">壓力－溫度相圖示意</title>
+              <desc id="pt-diagram-description">顯示固相、液相、氣相、汽液飽和線、三相點及臨界點，並標示目前飽和表的取樣方式。</desc>
+              <path class="pt-sublimation" d="M42 218 C60 213 78 201 98 183" />
+              <path class="pt-melting" d="M98 183 C95 150 96 90 99 28" />
+              <path class="pt-saturation" d="M98 183 C145 179 183 159 217 128 C246 101 266 70 285 42" />
+              <line class="pt-axis" x1="30" y1="218" x2="330" y2="218" />
+              <line class="pt-axis" x1="30" y1="218" x2="30" y2="22" />
+              <text class="pt-label" x="18" y="24">P</text>
+              <text class="pt-label" x="335" y="224">T</text>
+              <text class="pt-region" x="58" y="133">S</text>
+              <text class="pt-region" x="163" y="91">L</text>
+              <text class="pt-region" x="259" y="183">V</text>
+              <circle class="pt-point" cx="98" cy="183" r="5" />
+              <text class="pt-label" x="68" y="202">三相點</text>
+              <circle class="pt-critical" cx="285" cy="42" r="6" />
+              <text class="pt-label" x="291" y="39" fill="#b33a30">臨界點</text>
+              <g class="pt-sample-points" aria-hidden="true">
+                <circle class="pt-point" cx="148" cy="174" r="4.5" />
+                <circle class="pt-point" cx="207" cy="137" r="4.5" />
+                <circle class="pt-point" cx="254" cy="88" r="4.5" />
+              </g>
+              <g class="pt-fixed-temperature" aria-hidden="true">
+                <line class="pt-guide" x1="195" y1="218" x2="195" y2="148" />
+                <line class="pt-guide" x1="30" y1="148" x2="195" y2="148" />
+                <circle class="pt-point" cx="195" cy="148" r="5" />
+                <text class="pt-label" x="187" y="235">固定 T</text>
+              </g>
+              <g class="pt-fixed-pressure" aria-hidden="true">
+                <line class="pt-guide" x1="30" y1="148" x2="195" y2="148" />
+                <line class="pt-guide" x1="195" y1="148" x2="195" y2="218" />
+                <circle class="pt-point" cx="195" cy="148" r="5" />
+                <text class="pt-label" x="37" y="141">固定 P</text>
+              </g>
+            </svg>
+            <figcaption>汽液飽和線示意圖（非比例圖）</figcaption>
+          </figure>
+          <div class="table-settings">
+            <div class="field">
+              <label for="table-variation">變化方式</label>
+              <select id="table-variation">
+                <option value="T">溫度變化</option>
+                <option value="P">壓力變化</option>
+                <option value="QT">固定溫度下變化乾度</option>
+                <option value="QP">固定壓力下變化乾度</option>
+              </select>
+            </div>
+            <div class="table-range-fields" id="table-range-fields"></div>
           </div>
-          <div class="table-range-fields" id="table-range-fields"></div>
         </div>
         <div class="table-actions">
           <button id="generate-table-button" type="submit" disabled>載入運算模組…</button>
@@ -908,6 +1040,8 @@
     const saturationTableForm = document.querySelector("#saturation-table-form");
     const tableVariation = document.querySelector("#table-variation");
     const tableRangeFields = document.querySelector("#table-range-fields");
+    const ptDiagram = document.querySelector("#pt-diagram");
+    const ptDiagramDescription = document.querySelector("#pt-diagram-description");
     const generateTableButton = document.querySelector("#generate-table-button");
     const tableStatus = document.querySelector("#table-status");
     const saturationTableResult = document.querySelector("#saturation-table-result");
@@ -1102,6 +1236,13 @@
     function renderSaturationTableFields() {
       const fields = saturationTableDefaults[tableVariation.value] ?? [];
       tableRangeFields.replaceChildren();
+      ptDiagram.dataset.variation = tableVariation.value;
+      ptDiagramDescription.textContent = {
+        T: "沿汽液飽和線依溫度取樣。",
+        P: "沿汽液飽和線依壓力取樣。",
+        QT: "固定溫度，沿乾度方向取樣汽液飽和狀態。",
+        QP: "固定壓力，沿乾度方向取樣汽液飽和狀態。",
+      }[tableVariation.value];
       for (const [id, labelText, value] of fields) {
         const field = document.createElement("div");
         field.className = "field";
