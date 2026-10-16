@@ -38,8 +38,7 @@
       color: inherit;
     }
 
-    a:focus-visible,
-    .table-scroll:focus-visible {
+    a:focus-visible {
       outline: 3px solid #9ab952;
       outline-offset: 4px;
     }
@@ -149,77 +148,113 @@
       font-size: 14px;
     }
 
-    .table-scroll {
-      overflow-x: auto;
+    .term-list {
+      display: grid;
+      gap: 22px;
+    }
+
+    .term-card {
+      overflow: hidden;
       border: 1px solid var(--line);
       background: var(--surface);
-      scrollbar-color: #9daf9f #edf0e9;
       box-shadow: 0 8px 24px rgba(23, 43, 43, .045);
     }
 
-    table {
-      width: 100%;
-      min-width: 1520px;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    col.term {
-      width: 190px;
-    }
-
-    col.translation {
-      width: 110px;
-    }
-
-    col.definition-iir {
-      width: 260px;
-    }
-
-    col.definition-iir-translation {
-      width: 240px;
-    }
-
-    col.definition-ashrae {
-      width: 340px;
-    }
-
-    col.definition-ashrae-translation {
-      width: 270px;
-    }
-
-    caption {
-      padding: 15px 20px;
-      color: var(--muted);
-      font-size: 13px;
-      text-align: left;
-    }
-
-    th,
-    td {
-      padding: 20px 22px;
-      border-top: 1px solid var(--line);
-      vertical-align: top;
-    }
-
-    thead th {
-      position: sticky;
-      top: 0;
-      z-index: 1;
+    .term-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 22px 26px;
+      border-bottom: 1px solid var(--line);
       background: #edf0e9;
+    }
+
+    .term-heading h2 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 23px;
+      font-weight: 600;
+      letter-spacing: -.02em;
+      line-height: 1.4;
+    }
+
+    .term-heading h2 span {
+      color: var(--green);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      font-size: .72em;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .term-translations {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 9px;
+    }
+
+    .term-translations span {
+      padding: 5px 10px;
+      border: 1px solid #d6dfd2;
+      border-radius: 2px;
+      background: var(--surface);
+      color: #405650;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .definition-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .definition-panel {
+      min-width: 0;
+      padding: 23px 26px 26px;
+    }
+
+    .definition-panel + .definition-panel {
+      border-left: 1px solid var(--line);
+    }
+
+    .definition-panel h3 {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 17px;
       color: var(--green-dark);
       font-size: 13px;
       font-weight: 750;
-      line-height: 1.6;
+      letter-spacing: .035em;
     }
 
-    tbody td {
-      color: #3f514c;
-      font-size: 14px;
-      line-height: 1.85;
+    .definition-panel h3::before {
+      width: 4px;
+      height: 17px;
+      border-radius: 2px;
+      background: #a6bd70;
+      content: "";
+    }
+
+    .definition-block + .definition-block {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid #e8ebe4;
+    }
+
+    .definition-label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: .06em;
+      text-transform: uppercase;
     }
 
     .definition-en {
+      margin: 0;
       color: #243a36;
       font-family: Georgia, "Noto Serif TC", "PMingLiU", serif;
       font-size: 15px;
@@ -228,31 +263,11 @@
     }
 
     .definition-translation {
+      margin: 0;
       color: #304a43;
       font-size: 15px;
       line-height: 1.9;
       overflow-wrap: break-word;
-    }
-
-    tbody tr:hover {
-      background: #fbfcf7;
-    }
-
-    tbody tr + tr th,
-    tbody tr + tr td {
-      border-top: 2px solid var(--line);
-    }
-
-    .term-name {
-      color: var(--ink);
-      font-size: 14px;
-      font-weight: 750;
-      line-height: 1.7;
-    }
-
-    .term-abbr {
-      color: var(--green);
-      white-space: nowrap;
     }
 
     .sources {
@@ -293,6 +308,42 @@
 
       .page {
         padding-block: 58px 68px;
+      }
+
+      .term-list {
+        gap: 16px;
+      }
+
+      .term-heading {
+        display: block;
+        padding: 18px 19px;
+      }
+
+      .term-heading h2 {
+        font-size: 21px;
+      }
+
+      .term-translations {
+        justify-content: flex-start;
+        margin-top: 12px;
+      }
+
+      .definition-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .definition-panel {
+        padding: 19px;
+      }
+
+      .definition-panel + .definition-panel {
+        border-top: 1px solid var(--line);
+        border-left: 0;
+      }
+
+      .definition-en,
+      .definition-translation {
+        font-size: 14px;
       }
     }
 
@@ -345,64 +396,109 @@
   <main class="wrap page">
     <p class="eyebrow">Terminology Dictionary of HVACR</p>
     <h1>冷凍空調術語辭典</h1>
-    <p class="intro">整理冷凍、空調與能源領域常見術語，依英文詞條字母順序排列。首批範例包含性能係數、蒸發器與冷媒；手機版可在表格內左右滑動。</p>
-    <div class="table-scroll" role="region" aria-label="HVACR 術語表，可左右捲動" tabindex="0">
-      <table>
-        <caption>示範詞條 — 按英文詞條字首排序</caption>
-        <colgroup>
-          <col class="term">
-          <col class="translation">
-          <col class="translation">
-          <col class="definition-iir">
-          <col class="definition-iir-translation">
-          <col class="definition-ashrae">
-          <col class="definition-ashrae-translation">
-        </colgroup>
-        <thead>
-          <tr>
-            <th scope="col">英文</th>
-            <th scope="col">中文</th>
-            <th scope="col">日文</th>
-            <th scope="col">IIR 英文解釋</th>
-            <th scope="col">IIR 中文翻譯</th>
-            <th scope="col">ASHRAE 英文解釋</th>
-            <th scope="col">ASHRAE 中文翻譯</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row"><span class="term-name">Coefficient of performance (COP)</span></th>
-            <td lang="zh-Hant">性能係數</td>
-            <td lang="ja">動作係数</td>
-            <td class="definition-en" lang="en">ratio of the refrigerating capacity to the power input.</td>
-            <td class="definition-translation">制冷能力與輸入功率之比。</td>
-            <td class="definition-en" lang="en">
-              (1) ratio of the rate of net heat output to the total energy input expressed in consistent units and under designated rating conditions. (2) ratio of the refrigerating capacity to the work absorbed by the compressor per unit time.
-            </td>
-            <td class="definition-translation">(1) 在指定額定條件下，以一致單位表示的淨熱輸出速率與總能量輸入之比。(2) 制冷能力與壓縮機單位時間所吸收功之比。</td>
-          </tr>
-          <tr>
-            <th scope="row"><span class="term-name">Evaporator</span></th>
-            <td lang="zh-Hant">蒸發器</td>
-            <td lang="ja">蒸発器</td>
-            <td class="definition-en" lang="en">That part of a refrigeration system in which the refrigerant evaporates by absorbing heat from the contacting fluid.</td>
-            <td class="definition-translation">冷凍系統中，製冷劑從接觸流體吸收熱量並蒸發的部分。</td>
-            <td class="definition-en" lang="en">heat exchanger, usually of the shell-and-tube type, over which liquid refrigerant is dripped or sprayed and evaporated.</td>
-            <td class="definition-translation">一種熱交換器，通常為殼管式；液態製冷劑滴淋或噴灑於其上並蒸發。</td>
-          </tr>
-          <tr>
-            <th scope="row"><span class="term-name">Refrigerant</span></th>
-            <td lang="zh-Hant">製冷劑</td>
-            <td lang="ja">冷媒</td>
-            <td class="definition-en" lang="en">Working fluid in a refrigerating system absorbing heat at low pressure/temperature and rejecting it at a higher pressure/temperature.</td>
-            <td class="definition-translation">冷凍系統中的工作流體，在低壓／低溫下吸收熱量，並在較高壓力／溫度下排出熱量。</td>
-            <td class="definition-en" lang="en">
-              the fluid used for heat transfer in a refrigerating system, which absorbs heat at a low temperature and a low pressure of the fluid and rejects it at a higher temperature and a higher pressure of the fluid, usually involving changes of the state of the fluid.
-            </td>
-            <td class="definition-translation">用於冷凍系統中傳熱的流體，在流體處於低溫、低壓時吸收熱量，並在較高溫度、較高壓力下排出熱量，通常伴隨流體狀態變化。</td>
-          </tr>
-        </tbody>
-      </table>
+    <p class="intro">整理冷凍、空調與能源領域常見術語，依英文詞條字母順序排列。每張卡片並列 IIR 與 ASHRAE 的英文解釋及中文翻譯。</p>
+    <div class="term-list" aria-label="按英文字母排序的 HVACR 術語">
+      <article class="term-card" aria-labelledby="term-cop">
+        <header class="term-heading">
+          <h2 id="term-cop">Coefficient of performance <span>(COP)</span></h2>
+          <div class="term-translations">
+            <span lang="zh-Hant">中文：性能係數</span>
+            <span lang="ja">日文：動作係数</span>
+          </div>
+        </header>
+        <div class="definition-grid">
+          <section class="definition-panel" aria-labelledby="cop-iir">
+            <h3 id="cop-iir">IIR 定義</h3>
+            <div class="definition-block">
+              <span class="definition-label">English</span>
+              <p class="definition-en" lang="en">ratio of the refrigerating capacity to the power input.</p>
+            </div>
+            <div class="definition-block">
+              <span class="definition-label">中文翻譯</span>
+              <p class="definition-translation">制冷能力與輸入功率之比。</p>
+            </div>
+          </section>
+          <section class="definition-panel" aria-labelledby="cop-ashrae">
+            <h3 id="cop-ashrae">ASHRAE 定義</h3>
+            <div class="definition-block">
+              <span class="definition-label">English</span>
+              <p class="definition-en" lang="en">(1) ratio of the rate of net heat output to the total energy input expressed in consistent units and under designated rating conditions. (2) ratio of the refrigerating capacity to the work absorbed by the compressor per unit time.</p>
+            </div>
+            <div class="definition-block">
+              <span class="definition-label">中文翻譯</span>
+              <p class="definition-translation">(1) 在指定額定條件下，以一致單位表示的淨熱輸出速率與總能量輸入之比。(2) 制冷能力與壓縮機單位時間所吸收功之比。</p>
+            </div>
+          </section>
+        </div>
+      </article>
+
+      <article class="term-card" aria-labelledby="term-evaporator">
+        <header class="term-heading">
+          <h2 id="term-evaporator">Evaporator</h2>
+          <div class="term-translations">
+            <span lang="zh-Hant">中文：蒸發器</span>
+            <span lang="ja">日文：蒸発器</span>
+          </div>
+        </header>
+        <div class="definition-grid">
+          <section class="definition-panel" aria-labelledby="evaporator-iir">
+            <h3 id="evaporator-iir">IIR 定義</h3>
+            <div class="definition-block">
+              <span class="definition-label">English</span>
+              <p class="definition-en" lang="en">That part of a refrigeration system in which the refrigerant evaporates by absorbing heat from the contacting fluid.</p>
+            </div>
+            <div class="definition-block">
+              <span class="definition-label">中文翻譯</span>
+              <p class="definition-translation">冷凍系統中，製冷劑從接觸流體吸收熱量並蒸發的部分。</p>
+            </div>
+          </section>
+          <section class="definition-panel" aria-labelledby="evaporator-ashrae">
+            <h3 id="evaporator-ashrae">ASHRAE 定義</h3>
+            <div class="definition-block">
+              <span class="definition-label">English</span>
+              <p class="definition-en" lang="en">heat exchanger, usually of the shell-and-tube type, over which liquid refrigerant is dripped or sprayed and evaporated.</p>
+            </div>
+            <div class="definition-block">
+              <span class="definition-label">中文翻譯</span>
+              <p class="definition-translation">一種熱交換器，通常為殼管式；液態製冷劑滴淋或噴灑於其上並蒸發。</p>
+            </div>
+          </section>
+        </div>
+      </article>
+
+      <article class="term-card" aria-labelledby="term-refrigerant">
+        <header class="term-heading">
+          <h2 id="term-refrigerant">Refrigerant</h2>
+          <div class="term-translations">
+            <span lang="zh-Hant">中文：製冷劑</span>
+            <span lang="ja">日文：冷媒</span>
+          </div>
+        </header>
+        <div class="definition-grid">
+          <section class="definition-panel" aria-labelledby="refrigerant-iir">
+            <h3 id="refrigerant-iir">IIR 定義</h3>
+            <div class="definition-block">
+              <span class="definition-label">English</span>
+              <p class="definition-en" lang="en">Working fluid in a refrigerating system absorbing heat at low pressure/temperature and rejecting it at a higher pressure/temperature.</p>
+            </div>
+            <div class="definition-block">
+              <span class="definition-label">中文翻譯</span>
+              <p class="definition-translation">冷凍系統中的工作流體，在低壓／低溫下吸收熱量，並在較高壓力／溫度下排出熱量。</p>
+            </div>
+          </section>
+          <section class="definition-panel" aria-labelledby="refrigerant-ashrae">
+            <h3 id="refrigerant-ashrae">ASHRAE 定義</h3>
+            <div class="definition-block">
+              <span class="definition-label">English</span>
+              <p class="definition-en" lang="en">the fluid used for heat transfer in a refrigerating system, which absorbs heat at a low temperature and a low pressure of the fluid and rejects it at a higher temperature and a higher pressure of the fluid, usually involving changes of the state of the fluid.</p>
+            </div>
+            <div class="definition-block">
+              <span class="definition-label">中文翻譯</span>
+              <p class="definition-translation">用於冷凍系統中傳熱的流體，在流體處於低溫、低壓時吸收熱量，並在較高溫度、較高壓力下排出熱量，通常伴隨流體狀態變化。</p>
+            </div>
+          </section>
+        </div>
+      </article>
     </div>
 
     <div class="sources" aria-label="辭典來源">
