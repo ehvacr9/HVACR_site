@@ -446,10 +446,10 @@
         </div>
 
         <div class="actions">
-          <button id="calculate-button" type="submit" disabled>載入計算引擎…</button>
+          <button id="calculate-button" type="submit" disabled>載入運算模組…</button>
           <button class="secondary" id="clear-button" type="button">清除</button>
         </div>
-        <p class="status" id="status" role="status" aria-live="polite">正在載入 CoolProp 計算引擎…首次載入需連線下載。</p>
+        <p class="status" id="status" role="status" aria-live="polite">正在載入本站的 CoolProp 計算模組…</p>
       </form>
 
       <div class="results-panel">
@@ -475,7 +475,7 @@
         </div>
         <div class="notes">
           <p>適用於水的汽液飽和狀態，範圍由三相點至臨界點以下；不適用於過熱蒸汽或其他流體。</p>
-          <p>性質計算由 <a href="https://github.com/CoolProp/CoolProp" target="_blank" rel="noopener noreferrer">CoolProp 6.6.0</a>（WebAssembly）提供，水的狀態方程式採 IAPWS-95。計算引擎由 jsDelivr 載入。</p>
+          <p>性質計算由 <a href="https://github.com/CoolProp/CoolProp" target="_blank" rel="noopener noreferrer">CoolProp 8.1.0.dev</a>（WebAssembly）提供，水的狀態方程式採 IAPWS-95。運算模組由本站提供，不需連接第三方 CDN；首次使用時瀏覽器會載入約 10 MB 的模組。</p>
         </div>
       </div>
     </section>
@@ -580,7 +580,7 @@
           };
           for (const [key, value] of Object.entries(properties)) {
             if (!Number.isFinite(value)) {
-              throw new Error("計算引擎回傳了非有限的物性值，請改用較遠離臨界點的狀態。");
+              throw new Error("CoolProp 回傳了非有限的物性值，請改用較遠離臨界點的狀態。");
             }
             resultFields[phase][key].textContent = formatNumber(value);
           }
@@ -613,9 +613,7 @@
     });
 
     try {
-      const { default: initCoolProp } = await import(
-        "https://cdn.jsdelivr.net/npm/coolprop-wasm@6.6.0/index.js"
-      );
+      const { default: initCoolProp } = await import("./assets/coolprop/coolprop.js");
       coolprop = await initCoolProp();
       minimumTemperature = coolprop.PropsSI("Tmin", "", 0, "", 0, "Water");
       criticalTemperature = coolprop.PropsSI("Tcrit", "", 0, "", 0, "Water");
@@ -624,10 +622,10 @@
       calculateButton.disabled = false;
       calculateButton.textContent = "計算";
       status.dataset.kind = "success";
-      status.textContent = "計算引擎已就緒。";
+      status.textContent = "CoolProp 運算模組已就緒。";
     } catch (error) {
-      showError(`計算引擎載入失敗：${error instanceof Error ? error.message : String(error)}。請確認網路連線後重新整理頁面。`);
-      calculateButton.textContent = "引擎載入失敗";
+      showError(`本站運算模組載入失敗：${error instanceof Error ? error.message : String(error)}。請重新整理頁面；若問題持續，請聯絡網站管理者。`);
+      calculateButton.textContent = "模組載入失敗";
     }
   </script>
 </body>
