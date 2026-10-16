@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="冷凍空調術語辭典：HVACR 常用英文術語、中日文名稱與定義。">
+  <title>冷凍空調術語辭典 | 能源與冷凍空調小站</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172b2b;
+      --muted: #5b6c68;
+      --paper: #f6f5ef;
+      --surface: #fffefa;
+      --green: #1d6252;
+      --green-dark: #16483e;
+      --lime: #d9e99b;
+      --line: #dce2d8;
+      --serif: Georgia, "Noto Serif TC", "PMingLiU", serif;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.7;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    a:focus-visible,
+    .table-scroll:focus-visible {
+      outline: 3px solid #9ab952;
+      outline-offset: 4px;
+    }
+
+    .wrap {
+      width: min(1120px, calc(100% - 48px));
+      margin-inline: auto;
+    }
+
+    .topbar {
+      display: flex;
+      min-height: 82px;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: .04em;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--green);
+      color: white;
+      font-family: var(--serif);
+      font-size: 19px;
+    }
+
+    nav {
+      display: flex;
+      gap: 26px;
+      font-size: 13px;
+    }
+
+    nav a,
+    .source-link {
+      color: var(--green);
+      font-weight: 650;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    nav a {
+      color: var(--muted);
+      font-weight: 400;
+      text-decoration: none;
+    }
+
+    nav a:hover,
+    .source-link:hover {
+      color: var(--green-dark);
+    }
+
+    h1,
+    p {
+      margin-top: 0;
+    }
+
+    .page {
+      padding-block: 72px 92px;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 13px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 24px;
+      height: 1px;
+      background: currentColor;
+      content: "";
+    }
+
+    h1 {
+      margin-bottom: 15px;
+      font-family: var(--serif);
+      font-size: clamp(36px, 5vw, 55px);
+      font-weight: 500;
+      letter-spacing: -.045em;
+      line-height: 1.25;
+    }
+
+    .intro {
+      max-width: 770px;
+      margin-bottom: 28px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .permission-note {
+      max-width: 850px;
+      margin-bottom: 30px;
+      padding: 15px 18px;
+      border-left: 3px solid #a6bd70;
+      background: #ecefe4;
+      color: #4d6257;
+      font-size: 12px;
+    }
+
+    .permission-note p:last-child {
+      margin-bottom: 0;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      scrollbar-color: #9daf9f #edf0e9;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1080px;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    caption {
+      padding: 12px 16px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: left;
+    }
+
+    th,
+    td {
+      padding: 15px 16px;
+      border-top: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    thead th {
+      background: #edf0e9;
+      color: var(--green-dark);
+      font-size: 12px;
+      font-weight: 750;
+      line-height: 1.5;
+    }
+
+    tbody td {
+      color: #3f514c;
+      font-size: 12px;
+    }
+
+    tbody tr:hover {
+      background: #fbfcf7;
+    }
+
+    .term-name {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .term-abbr {
+      color: var(--green);
+      white-space: nowrap;
+    }
+
+    .source-note {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .sources {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 22px;
+      margin-top: 18px;
+      font-size: 12px;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .footer-inner {
+      display: flex;
+      min-height: 76px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    @media (max-width: 760px) {
+      .wrap {
+        width: min(100% - 36px, 560px);
+      }
+
+      .topbar {
+        min-height: 70px;
+      }
+
+      nav {
+        gap: 16px;
+        font-size: 12px;
+      }
+
+      .page {
+        padding-block: 58px 68px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .topbar {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-block: 12px;
+      }
+
+      .brand {
+        gap: 8px;
+        font-size: 13px;
+      }
+
+      nav {
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      .footer-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        justify-content: center;
+        gap: 3px;
+        padding-block: 16px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap topbar">
+    <a class="brand" href="index.html" aria-label="回到能源與冷凍空調小站首頁">
+      <span class="brand-mark" aria-hidden="true">能</span>
+      <span>能源與冷凍空調小站</span>
+    </a>
+    <nav aria-label="主選單">
+      <a href="index.html">首頁</a>
+      <a href="index.html#topics">主題筆記</a>
+      <a href="terminology.html" aria-current="page">術語辭典</a>
+    </nav>
+  </header>
+
+  <main class="wrap page">
+    <p class="eyebrow">Terminology Dictionary of HVACR</p>
+    <h1>冷凍空調術語辭典</h1>
+    <p class="intro">整理冷凍、空調與能源領域常見術語，依英文詞條字母順序排列。首批範例包含性能係數、蒸發器與冷媒；手機版可在表格內左右滑動。</p>
+    <aside class="permission-note">
+      <p>原始 Definition 欄位預留給經授權的原文。請提供獲授權的詞條與 Definition 文字，我即可依授權範圍加入對應列；目前本頁不從來源網站複製定義。</p>
+      <p>ASHRAE 欄位目前為本站撰寫的英文摘要與中文譯文。日後若要換成原文，請一併提供對應獲授權文字。</p>
+    </aside>
+
+    <div class="table-scroll" role="region" aria-label="HVACR 術語表，可左右捲動" tabindex="0">
+      <table>
+        <caption>示範詞條 — 按英文詞條字首排序</caption>
+        <thead>
+          <tr>
+            <th scope="col">英文</th>
+            <th scope="col">中文 &amp; 日文</th>
+            <th scope="col">IIR 英文解釋</th>
+            <th scope="col">IIR 中文翻譯</th>
+            <th scope="col">ASHRAE 英文解釋（摘要）</th>
+            <th scope="col">ASHRAE 中文翻譯</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><span class="term-name">Coefficient of performance</span> <span class="term-abbr">(COP)</span></th>
+            <td><span lang="zh-Hant">中：性能係數</span><br><span lang="ja">日：成績係数</span></td>
+            <td>待提供獲授權的 IIR Definition。</td>
+            <td>待提供獲授權的中文翻譯。</td>
+            <td>
+              A measure comparing useful heating or cooling delivered with energy supplied under stated rating conditions.
+              <span class="source-note"><a class="source-link" href="https://terminology.ashrae.org/?searchType=contains&amp;term=coefficient%20of%20performance" target="_blank" rel="noopener noreferrer">ASHRAE 詞條</a></span>
+            </td>
+            <td>在指定額定條件下，比較有效供熱或供冷量與輸入能量的性能指標。</td>
+          </tr>
+          <tr>
+            <th scope="row"><span class="term-name">Evaporator</span></th>
+            <td><span lang="zh-Hant">中：蒸發器</span><br><span lang="ja">日：蒸発器</span></td>
+            <td>待提供獲授權的 IIR Definition。</td>
+            <td>待提供獲授權的中文翻譯。</td>
+            <td>
+              A heat exchanger in which refrigerant absorbs heat and vaporizes.
+              <span class="source-note"><a class="source-link" href="https://terminology.ashrae.org/?searchType=contains&amp;term=evaporator" target="_blank" rel="noopener noreferrer">ASHRAE 詞條</a></span>
+            </td>
+            <td>冷媒在其中吸收熱量並汽化的熱交換器。</td>
+          </tr>
+          <tr>
+            <th scope="row"><span class="term-name">Refrigerant</span></th>
+            <td><span lang="zh-Hant">中：冷媒</span><br><span lang="ja">日：冷媒</span></td>
+            <td>待提供獲授權的 IIR Definition。</td>
+            <td>待提供獲授權的中文翻譯。</td>
+            <td>
+              A working fluid that transfers heat through evaporation and condensation in a refrigeration cycle.
+              <span class="source-note"><a class="source-link" href="https://terminology.ashrae.org/?searchType=contains&amp;term=refrigerant" target="_blank" rel="noopener noreferrer">ASHRAE 詞條</a></span>
+            </td>
+            <td>在冷凍循環中藉由蒸發與冷凝傳遞熱量的工作流體。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sources" aria-label="辭典來源">
+      <a class="source-link" href="https://dictionary.iifiir.org/index.php?dispLang=en" target="_blank" rel="noopener noreferrer">[1] International Dictionary of Refrigeration (IIR)</a>
+      <a class="source-link" href="https://terminology.ashrae.org/" target="_blank" rel="noopener noreferrer">[2] ASHRAE Terminology</a>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <span>能源與冷凍空調小站</span>
+      <span><a href="index.html">回首頁</a></span>
+    </div>
+  </footer>
+</body>
+</html>

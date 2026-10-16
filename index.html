@@ -98,17 +98,6 @@
       color: var(--green);
     }
 
-    .source-link {
-      color: var(--green);
-      font-weight: 650;
-      text-decoration-thickness: 1px;
-      text-underline-offset: 3px;
-    }
-
-    .source-link:hover {
-      color: var(--green-dark);
-    }
-
     .hero {
       display: grid;
       min-height: 570px;
@@ -333,93 +322,6 @@
       font-size: 13px;
     }
 
-    .dictionary {
-      padding-block: 79px 91px;
-      border-top: 1px solid var(--line);
-    }
-
-    .dictionary-note {
-      max-width: 820px;
-      margin: 0 0 24px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .dictionary-note p {
-      margin-bottom: 10px;
-    }
-
-    .dictionary-scroll {
-      overflow-x: auto;
-      border: 1px solid var(--line);
-      background: var(--surface);
-      scrollbar-color: #9daf9f #edf0e9;
-    }
-
-    .dictionary-table {
-      width: 100%;
-      min-width: 1080px;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    .dictionary-table caption {
-      padding: 12px 16px;
-      color: var(--muted);
-      font-size: 12px;
-      text-align: left;
-    }
-
-    .dictionary-table th,
-    .dictionary-table td {
-      padding: 15px 16px;
-      border-top: 1px solid var(--line);
-      vertical-align: top;
-    }
-
-    .dictionary-table th {
-      background: #edf0e9;
-      color: var(--green-dark);
-      font-size: 12px;
-      font-weight: 750;
-      line-height: 1.5;
-    }
-
-    .dictionary-table td {
-      color: #3f514c;
-      font-size: 12px;
-    }
-
-    .dictionary-table tbody tr:hover {
-      background: #fbfcf7;
-    }
-
-    .term-name {
-      color: var(--ink);
-      font-size: 13px;
-      font-weight: 750;
-    }
-
-    .term-abbr {
-      color: var(--green);
-      white-space: nowrap;
-    }
-
-    .dictionary-source-note {
-      display: block;
-      margin-top: 7px;
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .dictionary-sources {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px 22px;
-      margin-top: 16px;
-      font-size: 12px;
-    }
-
     .about {
       display: grid;
       grid-template-columns: .8fr 1.2fr;
@@ -490,10 +392,6 @@
       }
 
       .topics {
-        padding-block: 62px;
-      }
-
-      .dictionary {
         padding-block: 62px;
       }
 
@@ -570,7 +468,7 @@
     </a>
     <nav aria-label="主選單">
       <a href="#topics">主題筆記</a>
-      <a href="#dictionary">術語辭典</a>
+      <a href="terminology.html">術語辭典</a>
       <a href="#about">關於本站</a>
     </nav>
   </header>
@@ -619,72 +517,16 @@
       </div>
     </section>
 
-    <section class="dictionary" id="dictionary" aria-labelledby="dictionary-title">
+    <section class="topics" aria-labelledby="dictionary-link-title">
       <div class="wrap">
         <div class="section-head">
           <div>
             <p class="eyebrow">Terminology Dictionary of HVACR</p>
-            <h2 id="dictionary-title">冷凍空調術語辭典</h2>
+            <h2 id="dictionary-link-title">冷凍空調術語辭典</h2>
           </div>
-          <p class="section-intro">先從三個常見術語開始，依英文詞條字首排列；後續可逐步擴充。</p>
+          <p class="section-intro">查閱冷凍空調常用英文術語、中日文名稱與專業定義。</p>
         </div>
-        <div class="dictionary-note">
-          <p>ASHRAE 欄位是本站撰寫的英文摘要與中文翻譯，並非原文逐字引用。IIR 詞典的著作權聲明限制未經書面許可的定義轉載、翻譯與改寫，因此下表提供 IIR 原典查閱連結，不轉載其釋義或翻譯。</p>
-        </div>
-        <div class="dictionary-scroll" role="region" aria-label="HVACR 術語表，可左右捲動" tabindex="0">
-          <table class="dictionary-table">
-            <caption>示範詞條 — 按英文詞條字首排序</caption>
-            <thead>
-              <tr>
-                <th scope="col">英文</th>
-                <th scope="col">中文 &amp; 日文</th>
-                <th scope="col">IIR 英文解釋</th>
-                <th scope="col">IIR 中文翻譯</th>
-                <th scope="col">ASHRAE 英文解釋（摘要）</th>
-                <th scope="col">ASHRAE 中文翻譯</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th scope="row"><span class="term-name">Coefficient of performance</span> <span class="term-abbr">(COP)</span></th>
-                <td><span lang="zh-Hant">中：性能係數</span><br><span lang="ja">日：成績係数</span></td>
-                <td><a class="source-link" href="https://dictionary.iifiir.org/index.php?dispLang=en" target="_blank" rel="noopener noreferrer">於 IIR 原典查閱</a></td>
-                <td>請參閱 IIR 原典；本站不轉載翻譯。</td>
-                <td>
-                  A measure comparing useful heating or cooling delivered with energy supplied under stated rating conditions.
-                  <span class="dictionary-source-note"><a class="source-link" href="https://terminology.ashrae.org/?searchType=contains&amp;term=coefficient%20of%20performance" target="_blank" rel="noopener noreferrer">ASHRAE 詞條</a></span>
-                </td>
-                <td>在指定額定條件下，比較有效供熱或供冷量與輸入能量的性能指標。</td>
-              </tr>
-              <tr>
-                <th scope="row"><span class="term-name">Evaporator</span></th>
-                <td><span lang="zh-Hant">中：蒸發器</span><br><span lang="ja">日：蒸発器</span></td>
-                <td><a class="source-link" href="https://dictionary.iifiir.org/index.php?dispLang=en" target="_blank" rel="noopener noreferrer">於 IIR 原典查閱</a></td>
-                <td>請參閱 IIR 原典；本站不轉載翻譯。</td>
-                <td>
-                  A heat exchanger in which refrigerant absorbs heat and vaporizes.
-                  <span class="dictionary-source-note"><a class="source-link" href="https://terminology.ashrae.org/?searchType=contains&amp;term=evaporator" target="_blank" rel="noopener noreferrer">ASHRAE 詞條</a></span>
-                </td>
-                <td>冷媒在其中吸收熱量並汽化的熱交換器。</td>
-              </tr>
-              <tr>
-                <th scope="row"><span class="term-name">Refrigerant</span></th>
-                <td><span lang="zh-Hant">中：冷媒</span><br><span lang="ja">日：冷媒</span></td>
-                <td><a class="source-link" href="https://dictionary.iifiir.org/index.php?dispLang=en" target="_blank" rel="noopener noreferrer">於 IIR 原典查閱</a></td>
-                <td>請參閱 IIR 原典；本站不轉載翻譯。</td>
-                <td>
-                  A working fluid that transfers heat through evaporation and condensation in a refrigeration cycle.
-                  <span class="dictionary-source-note"><a class="source-link" href="https://terminology.ashrae.org/?searchType=contains&amp;term=refrigerant" target="_blank" rel="noopener noreferrer">ASHRAE 詞條</a></span>
-                </td>
-                <td>在冷凍循環中藉由蒸發與冷凝傳遞熱量的工作流體。</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="dictionary-sources" aria-label="辭典來源">
-          <a class="source-link" href="https://dictionary.iifiir.org/index.php?dispLang=en" target="_blank" rel="noopener noreferrer">[1] International Dictionary of Refrigeration (IIR)</a>
-          <a class="source-link" href="https://terminology.ashrae.org/" target="_blank" rel="noopener noreferrer">[2] ASHRAE Terminology</a>
-        </div>
+        <a class="button" href="terminology.html">前往術語辭典 <span aria-hidden="true">→</span></a>
       </div>
     </section>
 
