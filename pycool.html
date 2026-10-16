@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="PyCool 飽和水蒸汽性質計算器：輸入壓力或溫度，查詢飽和液體與蒸汽的密度及比熱。">
+  <title>PyCool | 能源與冷凍空調小站</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172b2b;
+      --muted: #5b6c68;
+      --paper: #f6f5ef;
+      --surface: #fffefa;
+      --green: #1d6252;
+      --green-dark: #16483e;
+      --line: #dce2d8;
+      --serif: Georgia, "Noto Serif TC", "PMingLiU", serif;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.7;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible {
+      outline: 3px solid #9ab952;
+      outline-offset: 3px;
+    }
+
+    .wrap {
+      width: min(1120px, calc(100% - 48px));
+      margin-inline: auto;
+    }
+
+    .topbar {
+      display: flex;
+      min-height: 82px;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: .04em;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--green);
+      color: white;
+      font-family: var(--serif);
+      font-size: 19px;
+    }
+
+    nav {
+      display: flex;
+      gap: 24px;
+      font-size: 13px;
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      color: var(--green);
+    }
+
+    .page {
+      padding-block: 68px 88px;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 13px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 24px;
+      height: 1px;
+      background: currentColor;
+      content: "";
+    }
+
+    h1,
+    h2,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 12px;
+      font-family: var(--serif);
+      font-size: clamp(42px, 6vw, 62px);
+      font-weight: 500;
+      letter-spacing: -.045em;
+      line-height: 1.2;
+    }
+
+    .intro {
+      max-width: 760px;
+      margin-bottom: 32px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .calculator {
+      display: grid;
+      grid-template-columns: minmax(260px, .75fr) minmax(0, 1.25fr);
+      border: 1px solid var(--line);
+      background: var(--surface);
+      box-shadow: 0 12px 32px rgba(23, 43, 43, .06);
+    }
+
+    .input-panel,
+    .results-panel {
+      min-width: 0;
+      padding: 28px;
+    }
+
+    .input-panel {
+      border-right: 1px solid var(--line);
+      background: #edf0e9;
+    }
+
+    h2 {
+      margin-bottom: 8px;
+      font-family: var(--serif);
+      font-size: 23px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .panel-intro {
+      margin-bottom: 21px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .field input {
+      width: 100%;
+      min-height: 46px;
+      padding: 9px 12px;
+      border: 1px solid #bcc9bd;
+      border-radius: 2px;
+      background: var(--surface);
+      color: var(--ink);
+      font: inherit;
+      font-size: 15px;
+    }
+
+    .field-hint {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    button {
+      min-height: 44px;
+      padding: 9px 17px;
+      border: 1px solid var(--green);
+      border-radius: 2px;
+      background: var(--green);
+      color: white;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--green-dark);
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--green);
+    }
+
+    button.secondary:hover:not(:disabled) {
+      background: rgba(29, 98, 82, .08);
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: .65;
+    }
+
+    .status {
+      min-height: 3.4em;
+      margin: 17px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .status[data-kind="error"] {
+      color: #9d382d;
+    }
+
+    .status[data-kind="warning"] {
+      color: #785a13;
+    }
+
+    .result-summary {
+      margin: 0 0 20px;
+      padding: 12px 14px;
+      border-left: 3px solid #a6bd70;
+      background: #f4f6ee;
+      color: #405650;
+      font-size: 13px;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .phase-card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .phase-card h3 {
+      margin: 0;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #edf0e9;
+      color: var(--green-dark);
+      font-size: 14px;
+    }
+
+    .phase-card dl {
+      margin: 0;
+      padding: 4px 14px;
+    }
+
+    .result-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      padding-block: 11px;
+      border-bottom: 1px solid #e8ebe4;
+      font-size: 13px;
+    }
+
+    .result-row:last-child {
+      border-bottom: 0;
+    }
+
+    .result-row dt {
+      color: var(--muted);
+    }
+
+    .result-row dd {
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .notes {
+      margin-top: 25px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .notes p {
+      margin-bottom: 6px;
+    }
+
+    .notes a {
+      color: var(--green);
+      text-underline-offset: 3px;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .footer-inner {
+      display: flex;
+      min-height: 76px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    @media (max-width: 760px) {
+      .wrap {
+        width: min(100% - 36px, 560px);
+      }
+
+      .topbar {
+        min-height: 70px;
+      }
+
+      nav {
+        gap: 14px;
+        font-size: 12px;
+      }
+
+      .page {
+        padding-block: 54px 66px;
+      }
+
+      .calculator {
+        grid-template-columns: 1fr;
+      }
+
+      .input-panel {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .input-panel,
+      .results-panel {
+        padding: 22px;
+      }
+    }
+
+    @media (max-width: 460px) {
+      .topbar {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-block: 12px;
+      }
+
+      .brand {
+        gap: 8px;
+        font-size: 13px;
+      }
+
+      nav {
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        justify-content: center;
+        gap: 3px;
+        padding-block: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap topbar">
+    <a class="brand" href="index.html" aria-label="回到能源與冷凍空調小站首頁">
+      <span class="brand-mark" aria-hidden="true">能</span>
+      <span>能源與冷凍空調小站</span>
+    </a>
+    <nav aria-label="主選單">
+      <a href="index.html">首頁</a>
+      <a href="terminology.html">術語辭典</a>
+      <a href="pycool.html" aria-current="page">PyCool</a>
+    </nav>
+  </header>
+
+  <main class="wrap page">
+    <p class="eyebrow">Water Properties · CoolProp</p>
+    <h1>PyCool</h1>
+    <p class="intro">飽和水蒸汽性質計算。輸入壓力或溫度其中一項，即可取得對應的飽和液體與飽和蒸汽密度、定壓比熱及定容比熱。若兩項都輸入，將以溫度為準。</p>
+
+    <section class="calculator" aria-label="飽和水蒸汽性質計算器">
+      <form class="input-panel" id="calculator-form">
+        <h2>飽和輸入</h2>
+        <p class="panel-intro">只需填入壓力或溫度其中一項。</p>
+
+        <div class="field">
+          <label for="pressure">壓力 P (kPa)</label>
+          <input id="pressure" name="pressure" type="number" inputmode="decimal" step="any" autocomplete="off" aria-describedby="pressure-hint">
+          <p class="field-hint" id="pressure-hint">絕對壓力，不是表壓。</p>
+        </div>
+
+        <div class="field">
+          <label for="temperature">溫度 T (°C)</label>
+          <input id="temperature" name="temperature" type="number" inputmode="decimal" step="any" autocomplete="off">
+          <p class="field-hint" id="temperature-range">範圍載入中…</p>
+        </div>
+
+        <div class="actions">
+          <button id="calculate-button" type="submit" disabled>載入計算引擎…</button>
+          <button class="secondary" id="clear-button" type="button">清除</button>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite">正在載入 CoolProp 計算引擎…首次載入需連線下載。</p>
+      </form>
+
+      <div class="results-panel">
+        <h2>計算結果</h2>
+        <p class="result-summary" id="result-summary">輸入資料並按「計算」後，結果將顯示於此。</p>
+        <div class="result-grid">
+          <section class="phase-card" aria-labelledby="liquid-title">
+            <h3 id="liquid-title">飽和液體 (f)</h3>
+            <dl>
+              <div class="result-row"><dt>密度 ρ (kg/m³)</dt><dd id="liquid-rho">—</dd></div>
+              <div class="result-row"><dt>比熱 cp (kJ/kg·K)</dt><dd id="liquid-cp">—</dd></div>
+              <div class="result-row"><dt>比熱 cv (kJ/kg·K)</dt><dd id="liquid-cv">—</dd></div>
+            </dl>
+          </section>
+          <section class="phase-card" aria-labelledby="vapor-title">
+            <h3 id="vapor-title">飽和蒸汽 (g)</h3>
+            <dl>
+              <div class="result-row"><dt>密度 ρ (kg/m³)</dt><dd id="vapor-rho">—</dd></div>
+              <div class="result-row"><dt>比熱 cp (kJ/kg·K)</dt><dd id="vapor-cp">—</dd></div>
+              <div class="result-row"><dt>比熱 cv (kJ/kg·K)</dt><dd id="vapor-cv">—</dd></div>
+            </dl>
+          </section>
+        </div>
+        <div class="notes">
+          <p>適用於水的汽液飽和狀態，範圍由三相點至臨界點以下；不適用於過熱蒸汽或其他流體。</p>
+          <p>性質計算由 <a href="https://github.com/CoolProp/CoolProp" target="_blank" rel="noopener noreferrer">CoolProp 6.6.0</a>（WebAssembly）提供，水的狀態方程式採 IAPWS-95。計算引擎由 jsDelivr 載入。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <span>能源與冷凍空調小站 · PyCool</span>
+      <span><a href="index.html">回首頁</a></span>
+    </div>
+  </footer>
+
+  <script type="module">
+    const form = document.querySelector("#calculator-form");
+    const pressureInput = document.querySelector("#pressure");
+    const temperatureInput = document.querySelector("#temperature");
+    const calculateButton = document.querySelector("#calculate-button");
+    const clearButton = document.querySelector("#clear-button");
+    const status = document.querySelector("#status");
+    const resultSummary = document.querySelector("#result-summary");
+    const temperatureRange = document.querySelector("#temperature-range");
+    const resultFields = {
+      liquid: {
+        rho: document.querySelector("#liquid-rho"),
+        cp: document.querySelector("#liquid-cp"),
+        cv: document.querySelector("#liquid-cv"),
+      },
+      vapor: {
+        rho: document.querySelector("#vapor-rho"),
+        cp: document.querySelector("#vapor-cp"),
+        cv: document.querySelector("#vapor-cv"),
+      },
+    };
+    const formatNumber = (value) => Number(value.toPrecision(6)).toString();
+
+    let coolprop;
+    let minimumTemperature;
+    let criticalTemperature;
+    let criticalPressure;
+
+    function showError(message) {
+      status.dataset.kind = "error";
+      status.textContent = message;
+    }
+
+    function clearResults() {
+      for (const phase of Object.values(resultFields)) {
+        for (const field of Object.values(phase)) field.textContent = "—";
+      }
+      resultSummary.textContent = "輸入資料並按「計算」後，結果將顯示於此。";
+    }
+
+    function calculate() {
+      const pressureText = pressureInput.value.trim();
+      const temperatureText = temperatureInput.value.trim();
+      if (!pressureText && !temperatureText) {
+        showError("請輸入壓力或溫度。");
+        return;
+      }
+
+      const enteredPressure = pressureText ? Number(pressureText) : null;
+      const enteredTemperature = temperatureText ? Number(temperatureText) : null;
+      if ((enteredPressure !== null && (!Number.isFinite(enteredPressure) || enteredPressure <= 0))
+        || (enteredTemperature !== null && !Number.isFinite(enteredTemperature))) {
+        showError("請輸入有效的數值；壓力必須大於 0。");
+        return;
+      }
+
+      try {
+        let temperature;
+        let pressure;
+        let mismatch = false;
+        if (enteredTemperature !== null) {
+          temperature = enteredTemperature + 273.15;
+          if (temperature < minimumTemperature || temperature >= criticalTemperature) {
+            showError(`溫度須介於 ${formatNumber(minimumTemperature - 273.15)} °C 與臨界溫度 ${formatNumber(criticalTemperature - 273.15)} °C 之間。`);
+            return;
+          }
+          pressure = coolprop.PropsSI("P", "T", temperature, "Q", 0, "Water");
+          if (enteredPressure !== null) {
+            mismatch = Math.abs(enteredPressure * 1000 - pressure) / pressure > 0.01;
+          }
+        } else {
+          pressure = enteredPressure * 1000;
+          if (pressure >= criticalPressure) {
+            showError(`壓力須低於臨界壓力 ${formatNumber(criticalPressure / 1000)} kPa。`);
+            return;
+          }
+          temperature = coolprop.PropsSI("T", "P", pressure, "Q", 0, "Water");
+          if (temperature < minimumTemperature) {
+            showError(`壓力低於三相點壓力 ${formatNumber(coolprop.PropsSI("P", "T", minimumTemperature, "Q", 0, "Water") / 1000)} kPa，無法計算汽液飽和性質。`);
+            return;
+          }
+        }
+
+        const phases = { liquid: 0, vapor: 1 };
+        for (const [phase, quality] of Object.entries(phases)) {
+          const properties = {
+            rho: coolprop.PropsSI("D", "T", temperature, "Q", quality, "Water"),
+            cp: coolprop.PropsSI("C", "T", temperature, "Q", quality, "Water") / 1000,
+            cv: coolprop.PropsSI("O", "T", temperature, "Q", quality, "Water") / 1000,
+          };
+          for (const [key, value] of Object.entries(properties)) {
+            if (!Number.isFinite(value)) {
+              throw new Error("計算引擎回傳了非有限的物性值，請改用較遠離臨界點的狀態。");
+            }
+            resultFields[phase][key].textContent = formatNumber(value);
+          }
+        }
+
+        pressureInput.value = formatNumber(pressure / 1000);
+        temperatureInput.value = formatNumber(temperature - 273.15);
+        resultSummary.textContent = `飽和壓力 ${formatNumber(pressure / 1000)} kPa · 飽和溫度 ${formatNumber(temperature - 273.15)} °C`;
+        status.dataset.kind = mismatch ? "warning" : "success";
+        status.textContent = mismatch
+          ? `兩個輸入值不相符（溫度對應壓力為 ${formatNumber(pressure / 1000)} kPa）；已依照溫度計算。`
+          : "計算完成。";
+      } catch (error) {
+        clearResults();
+        showError(`無法計算此狀態：${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      calculate();
+    });
+
+    clearButton.addEventListener("click", () => {
+      form.reset();
+      clearResults();
+      status.dataset.kind = "success";
+      status.textContent = "已清除輸入與計算結果。";
+      pressureInput.focus();
+    });
+
+    try {
+      const { default: initCoolProp } = await import(
+        "https://cdn.jsdelivr.net/npm/coolprop-wasm@6.6.0/index.js"
+      );
+      coolprop = await initCoolProp();
+      minimumTemperature = coolprop.PropsSI("Tmin", "", 0, "", 0, "Water");
+      criticalTemperature = coolprop.PropsSI("Tcrit", "", 0, "", 0, "Water");
+      criticalPressure = coolprop.PropsSI("pcrit", "", 0, "", 0, "Water");
+      temperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(criticalTemperature - 273.15)} °C 以下`;
+      calculateButton.disabled = false;
+      calculateButton.textContent = "計算";
+      status.dataset.kind = "success";
+      status.textContent = "計算引擎已就緒。";
+    } catch (error) {
+      showError(`計算引擎載入失敗：${error instanceof Error ? error.message : String(error)}。請確認網路連線後重新整理頁面。`);
+      calculateButton.textContent = "引擎載入失敗";
+    }
+  </script>
+</body>
+</html>
