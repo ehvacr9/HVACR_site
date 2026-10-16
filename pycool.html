@@ -942,7 +942,7 @@
       </label>
     </div>
 
-    <section class="calculator" id="calculator-section" aria-label="PyCool 性質計算器">
+    <section class="calculator" id="calculator-section" hidden aria-label="PyCool 性質計算器">
       <form class="input-panel" id="calculator-form">
         <div id="saturation-inputs">
           <h2>飽和輸入</h2>
@@ -1171,16 +1171,16 @@
         </div>
       </section>
     </section>
-    <section class="basic-information-section" id="basic-information-section" hidden aria-labelledby="basic-information-title">
+    <section class="basic-information-section" id="basic-information-section" aria-labelledby="basic-information-title">
       <h2 id="basic-information-title">基本資訊</h2>
       <dl class="basic-information-grid">
-        <div class="basic-information-item"><dt>化學名稱 (chemical-name)</dt><dd id="basic-chemical-name">—</dd></div>
-        <div class="basic-information-item"><dt>分子量 (g/mol)</dt><dd id="basic-molar-mass">—</dd></div>
-        <div class="basic-information-item"><dt>氣體常數 R (J/kg·K)</dt><dd id="basic-gas-constant">—</dd></div>
-        <div class="basic-information-item"><dt>三相點溫度 (°C)</dt><dd id="basic-triple-temperature">—</dd></div>
-        <div class="basic-information-item"><dt>三相點壓力 (kPa)</dt><dd id="basic-triple-pressure">—</dd></div>
-        <div class="basic-information-item"><dt>臨界點溫度 (°C)</dt><dd id="basic-critical-temperature">—</dd></div>
-        <div class="basic-information-item"><dt>臨界點壓力 (kPa)</dt><dd id="basic-critical-pressure">—</dd></div>
+        <div class="basic-information-item"><dt>化學名稱 (chemical-name)</dt><dd id="basic-chemical-name">載入中…</dd></div>
+        <div class="basic-information-item"><dt>分子量 (g/mol)</dt><dd id="basic-molar-mass">載入中…</dd></div>
+        <div class="basic-information-item"><dt>氣體常數 R (J/kg·K)</dt><dd id="basic-gas-constant">載入中…</dd></div>
+        <div class="basic-information-item"><dt>三相點溫度 (°C)</dt><dd id="basic-triple-temperature">載入中…</dd></div>
+        <div class="basic-information-item"><dt>三相點壓力 (kPa)</dt><dd id="basic-triple-pressure">載入中…</dd></div>
+        <div class="basic-information-item"><dt>臨界點溫度 (°C)</dt><dd id="basic-critical-temperature">載入中…</dd></div>
+        <div class="basic-information-item"><dt>臨界點壓力 (kPa)</dt><dd id="basic-critical-pressure">載入中…</dd></div>
       </dl>
     </section>
   </main>
@@ -2209,6 +2209,7 @@
     } catch (error) {
       temperatureRange.textContent = "無法載入";
       stateTemperatureRange.textContent = "無法載入";
+      for (const field of Object.values(basicInformationFields)) field.textContent = "無法載入";
       showError(`本站運算模組載入失敗：${error instanceof Error ? error.message : String(error)}。請重新整理頁面；若問題持續，請聯絡網站管理者。`);
       calculateButton.textContent = "模組載入失敗";
       tableStatus.dataset.kind = "error";
