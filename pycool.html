@@ -612,7 +612,7 @@
               <input id="property-two-value" type="number" inputmode="decimal" step="any" autocomplete="off" aria-label="已知性質 2 數值">
             </div>
           </div>
-          <p class="field-hint">密度與比容代表同一種物性，不能同時選取。溫度範圍：<span id="state-temperature-range">載入中…</span></p>
+          <p class="field-hint">密度與比容代表同一種物性，不能同時選取。CoolProp 水模型溫度範圍：<span id="state-temperature-range">載入中…</span>；實際可解狀態依輸入性質而定。</p>
         </div>
 
         <div class="actions">
@@ -660,7 +660,7 @@
           </dl>
         </section>
         <div class="notes">
-          <p>適用於水的汽液飽和狀態，範圍由三相點至臨界點以下；不適用於過熱蒸汽或其他流體。狀態點中的「—」表示該性質在該相態下無定義或無法計算。</p>
+          <p>飽和輸入適用於水的汽液飽和狀態，範圍由三相點至臨界點以下；指定任兩性質可計算 CoolProp 水模型範圍內的過冷液體、過熱蒸汽及其他狀態，實際範圍依輸入性質而定。狀態點中的「—」表示該性質在該相態下無定義或無法計算。</p>
           <p>性質計算由 <a href="https://github.com/CoolProp/CoolProp" target="_blank" rel="noopener noreferrer">CoolProp 8.1.0.dev</a>（WebAssembly）提供，水的狀態方程式採 IAPWS-95。運算模組由本站提供，不需連接第三方 CDN；首次使用時瀏覽器會載入約 10 MB 的模組。</p>
         </div>
       </div>
@@ -722,6 +722,7 @@
 
     let coolprop;
     let minimumTemperature;
+    let maximumTemperature;
     let criticalTemperature;
     let criticalPressure;
 
@@ -750,7 +751,7 @@
     const phaseNames = {
       0: "壓縮（過冷）液體",
       1: "超臨界流體",
-      2: "超臨界（氣態側）",
+      2: "過熱蒸汽（超臨界溫度以上的氣態）",
       3: "超臨界（液態側）",
       4: "臨界點",
       5: "過熱蒸汽",
@@ -993,11 +994,11 @@
       const { default: initCoolProp } = await import("./assets/coolprop/coolprop.js");
       coolprop = await initCoolProp();
       minimumTemperature = coolprop.PropsSI("Tmin", "", 0, "", 0, "Water");
+      maximumTemperature = coolprop.PropsSI("Tmax", "", 0, "", 0, "Water");
       criticalTemperature = coolprop.PropsSI("Tcrit", "", 0, "", 0, "Water");
       criticalPressure = coolprop.PropsSI("pcrit", "", 0, "", 0, "Water");
-      const temperatureRangeText = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(criticalTemperature - 273.15)} °C 以下`;
-      temperatureRange.textContent = temperatureRangeText;
-      stateTemperatureRange.textContent = temperatureRangeText;
+      temperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(criticalTemperature - 273.15)} °C 以下`;
+      stateTemperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(maximumTemperature - 273.15)} °C`;
       calculateButton.disabled = false;
       calculateButton.textContent = "計算";
       status.dataset.kind = "success";
