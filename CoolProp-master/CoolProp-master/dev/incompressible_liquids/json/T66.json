@@ -1,0 +1,171 @@
+{
+  "T_freeze": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "Tbase": 463.15,
+  "Tmax": 653.15,
+  "Tmin": 273.15,
+  "TminPsat": 343.15,
+  "conductivity": {
+    "NRMS": 0.009200426,
+    "coeffs": [
+      [
+        0.1065831
+      ],
+      [
+        -9.17879e-05
+      ],
+      [
+        -1.57373e-07
+      ],
+      [
+        1.361587e-11
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density": {
+    "NRMS": 0.0005632313,
+    "coeffs": [
+      [
+        892.4651
+      ],
+      [
+        -0.7182484
+      ],
+      [
+        -0.0003391502
+      ],
+      [
+        -7.434511e-07
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density_cheb": {
+    "NRMS": 9.035518e-05,
+    "Trange": [
+      273.15,
+      653.15
+    ],
+    "coeffs": [
+      [
+        886.3072
+      ],
+      [
+        -140.3011
+      ],
+      [
+        -6.215453
+      ],
+      [
+        -1.290467
+      ],
+      [
+        -0.2347124
+      ],
+      [
+        -0.04596954
+      ],
+      [
+        -0.01671751
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "description": "Therminol66",
+  "mass2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "mole2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "name": "T66",
+  "reference": "Therminol2014",
+  "saturation_pressure": {
+    "NRMS": 0.002309993,
+    "coeffs": [
+      -9020.703,
+      65.50191,
+      -24.45722
+    ],
+    "type": "exponential"
+  },
+  "specific_heat": {
+    "NRMS": 0.0003462753,
+    "coeffs": [
+      [
+        2157.819
+      ],
+      [
+        3.630114
+      ],
+      [
+        0.0009171095
+      ],
+      [
+        1.004461e-06
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "specific_heat_cheb": {
+    "NRMS": 0.0002017283,
+    "Trange": [
+      273.15,
+      653.15
+    ],
+    "coeffs": [
+      [
+        2174.463
+      ],
+      [
+        694.9208
+      ],
+      [
+        16.78793
+      ],
+      [
+        1.775374
+      ],
+      [
+        0.5841956
+      ],
+      [
+        0.155761
+      ],
+      [
+        0.1075219
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "viscosity": {
+    "NRMS": 0.00547764,
+    "coeffs": [
+      653.8723,
+      -206.0943,
+      9.556995
+    ],
+    "type": "exponential"
+  },
+  "volume2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "xbase": 0.0,
+  "xid": "pure",
+  "xmax": 1.0,
+  "xmin": 0.0
+}

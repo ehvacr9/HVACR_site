@@ -1,0 +1,152 @@
+{
+  "T_freeze": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "Tbase": 314.15,
+  "Tmax": 363.15,
+  "Tmin": 265.15,
+  "TminPsat": 363.15,
+  "conductivity": {
+    "NRMS": 2.228681e-05,
+    "coeffs": [
+      [
+        0.5643895
+      ],
+      [
+        0.001301523
+      ],
+      [
+        -3.004842e-07
+      ],
+      [
+        -1.909279e-11
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density": {
+    "NRMS": 6.354667e-09,
+    "coeffs": [
+      [
+        1079.692
+      ],
+      [
+        -0.4643114
+      ],
+      [
+        -1.24607e-11
+      ],
+      [
+        -2.087007e-13
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density_cheb": {
+    "NRMS": 6.358368e-09,
+    "Trange": [
+      265.15,
+      363.15
+    ],
+    "coeffs": [
+      [
+        1079.692
+      ],
+      [
+        -22.75126
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "description": "Zitrec S10, Potassium formate/Sodium propionate",
+  "mass2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "mole2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "name": "ZS10",
+  "reference": "Arteco2010,Skovrup2013",
+  "saturation_pressure": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "specific_heat": {
+    "NRMS": 1.735172e-06,
+    "coeffs": [
+      [
+        3645.713
+      ],
+      [
+        1.640938
+      ],
+      [
+        -0.009290489
+      ],
+      [
+        -4.913539e-10
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "specific_heat_cheb": {
+    "NRMS": 1.728575e-06,
+    "Trange": [
+      263.15,
+      363.15
+    ],
+    "coeffs": [
+      [
+        3632.45
+      ],
+      [
+        82.97587
+      ],
+      [
+        -11.6131
+      ],
+      [
+        -2.618116e-05
+      ],
+      [
+        1.567422e-05
+      ],
+      [
+        -1.980331e-05
+      ],
+      [
+        -2.24853e-05
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "viscosity": {
+    "NRMS": 0.00286878,
+    "coeffs": [
+      516.0185,
+      -154.0033,
+      10.03025
+    ],
+    "type": "exponential"
+  },
+  "volume2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "xbase": 0.0,
+  "xid": "pure",
+  "xmax": 1.0,
+  "xmin": 0.0
+}

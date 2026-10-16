@@ -1,0 +1,331 @@
+name: Documentation builds (HTML)
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # daily
+    - cron: '0 4 * * 1' # weekly
+  workflow_dispatch:
+    inputs:
+      expensive:
+        description: 'Build expensive docs'
+        required: false
+        type: boolean
+  push:
+    branches: [ 'master', 'main', 'develop', 'actions_docs' ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ 'master', 'main', 'develop' ]
+
+concurrency:
+  # Cancel superseded runs on the same ref to cut CI backlog on heavy
+  # dev days (repeated pushes to an open PR).  Protected: master / main
+  # / develop and tags never cancel, so mainline + release runs always
+  # complete.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' && !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      # Persist the (expensive, cold-built) SVDSBTL SVD surfaces under the
+      # workspace so actions/cache can cache them across builds.  The
+      # SVDSBTLValidation / SVDSBTLHeatExchangerDemo notebooks read this via
+      # os.environ (and joblib loky workers inherit it); their default
+      # ~/.CoolProp/SVDTables-docs lives in the container home, which is NOT
+      # on the cacheable workspace.  Must be an absolute path inside the
+      # container — github.workspace is the bind-mounted workspace, so the
+      # host-side actions/cache step sees the same files.
+      COOLPROP_ALTERNATIVE_SVDTABLES_DIRECTORY: ${{ github.workspace }}/.svdtables-cache
+
+      # Compiler cache for the wrapper-example builds (LinuxRun.py).  Each
+      # COOLPROP_*_MODULE build recompiles the CoolProp core from scratch, so
+      # the core is built once per wrapper language.  Persisting the dir on the
+      # workspace lets actions/cache carry hits across runs, so an unchanged
+      # core source (docs-only changes, the cron on a quiet master, re-runs) is
+      # a full hit next time.  (Within a single run the four modules don't share
+      # core objects yet -- the Octave/Java/R blocks add header dirs via global
+      # include_directories(), which lands on the core compiles; scoping those
+      # to the swig target would unlock that, tracked separately.)  Same
+      # bind-mounted-workspace reasoning as the SVD dir above.
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+
+    container:
+      image: ghcr.io/coolprop/coolprop_docs_02_builder:dev
+      # options: --user 1001 --group 1001
+      credentials:
+         username: ${{ github.actor }}
+         password: ${{ secrets.GITHUB_TOKEN }}
+         
+    steps: 
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0  # Fetch all history for git revision info
+    
+    - name: Set up Git
+      run: |
+        git config --global --add safe.directory $GITHUB_WORKSPACE
+        # Get the full git revision hash
+        git rev-parse HEAD > dev/gitrevision.txt
+        echo "Git revision: $(cat dev/gitrevision.txt)"
+    
+    - uses: actions/cache@v6
+      if: ${{ !env.ACT }} # skip during local actions testing
+      id: cached-props # steps.cached-props.outputs.cache-hit != 'true'
+      with:
+        path: |
+          ./Web/fluid_properties/fluids/Consistencyplots
+          ./Web/_static/fluid_properties/Incompressibles_reports
+          ./Web/fluid_properties/Incompressibles_mass-based-fluids.csv
+          ./Web/fluid_properties/Incompressibles_mole-based-fluids.csv
+          ./Web/fluid_properties/Incompressibles_volume-based-fluids.csv
+          ./Web/fluid_properties/Incompressibles_pure-fluids.csv
+          ./Web/_static/fluid_properties/incompressibles_consistency.jpg
+          ./Web/_static/fluid_properties/incompressibles_consistency.pdf
+        # Key depends on the fluid list so adding/removing a fluid invalidates
+        # the cache and triggers a consistency-plot refresh for the new fluid.
+        # The restore-keys fallback still seeds the directory with prior plots
+        # so the incremental Consistency.py only has to regenerate what changed.
+        key: cached-props-${{ hashFiles('dev/fluids/*.json', 'dev/incompressible_liquids/json/*.json') }}
+        restore-keys: |
+          cached-props-
+
+    # Cache the SVDSBTL SVD surfaces (COOLPROP_ALTERNATIVE_SVDTABLES_DIRECTORY,
+    # set at job level).  Without this they are rebuilt cold every run (~370 s
+    # per panel of SVDSBTLValidation / SVDSBTLHeatExchangerDemo).  Surfaces are
+    # serialized and content-addressed, but the on-disk opthash covers only the
+    # grid options — NOT the EOS coefficients or the SVDSBTL algorithm — so the
+    # key busts on the fluid JSONs + SVDSBTL/SBTL/Region sources + the notebook
+    # generator (fluid/grid list).  No restore-keys fallback ON PURPOSE: a
+    # partial restore could seed a surface that is stale w.r.t. an EOS/algorithm
+    # change the opthash cannot see.  Exact key only => any relevant change
+    # triggers a clean cold rebuild; otherwise surfaces load in ~80 ms.
+    - uses: actions/cache@v6
+      if: ${{ !env.ACT }}
+      with:
+        path: .svdtables-cache
+        key: svd-tables-${{ hashFiles('dev/fluids/*.json', 'src/SBTL/**', 'src/Backends/SVDSBTL/**', 'src/Region/**', 'include/CoolProp/sbtl/**', 'Web/coolprop/_gen/gen_SVDSBTLValidation.py') }}
+
+    # Persist the ccache dir (CCACHE_DIR, set at job level) across runs so the
+    # wrapper-example builds also reuse the CoolProp core compiled by previous
+    # runs, not just within a single run.  ccache is content-addressed and
+    # self-managed (bounded by its own max-size), so a rolling per-SHA key with
+    # a restore-keys fallback is the right pattern: always seed from the most
+    # recent prior cache.  A stale object is never a correctness risk — ccache
+    # keys on the preprocessed source + compiler args, so any real change is a
+    # natural miss.
+    #
+    # Restore on every event, but SAVE only on trusted (non-PR) events: the
+    # later steps compile + execute native artifacts out of this cache, so an
+    # untrusted PR must never populate a store a trusted push/schedule run could
+    # later restore.  (GitHub's cache scope already isolates PR-created caches
+    # from default-branch runs; this is defense-in-depth and also keeps PR churn
+    # from evicting the mainline cache.)  Hence the cache/restore + conditional
+    # cache/save split instead of the combined actions/cache action.
+    - uses: actions/cache/restore@v6
+      if: ${{ !env.ACT }}
+      with:
+        path: .ccache
+        key: docs-ccache-${{ github.sha }}
+        restore-keys: |
+          docs-ccache-
+
+    - name: Schedule calculations
+      id: schedule_calculation
+      shell: bash
+      run: |
+        set -x
+        echo ${{ github.event.schedule }}
+        echo "COOLPROP_DAILY=${{ github.event.schedule == '0 2 * * *' }}" >> $GITHUB_ENV
+        echo "COOLPROP_WEEKLY=${{ github.event.schedule == '0 4 * * 1' }}" >> $GITHUB_ENV
+        echo ${{ github.ref }}
+        echo "COOLPROP_TAGGED=${{ contains(github.ref, 'refs/tags') }}" >> $GITHUB_ENV
+        cat $GITHUB_ENV
+        
+    - name: Variable calculations
+      id: variable_calculation
+      shell: bash
+      run: |
+        set -x
+        conda install -y packaging
+        echo "COOLPROP_VERSION=$(python dev/extract_version.py --cmake-only)" >> $GITHUB_ENV
+        echo "COOLPROP_EXPENSIVE=${{ (steps.cached-props.outputs.cache-hit != 'true') || inputs.expensive || env.COOLPROP_TAGGED || env.COOLPROP_WEEKLY }}" >> $GITHUB_ENV
+        cat $GITHUB_ENV
+    
+    - name: Build and install wheel using bdist_wheel
+      shell: bash
+      run: |
+        source activate docs
+        # Ensure the gitrevision.txt is used for the build
+        python dev/generate_headers.py
+        # Build and install the wheel.  --no-deps keeps pip from also saving and
+        # installing CoolProp's dependencies (the newest numpy from PyPI), which would
+        # replace the numpy that conda solved for this image with one scipy rejects.
+        pip -vv wheel --no-deps .
+        # The install below takes every *.whl, so fail unless exactly one was built
+        test "$(ls *.whl | wc -l)" = 1
+        pip install -vvv --no-deps --force-reinstall --ignore-installed --upgrade --no-index `ls *.whl`
+        # sphinx-design, plotly and joblib are in conda_environment.yml, but that
+        # env is baked into the prebuilt docs container; the image isn't rebuilt
+        # for PRs, so install them at runtime here (same escape hatch as the
+        # packages above) to unblock the build until the next docs image rebuild
+        # on master.  plotly+joblib are required by the SVDSBTL validation
+        # notebooks (SVDSBTLValidation, SVDSBTLHeatExchangerDemo); without them
+        # nbconvert --allow-errors silently renders those pages as import-error
+        # tracebacks.
+        pip install pydata-sphinx-theme tqdm ninja sphinx-design plotly joblib
+        
+    - name: Test the installed CoolProp version
+      shell: bash
+      run: |
+        source activate docs
+        python -c "import CoolProp; print(CoolProp.__version__)"
+        python -c "import CoolProp; print(CoolProp.__gitrevision__)"
+        python -c "import CoolProp; print(CoolProp.__file__)"
+        
+    - name: Install ccache (runtime escape hatch until the docs image rebuilds)
+      shell: bash
+      run: |
+        source activate docs
+        # ccache is baked into docs_01_base.Dockerfile, but PR builds run on the
+        # already-published image (not rebuilt for PRs), so install it here until
+        # the next image rebuild on master — same escape hatch as the pip
+        # packages in the wheel step.  Skips cleanly once the image already
+        # carries it; a genuine install failure still fails the step (not masked).
+        command -v ccache >/dev/null || conda install -y -c conda-forge ccache
+        ccache --version
+
+    - name: Build homepage and create graphs
+      # Use a single argument with "True" or "1" to trigger a full rebuild
+      working-directory: ./Web/scripts/
+      shell: bash
+      run: |
+        source activate docs
+        echo "Calling: python -u __init__.py ${{ env.COOLPROP_EXPENSIVE }}"
+        python -u __init__.py ${{ env.COOLPROP_EXPENSIVE }}
+
+    # Save the ccache populated by the wrapper-example builds above — but only
+    # on a trusted event and only if the build SUCCEEDED.  An explicit `if:`
+    # drops the implicit success() check, so success() must be restated or the
+    # save would fire after a failed/partial build and persist a bad snapshot
+    # that a later run restores.  The event allowlist (push — incl. tags —,
+    # schedule, workflow_dispatch; all require write access) is used instead of
+    # `!= 'pull_request'` so a future pull_request_target trigger can't slip
+    # through and poison the trusted cache.  Placed right after the homepage
+    # build (the only ccache writer) so a later doxygen/sphinx failure doesn't
+    # discard a cache from an otherwise-good wrapper build.
+    - uses: actions/cache/save@v6
+      if: ${{ success() && !env.ACT && (github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+      with:
+        path: .ccache
+        key: docs-ccache-${{ github.sha }}
+
+    - name: Build documentation with Doxygen
+      shell: bash
+      run: |
+        source activate docs
+        doxygen --version
+        doxygen Doxyfile
+        
+    - name: Build documentation with Sphinx
+      working-directory: ./Web
+      shell: bash
+      run: |
+        source activate docs
+        # CoolProp/GUI is a wxPython app that has not imported since 2015
+        # (Ph and Ts were removed from CoolProp.Plots.Plots), so leave it out.
+        sphinx-apidoc -T -f -e -o apidoc ../wrappers/Python/CoolProp ../wrappers/Python/CoolProp/GUI
+        make html
+
+    - name: Check documentation links (non-blocking)
+      working-directory: ./Web
+      shell: bash
+      # Reports dead/broken URLs in the docs.  Non-blocking: external sites flap
+      # and a hard gate would cause spurious CI failures, so this never fails the
+      # build.  Sphinx runs with -q so the log holds only warnings; the broken
+      # and timed-out links are then listed from _build/linkcheck/output.txt,
+      # which is also uploaded as an artifact.  See linkcheck_ignore and
+      # linkcheck_request_headers in conf.py.
+      continue-on-error: true
+      run: |
+        source activate docs
+        rc=0
+        make linkcheck SPHINXOPTS=-q || rc=$?
+        echo "::group::Broken or timed-out links"
+        if [ -f _build/linkcheck/output.txt ]; then
+          grep -E '\[(broken|timeout)\]' _build/linkcheck/output.txt \
+            || { [ $rc -eq 0 ] && echo "(none)" || echo "(no entries; linkcheck exited with status $rc, so the list may be incomplete)"; }
+        else
+          echo "linkcheck produced no output.txt (the build itself failed)"
+        fi
+        echo "::endgroup::"
+        exit $rc
+
+    - name: Upload linkcheck results
+      if: ${{ !cancelled() && !env.ACT }} # skip during local actions testing
+      uses: actions/upload-artifact@v7
+      with:
+        name: linkcheck
+        path: |
+          Web/_build/linkcheck/output.txt
+          Web/_build/linkcheck/output.json
+        if-no-files-found: warn
+
+    - name: Upload GitHub Pages artifact
+      if: ${{ !env.ACT }} # skip during local actions testing
+      uses: actions/upload-pages-artifact@v5
+      with:
+        path: ./Web/_build/html/
+    
+    - name: Zip the HTML documentation
+      working-directory: ./Web/_build/
+      shell: bash
+      run: |
+        tar -cvzf CoolProp-${{ env.COOLPROP_VERSION }}-documentation-html.tar.gz html/*
+      # zip -rq   CoolProp-${{ env.COOLPROP_VERSION }}-documentation-html.zip    html/*
+    
+    - name: Archive TGZ or ZIP artifacts
+      if: ${{ !env.ACT }} # skip during local actions testing
+      uses: actions/upload-artifact@v7
+      with:
+          name: docs
+          path: |
+            Web/_build/CoolProp-${{ env.COOLPROP_VERSION }}-documentation-html.tar.gz
+          # Web/_build/CoolProp-${{ env.COOLPROP_VERSION }}-documentation-html.zip
+    
+    #- name: Upload TGZ or ZIP to release
+    #  if: contains(github.ref, 'refs/tags')
+    #  uses: svenstaro/upload-release-action@v2
+    #  with:
+    #    repo_token: ${{ secrets.GITHUB_TOKEN }}
+    #    file: Web/_build/CoolProp-${{ env.COOLPROP_VERSION }}-documentation-html.tar.gz
+    #    tag: ${{ github.ref }}
+    #    overwrite: true
+    #    file_glob: false
+
+  # Deploy job
+  deploy:
+    # Add a dependency to the build job
+    needs: build
+    # Do not deploy intermediate builds, only deploy on tags
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to GitHub Pages
+      #if: contains(github.ref, 'refs/tags')
+      if: ${{ !env.ACT }} # skip during local actions testing
+      id: deployment
+      uses: actions/deploy-pages@v5

@@ -1,0 +1,143 @@
+{
+  "T_freeze": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "Tbase": 265.65,
+  "Tmax": 313.15,
+  "Tmin": 218.15,
+  "TminPsat": 313.15,
+  "conductivity": {
+    "NRMS": 0.00398465,
+    "coeffs": [
+      [
+        0.4244824
+      ],
+      [
+        0.0006122521
+      ],
+      [
+        1.782405e-07
+      ],
+      [
+        9.187623e-09
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density": {
+    "NRMS": 6.886365e-14,
+    "coeffs": [
+      [
+        1251.0
+      ],
+      [
+        -0.4
+      ],
+      [
+        -4.330191e-16
+      ],
+      [
+        -6.422703e-17
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density_cheb": {
+    "NRMS": 5.983518e-15,
+    "Trange": [
+      218.15,
+      313.15
+    ],
+    "coeffs": [
+      [
+        1251.0
+      ],
+      [
+        -19.0
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "description": "Tyfoxit 1.24, Potassium Acetate",
+  "mass2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "mole2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "name": "TY24",
+  "reference": "Tyfoprop1999,Skovrup2013",
+  "saturation_pressure": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "specific_heat": {
+    "NRMS": 0.009684872,
+    "coeffs": [
+      [
+        2870.084
+      ],
+      [
+        3.142832
+      ],
+      [
+        -0.002449077
+      ],
+      [
+        -0.00012578
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "specific_heat_cheb": {
+    "NRMS": 0.009684872,
+    "Trange": [
+      218.15,
+      313.15
+    ],
+    "coeffs": [
+      [
+        2867.321
+      ],
+      [
+        139.1744
+      ],
+      [
+        -2.762865
+      ],
+      [
+        -3.37002
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "viscosity": {
+    "NRMS": 0.006888662,
+    "coeffs": [
+      788.3571,
+      -133.4617,
+      10.35294
+    ],
+    "type": "exponential"
+  },
+  "volume2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "xbase": 0.0,
+  "xid": "pure",
+  "xmax": 1.0,
+  "xmin": 0.0
+}

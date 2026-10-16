@@ -1,0 +1,440 @@
+
+#include "FluidLibrary.h"
+
+#include "CoolProp/detail/json.h"
+#include <mutex>
+
+#include "Backends/Helmholtz/HelmholtzEOSBackend.h"
+
+#if defined(COOLPROP_NO_INCBIN)
+#    define INCBIN_CONST
+#    define INCBIN_ALIGN
+#    include "all_fluids_CBOR.h"
+#    undef INCBIN_CONST
+#    undef INCBIN_ALIGN
+#else
+#    include "incbin.h"
+// Use the magic of the incbin library to include the binary CBOR data
+#    if defined(_MSC_VER)
+#        include "all_fluids_CBOR.h"
+#    else
+
+INCBIN(all_fluids_CBOR, "all_fluids.cbor");
+#    endif
+#endif
+
+namespace CoolProp {
+
+static JSONFluidLibrary library;
+
+void load();
+
+// Thread-safe lazy initialization of the global fluid library. The
+// previous `if (library.is_empty()) load();` pattern races when multiple
+// threads hit a cold cache simultaneously — multiple threads see the
+// library empty, all call load() concurrently, and the resulting
+// concurrent inserts into string_to_index_map / fluid_map leave the
+// library partially populated (gh-2787). std::call_once ensures load()
+// runs exactly once even under concurrent first calls; if load() throws,
+// the flag is left unset and the next call will retry.
+static std::once_flag library_load_flag;
+
+static void ensure_library_loaded() {
+    std::call_once(library_load_flag, &load);
+}
+
+void load() {
+    if (getenv("COOLPROP_DISABLE_SUPERANCILLARIES_ENTIRELY")) {
+        std::cout << "CoolProp: superancillaries have been disabled because the COOLPROP_DISABLE_SUPERANCILLARIES_ENTIRELY environment variable has "
+                     "been defined"
+                  << '\n';
+    }
+    // Let a CBOR-decode failure propagate (it did, as a parse error, before this
+    // migration): under std::call_once a thrown load() leaves the once-flag unset
+    // so the error surfaces and a later call can retry, rather than silently
+    // leaving the global library empty.
+    nlohmann::json dd = cpjson::from_cbor(gall_fluids_CBORData, gall_fluids_CBORSize);
+    // add_many is likewise left to throw.  It used to be wrapped in a handler
+    // that printed to stdout and returned, but add_many has no per-fluid try, so
+    // one bad fluid aborted the loop and every fluid after it in load order
+    // silently vanished -- the library came up truncated, with a stdout line as
+    // the only signal and no error state anywhere. Users saw an arbitrary subset
+    // of fluids reported as unknown.  The same data reaches add_fluids_as_JSON
+    // through a path that has always thrown, so the two entry points used to
+    // disagree about what a malformed fluid means.  This is shipped, CI-verified
+    // data: a throw here means the build is broken, and failing loudly at first
+    // use beats a silently partial library.
+    //
+    // The retry story differs from the from_cbor line above, which is why this
+    // is not a bare call.  from_cbor leaves no state behind, so a rethrow is
+    // simply retried.  add_many mutates the library in place and is NOT
+    // transactional: a mid-array failure leaves every fluid before it
+    // registered.  Since a thrown load() leaves the std::call_once flag unset,
+    // the next library access re-runs load() -- which would meet its own
+    // half-finished first attempt and throw "already in library" for fluid 0,
+    // naming the wrong fluid and pointing at OVERWRITE_FLUIDS instead of the
+    // real parse error.  Wrappers surface the most recent error, so that
+    // misleading message is the one users would actually see.  Resetting first
+    // makes every attempt report the same, true cause.
+    try {
+        library.add_many(dd);
+    } catch (...) {
+        library = JSONFluidLibrary();
+        throw;
+    }
+}
+
+void JSONFluidLibrary::set_fluid_enthalpy_entropy_offset(const std::string& fluid, double delta_a1, double delta_a2, const std::string& ref) {
+    // Try to find it
+    auto it = string_to_index_map.find(fluid);
+    if (it != string_to_index_map.end()) {
+        auto it2 = fluid_map.find(it->second);
+        // If it is found
+        if (it2 != fluid_map.end()) {
+            if (!ValidNumber(delta_a1) || !ValidNumber(delta_a2)) {
+                throw ValueError(format("Not possible to set reference state for fluid %s because offset values are NAN", fluid.c_str()));
+            }
+            it2->second.EOS().alpha0.EnthalpyEntropyOffset.set(delta_a1, delta_a2, ref);
+
+            // Note: cached caloric superancillaries are not invalidated here.
+            // They are reference-state-agnostic: the offset's effect on h(T)
+            // and s(T) along the saturation curve is exactly a constant
+            // (Δh = R·T_red·Δa2, Δs = −R·Δa1), so shapes are invariant and
+            // c0 is shifted at query time. The (a1, a2) stamp recorded at
+            // first build lets resolve_T_via_superancillary translate the
+            // user's target into the cache's frame. See #2773.
+
+            shared_ptr<CoolProp::HelmholtzEOSBackend> HEOS = std::make_shared<CoolProp::HelmholtzEOSBackend>(it2->second);
+            HEOS->specify_phase(iphase_gas);  // Something homogeneous;
+            // Calculate the new enthalpy and entropy values
+            HEOS->update(DmolarT_INPUTS, it2->second.EOS().hs_anchor.rhomolar, it2->second.EOS().hs_anchor.T);
+            it2->second.EOS().hs_anchor.hmolar = HEOS->hmolar();
+            it2->second.EOS().hs_anchor.smolar = HEOS->smolar();
+
+            double f = (HEOS->name() == "Water" || HEOS->name() == "CarbonDioxide") ? 1.00001 : 1.0;
+
+            // Calculate the new enthalpy and entropy values at the reducing state
+            HEOS->update(DmolarT_INPUTS, it2->second.EOS().reduce.rhomolar * f, it2->second.EOS().reduce.T * f);
+            it2->second.EOS().reduce.hmolar = HEOS->hmolar();
+            it2->second.EOS().reduce.smolar = HEOS->smolar();
+
+            // Calculate the new enthalpy and entropy values at the critical state
+            HEOS->update(DmolarT_INPUTS, it2->second.crit.rhomolar * f, it2->second.crit.T * f);
+            it2->second.crit.hmolar = HEOS->hmolar();
+            it2->second.crit.smolar = HEOS->smolar();
+
+            // Calculate the new enthalpy and entropy values
+            HEOS->update(DmolarT_INPUTS, it2->second.triple_liquid.rhomolar, it2->second.triple_liquid.T);
+            it2->second.triple_liquid.hmolar = HEOS->hmolar();
+            it2->second.triple_liquid.smolar = HEOS->smolar();
+
+            // Calculate the new enthalpy and entropy values
+            HEOS->update(DmolarT_INPUTS, it2->second.triple_vapor.rhomolar, it2->second.triple_vapor.T);
+            it2->second.triple_vapor.hmolar = HEOS->hmolar();
+            it2->second.triple_vapor.smolar = HEOS->smolar();
+
+            if (!HEOS->is_pure()) {
+                // Calculate the new enthalpy and entropy values
+                HEOS->update(DmolarT_INPUTS, it2->second.EOS().max_sat_T.rhomolar, it2->second.EOS().max_sat_T.T);
+                it2->second.EOS().max_sat_T.hmolar = HEOS->hmolar();
+                it2->second.EOS().max_sat_T.smolar = HEOS->smolar();
+                // Calculate the new enthalpy and entropy values
+                HEOS->update(DmolarT_INPUTS, it2->second.EOS().max_sat_p.rhomolar, it2->second.EOS().max_sat_p.T);
+                it2->second.EOS().max_sat_p.hmolar = HEOS->hmolar();
+                it2->second.EOS().max_sat_p.smolar = HEOS->smolar();
+            }
+        } else {
+            throw ValueError(format("fluid [%s] was not found in JSONFluidLibrary", fluid.c_str()));
+        }
+    }
+}
+
+/// Add all the fluid entries in the JSON-encoded string passed in
+void JSONFluidLibrary::add_many(const std::string& JSON_string) {
+
+    // First load all the baseline fluids
+    ensure_library_loaded();
+
+    // Then, load the fluids we would like to add
+    nlohmann::json doc = cpjson::parse(JSON_string);
+    library.add_many(doc);
+};
+
+void JSONFluidLibrary::add_many(const nlohmann::json& listing) {
+    if (!listing.is_array()) {
+        add_one(listing);
+        return;
+    }
+    for (const auto& fluid_json : listing) {
+        add_one(fluid_json);
+    }
+};
+
+void JSONFluidLibrary::add_one(const nlohmann::json& fluid_json) {
+    _is_empty = false;
+
+    // The variable index is initialized to the size of the fluid_map.
+    // Since the first fluid_map key equals zero (0), index is initialized to the key
+    // value for the next fluid to be added. (e.g. fluid_map[0..140]; index = 141 )
+    std::size_t index = fluid_map.size();
+
+    CoolPropFluid fluid;  // create a new CoolPropFluid object
+
+    // Assign the fluid properties based on the passed in fluid_json
+    // =============================================================
+    // Parse out Fluid name
+    fluid.name = fluid_json.at("INFO").at("NAME").get<std::string>();
+
+    // name_vector is deliberately NOT appended here.  It backs
+    // get_global_param_string("fluids_list"), and anything parsed below can
+    // throw, so publishing the name up-front left it permanently listed for a
+    // fluid that has no entry in string_to_index_map or fluid_map -- an orphan
+    // that makes AbstractState::factory("HEOS", <name>) throw for a name the
+    // library itself advertises.  The append now happens at the end of the try,
+    // once the fluid is genuinely in the library.
+    //
+    // Popping in the catch instead would be wrong: the duplicate-fluid branch
+    // below throws *after* it would have popped, so the handler would remove
+    // some other fluid's name and turn a leak into corruption.
+
+    try {
+        // CAS number
+        if (!fluid_json.at("INFO").contains("CAS")) {
+            throw ValueError(format("fluid [%s] does not have \"CAS\" member", fluid.name.c_str()));
+        }
+        fluid.CAS = fluid_json.at("INFO").at("CAS").get<std::string>();
+
+        // REFPROP alias
+        if (!fluid_json.at("INFO").contains("REFPROP_NAME")) {
+            throw ValueError(format("fluid [%s] does not have \"REFPROP_NAME\" member", fluid.name.c_str()));
+        }
+        fluid.REFPROPname = fluid_json.at("INFO").at("REFPROP_NAME").get<std::string>();
+
+        // FORMULA
+        if (fluid_json.at("INFO").contains("FORMULA")) {
+            fluid.formula = cpjson::get_string(fluid_json.at("INFO"), "FORMULA");
+        } else {
+            fluid.formula = "N/A";
+        }
+
+        // Abstract references
+        if (fluid_json.at("INFO").contains("INCHI_STRING")) {
+            fluid.InChI = cpjson::get_string(fluid_json.at("INFO"), "INCHI_STRING");
+        } else {
+            fluid.InChI = "N/A";
+        }
+
+        if (fluid_json.at("INFO").contains("INCHI_KEY")) {
+            fluid.InChIKey = cpjson::get_string(fluid_json.at("INFO"), "INCHI_KEY");
+        } else {
+            fluid.InChIKey = "N/A";
+        }
+
+        if (fluid_json.at("INFO").contains("SMILES")) {
+            fluid.smiles = cpjson::get_string(fluid_json.at("INFO"), "SMILES");
+        } else {
+            fluid.smiles = "N/A";
+        }
+
+        if (fluid_json.at("INFO").contains("CHEMSPIDER_ID")) {
+            fluid.ChemSpider_id = cpjson::get_integer(fluid_json.at("INFO"), "CHEMSPIDER_ID");
+        } else {
+            fluid.ChemSpider_id = -1;
+        }
+
+        if (fluid_json.at("INFO").contains("2DPNG_URL")) {
+            fluid.TwoDPNG_URL = cpjson::get_string(fluid_json.at("INFO"), "2DPNG_URL");
+        } else {
+            fluid.TwoDPNG_URL = "N/A";
+        }
+
+        // Parse the environmental parameters
+        if (!(fluid_json.at("INFO").contains("ENVIRONMENTAL"))) {
+            if (get_debug_level() > 0) {
+                std::cout << format("Environmental data are missing for fluid [%s]\n", fluid.name.c_str());
+            }
+        } else {
+            parse_environmental(fluid_json.at("INFO").at("ENVIRONMENTAL"), fluid);
+        }
+
+        // Parse the standard-state thermochemical data.  Optional: absent for
+        // fluids the source database does not cover -- see
+        // dev/atct/expected_coverage.json for the authoritative list.
+        if (fluid_json.at("INFO").contains("STANDARD_STATE")) {
+            parse_standard_state(fluid_json.at("INFO").at("STANDARD_STATE"), fluid);
+        }
+
+        // Aliases
+        fluid.aliases = cpjson::get_string_array(fluid_json.at("INFO").at("ALIASES"));
+
+        // Critical state
+        if (!fluid_json.contains("STATES")) {
+            throw ValueError(format("fluid [%s] does not have \"STATES\" member", fluid.name.c_str()));
+        }
+        parse_states(fluid_json.at("STATES"), fluid);
+
+        if (get_debug_level() > 5) {
+            std::cout << format("Loading fluid %s with CAS %s; %d fluids loaded\n", fluid.name.c_str(), fluid.CAS.c_str(), index);
+        }
+
+        // EOS
+        parse_EOS_listing(fluid_json.at("EOS"), fluid);
+
+        // Validate the fluid
+        validate(fluid);
+
+        // Ancillaries for saturation
+        if (!fluid_json.contains("ANCILLARIES")) {
+            throw ValueError(format("Ancillary curves are missing for fluid [%s]", fluid.name.c_str()));
+        };
+        parse_ancillaries(fluid_json.at("ANCILLARIES"), fluid);
+
+        // Surface tension
+        if (!(fluid_json.at("ANCILLARIES").contains("surface_tension"))) {
+            if (get_debug_level() > 0) {
+                std::cout << format("Surface tension curves are missing for fluid [%s]\n", fluid.name.c_str());
+            }
+        } else {
+            parse_surface_tension(fluid_json.at("ANCILLARIES").at("surface_tension"), fluid);
+        }
+
+        // Melting line
+        if (!(fluid_json.at("ANCILLARIES").contains("melting_line"))) {
+            if (get_debug_level() > 0) {
+                std::cout << format("Melting line curves are missing for fluid [%s]\n", fluid.name.c_str());
+            }
+        } else {
+            parse_melting_line(fluid_json.at("ANCILLARIES").at("melting_line"), fluid);
+        }
+
+        // Parse the transport property (viscosity and/or thermal conductivity) parameters
+        if (!(fluid_json.contains("TRANSPORT"))) {
+            default_transport(fluid);
+        } else {
+            parse_transport(fluid_json.at("TRANSPORT"), fluid);
+        }
+
+        // If the fluid is ok...
+
+        // First check that none of the identifiers are already present
+        // ===============================================================
+        // Remember that index is already initialized to fluid_map.size() = max index + 1.
+        // If the new fluid name, CAS, or aliases are found in the string_to_index_map, then
+        // the fluid is already in the fluid_map, so reset index to it's key.
+
+        if (string_to_index_map.find(fluid.CAS) != string_to_index_map.end()) {
+            index = string_to_index_map.find(fluid.CAS)->second;  //if CAS found, grab index
+        } else if (string_to_index_map.find(fluid.name) != string_to_index_map.end()) {
+            index = string_to_index_map.find(fluid.name)->second;  // if name found, grab index
+        } else if (string_to_index_map.find(upper(fluid.name)) != string_to_index_map.end()) {
+            index = string_to_index_map.find(upper(fluid.name))->second;  // if uppercase name found, grab index
+        } else {
+            // Check the aliases
+            for (const auto& alias : fluid.aliases) {
+                if (string_to_index_map.find(alias) != string_to_index_map.end()) {
+                    index = string_to_index_map.find(alias)->second;  // if alias found, grab index
+                    break;
+                }
+                if (string_to_index_map.find(upper(alias)) != string_to_index_map.end()) {  // if ALIAS found, grab index
+                    index = string_to_index_map.find(upper(alias))->second;
+                    break;
+                }
+            }
+        }
+
+        bool fluid_exists = false;  // Initialize flag for doing replace instead of add
+
+        if (index != fluid_map.size()) {               // Fluid already in list if index was reset to something < fluid_map.size()
+            fluid_exists = true;                       //   Set the flag for replace; the name is already in name_vector
+            if (!get_config_bool(OVERWRITE_FLUIDS)) {  // Throw exception if replacing fluids is not allowed
+                throw ValueError(format("Cannot load fluid [%s:%s] because it is already in library; index = [%i] of [%i]; Consider enabling the "
+                                        "config boolean variable OVERWRITE_FLUIDS",
+                                        fluid.name.c_str(), fluid.CAS.c_str(), index, fluid_map.size()));
+            }
+        }
+
+        // index now holds either
+        //    1. the index of a fluid that's already present, in which case it will be overwritten, or
+        //    2. the fluid_map.size(), in which case a new entry will be added to the list
+
+        // Add/Replace index->fluid mapping
+        // If the fluid index exists, the [] operator replaces the existing entry with the new fluid;
+        //    However, since fluid is a custom type, the old entry must be erased first to properly
+        //    release the memory before adding in the new fluid object at the same location (index)
+        if (fluid_exists) fluid_map.erase(fluid_map.find(index));
+        // if not, it will add the (index,fluid) pair to the map using the new index value (fluid_map.size())
+        fluid_map[index] = fluid;
+
+        // Add/Replace index->JSONstring mapping to easily pull out if the user wants it
+        // Convert fuid_json to a string and store it in the map at index.
+        // if the fluid index exists, the [] operator replaces the existing entry with the new JSONstring;
+        //    However, since fluid_json is a custom type, the old entry must be erased first to properly
+        //    release the memory before adding in the new fluid object at the same location (index)
+        if (fluid_exists) JSONstring_map.erase(JSONstring_map.find(index));
+        // if not, it will add the new (index,JSONstring) pair to the map.
+        JSONstring_map[index] = fluid_json.dump();
+
+        // Add/Replace CAS->index mapping
+        // This map helps find the index of a fluid in the fluid_map given a CAS string
+        // If the CAS string exists, the [] operator will replace index with an updated index number;
+        // if not, it will add a new (CAS,index) pair to the map.
+        string_to_index_map[fluid.CAS] = index;
+
+        // Add/Replace name->index mapping
+        // This map quickly finds the index of a fluid in the fluid_map given its name string
+        // Again, the map [] operator replaces if the alias is found, adds the new (name,index) pair if not
+        string_to_index_map[fluid.name] = index;
+
+        // Add/Replace the aliases->index mapping
+        // This map quickly finds the index of a fluid in the fluid_map given an alias string
+        // Again, the map [] operator replaces if the alias is found, adds the new (alias,index) pair if not
+        for (const auto& alias : fluid.aliases) {
+            string_to_index_map[alias] = index;
+
+            // Add uppercase alias for EES compatibility
+            string_to_index_map[upper(alias)] = index;
+        }
+
+        // Everything that can throw is behind us, so the fluid is now genuinely
+        // in the library and its name can be advertised.  Skipped when
+        // overwriting, because the name is already there from the first load.
+        if (!fluid_exists) {
+            name_vector.push_back(fluid.name);
+        }
+
+        //If Debug level set >5 print fluid name and total size of fluid_map
+        if (get_debug_level() > 5) {
+            std::cout << format("Loaded fluid: %s - Number of fluids = %d\n", fluid.name, fluid_map.size());
+        }
+
+    } catch (const std::exception& e) {
+        throw ValueError(format("Unable to load fluid [%s] due to error: %s", fluid.name.c_str(), e.what()));
+    }
+};
+
+JSONFluidLibrary& get_library() {
+    ensure_library_loaded();
+    return library;
+}
+
+CoolPropFluid get_fluid(const std::string& fluid_string) {
+    ensure_library_loaded();
+    return library.get(fluid_string);
+}
+
+std::string get_fluid_as_JSONstring(const std::string& identifier) {
+    ensure_library_loaded();
+    return library.get_JSONstring(identifier);
+}
+
+std::string get_fluid_list() {
+    ensure_library_loaded();
+    return library.get_fluid_list();
+};
+
+void set_fluid_enthalpy_entropy_offset(const std::string& fluid, double delta_a1, double delta_a2, const std::string& ref) {
+    ensure_library_loaded();
+    library.set_fluid_enthalpy_entropy_offset(fluid, delta_a1, delta_a2, ref);
+}
+
+} /* namespace CoolProp */

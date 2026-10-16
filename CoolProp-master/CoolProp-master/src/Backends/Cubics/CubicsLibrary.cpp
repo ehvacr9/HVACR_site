@@ -1,0 +1,183 @@
+#include <string>
+#include <map>
+#include "CubicsLibrary.h"
+#include "all_cubics_JSON.h"           // Makes a std::string variable called all_cubics_JSON
+#include "cubic_fluids_schema_JSON.h"  // Makes a std::string variable called cubic_fluids_schema_JSON
+#include "CoolProp/detail/json.h"
+#include "CoolProp/detail/strings.h"
+#include "CoolProp/CoolProp.h"
+#include "CoolProp/Configuration.h"
+#include "Backends/Helmholtz/Fluids/FluidLibrary.h"
+
+namespace CoolProp {
+namespace CubicLibrary {
+
+class CubicsLibraryClass
+{
+   private:
+    std::map<std::string, CubicsValues> fluid_map;
+    std::map<std::string, std::string> aliases_map;
+    /// Map from index of fluid to a string
+    std::map<std::string, std::string> JSONstring_map;
+    bool empty;  // Is empty
+
+   public:
+    CubicsLibraryClass();
+    bool is_empty() {
+        return empty;
+    };
+    int add_many(const nlohmann::json& listing) {
+        int counter = 0;
+        for (const auto& el : listing) {
+            CubicsValues val;
+            val.Tc = cpjson::get_double(el, "Tc");
+            val.pc = cpjson::get_double(el, "pc");
+            val.acentric = cpjson::get_double(el, "acentric");
+            val.molemass = cpjson::get_double(el, "molemass");
+            val.name = cpjson::get_string(el, "name");
+            val.aliases = cpjson::get_string_array(el, "aliases");
+            val.CAS = cpjson::get_string(el, "CAS");
+            if (el.contains("rhomolarc") && el.at("rhomolarc").is_number()) {
+                val.rhomolarc = cpjson::get_double(el, "rhomolarc");
+            }
+            if (el.contains("alpha") && el.at("alpha").is_object()) {
+                const nlohmann::json& alpha = el.at("alpha");
+                val.alpha_type = cpjson::get_string(alpha, "type");
+                val.alpha_coeffs = cpjson::get_double_array(alpha, "c");
+            } else {
+                val.alpha_type = "default";
+            }
+            if (el.contains("alpha0") && el.at("alpha0").is_array()) {
+                val.alpha0 = JSONFluidLibrary::parse_alpha0(el.at("alpha0"));
+            }
+            std::pair<std::map<std::string, CubicsValues>::iterator, bool> ret;
+            ret = fluid_map.emplace(upper(val.name), val);
+            if (ret.second == false && get_config_bool(OVERWRITE_FLUIDS)) {
+                fluid_map.erase(ret.first);
+                ret = fluid_map.emplace(upper(val.name), val);
+                if (get_debug_level() > 0) {
+                    std::cout << "added the cubic fluid: " + val.name << '\n';
+                }
+                assert(ret.second == true);
+            }
+            for (auto it = val.aliases.begin(); it != val.aliases.end(); ++it) {
+                if (aliases_map.find(*it) == aliases_map.end()) {
+                    aliases_map.emplace(*it, upper(val.name));
+                }
+            }
+            std::pair<std::map<std::string, std::string>::iterator, bool> addJson;
+            addJson = JSONstring_map.emplace(upper(val.name), el.dump());
+            if (addJson.second == false && get_config_bool(OVERWRITE_FLUIDS)) {
+                JSONstring_map.erase(addJson.first);
+                addJson = JSONstring_map.emplace(upper(val.name), el.dump());
+                if (get_debug_level() > 0) {
+                    std::cout << "added the cubic fluid: " + val.name << '\n';
+                }
+                assert(addJson.second == true);
+            }
+            counter++;
+        }
+        return counter;
+    };
+
+    std::string get_JSONstring(const std::string& key) {
+        std::string uppercase_identifier = upper(key);
+        // Try to find it
+        auto it = JSONstring_map.find(uppercase_identifier);
+        // If it is found
+        if (it == JSONstring_map.end()) {
+            auto italias = aliases_map.find(uppercase_identifier);
+            if (italias != aliases_map.end()) {
+                // Alias was found, use it to get the fluid name, and then the cubic values
+                it = JSONstring_map.find(italias->second);
+            } else {
+                throw ValueError(format("Fluid identifier [%s] was not found in CubicsLibrary", uppercase_identifier.c_str()));
+            }
+        }
+        // Then, wrap the single fluid object in an array, as callers expect
+        nlohmann::json doc = cpjson::parse(it->second);
+        nlohmann::json doc2 = nlohmann::json::array();
+        doc2.push_back(doc);
+        return doc2.dump();
+    }
+
+    CubicsValues get(const std::string& identifier) {
+        std::string uppercase_identifier = upper(identifier);
+        // Try to find it
+        auto it = fluid_map.find(uppercase_identifier);
+        // If it is found
+        if (it != fluid_map.end()) {
+            return it->second;
+        } else {
+            auto italias = aliases_map.find(uppercase_identifier);
+            if (italias != aliases_map.end()) {
+                // Alias was found, use it to get the fluid name, and then the cubic values
+                return fluid_map.find(italias->second)->second;
+            } else {
+                throw ValueError(format("Fluid identifier [%s] was not found in CubicsLibrary", uppercase_identifier.c_str()));
+            }
+        }
+    };
+    std::string get_fluids_list() {
+        std::vector<std::string> out;
+        for (auto it = fluid_map.begin(); it != fluid_map.end(); ++it) {
+            out.push_back(it->first);
+        }
+        return strjoin(out, ",");
+    }
+};
+namespace {
+/// Schema-validate a JSON blob and merge it into the given library instance.
+/// File-private so the constructor can populate `*this` without going through
+/// the get_library() singleton (which would recurse into its own constructor).
+void add_fluids_from_JSON_string(CubicsLibraryClass& dest, const std::string_view& JSON) {
+    std::string errstr;
+    cpjson::schema_validation_code val_code = cpjson::validate_schema(cubic_fluids_schema_JSON, JSON, errstr);
+    if (val_code == cpjson::SCHEMA_VALIDATION_OK) {
+        nlohmann::json dd = cpjson::parse(JSON);
+        try {
+            dest.add_many(dd);
+        } catch (std::exception& e) {
+            throw ValueError(format("Unable to load cubics library with error: %s", e.what()));
+        }
+    } else {
+        throw ValueError(format("Unable to validate cubics library against schema with error: %s", errstr.c_str()));
+    }
+}
+}  // anonymous namespace
+
+CubicsLibraryClass::CubicsLibraryClass() : empty(true) {
+    // Populate via the file-private helper so the constructor does NOT recurse
+    // through get_library() while the singleton is still being built.
+    add_fluids_from_JSON_string(*this, all_cubics_JSON);
+}
+
+/// Function-local static (Meyers singleton). C++11 guarantees the
+/// constructor runs exactly once even under concurrent first calls. The
+/// previous namespace-scope `static CubicsLibraryClass library;` relied on
+/// single-threaded static init, which is fragile across translation-unit
+/// init order and dynamic-library load contexts (gh-2787).
+static CubicsLibraryClass& get_library() {
+    static CubicsLibraryClass library;
+    return library;
+}
+
+void add_fluids_as_JSON(const std::string_view& JSON) {
+    add_fluids_from_JSON_string(get_library(), JSON);
+}
+std::string get_fluid_as_JSONstring(const std::string& identifier) {
+    return get_library().get_JSONstring(identifier);
+}
+
+CubicLibrary::CubicsValues get_cubic_values(const std::string& identifier) {
+    return get_library().get(identifier);
+}
+std::string_view get_cubic_fluids_schema() {
+    return cubic_fluids_schema_JSON;
+}
+std::string get_cubic_fluids_list() {
+    return get_library().get_fluids_list();
+}
+
+}  // namespace CubicLibrary
+}  // namespace CoolProp

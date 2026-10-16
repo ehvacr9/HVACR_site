@@ -1,0 +1,125 @@
+{
+  "T_freeze": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "Tbase": 273.15,
+  "Tmax": 323.15,
+  "Tmin": 253.15,
+  "TminPsat": 323.15,
+  "conductivity": {
+    "NRMS": 0.01087061,
+    "coeffs": [
+      [
+        0.5181167
+      ],
+      [
+        0.001966495
+      ],
+      [
+        -7.108434e-06
+      ],
+      [
+        -1.079438e-07
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density": {
+    "NRMS": null,
+    "coeffs": [
+      [
+        1202.2
+      ],
+      [
+        -0.42918
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density_cheb": {
+    "NRMS": null,
+    "Trange": [
+      253.15,
+      323.15
+    ],
+    "coeffs": [
+      [
+        1195.7623
+      ],
+      [
+        -15.0213
+      ]
+    ],
+    "fit_source": "basis_conversion",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "description": "HYCOOL 20, Potassium formate",
+  "mass2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "mole2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "name": "HY20",
+  "reference": "Hydro2000",
+  "saturation_pressure": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "specific_heat": {
+    "NRMS": null,
+    "coeffs": [
+      [
+        2955.0
+      ],
+      [
+        2.3
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "specific_heat_cheb": {
+    "NRMS": null,
+    "Trange": [
+      253.15,
+      323.15
+    ],
+    "coeffs": [
+      [
+        2989.5
+      ],
+      [
+        80.5
+      ]
+    ],
+    "fit_source": "basis_conversion",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "viscosity": {
+    "NRMS": 0.006774862,
+    "coeffs": [
+      642.8082,
+      -117.2883,
+      9.971346
+    ],
+    "type": "exponential"
+  },
+  "volume2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "xbase": 0.0,
+  "xid": "pure",
+  "xmax": 1.0,
+  "xmin": 0.0
+}

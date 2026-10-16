@@ -1,0 +1,150 @@
+{
+  "T_freeze": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "Tbase": 353.15,
+  "Tmax": 483.15,
+  "Tmin": 223.15,
+  "TminPsat": 293.15,
+  "conductivity": {
+    "NRMS": 0.0002738776,
+    "coeffs": [
+      [
+        0.565023
+      ],
+      [
+        0.001000763
+      ],
+      [
+        -6.841817e-09
+      ],
+      [
+        -1.064283e-10
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density": {
+    "NRMS": 0.001945182,
+    "coeffs": [
+      [
+        1306.294
+      ],
+      [
+        -0.555318
+      ],
+      [
+        -5.768178e-06
+      ],
+      [
+        6.22196e-08
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density_cheb": {
+    "NRMS": 0.001963701,
+    "Trange": [
+      223.15,
+      483.15
+    ],
+    "coeffs": [
+      [
+        1306.259
+      ],
+      [
+        -72.10317
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "description": "Dynalene HC50",
+  "mass2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "mole2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "name": "HC50",
+  "reference": "Dynalene2014",
+  "saturation_pressure": {
+    "NRMS": 0.01283945,
+    "coeffs": [
+      [
+        10.09944
+      ],
+      [
+        0.04207959
+      ],
+      [
+        -0.0001159692
+      ],
+      [
+        1.048304e-07
+      ]
+    ],
+    "type": "exppolynomial"
+  },
+  "specific_heat": {
+    "NRMS": 0.0005439157,
+    "coeffs": [
+      [
+        2818.936
+      ],
+      [
+        1.970979
+      ],
+      [
+        4.505073e-06
+      ],
+      [
+        -1.211645e-07
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "specific_heat_cheb": {
+    "NRMS": 0.0005529151,
+    "Trange": [
+      223.15,
+      483.15
+    ],
+    "coeffs": [
+      [
+        2818.963
+      ],
+      [
+        256.0556
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "viscosity": {
+    "NRMS": 0.01171334,
+    "coeffs": [
+      501.109,
+      -132.0362,
+      8.848779
+    ],
+    "type": "exponential"
+  },
+  "volume2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "xbase": 0.0,
+  "xid": "pure",
+  "xmax": 1.0,
+  "xmin": 0.0
+}

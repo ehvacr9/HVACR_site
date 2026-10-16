@@ -1,0 +1,42 @@
+name: LibreOffice wrapper
+
+on:
+  push:
+    branches: [ 'master', 'main', 'develop', 'actions_javascript' ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ 'master', 'main', 'develop' ]
+
+concurrency:
+  # Cancel superseded runs on the same ref to cut CI backlog on heavy
+  # dev days (repeated pushes to an open PR).  Protected: master / main
+  # / develop and tags never cancel, so mainline + release runs always
+  # complete.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' && !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install dependencies
+      shell: bash
+      # use backports to get libreoffice > 7.3 on ubuntu-lastest (22.04)
+      run: sudo apt-get update -y && sudo apt-get install -y -t $(lsb_release -cs)-backports libreoffice-dev
+
+    - name: Configure CMake
+      shell: bash
+      run: cmake -B build -S. -DCOOLPROP_LIBREOFFICE_MODULE=ON -DLO_PROGRAM_PATH=/usr/lib/libreoffice/program -DLO_SDK_PATH=/usr/lib/libreoffice/sdk
+    
+    - name: Build
+      shell: bash
+      run: cmake --build build --target install
+
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v7
+      with:
+          name: LibreOffice
+          path: install_root/LibreOffice

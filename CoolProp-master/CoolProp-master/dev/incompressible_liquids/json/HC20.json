@@ -1,0 +1,150 @@
+{
+  "T_freeze": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "Tbase": 368.15,
+  "Tmax": 483.15,
+  "Tmin": 253.15,
+  "TminPsat": 293.15,
+  "conductivity": {
+    "NRMS": 3.43865e-14,
+    "coeffs": [
+      [
+        0.598
+      ],
+      [
+        0.001
+      ],
+      [
+        0.0
+      ],
+      [
+        0.0
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density": {
+    "NRMS": 0.002323769,
+    "coeffs": [
+      [
+        1198.285
+      ],
+      [
+        -0.5182763
+      ],
+      [
+        1.018547e-05
+      ],
+      [
+        -2.852756e-08
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density_cheb": {
+    "NRMS": 0.002353209,
+    "Trange": [
+      253.15,
+      483.15
+    ],
+    "coeffs": [
+      [
+        1198.333
+      ],
+      [
+        -59.63
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "description": "Dynalene HC20",
+  "mass2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "mole2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "name": "HC20",
+  "reference": "Dynalene2014",
+  "saturation_pressure": {
+    "NRMS": 0.009364035,
+    "coeffs": [
+      [
+        11.01947
+      ],
+      [
+        0.03824312
+      ],
+      [
+        -0.0001117766
+      ],
+      [
+        1.458139e-07
+      ]
+    ],
+    "type": "exppolynomial"
+  },
+  "specific_heat": {
+    "NRMS": 0.0005054668,
+    "coeffs": [
+      [
+        3388.62
+      ],
+      [
+        2.359984
+      ],
+      [
+        -7.601095e-06
+      ],
+      [
+        1.876813e-09
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "specific_heat_cheb": {
+    "NRMS": 0.0005089971,
+    "Trange": [
+      253.15,
+      483.15
+    ],
+    "coeffs": [
+      [
+        3388.583
+      ],
+      [
+        271.4
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "viscosity": {
+    "NRMS": 0.003930689,
+    "coeffs": [
+      1457.363,
+      8.32874,
+      10.98672
+    ],
+    "type": "exponential"
+  },
+  "volume2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "xbase": 0.0,
+  "xid": "pure",
+  "xmax": 1.0,
+  "xmin": 0.0
+}

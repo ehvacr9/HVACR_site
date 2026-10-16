@@ -1,0 +1,146 @@
+{
+  "T_freeze": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "Tbase": 273.15,
+  "Tmax": 303.15,
+  "Tmin": 233.15,
+  "TminPsat": 303.15,
+  "conductivity": {
+    "NRMS": null,
+    "coeffs": [
+      [
+        0.443327
+      ],
+      [
+        0.001099
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density": {
+    "NRMS": null,
+    "coeffs": [
+      [
+        1214.84
+      ],
+      [
+        -0.3781987
+      ],
+      [
+        -0.00109307
+      ],
+      [
+        1.6835e-05
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density_cheb": {
+    "NRMS": null,
+    "Trange": [
+      233.15,
+      303.15
+    ],
+    "coeffs": [
+      [
+        1215.87738544
+      ],
+      [
+        -12.2688376562
+      ],
+      [
+        -0.8241769375
+      ],
+      [
+        0.18045015625
+      ]
+    ],
+    "fit_source": "basis_conversion",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "description": "Aspen Temper -40, Potassium acetate/formate",
+  "mass2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "mole2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "name": "AS40",
+  "reference": "Aspen2001,Skovrup2013",
+  "saturation_pressure": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "specific_heat": {
+    "NRMS": null,
+    "coeffs": [
+      [
+        2977.88
+      ],
+      [
+        2.28
+      ],
+      [
+        -0.0387227
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "specific_heat_cheb": {
+    "NRMS": null,
+    "Trange": [
+      233.15,
+      303.15
+    ],
+    "coeffs": [
+      [
+        2941.79427875
+      ],
+      [
+        93.352945
+      ],
+      [
+        -23.71765375
+      ]
+    ],
+    "fit_source": "basis_conversion",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "viscosity": {
+    "NRMS": 0.001052442,
+    "coeffs": [
+      [
+        -5.278872
+      ],
+      [
+        -0.03682769
+      ],
+      [
+        0.0003490872
+      ],
+      [
+        -4.527292e-06
+      ]
+    ],
+    "type": "exppolynomial"
+  },
+  "volume2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "xbase": 0.0,
+  "xid": "pure",
+  "xmax": 1.0,
+  "xmin": 0.0
+}

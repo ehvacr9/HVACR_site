@@ -1,0 +1,168 @@
+{
+  "T_freeze": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "Tbase": 1450.0,
+  "Tmax": 2500.0,
+  "Tmin": 400.0,
+  "TminPsat": 400.0,
+  "conductivity": {
+    "NRMS": 2.703068e-05,
+    "coeffs": [
+      [
+        39.65236
+      ],
+      [
+        -0.02835205
+      ],
+      [
+        3.712945e-06
+      ],
+      [
+        -1.183826e-08
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density": {
+    "NRMS": 0.01251025,
+    "coeffs": [
+      [
+        672.0767
+      ],
+      [
+        -0.2524942
+      ],
+      [
+        -6.885234e-05
+      ],
+      [
+        -5.679565e-08
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density_cheb": {
+    "NRMS": 0.001406968,
+    "Trange": [
+      400.0,
+      2500.0
+    ],
+    "coeffs": [
+      [
+        633.8592
+      ],
+      [
+        -314.0404
+      ],
+      [
+        -39.76053
+      ],
+      [
+        -17.22464
+      ],
+      [
+        -9.496121
+      ],
+      [
+        -5.918895
+      ],
+      [
+        -3.797634
+      ],
+      [
+        -2.37815
+      ],
+      [
+        -1.622822
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "description": "LiqNa",
+  "mass2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "mole2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "name": "LiqNa",
+  "reference": "LiqNa",
+  "saturation_pressure": {
+    "NRMS": 0.0007472008,
+    "coeffs": [
+      -11758.33,
+      -14.05614,
+      -21.81569
+    ],
+    "type": "exponential"
+  },
+  "specific_heat": {
+    "NRMS": 0.002705988,
+    "coeffs": [
+      [
+        1376.659
+      ],
+      [
+        0.520506
+      ],
+      [
+        0.0005791667
+      ],
+      [
+        8.333333e-08
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "specific_heat_cheb": {
+    "NRMS": 0.002705988,
+    "Trange": [
+      400.0,
+      2500.0
+    ],
+    "coeffs": [
+      [
+        1695.92464337
+      ],
+      [
+        618.882859606
+      ],
+      [
+        319.265643375
+      ],
+      [
+        24.1171865353
+      ]
+    ],
+    "fit_source": "basis_conversion",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "viscosity": {
+    "NRMS": 0.006087519,
+    "coeffs": [
+      1477.594,
+      217.0383,
+      9.835136
+    ],
+    "type": "exponential"
+  },
+  "volume2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "xbase": 0.0,
+  "xid": "pure",
+  "xmax": 1.0,
+  "xmin": 0.0
+}

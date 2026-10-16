@@ -1,0 +1,171 @@
+{
+  "T_freeze": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "Tbase": 450.65,
+  "Tmax": 643.15,
+  "Tmin": 258.15,
+  "TminPsat": 470.15,
+  "conductivity": {
+    "NRMS": 0.008125849,
+    "coeffs": [
+      [
+        0.1083524
+      ],
+      [
+        -9.155677e-05
+      ],
+      [
+        -2.019783e-07
+      ],
+      [
+        3.113233e-11
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density": {
+    "NRMS": 0.000973702,
+    "coeffs": [
+      [
+        838.7187
+      ],
+      [
+        -0.7697404
+      ],
+      [
+        5.36082e-07
+      ],
+      [
+        9.408965e-09
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density_cheb": {
+    "NRMS": 0.0009745223,
+    "Trange": [
+      258.15,
+      643.15
+    ],
+    "coeffs": [
+      [
+        838.7254
+      ],
+      [
+        -148.1346
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "description": "Paratherm HR",
+  "mass2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "mole2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "name": "PHR",
+  "reference": "Paratherm2013",
+  "saturation_pressure": {
+    "NRMS": 0.008084486,
+    "coeffs": [
+      [
+        7.198158
+      ],
+      [
+        0.03545824
+      ],
+      [
+        -6.053227e-05
+      ],
+      [
+        5.544196e-08
+      ]
+    ],
+    "type": "exppolynomial"
+  },
+  "specific_heat": {
+    "NRMS": 0.03560268,
+    "coeffs": [
+      [
+        2289.35
+      ],
+      [
+        2.349866
+      ],
+      [
+        0.0002735279
+      ],
+      [
+        -3.240899e-06
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "specific_heat_cheb": {
+    "NRMS": 0.03458588,
+    "Trange": [
+      258.15,
+      643.15
+    ],
+    "coeffs": [
+      [
+        2294.316
+      ],
+      [
+        429.3084
+      ],
+      [
+        4.924896
+      ],
+      [
+        -12.35339
+      ],
+      [
+        0.4464133
+      ],
+      [
+        -10.64577
+      ],
+      [
+        -1.331417
+      ],
+      [
+        -7.138963
+      ],
+      [
+        -3.72014
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "viscosity": {
+    "NRMS": 0.006907493,
+    "coeffs": [
+      750.0522,
+      -173.8728,
+      9.885478
+    ],
+    "type": "exponential"
+  },
+  "volume2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "xbase": 0.0,
+  "xid": "pure",
+  "xmax": 1.0,
+  "xmin": 0.0
+}

@@ -1,0 +1,143 @@
+{
+  "T_freeze": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "Tbase": 430.65,
+  "Tmax": 588.15,
+  "Tmin": 273.15,
+  "TminPsat": 273.15,
+  "conductivity": {
+    "NRMS": 0.001057417,
+    "coeffs": [
+      [
+        0.1242271
+      ],
+      [
+        -8.007266e-05
+      ],
+      [
+        -2.820274e-08
+      ],
+      [
+        5.359448e-12
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density": {
+    "NRMS": 0.02812799,
+    "coeffs": [
+      [
+        785.4409
+      ],
+      [
+        -0.6916519
+      ],
+      [
+        -0.0002639398
+      ],
+      [
+        2.502503e-06
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "density_cheb": {
+    "NRMS": 0.02812799,
+    "Trange": [
+      273.15,
+      588.15
+    ],
+    "coeffs": [
+      [
+        782.1672
+      ],
+      [
+        -101.6022
+      ],
+      [
+        -3.273679
+      ],
+      [
+        2.44431
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "description": "Dynalene SF",
+  "mass2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "mole2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "name": "DSF",
+  "reference": "Dynalene, Inc.",
+  "saturation_pressure": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "specific_heat": {
+    "NRMS": 0.0002457411,
+    "coeffs": [
+      [
+        2469.301
+      ],
+      [
+        3.6541
+      ],
+      [
+        2.637238e-06
+      ],
+      [
+        4.220296e-08
+      ]
+    ],
+    "type": "polynomial"
+  },
+  "specific_heat_cheb": {
+    "NRMS": 0.0002476932,
+    "Trange": [
+      273.15,
+      588.15
+    ],
+    "coeffs": [
+      [
+        2469.326
+      ],
+      [
+        575.6297
+      ]
+    ],
+    "fit_source": "tabular_data",
+    "type": "chebyshev",
+    "xbase": 0.0
+  },
+  "viscosity": {
+    "NRMS": 0.003059097,
+    "coeffs": [
+      -253.8312,
+      2.073714,
+      4.23785
+    ],
+    "type": "logexponential"
+  },
+  "volume2input": {
+    "NRMS": null,
+    "coeffs": "null",
+    "type": "notdefined"
+  },
+  "xbase": 0.0,
+  "xid": "pure",
+  "xmax": 1.0,
+  "xmin": 0.0
+}
