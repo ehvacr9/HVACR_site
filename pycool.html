@@ -1264,6 +1264,10 @@
             variation === "T" ? point + 273.15 : point * 1000,
           ));
           headers = saturationTableHeaders.TP;
+          if (variation === "P") {
+            headers = [headers[1], headers[0], ...headers.slice(2)];
+            rows = rows.map(([temperature, pressure, ...properties]) => [pressure, temperature, ...properties]);
+          }
           description = `${formatNumber(start)} 至 ${formatNumber(end)}，間隔 ${formatNumber(step)} ${variation === "T" ? "°C" : "kPa"}`;
         } else {
           const fixed = tableNumber("table-fixed", variation === "QT" ? "固定溫度" : "固定壓力");
