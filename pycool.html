@@ -140,6 +140,48 @@
       font-size: 14px;
     }
 
+    .mode-switch {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .mode-option {
+      position: relative;
+    }
+
+    .mode-option input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .mode-option span {
+      display: block;
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .mode-option input:checked + span {
+      border-color: var(--green);
+      background: var(--green);
+      color: white;
+    }
+
+    .mode-option input:focus-visible + span {
+      outline: 3px solid #9ab952;
+      outline-offset: 3px;
+    }
+
     .calculator {
       display: grid;
       grid-template-columns: minmax(260px, .75fr) minmax(0, 1.25fr);
@@ -196,10 +238,28 @@
       font-size: 15px;
     }
 
+    .field select {
+      width: 100%;
+      min-height: 46px;
+      padding: 9px 12px;
+      border: 1px solid #bcc9bd;
+      border-radius: 2px;
+      background: var(--surface);
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+    }
+
     .field-hint {
       margin: 5px 0 0;
       color: var(--muted);
       font-size: 12px;
+    }
+
+    .two-property-fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
     }
 
     .actions {
@@ -268,6 +328,13 @@
     .result-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .result-grid[hidden],
+    .state-results[hidden],
+    #saturation-inputs[hidden],
+    #state-inputs[hidden] {
+      display: none;
       gap: 14px;
     }
 
@@ -310,6 +377,51 @@
     }
 
     .result-row dd {
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .state-results {
+      margin-top: 20px;
+    }
+
+    .state-results h3 {
+      margin: 0;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      background: #edf0e9;
+      color: var(--green-dark);
+      font-size: 14px;
+    }
+
+    .state-output-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      border-top: 0;
+      border-left: 1px solid var(--line);
+    }
+
+    .state-output {
+      display: flex;
+      min-width: 0;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+      font-size: 13px;
+    }
+
+    .state-output dt {
+      color: var(--muted);
+    }
+
+    .state-output dd {
       margin: 0;
       font-variant-numeric: tabular-nums;
       font-weight: 700;
@@ -377,6 +489,11 @@
       .results-panel {
         padding: 22px;
       }
+
+      .two-property-fields {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
     }
 
     @media (max-width: 460px) {
@@ -397,6 +514,10 @@
       }
 
       .result-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .state-output-grid {
         grid-template-columns: 1fr;
       }
 
@@ -426,23 +547,72 @@
   <main class="wrap page">
     <p class="eyebrow">Water Properties · CoolProp</p>
     <h1>PyCool</h1>
-    <p class="intro">飽和水蒸汽性質計算。輸入壓力或溫度其中一項，即可取得對應的飽和液體與飽和蒸汽密度、定壓比熱及定容比熱。若兩項都輸入，將以溫度為準。</p>
+    <p class="intro">查詢水的飽和性質，或指定任兩項已知性質求出完整狀態點。</p>
 
-    <section class="calculator" aria-label="飽和水蒸汽性質計算器">
+    <div class="mode-switch" role="radiogroup" aria-label="計算模式">
+      <label class="mode-option">
+        <input type="radio" name="calculation-mode" value="saturation" checked>
+        <span>飽和輸入</span>
+      </label>
+      <label class="mode-option">
+        <input type="radio" name="calculation-mode" value="state">
+        <span>指定任兩性質（求狀態點）</span>
+      </label>
+    </div>
+
+    <section class="calculator" aria-label="PyCool 性質計算器">
       <form class="input-panel" id="calculator-form">
-        <h2>飽和輸入</h2>
-        <p class="panel-intro">只需填入壓力或溫度其中一項。</p>
+        <div id="saturation-inputs">
+          <h2>飽和輸入</h2>
+          <p class="panel-intro">只需填入壓力或溫度其中一項。</p>
 
-        <div class="field">
-          <label for="pressure">壓力 P (kPa)</label>
-          <input id="pressure" name="pressure" type="number" inputmode="decimal" step="any" autocomplete="off" aria-describedby="pressure-hint">
-          <p class="field-hint" id="pressure-hint">絕對壓力，不是表壓。</p>
+          <div class="field">
+            <label for="pressure">壓力 P (kPa)</label>
+            <input id="pressure" name="pressure" type="number" inputmode="decimal" step="any" autocomplete="off" aria-describedby="pressure-hint">
+            <p class="field-hint" id="pressure-hint">絕對壓力，不是表壓。</p>
+          </div>
+
+          <div class="field">
+            <label for="temperature">溫度 T (°C)</label>
+            <input id="temperature" name="temperature" type="number" inputmode="decimal" step="any" autocomplete="off">
+            <p class="field-hint" id="temperature-range">範圍載入中…</p>
+          </div>
         </div>
 
-        <div class="field">
-          <label for="temperature">溫度 T (°C)</label>
-          <input id="temperature" name="temperature" type="number" inputmode="decimal" step="any" autocomplete="off">
-          <p class="field-hint" id="temperature-range">範圍載入中…</p>
+        <div id="state-inputs" hidden>
+          <h2>指定任兩性質</h2>
+          <p class="panel-intro">選擇兩種不同的已知性質並輸入數值。</p>
+          <div class="two-property-fields">
+            <div class="field">
+              <label for="property-one">已知性質 1</label>
+              <select id="property-one">
+                <option value="T">溫度 T (°C)</option>
+                <option value="P">壓力 P (kPa)</option>
+                <option value="D">密度 ρ (kg/m³)</option>
+                <option value="v">比容 v (m³/kg)</option>
+                <option value="H">比焓 h (kJ/kg)</option>
+                <option value="S">比熵 s (kJ/kg·K)</option>
+                <option value="U">比內能 u (kJ/kg)</option>
+                <option value="Q">乾度 x (0~1)</option>
+              </select>
+              <input id="property-one-value" type="number" inputmode="decimal" step="any" autocomplete="off" aria-label="已知性質 1 數值">
+            </div>
+            <div class="field">
+              <label for="property-two">已知性質 2</label>
+              <select id="property-two">
+                <option value="T">溫度 T (°C)</option>
+                <option value="P" selected>壓力 P (kPa)</option>
+                <option value="D">密度 ρ (kg/m³)</option>
+                <option value="v">比容 v (m³/kg)</option>
+                <option value="H">比焓 h (kJ/kg)</option>
+                <option value="S">比熵 s (kJ/kg·K)</option>
+                <option value="U">比內能 u (kJ/kg)</option>
+                <option value="Q">乾度 x (0~1)</option>
+              </select>
+              <input id="property-two-value" type="number" inputmode="decimal" step="any" autocomplete="off" aria-label="已知性質 2 數值">
+            </div>
+          </div>
+          <p class="field-hint">密度與比容代表同一種物性，不能同時選取。溫度範圍：<span id="state-temperature-range">載入中…</span></p>
         </div>
 
         <div class="actions">
@@ -473,8 +643,24 @@
             </dl>
           </section>
         </div>
+        <section class="state-results" id="state-results" hidden aria-labelledby="state-results-title">
+          <h3 id="state-results-title">狀態點性質</h3>
+          <dl class="state-output-grid">
+            <div class="state-output"><dt>相態</dt><dd id="state-phase">—</dd></div>
+            <div class="state-output"><dt>溫度 T (°C)</dt><dd id="state-t">—</dd></div>
+            <div class="state-output"><dt>壓力 P (kPa)</dt><dd id="state-p">—</dd></div>
+            <div class="state-output"><dt>密度 ρ (kg/m³)</dt><dd id="state-rho">—</dd></div>
+            <div class="state-output"><dt>比容 v (m³/kg)</dt><dd id="state-v">—</dd></div>
+            <div class="state-output"><dt>比焓 h (kJ/kg)</dt><dd id="state-h">—</dd></div>
+            <div class="state-output"><dt>比熵 s (kJ/kg·K)</dt><dd id="state-s">—</dd></div>
+            <div class="state-output"><dt>比內能 u (kJ/kg)</dt><dd id="state-u">—</dd></div>
+            <div class="state-output"><dt>比熱 cp (kJ/kg·K)</dt><dd id="state-cp">—</dd></div>
+            <div class="state-output"><dt>比熱 cv (kJ/kg·K)</dt><dd id="state-cv">—</dd></div>
+            <div class="state-output"><dt>乾度 x</dt><dd id="state-q">—</dd></div>
+          </dl>
+        </section>
         <div class="notes">
-          <p>適用於水的汽液飽和狀態，範圍由三相點至臨界點以下；不適用於過熱蒸汽或其他流體。</p>
+          <p>適用於水的汽液飽和狀態，範圍由三相點至臨界點以下；不適用於過熱蒸汽或其他流體。狀態點中的「—」表示該性質在該相態下無定義或無法計算。</p>
           <p>性質計算由 <a href="https://github.com/CoolProp/CoolProp" target="_blank" rel="noopener noreferrer">CoolProp 8.1.0.dev</a>（WebAssembly）提供，水的狀態方程式採 IAPWS-95。運算模組由本站提供，不需連接第三方 CDN；首次使用時瀏覽器會載入約 10 MB 的模組。</p>
         </div>
       </div>
@@ -490,13 +676,36 @@
 
   <script type="module">
     const form = document.querySelector("#calculator-form");
+    const modeInputs = document.querySelectorAll('input[name="calculation-mode"]');
+    const saturationInputs = document.querySelector("#saturation-inputs");
+    const stateInputs = document.querySelector("#state-inputs");
     const pressureInput = document.querySelector("#pressure");
     const temperatureInput = document.querySelector("#temperature");
+    const propertyOne = document.querySelector("#property-one");
+    const propertyTwo = document.querySelector("#property-two");
+    const propertyOneValue = document.querySelector("#property-one-value");
+    const propertyTwoValue = document.querySelector("#property-two-value");
     const calculateButton = document.querySelector("#calculate-button");
     const clearButton = document.querySelector("#clear-button");
     const status = document.querySelector("#status");
     const resultSummary = document.querySelector("#result-summary");
     const temperatureRange = document.querySelector("#temperature-range");
+    const stateTemperatureRange = document.querySelector("#state-temperature-range");
+    const saturationResults = document.querySelector(".result-grid");
+    const stateResults = document.querySelector("#state-results");
+    const stateResultFields = {
+      phase: document.querySelector("#state-phase"),
+      T: document.querySelector("#state-t"),
+      P: document.querySelector("#state-p"),
+      rho: document.querySelector("#state-rho"),
+      v: document.querySelector("#state-v"),
+      h: document.querySelector("#state-h"),
+      s: document.querySelector("#state-s"),
+      u: document.querySelector("#state-u"),
+      cp: document.querySelector("#state-cp"),
+      cv: document.querySelector("#state-cv"),
+      q: document.querySelector("#state-q"),
+    };
     const resultFields = {
       liquid: {
         rho: document.querySelector("#liquid-rho"),
@@ -516,6 +725,38 @@
     let criticalTemperature;
     let criticalPressure;
 
+    const inputProperties = {
+      T: { key: "T", convert: (value) => value + 273.15, label: "溫度 T" },
+      P: { key: "P", convert: (value) => value * 1000, label: "壓力 P" },
+      D: { key: "D", convert: (value) => value, label: "密度 ρ" },
+      v: { key: "D", convert: (value) => 1 / value, label: "比容 v" },
+      H: { key: "H", convert: (value) => value * 1000, label: "比焓 h" },
+      S: { key: "S", convert: (value) => value * 1000, label: "比熵 s" },
+      U: { key: "U", convert: (value) => value * 1000, label: "比內能 u" },
+      Q: { key: "Q", convert: (value) => value, label: "乾度 x" },
+    };
+    const outputProperties = [
+      ["T", "T", (value) => value - 273.15],
+      ["P", "P", (value) => value / 1000],
+      ["rho", "D", (value) => value],
+      ["v", "D", (value) => 1 / value],
+      ["h", "H", (value) => value / 1000],
+      ["s", "S", (value) => value / 1000],
+      ["u", "U", (value) => value / 1000],
+      ["cp", "C", (value) => value / 1000],
+      ["cv", "O", (value) => value / 1000],
+      ["q", "Q", (value) => value],
+    ];
+    const phaseNames = {
+      0: "壓縮（過冷）液體",
+      1: "超臨界流體",
+      2: "超臨界（氣態側）",
+      3: "超臨界（液態側）",
+      4: "臨界點",
+      5: "過熱蒸汽",
+      6: "飽和混合物（液汽共存）",
+    };
+
     function showError(message) {
       status.dataset.kind = "error";
       status.textContent = message;
@@ -525,10 +766,22 @@
       for (const phase of Object.values(resultFields)) {
         for (const field of Object.values(phase)) field.textContent = "—";
       }
+      for (const field of Object.values(stateResultFields)) field.textContent = "—";
       resultSummary.textContent = "輸入資料並按「計算」後，結果將顯示於此。";
     }
 
-    function calculate() {
+    function setMode(mode) {
+      const isStateMode = mode === "state";
+      saturationInputs.hidden = isStateMode;
+      stateInputs.hidden = !isStateMode;
+      saturationResults.hidden = isStateMode;
+      stateResults.hidden = !isStateMode;
+      clearResults();
+      status.dataset.kind = "success";
+      status.textContent = isStateMode ? "請選擇兩項性質並輸入數值。" : "請輸入壓力或溫度。";
+    }
+
+    function calculateSaturation() {
       const pressureText = pressureInput.value.trim();
       const temperatureText = temperatureInput.value.trim();
       if (!pressureText && !temperatureText) {
@@ -599,17 +852,141 @@
       }
     }
 
+    function calculateStatePoint() {
+      const selectedOne = propertyOne.value;
+      const selectedTwo = propertyTwo.value;
+      const propertyOneSpec = inputProperties[selectedOne];
+      const propertyTwoSpec = inputProperties[selectedTwo];
+
+      if (propertyOneSpec.key === propertyTwoSpec.key) {
+        clearResults();
+        showError("請選擇兩種不同的性質；密度與比容不能同時選取。");
+        return;
+      }
+
+      const valueOne = propertyOneValue.value.trim();
+      const valueTwo = propertyTwoValue.value.trim();
+      if (!valueOne || !valueTwo) {
+        clearResults();
+        showError("請輸入兩項已知性質的數值。");
+        return;
+      }
+
+      const rawOne = Number(valueOne);
+      const rawTwo = Number(valueTwo);
+      if (!Number.isFinite(rawOne) || !Number.isFinite(rawTwo)) {
+        clearResults();
+        showError("請輸入有效的數值。");
+        return;
+      }
+      for (const [property, value] of [[selectedOne, rawOne], [selectedTwo, rawTwo]]) {
+        if ((property === "P" || property === "D" || property === "v") && value <= 0) {
+          clearResults();
+          showError("壓力、密度與比容必須大於 0。");
+          return;
+        }
+        if (property === "Q" && (value < 0 || value > 1)) {
+          clearResults();
+          showError("乾度範圍為 0 至 1。");
+          return;
+        }
+      }
+
+      clearResults();
+      try {
+        const inputOne = propertyOneSpec.convert(rawOne);
+        const inputTwo = propertyTwoSpec.convert(rawTwo);
+        const phase = coolprop.PropsSI(
+          "Phase",
+          propertyOneSpec.key,
+          inputOne,
+          propertyTwoSpec.key,
+          inputTwo,
+          "Water",
+        );
+        if (phaseNames[phase] === undefined) {
+          throw new Error("輸入可能位於飽和邊界，無法只靠這兩項判定液相或汽相；請改用壓力與乾度等性質組合。");
+        }
+        const values = {};
+        for (const [field, output, convert] of outputProperties) {
+          if (phase === 6 && (field === "cp" || field === "cv")) {
+            values[field] = "—（兩相無定義）";
+            continue;
+          }
+          try {
+            const raw = coolprop.PropsSI(
+              output,
+              propertyOneSpec.key,
+              inputOne,
+              propertyTwoSpec.key,
+              inputTwo,
+              "Water",
+            );
+            if (!Number.isFinite(raw)) {
+              values[field] = "—";
+              continue;
+            }
+            const converted = convert(raw);
+            if (!Number.isFinite(converted)) {
+              values[field] = "—";
+            } else if (field === "q" && (converted < 0 || converted > 1)) {
+              values[field] = "—（單相）";
+            } else {
+              values[field] = formatNumber(converted);
+            }
+          } catch {
+            values[field] = "—";
+          }
+        }
+
+        if (Object.values(values).every((value) => value === "—" || value.startsWith("—"))) {
+          throw new Error("輸入不在有效範圍內，或 CoolProp 無法求解此狀態點。");
+        }
+
+        stateResultFields.phase.textContent = phaseNames[phase] ?? `未知相態 (${phase})`;
+        for (const [field, value] of Object.entries(values)) {
+          stateResultFields[field].textContent = value;
+        }
+
+        resultSummary.textContent = `${propertyOneSpec.label} = ${formatNumber(rawOne)} · ${propertyTwoSpec.label} = ${formatNumber(rawTwo)}`;
+        status.dataset.kind = "success";
+        status.textContent = "狀態點計算完成。";
+      } catch (error) {
+        clearResults();
+        showError(`無法求解此狀態點：${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+
+    function calculate() {
+      clearResults();
+      const mode = document.querySelector('input[name="calculation-mode"]:checked').value;
+      if (mode === "state") {
+        calculateStatePoint();
+      } else {
+        calculateSaturation();
+      }
+    }
+
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       calculate();
     });
 
+    for (const input of modeInputs) {
+      input.addEventListener("change", () => setMode(input.value));
+    }
+
     clearButton.addEventListener("click", () => {
-      form.reset();
+      pressureInput.value = "";
+      temperatureInput.value = "";
+      propertyOneValue.value = "";
+      propertyTwoValue.value = "";
       clearResults();
       status.dataset.kind = "success";
       status.textContent = "已清除輸入與計算結果。";
-      pressureInput.focus();
+      const mode = document.querySelector('input[name="calculation-mode"]:checked').value;
+      if (mode === "state") propertyOneValue.focus();
+      else pressureInput.focus();
     });
 
     try {
