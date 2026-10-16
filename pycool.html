@@ -148,6 +148,11 @@
       margin-bottom: 16px;
     }
 
+    .shared-fluid-field {
+      max-width: 360px;
+      margin-bottom: 18px;
+    }
+
     .mode-option {
       position: relative;
     }
@@ -220,6 +225,10 @@
       grid-template-columns: minmax(260px, .75fr) minmax(0, 1.25fr);
       border: 1px solid var(--line);
       background: var(--surface);
+    }
+
+    .calculator[hidden] {
+      display: none;
       box-shadow: 0 12px 32px rgba(23, 43, 43, .06);
     }
 
@@ -844,7 +853,24 @@
   <main class="wrap page">
     <p class="eyebrow">Fluid Properties · CoolProp</p>
     <h1>PyCool Web</h1>
-    <p class="intro">選擇水或冷媒，查詢飽和性質，或指定任兩項已知性質求出完整狀態點。</p>
+    <p class="intro">選擇水或冷媒，查詢飽和性質、指定任兩項性質求狀態點，或產生飽和表。</p>
+
+    <div class="field shared-fluid-field">
+      <label for="fluid">流體</label>
+      <select id="fluid" name="fluid">
+        <option value="Water">水 (Water)</option>
+        <option value="R134a">R134a</option>
+        <option value="R22">R22</option>
+        <option value="R410A">R410A</option>
+        <option value="R32">R32</option>
+        <option value="R125">R125</option>
+        <option value="R1234yf">R1234yf</option>
+        <option value="R290">R290 (丙烷)</option>
+        <option value="R600a">R600a (異丁烷)</option>
+        <option value="R717">R717 (氨)</option>
+        <option value="R744">R744 (二氧化碳)</option>
+      </select>
+    </div>
 
     <div class="mode-switch" role="radiogroup" aria-label="計算模式">
       <label class="mode-option">
@@ -855,27 +881,14 @@
         <input type="radio" name="calculation-mode" value="state">
         <span>指定任兩性質（求狀態點）</span>
       </label>
+      <label class="mode-option">
+        <input type="radio" name="calculation-mode" value="table">
+        <span>產生飽和表</span>
+      </label>
     </div>
 
-    <section class="calculator" aria-label="PyCool 性質計算器">
+    <section class="calculator" id="calculator-section" aria-label="PyCool 性質計算器">
       <form class="input-panel" id="calculator-form">
-        <div class="field">
-          <label for="fluid">流體</label>
-          <select id="fluid" name="fluid">
-            <option value="Water">水 (Water)</option>
-            <option value="R134a">R134a</option>
-            <option value="R22">R22</option>
-            <option value="R410A">R410A</option>
-            <option value="R32">R32</option>
-            <option value="R125">R125</option>
-            <option value="R1234yf">R1234yf</option>
-            <option value="R290">R290 (丙烷)</option>
-            <option value="R600a">R600a (異丁烷)</option>
-            <option value="R717">R717 (氨)</option>
-            <option value="R744">R744 (二氧化碳)</option>
-          </select>
-        </div>
-
         <div id="saturation-inputs">
           <h2>飽和輸入</h2>
           <p class="panel-intro">只需填入壓力或溫度其中一項。</p>
@@ -986,7 +999,7 @@
       </div>
     </section>
 
-    <section class="saturation-table-section" aria-labelledby="saturation-table-title">
+    <section class="saturation-table-section" id="saturation-table-section" hidden aria-labelledby="saturation-table-title">
       <h2 id="saturation-table-title">產生飽和表</h2>
       <p class="table-intro">依所選流體與飽和線類型產生表格；汽液飽和表列出液體與蒸氣性質，熔化線表列出液相側性質，昇華線列出溫度與壓力。可依溫度、壓力或乾度取樣。</p>
       <form id="saturation-table-form">
@@ -1115,6 +1128,8 @@
   <script type="module">
     const form = document.querySelector("#calculator-form");
     const modeInputs = document.querySelectorAll('input[name="calculation-mode"]');
+    const calculatorSection = document.querySelector("#calculator-section");
+    const saturationTableSection = document.querySelector("#saturation-table-section");
     const saturationInputs = document.querySelector("#saturation-inputs");
     const stateInputs = document.querySelector("#state-inputs");
     const fluidInput = document.querySelector("#fluid");
@@ -1254,7 +1269,11 @@
     }
 
     function setMode(mode) {
+      const isTableMode = mode === "table";
       const isStateMode = mode === "state";
+      calculatorSection.hidden = isTableMode;
+      saturationTableSection.hidden = !isTableMode;
+      if (isTableMode) return;
       saturationInputs.hidden = isStateMode;
       stateInputs.hidden = !isStateMode;
       saturationResults.hidden = isStateMode;
