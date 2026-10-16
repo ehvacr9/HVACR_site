@@ -641,6 +641,9 @@
             <h3 id="liquid-title">飽和液體 (f)</h3>
             <dl>
               <div class="result-row"><dt>密度 ρ (kg/m³)</dt><dd id="liquid-rho">—</dd></div>
+              <div class="result-row"><dt>比容積 v (m³/kg)</dt><dd id="liquid-v">—</dd></div>
+              <div class="result-row"><dt>比焓 h (kJ/kg)</dt><dd id="liquid-h">—</dd></div>
+              <div class="result-row"><dt>比內能 u (kJ/kg)</dt><dd id="liquid-u">—</dd></div>
               <div class="result-row"><dt>比熱 cp (kJ/kg·K)</dt><dd id="liquid-cp">—</dd></div>
               <div class="result-row"><dt>比熱 cv (kJ/kg·K)</dt><dd id="liquid-cv">—</dd></div>
             </dl>
@@ -649,6 +652,9 @@
             <h3 id="vapor-title">飽和蒸氣 (g)</h3>
             <dl>
               <div class="result-row"><dt>密度 ρ (kg/m³)</dt><dd id="vapor-rho">—</dd></div>
+              <div class="result-row"><dt>比容積 v (m³/kg)</dt><dd id="vapor-v">—</dd></div>
+              <div class="result-row"><dt>比焓 h (kJ/kg)</dt><dd id="vapor-h">—</dd></div>
+              <div class="result-row"><dt>比內能 u (kJ/kg)</dt><dd id="vapor-u">—</dd></div>
               <div class="result-row"><dt>比熱 cp (kJ/kg·K)</dt><dd id="vapor-cp">—</dd></div>
               <div class="result-row"><dt>比熱 cv (kJ/kg·K)</dt><dd id="vapor-cv">—</dd></div>
             </dl>
@@ -721,11 +727,17 @@
     const resultFields = {
       liquid: {
         rho: document.querySelector("#liquid-rho"),
+        v: document.querySelector("#liquid-v"),
+        h: document.querySelector("#liquid-h"),
+        u: document.querySelector("#liquid-u"),
         cp: document.querySelector("#liquid-cp"),
         cv: document.querySelector("#liquid-cv"),
       },
       vapor: {
         rho: document.querySelector("#vapor-rho"),
+        v: document.querySelector("#vapor-v"),
+        h: document.querySelector("#vapor-h"),
+        u: document.querySelector("#vapor-u"),
         cp: document.querySelector("#vapor-cp"),
         cv: document.querySelector("#vapor-cv"),
       },
@@ -870,6 +882,9 @@
         for (const [phase, quality] of Object.entries(phases)) {
           const properties = {
             rho: coolprop.PropsSI("D", "T", temperature, "Q", quality, activeFluid),
+            v: 1 / coolprop.PropsSI("D", "T", temperature, "Q", quality, activeFluid),
+            h: coolprop.PropsSI("H", "T", temperature, "Q", quality, activeFluid) / 1000,
+            u: coolprop.PropsSI("U", "T", temperature, "Q", quality, activeFluid) / 1000,
             cp: coolprop.PropsSI("C", "T", temperature, "Q", quality, activeFluid) / 1000,
             cv: coolprop.PropsSI("O", "T", temperature, "Q", quality, activeFluid) / 1000,
           };
