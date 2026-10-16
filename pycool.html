@@ -1175,12 +1175,16 @@
       <h2 id="basic-information-title">基本資訊</h2>
       <dl class="basic-information-grid">
         <div class="basic-information-item"><dt>化學名稱 (chemical-name)</dt><dd id="basic-chemical-name">載入中…</dd></div>
+        <div class="basic-information-item"><dt>化學式</dt><dd id="basic-formula">載入中…</dd></div>
+        <div class="basic-information-item"><dt>CAS 登錄號</dt><dd id="basic-cas">載入中…</dd></div>
         <div class="basic-information-item"><dt>分子量 (g/mol)</dt><dd id="basic-molar-mass">載入中…</dd></div>
         <div class="basic-information-item"><dt>氣體常數 R (J/kg·K)</dt><dd id="basic-gas-constant">載入中…</dd></div>
+        <div class="basic-information-item"><dt>Normal Point / 常壓沸點 (1 atm, °C)</dt><dd id="basic-normal-point">載入中…</dd></div>
         <div class="basic-information-item"><dt>三相點溫度 (°C)</dt><dd id="basic-triple-temperature">載入中…</dd></div>
         <div class="basic-information-item"><dt>三相點壓力 (kPa)</dt><dd id="basic-triple-pressure">載入中…</dd></div>
         <div class="basic-information-item"><dt>臨界點溫度 (°C)</dt><dd id="basic-critical-temperature">載入中…</dd></div>
         <div class="basic-information-item"><dt>臨界點壓力 (kPa)</dt><dd id="basic-critical-pressure">載入中…</dd></div>
+        <div class="basic-information-item"><dt>臨界密度 (kg/m³)</dt><dd id="basic-critical-density">載入中…</dd></div>
       </dl>
     </section>
   </main>
@@ -1230,12 +1234,16 @@
     const stateResults = document.querySelector("#state-results");
     const basicInformationFields = {
       chemicalName: document.querySelector("#basic-chemical-name"),
+      formula: document.querySelector("#basic-formula"),
+      cas: document.querySelector("#basic-cas"),
       molarMass: document.querySelector("#basic-molar-mass"),
       gasConstant: document.querySelector("#basic-gas-constant"),
+      normalPoint: document.querySelector("#basic-normal-point"),
       tripleTemperature: document.querySelector("#basic-triple-temperature"),
       triplePressure: document.querySelector("#basic-triple-pressure"),
       criticalTemperature: document.querySelector("#basic-critical-temperature"),
       criticalPressure: document.querySelector("#basic-critical-pressure"),
+      criticalDensity: document.querySelector("#basic-critical-density"),
     };
     const stateResultFields = {
       phase: document.querySelector("#state-phase"),
@@ -1344,6 +1352,22 @@
       R717: "Ammonia",
       R744: "Carbon dioxide",
     };
+    const mixtureMetadata = {
+      R410A: {
+        formula: "R32 / R125 (50/50 mass fraction)",
+        cas: "無單一 CAS 登錄號（混合冷媒）",
+      },
+    };
+    const formulaOverrides = {
+      R717: "NH₃",
+    };
+
+    function formatChemicalFormula(formula) {
+      if (!formula || formula === "N/A") return "—";
+      const subscriptDigits = { 0: "₀", 1: "₁", 2: "₂", 3: "₃", 4: "₄", 5: "₅", 6: "₆", 7: "₇", 8: "₈", 9: "₉" };
+      return formula.replace(/_\{(\d+)\}/g, (_, count) =>
+        count === "1" ? "" : Array.from(count, (digit) => subscriptDigits[digit]).join(""));
+    }
 
     function showError(message) {
       status.dataset.kind = "error";
@@ -1404,14 +1428,27 @@
       if (!Number.isFinite(molarMass) || molarMass <= 0) {
         throw new Error("CoolProp 無法取得有效的分子量。");
       }
+      const tripleTemperature = basicState.Ttriple();
+      const triplePressure = basicState.p_triple();
+      const normalPointTemperature = triplePressure <= 101325
+        ? coolprop.PropsSI("T", "P", 101325, "Q", 0, fluid)
+        : NaN;
+      const formula = coolprop.get_fluid_param_string(fluid, "formula");
+      const cas = coolprop.get_fluid_param_string(fluid, "CAS");
       const basicInformation = {
         chemicalName: chemicalNames[fluid],
+        formula: mixtureMetadata[fluid]?.formula ?? formulaOverrides[fluid] ?? formatChemicalFormula(formula),
+        cas: mixtureMetadata[fluid]?.cas ?? (cas && cas !== "N/A" ? cas : "—"),
         molarMass: molarMass * 1000,
         gasConstant: basicState.gas_constant() / molarMass,
-        tripleTemperature: basicState.Ttriple() - 273.15,
-        triplePressure: basicState.p_triple() / 1000,
+        normalPoint: Number.isFinite(normalPointTemperature)
+          ? `${mixtureMetadata[fluid] ? "泡點" : "沸點"} ${formatNumber(normalPointTemperature - 273.15)}`
+          : "無定義（1 atm 下無液汽相平衡）",
+        tripleTemperature: tripleTemperature - 273.15,
+        triplePressure: triplePressure / 1000,
         criticalTemperature: basicState.T_critical() - 273.15,
         criticalPressure: basicState.p_critical() / 1000,
+        criticalDensity: basicState.rhomass_critical(),
       };
       for (const [key, value] of Object.entries(basicInformation)) {
         if (typeof value === "number") {
