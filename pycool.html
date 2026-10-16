@@ -1235,9 +1235,6 @@
       if (!meltingLineLimits && tableSaturationType.value === "melt") {
         tableSaturationType.value = "vle";
       }
-      meltingLineHint.textContent = meltingLineLimits
-        ? `此流體的熔化線範圍：${formatNumber(meltingLineLimits.temperatureMin - 273.15)} 至 ${formatNumber(meltingLineLimits.temperatureMax - 273.15)} °C，${formatNumber(meltingLineLimits.pressureMin / 1000)} 至 ${formatNumber(meltingLineLimits.pressureMax / 1000)} kPa。`
-        : "此流體的 CoolProp 模型沒有熔化線資料。";
       setSaturationTableDefaults();
     }
 
@@ -1303,6 +1300,12 @@
 
     function renderSaturationTableFields() {
       const isMeltingLine = tableSaturationType.value === "melt";
+      meltingLineHint.hidden = !isMeltingLine;
+      if (isMeltingLine) {
+        meltingLineHint.textContent = meltingLineLimits
+          ? `此流體的熔化線範圍：${formatNumber(meltingLineLimits.temperatureMin - 273.15)} 至 ${formatNumber(meltingLineLimits.temperatureMax - 273.15)} °C，${formatNumber(meltingLineLimits.pressureMin / 1000)} 至 ${formatNumber(meltingLineLimits.pressureMax / 1000)} kPa。`
+          : "此流體的 CoolProp 模型沒有熔化線資料。";
+      }
       const variationOptions = Array.from(tableVariation.options);
       for (const option of variationOptions) {
         option.disabled = isMeltingLine && !["T", "P"].includes(option.value);
