@@ -1532,8 +1532,11 @@
       const endC = Math.floor(criticalC / 10) * 10;
       const safeStartC = startC < criticalC ? startC : minC;
       const safeEndC = endC > safeStartC ? endC : criticalC - 0.01;
-      const startP = coolprop.PropsSI("P", "T", safeStartC + 273.15, "Q", 0, activeFluid) / 1000;
-      const endP = coolprop.PropsSI("P", "T", safeEndC + 273.15, "Q", 0, activeFluid) / 1000;
+      const minimumPressureKPa = minimumSaturationPressure / 1000;
+      const maximumPressureKPa = criticalPressure / 1000;
+      const pressureStep = niceIntegerStep(maximumPressureKPa - minimumPressureKPa);
+      const startP = Math.ceil(minimumPressureKPa / pressureStep) * pressureStep;
+      const endP = (Math.ceil(maximumPressureKPa / pressureStep) - 1) * pressureStep;
       const defaultFixedT = Math.min(Math.max(25, safeStartC), safeEndC);
 
       saturationTableDefaults = {
@@ -1545,7 +1548,7 @@
         P: [
           ["table-start", "起始壓力 (kPa)", startP],
           ["table-end", "終止壓力 (kPa)", endP],
-          ["table-step", "間隔 (kPa)", niceTableStep(endP - startP)],
+          ["table-step", "間隔 (kPa)", pressureStep],
         ],
         QT: [
           ["table-fixed", "固定溫度 (°C)", defaultFixedT],
@@ -1599,6 +1602,14 @@
 
     function niceTableStep(span) {
       return Number((span / 20).toPrecision(3));
+    }
+
+    function niceIntegerStep(span) {
+      const target = Math.max(1, span / 20);
+      const magnitude = 10 ** Math.floor(Math.log10(target));
+      const normalized = target / magnitude;
+      const factor = normalized < 1.5 ? 1 : normalized < 3.5 ? 2 : normalized < 7.5 ? 5 : 10;
+      return Math.max(1, factor * magnitude);
     }
 
     function iceSublimationPressure(temperature) {
