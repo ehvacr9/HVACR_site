@@ -2965,9 +2965,17 @@
   </script>
   <script>
     if ("serviceWorker" in navigator && location.protocol !== "file:") {
-      navigator.serviceWorker.register("./service-worker.js").catch((error) => {
-        console.error("無法啟用 CoolProp 快取：", error);
-      });
+      const workerScript = new URL("./service-worker.js", location.href).href;
+      navigator.serviceWorker.getRegistrations()
+        .then((registrations) => Promise.all(registrations
+          .filter((registration) => [registration.active, registration.waiting, registration.installing]
+            .some((worker) => worker?.scriptURL === workerScript))
+          .map((registration) => registration.unregister())))
+        .catch((error) => console.error("無法移除舊版 CoolProp 快取：", error));
+      if ("caches" in window) {
+        caches.delete("hvacr-coolprop-v1")
+          .catch((error) => console.error("無法清除舊版 CoolProp 快取：", error));
+      }
     }
   </script>
 </body>
