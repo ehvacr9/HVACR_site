@@ -1130,7 +1130,7 @@
 
     <section class="saturation-table-section" id="saturation-table-section" hidden aria-labelledby="saturation-table-title">
       <h2 id="saturation-table-title">產生飽和表</h2>
-      <p class="table-intro">依所選流體與飽和線類型產生表格；汽液飽和表列出液體與蒸氣性質及黏度，熔化線表列出液相側性質與黏度，昇華線列出溫度與壓力。可依溫度、壓力或乾度取樣。</p>
+      <p class="table-intro">依所選流體與飽和線類型產生表格；汽液飽和表列出液體與蒸氣性質及黏度，熔化線表列出液相側性質與黏度，昇華線表列出氣相側性質與黏度（非冰的性質）。昇華線氣相性質使用 CoolProp 強制氣相外推，三相點以下的結果不保證精度；無法計算或非正值的密度、比熱與黏度顯示「—」。可依溫度、壓力或乾度取樣。</p>
       <form id="saturation-table-form">
         <div class="table-controls">
           <figure class="pt-diagram">
@@ -1404,7 +1404,11 @@
         "s (kJ/kg·K)", "u (kJ/kg)", "cp (kJ/kg·K)", "cv (kJ/kg·K)",
         "μ (μPa·s)",
       ],
-      SUBLIMATION: ["T (°C)", "P (kPa)"],
+      SUBLIMATION: [
+        "T (°C)", "P (kPa)", "ρg (kg/m³)", "vg (m³/kg)", "hg (kJ/kg)",
+        "sg (kJ/kg·K)", "ug (kJ/kg)", "cp,g (kJ/kg·K)", "cv,g (kJ/kg·K)",
+        "μg (μPa·s)",
+      ],
     };
 
     let coolprop;
@@ -2388,6 +2392,21 @@
       ];
     }
 
+    function sublimationLineRow(variation, value) {
+      const temperature = variation === "T" ? value + 273.15 : iceSublimationTemperature(value * 1000);
+      const pressure = variation === "P" ? value * 1000 : iceSublimationPressure(temperature);
+      const property = (output, positive = false) => {
+        const result = coolprop.PropsSI(output, "T|gas", temperature, "P", pressure, activeFluid);
+        return Number.isFinite(result) && (!positive || result > 0) ? result : NaN;
+      };
+      const density = property("D", true);
+      return [
+        temperature - 273.15, pressure / 1000, density, 1 / density,
+        property("H") / 1000, property("S") / 1000, property("U") / 1000,
+        property("C", true) / 1000, property("O", true) / 1000, property("V", true) * 1e6,
+      ];
+    }
+
     function renderSaturationTable(headers, rows) {
       const head = saturationTable.querySelector("thead");
       const body = saturationTable.querySelector("tbody");
@@ -2466,18 +2485,13 @@
               "壓力",
             );
           }
-          rows = tableRangePoints(start, end, step).map((point) => {
-            const temperature = variation === "T"
-              ? point + 273.15
-              : iceSublimationTemperature(point * 1000);
-            const pressure = variation === "P" ? point * 1000 : iceSublimationPressure(temperature);
-            return variation === "P"
-              ? [pressure / 1000, temperature - 273.15]
-              : [temperature - 273.15, pressure / 1000];
-          });
+          rows = tableRangePoints(start, end, step).map((point) => sublimationLineRow(variation, point));
           headers = saturationTableHeaders.SUBLIMATION;
-          if (variation === "P") headers = [headers[1], headers[0]];
-          description = `${formatNumber(start)} 至 ${formatNumber(end)}，間隔 ${formatNumber(step)} ${variation === "T" ? "°C" : "kPa"}`;
+          if (variation === "P") {
+            headers = [headers[1], headers[0], ...headers.slice(2)];
+            rows = rows.map(([temperature, pressure, ...properties]) => [pressure, temperature, ...properties]);
+          }
+          description = `${formatNumber(start)} 至 ${formatNumber(end)}，間隔 ${formatNumber(step)} ${variation === "T" ? "°C" : "kPa"} · 氣相側外推性質，非冰的性質；三相點以下不保證精度，「—」表示無法計算或非物理值`;
         } else if (saturationLineType === "melt") {
           if (!meltingLineState || !meltingLineLimits) {
             throw new Error("目前流體不支援固液熔化線。");
