@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
+  <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg">
   <meta name="description" content="快速換算溫度與壓力單位，包含攝氏、華氏、開爾文、蘭氏及常用壓力單位。">
   <title>單位換算 | 能源與冷凍空調學習網</title>
   <style>
@@ -79,15 +80,10 @@
     }
 
     .brand-mark {
-      display: grid;
       width: 34px;
       height: 34px;
-      place-items: center;
-      border-radius: 50%;
-      background: var(--green);
-      color: white;
-      font-family: var(--serif);
-      font-size: 19px;
+      flex: 0 0 34px;
+      object-fit: contain;
     }
 
     nav {
@@ -425,7 +421,7 @@
 <body>
   <header class="wrap topbar">
     <a class="brand" href="index.html" aria-label="回到能源與冷凍空調學習網首頁">
-      <span class="brand-mark" aria-hidden="true">能</span>
+      <img class="brand-mark" src="assets/hvacr-learning-logo.svg" alt="">
       <span>能源與冷凍空調學習網</span>
     </a>
     <nav aria-label="主選單">

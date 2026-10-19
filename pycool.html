@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
+  <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg">
   <meta name="description" content="PyCool Web 冷媒與水的物性計算器：查詢飽和性質、指定任兩項已知性質求狀態點、產生飽和表或繪製 Ph 圖。">
   <title>PyCool Web | 能源與冷凍空調學習網</title>
   <style>
@@ -78,15 +79,10 @@
     }
 
     .brand-mark {
-      display: grid;
       width: 34px;
       height: 34px;
-      place-items: center;
-      border-radius: 50%;
-      background: var(--green);
-      color: white;
-      font-family: var(--serif);
-      font-size: 19px;
+      flex: 0 0 34px;
+      object-fit: contain;
     }
 
     nav {
@@ -1064,7 +1060,7 @@
 <body>
   <header class="wrap topbar">
     <a class="brand" href="index.html" aria-label="回到能源與冷凍空調學習網首頁">
-      <span class="brand-mark" aria-hidden="true">能</span>
+      <img class="brand-mark" src="assets/hvacr-learning-logo.svg" alt="">
       <span>能源與冷凍空調學習網</span>
     </a>
     <nav aria-label="主選單">
