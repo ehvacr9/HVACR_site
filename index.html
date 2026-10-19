@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
   <meta name="description" content="以淺白方式整理能源、冷凍空調與節能知識。">
-  <title>能源與冷凍空調小站</title>
+  <title>能源與冷凍空調學習網</title>
   <style>
     :root {
       color-scheme: light;
@@ -53,11 +53,19 @@
     }
 
     .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       display: flex;
+      width: 100%;
+      max-width: none;
       min-height: 82px;
       align-items: center;
       justify-content: space-between;
+      margin-inline: 0;
+      padding-inline: max(24px, calc((100% - 1120px) / 2));
       border-bottom: 1px solid var(--line);
+      background: var(--paper);
     }
 
     .brand {
@@ -368,7 +376,10 @@
       }
 
       .topbar {
+        width: 100%;
+        max-width: none;
         min-height: 70px;
+        padding-inline: 18px;
       }
 
       nav {
@@ -462,15 +473,17 @@
 </head>
 <body>
   <header class="wrap topbar">
-    <a class="brand" href="#top" aria-label="能源與冷凍空調小站首頁">
+    <a class="brand" href="#top" aria-label="能源與冷凍空調學習網首頁">
       <span class="brand-mark" aria-hidden="true">能</span>
-      <span>能源與冷凍空調小站</span>
+      <span>能源與冷凍空調學習網</span>
     </a>
     <nav aria-label="主選單">
+      <a href="#about">關於我們</a>
+      <a href="#top">首頁</a>
       <a href="#topics">主題筆記</a>
       <a href="terminology.html">術語辭典</a>
       <a href="pycool.html">PyCool</a>
-      <a href="#about">關於本站</a>
+      <a href="unit-converter.html">單位換算</a>
     </nav>
   </header>
 
@@ -544,6 +557,19 @@
       </div>
     </section>
 
+    <section class="topics" aria-labelledby="unit-converter-link-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Unit Converter</p>
+            <h2 id="unit-converter-link-title">單位換算</h2>
+          </div>
+          <p class="section-intro">快速換算溫度與壓力，讓不同單位的數值更容易比較。</p>
+        </div>
+        <a class="button" href="unit-converter.html">前往單位換算 <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
     <section class="wrap about" id="about" aria-labelledby="about-title">
       <div>
         <p class="eyebrow">About This Site</p>
@@ -559,7 +585,7 @@
 
   <footer>
     <div class="wrap footer-inner">
-      <span>能源與冷凍空調小站</span>
+      <span>能源與冷凍空調學習網</span>
       <span>以好奇心，持續認識能源。</span>
     </div>
   </footer>

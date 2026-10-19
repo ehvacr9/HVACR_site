@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
   <meta name="description" content="PyCool Web 冷媒與水的物性計算器：查詢飽和性質、指定任兩項已知性質求狀態點、產生飽和表或繪製 Ph 圖。">
-  <title>PyCool Web | 能源與冷凍空調小站</title>
+  <title>PyCool Web | 能源與冷凍空調學習網</title>
   <style>
     :root {
       color-scheme: light;
@@ -51,11 +51,19 @@
     }
 
     .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       display: flex;
+      width: 100%;
+      max-width: none;
       min-height: 82px;
       align-items: center;
       justify-content: space-between;
+      margin-inline: 0;
+      padding-inline: max(24px, calc((100% - 1120px) / 2));
       border-bottom: 1px solid var(--line);
+      background: var(--paper);
     }
 
     .brand {
@@ -882,7 +890,10 @@
       }
 
       .topbar {
+        width: 100%;
+        max-width: none;
         min-height: 70px;
+        padding-inline: 18px;
       }
 
       nav {
@@ -976,14 +987,17 @@
 </head>
 <body>
   <header class="wrap topbar">
-    <a class="brand" href="index.html" aria-label="回到能源與冷凍空調小站首頁">
+    <a class="brand" href="index.html" aria-label="回到能源與冷凍空調學習網首頁">
       <span class="brand-mark" aria-hidden="true">能</span>
-      <span>能源與冷凍空調小站</span>
+      <span>能源與冷凍空調學習網</span>
     </a>
     <nav aria-label="主選單">
+      <a href="index.html#about">關於我們</a>
       <a href="index.html">首頁</a>
+      <a href="index.html#topics">主題筆記</a>
       <a href="terminology.html">術語辭典</a>
       <a href="pycool.html" aria-current="page">PyCool</a>
+      <a href="unit-converter.html">單位換算</a>
     </nav>
   </header>
 
@@ -1341,7 +1355,7 @@
 
   <footer>
     <div class="wrap footer-inner">
-      <span>能源與冷凍空調小站 · PyCool</span>
+      <span>能源與冷凍空調學習網 · PyCool</span>
       <span><a href="index.html">回首頁</a></span>
     </div>
   </footer>

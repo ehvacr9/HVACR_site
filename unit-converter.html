@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="快速換算溫度與壓力單位，包含攝氏、華氏、開爾文、蘭氏及常用壓力單位。">
+  <title>單位換算 | 能源與冷凍空調學習網</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172b2b;
+      --muted: #5b6c68;
+      --paper: #f6f5ef;
+      --surface: #fffefa;
+      --green: #1d6252;
+      --green-dark: #16483e;
+      --lime: #d9e99b;
+      --line: #dce2d8;
+      --serif: Georgia, "Noto Serif TC", "PMingLiU", serif;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.7;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 3px solid #9ab952;
+      outline-offset: 3px;
+    }
+
+    .wrap {
+      width: min(1120px, calc(100% - 48px));
+      margin-inline: auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      width: 100%;
+      max-width: none;
+      min-height: 82px;
+      align-items: center;
+      justify-content: space-between;
+      margin-inline: 0;
+      padding-inline: max(24px, calc((100% - 1120px) / 2));
+      border-bottom: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: .04em;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--green);
+      color: white;
+      font-family: var(--serif);
+      font-size: 19px;
+    }
+
+    nav {
+      display: flex;
+      gap: 24px;
+      font-size: 13px;
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      color: var(--green);
+    }
+
+    .page {
+      padding-block: 68px 88px;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 13px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 24px;
+      height: 1px;
+      background: currentColor;
+      content: "";
+    }
+
+    h1,
+    h2,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 12px;
+      font-family: var(--serif);
+      font-size: clamp(36px, 5vw, 55px);
+      font-weight: 500;
+      letter-spacing: -.045em;
+      line-height: 1.25;
+    }
+
+    .intro {
+      max-width: 700px;
+      margin-bottom: 30px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .converter {
+      max-width: 760px;
+      padding: clamp(22px, 5vw, 42px);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--surface);
+      box-shadow: 0 18px 46px rgba(23, 43, 43, .06);
+    }
+
+    .category-switch {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--paper);
+    }
+
+    .category-switch button {
+      flex: 1 1 140px;
+      min-height: 44px;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 3px;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .category-switch button[aria-pressed="true"] {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .conversion-fields {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: end;
+      gap: 14px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 12px;
+      border: 1px solid #cbd5ca;
+      border-radius: 3px;
+      background: white;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    .field input {
+      margin-bottom: 10px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .swap-button {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      margin-bottom: 58px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: white;
+      color: var(--green);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .swap-button:hover {
+      border-color: var(--green);
+      background: #f2f6e9;
+    }
+
+    .result {
+      min-height: 102px;
+      margin-top: 28px;
+      padding: 18px 20px;
+      border-left: 3px solid var(--green);
+      background: #f2f5ed;
+    }
+
+    .result-label {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .result-value {
+      margin: 0;
+      color: var(--green-dark);
+      font-size: clamp(24px, 4vw, 34px);
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .result-error {
+      margin: 8px 0 0;
+      color: #9a3328;
+      font-size: 13px;
+    }
+
+    .hint {
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .footer-inner {
+      display: flex;
+      min-height: 76px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 760px) {
+      .wrap {
+        width: min(100% - 36px, 560px);
+      }
+
+      .topbar {
+        width: 100%;
+        max-width: none;
+        min-height: 70px;
+        padding-inline: 18px;
+      }
+
+      nav {
+        gap: 14px;
+        font-size: 12px;
+      }
+
+      .page {
+        padding-block: 54px 66px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .topbar {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-block: 12px;
+      }
+
+      .brand {
+        gap: 8px;
+        font-size: 13px;
+      }
+
+      nav {
+        width: 100%;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .conversion-fields {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+      }
+
+      .swap-button {
+        margin: 0 auto;
+        transform: rotate(90deg);
+      }
+
+      .footer-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        justify-content: center;
+        gap: 3px;
+        padding-block: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap topbar">
+    <a class="brand" href="index.html" aria-label="回到能源與冷凍空調學習網首頁">
+      <span class="brand-mark" aria-hidden="true">能</span>
+      <span>能源與冷凍空調學習網</span>
+    </a>
+    <nav aria-label="主選單">
+      <a href="index.html#about">關於我們</a>
+      <a href="index.html">首頁</a>
+      <a href="index.html#topics">主題筆記</a>
+      <a href="terminology.html">術語辭典</a>
+      <a href="pycool.html">PyCool</a>
+      <a href="unit-converter.html" aria-current="page">單位換算</a>
+    </nav>
+  </header>
+
+  <main class="wrap page">
+    <p class="eyebrow">Unit Converter</p>
+    <h1>單位換算</h1>
+    <p class="intro">即時換算常用溫度、壓力、體積、質量、速度、力、絕對黏度與能量單位。壓力換算以絕對壓力為準；若使用表壓，請先加上當地大氣壓。</p>
+
+    <section class="converter" aria-label="單位換算器">
+      <div class="category-switch" role="group" aria-label="換算類別">
+        <button type="button" data-category="temperature" aria-pressed="true">溫度</button>
+        <button type="button" data-category="pressure" aria-pressed="false">壓力</button>
+        <button type="button" data-category="volume" aria-pressed="false">體積</button>
+        <button type="button" data-category="mass" aria-pressed="false">質量</button>
+        <button type="button" data-category="speed" aria-pressed="false">速度</button>
+        <button type="button" data-category="force" aria-pressed="false">力</button>
+        <button type="button" data-category="absolute-viscosity" aria-pressed="false">絕對黏度</button>
+        <button type="button" data-category="energy" aria-pressed="false">能量</button>
+      </div>
+
+      <div class="conversion-fields">
+        <div class="field">
+          <label for="conversion-value">輸入數值</label>
+          <input id="conversion-value" type="number" inputmode="decimal" step="any" placeholder="輸入數值" autocomplete="off">
+          <label for="from-unit">從</label>
+          <select id="from-unit"></select>
+        </div>
+
+        <button class="swap-button" id="swap-units" type="button" aria-label="交換換算單位" title="交換換算單位">⇄</button>
+
+        <div class="field">
+          <label for="result-value">換算結果</label>
+          <input id="result-value" type="text" readonly aria-live="polite" placeholder="結果會即時顯示">
+          <label for="to-unit">換算為</label>
+          <select id="to-unit"></select>
+        </div>
+      </div>
+
+      <div class="result" role="status" aria-live="polite" aria-atomic="true">
+        <span class="result-label" id="result-label">請輸入數值</span>
+        <p class="result-value" id="result-display">—</p>
+        <p class="result-error" id="result-error" hidden></p>
+      </div>
+      <p class="hint" id="conversion-hint">溫度採絕對溫標換算；低於絕對零度的數值不適用。</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <span>能源與冷凍空調學習網 · 單位換算</span>
+      <a href="index.html">回首頁</a>
+    </div>
+  </footer>
+
+  <script>
+    const unitDefinitions = {
+      temperature: [
+        { id: "C", label: "攝氏 (°C)" },
+        { id: "F", label: "華氏 (°F)" },
+        { id: "K", label: "開爾文 (K)" },
+        { id: "R", label: "蘭氏 (°R)" },
+      ],
+      pressure: [
+        { id: "Pa", label: "帕 (Pa)", factor: 1 },
+        { id: "kPa", label: "千帕 (kPa)", factor: 1e-3 },
+        { id: "MPa", label: "兆帕 (MPa)", factor: 1e-6 },
+        { id: "bar", label: "巴 (bar)", factor: 1e-5 },
+        { id: "atm", label: "標準大氣壓 (atm)", factor: 1 / 101325 },
+        { id: "psia", label: "磅力／平方英吋 (psia)", factor: 0.0254 ** 2 / (9.80665 * 0.45359237) },
+        { id: "inHg", label: "英吋汞柱 (inHg)", factor: (76 / 2.54) / 101325 },
+        { id: "mmHg", label: "毫米汞柱 (mmHg)", factor: 760 / 101325 },
+        { id: "kgf/cm2", label: "公斤力／平方公分 (kgf/cm²)", factor: 1 / 98066.5 },
+      ],
+      volume: [
+        { id: "m3", label: "立方公尺 (m³)", factor: 1 },
+        { id: "dm3", label: "立方分公尺 (dm³)", factor: 1e3 },
+        { id: "cm3", label: "立方公分 (cm³)", factor: 1e6 },
+        { id: "L", label: "公升 (L)", factor: 1e3 },
+        { id: "in3", label: "立方英吋 (in³)", factor: 1 / 0.0254 ** 3 },
+        { id: "ft3", label: "立方英尺 (ft³)", factor: 1 / 0.3048 ** 3 },
+        { id: "gal", label: "美制液量加侖 (gal)", factor: 1 / (0.0254 ** 3 * 231) },
+      ],
+      mass: [
+        { id: "kg", label: "公斤 (kg)", factor: 1 },
+        { id: "g", label: "公克 (g)", factor: 1e3 },
+        { id: "lbm", label: "磅 (lbm)", factor: 1 / 0.45359237 },
+      ],
+      speed: [
+        { id: "m/s", label: "公尺／秒 (m/s)", factor: 1 },
+        { id: "cm/s", label: "公分／秒 (cm/s)", factor: 1e2 },
+        { id: "km/hr", label: "公里／小時 (km/hr)", factor: 3.6 },
+        { id: "in/s", label: "英吋／秒 (in/s)", factor: 1 / 0.0254 },
+        { id: "ft/s", label: "英尺／秒 (ft/s)", factor: 1 / 0.3048 },
+        { id: "mi/hr", label: "英哩／小時 (mi/hr)", factor: 3600 / (5280 * 12 * 0.0254) },
+      ],
+      force: [
+        { id: "N", label: "牛頓 (N)", factor: 1 },
+        { id: "dyn", label: "達因 (dyn)", factor: 1e5 },
+        { id: "kgf", label: "公斤力 (kgf)", factor: 1 / 9.80665 },
+        { id: "lbf", label: "磅力 (lbf)", factor: 1 / (9.80665 * 0.45359237) },
+      ],
+      "absolute-viscosity": [
+        { id: "Pa*s", label: "帕秒 (Pa·s)", factor: 1 },
+        { id: "mPa*s", label: "毫帕秒 (mPa·s)", factor: 1e3 },
+        { id: "uPa*s", label: "微帕秒 (µPa·s)", factor: 1e6 },
+        { id: "P", label: "泊 (P)", factor: 10 },
+        { id: "cP", label: "厘泊 (cP)", factor: 1e3 },
+        { id: "lbf*s/ft^2", label: "磅力秒／平方英尺 (lbf·s/ft²)", factor: 0.3048 ** 2 / (9.80665 * 0.45359237) },
+        { id: "lbf*hr/ft^2", label: "磅力小時／平方英尺 (lbf·hr/ft²)", factor: (0.3048 ** 2 / (9.80665 * 0.45359237)) / 3600 },
+        { id: "lbm/(ft*s)", label: "磅質量／(英尺秒) (lbm/(ft·s))", factor: 0.3048 / 0.45359237 },
+        { id: "lbm/(ft*hr)", label: "磅質量／(英尺小時) (lbm/(ft·hr))", factor: (0.3048 / 0.45359237) * 3600 },
+      ],
+      energy: [
+        { id: "J", label: "焦耳 (J)", factor: 1 },
+        { id: "kJ", label: "千焦耳 (kJ)", factor: 1e-3 },
+        { id: "cal_IT", label: "卡路里（國際表）(cal_IT)", factor: 1 / 4.1868 },
+        { id: "BTU_IT", label: "英制熱單位（國際表）(BTU_IT)", factor: 1 / 1055.05585262 },
+        { id: "BTU_th", label: "英制熱單位（熱化學）(BTU_th)", factor: 1 / 1054.350 },
+      ],
+    };
+
+    const valueInput = document.querySelector("#conversion-value");
+    const fromUnit = document.querySelector("#from-unit");
+    const toUnit = document.querySelector("#to-unit");
+    const resultInput = document.querySelector("#result-value");
+    const resultLabel = document.querySelector("#result-label");
+    const resultDisplay = document.querySelector("#result-display");
+    const resultError = document.querySelector("#result-error");
+    const conversionHint = document.querySelector("#conversion-hint");
+    let activeCategory = "temperature";
+
+    function populateUnits(category, selectedFrom, selectedTo) {
+      const units = unitDefinitions[category];
+      for (const [select, selected] of [[fromUnit, selectedFrom], [toUnit, selectedTo]]) {
+        select.replaceChildren(...units.map(({ id, label }) => {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = label;
+          return option;
+        }));
+        select.value = selected;
+      }
+    }
+
+    function temperatureToKelvin(value, unit) {
+      if (unit === "F") return (value - 32) * 5 / 9 + 273.15;
+      if (unit === "R") return value * 5 / 9;
+      if (unit === "C") return value + 273.15;
+      return value;
+    }
+
+    function kelvinToTemperature(value, unit) {
+      if (unit === "F") return (value - 273.15) * 9 / 5 + 32;
+      if (unit === "R") return value * 9 / 5;
+      if (unit === "C") return value - 273.15;
+      return value;
+    }
+
+    function formatNumber(value) {
+      if (Object.is(value, -0) || value === 0) return "0";
+      return Number(value.toPrecision(8)).toString();
+    }
+
+    function updateConversion() {
+      resultError.hidden = true;
+      resultError.textContent = "";
+      const text = valueInput.value.trim();
+      if (!text) {
+        resultInput.value = "";
+        resultLabel.textContent = "請輸入數值";
+        resultDisplay.textContent = "—";
+        return;
+      }
+
+      const value = Number(text);
+      if (!Number.isFinite(value)) {
+        showConversionError("請輸入有效數值。");
+        return;
+      }
+
+      let result;
+      if (activeCategory === "temperature") {
+        const kelvin = temperatureToKelvin(value, fromUnit.value);
+        if (kelvin < 0) {
+          showConversionError("溫度不可低於絕對零度。");
+          return;
+        }
+        result = kelvinToTemperature(kelvin, toUnit.value);
+      } else {
+        if (value < 0 && ["pressure", "volume", "mass", "absolute-viscosity"].includes(activeCategory)) {
+          const categoryNames = { pressure: "壓力", volume: "體積", mass: "質量", "absolute-viscosity": "絕對黏度" };
+          showConversionError(`${categoryNames[activeCategory]}不可為負值。`);
+          return;
+        }
+        const from = unitDefinitions[activeCategory].find(({ id }) => id === fromUnit.value);
+        const to = unitDefinitions[activeCategory].find(({ id }) => id === toUnit.value);
+        result = value / from.factor * to.factor;
+      }
+
+      if (!Number.isFinite(result)) {
+        showConversionError("換算結果超出可處理範圍。");
+        return;
+      }
+
+      const formatted = formatNumber(result);
+      resultInput.value = formatted;
+      resultLabel.textContent = `${valueInput.value} ${unitLabel(fromUnit.value)} 等於`;
+      resultDisplay.textContent = `${formatted} ${unitLabel(toUnit.value)}`;
+    }
+
+    function showConversionError(message) {
+      resultInput.value = "";
+      resultLabel.textContent = "無法換算";
+      resultDisplay.textContent = "—";
+      resultError.textContent = message;
+      resultError.hidden = false;
+    }
+
+    function unitLabel(unitId) {
+      return unitDefinitions[activeCategory].find(({ id }) => id === unitId).label;
+    }
+
+    function setCategory(category) {
+      activeCategory = category;
+      const defaults = {
+        temperature: ["C", "F"],
+        pressure: ["kPa", "psia"],
+        volume: ["m3", "L"],
+        mass: ["kg", "lbm"],
+        speed: ["m/s", "km/hr"],
+        force: ["N", "kgf"],
+        "absolute-viscosity": ["Pa*s", "mPa*s"],
+        energy: ["J", "kJ"],
+      }[category];
+      populateUnits(category, ...defaults);
+      for (const button of document.querySelectorAll("[data-category]")) {
+        button.setAttribute("aria-pressed", String(button.dataset.category === category));
+      }
+      conversionHint.textContent = {
+        temperature: "溫度採絕對溫標換算；低於絕對零度的數值不適用。",
+        pressure: "壓力單位以絕對壓力換算；表壓數值須先加上當地大氣壓。",
+        volume: "美制液量加侖 (gal) 以 231 立方英吋換算；1 dm³ 等於 1 L。",
+        mass: "質量不可為負值。",
+        speed: "速度可為負值；正負號表示方向。",
+        force: "力可為負值；正負號表示方向。",
+        "absolute-viscosity": "動力黏度不可為負值。",
+        energy: "BTU_IT 採國際表定義，BTU_th 採熱化學定義。",
+      }[category];
+      updateConversion();
+    }
+
+    for (const button of document.querySelectorAll("[data-category]")) {
+      button.addEventListener("click", () => setCategory(button.dataset.category));
+    }
+    valueInput.addEventListener("input", updateConversion);
+    fromUnit.addEventListener("change", updateConversion);
+    toUnit.addEventListener("change", updateConversion);
+    document.querySelector("#swap-units").addEventListener("click", () => {
+      const previousFrom = fromUnit.value;
+      fromUnit.value = toUnit.value;
+      toUnit.value = previousFrom;
+      updateConversion();
+    });
+
+    setCategory(activeCategory);
+  </script>
+</body>
+</html>
