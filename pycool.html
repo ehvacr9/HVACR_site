@@ -811,6 +811,12 @@
       min-width: 640px;
       height: auto;
       border: 1px solid var(--line);
+      cursor: crosshair;
+    }
+
+    .ph-chart svg:focus {
+      outline: 3px solid var(--green);
+      outline-offset: -3px;
     }
 
     .ph-actions {
@@ -818,6 +824,9 @@
     }
 
     .ph-readout {
+      position: sticky;
+      top: 8px;
+      z-index: 2;
       height: 5.4em;
       overflow-y: auto;
       margin: 10px 0;
@@ -1251,7 +1260,8 @@
         <label><input type="checkbox" id="ph-isochores" checked> 等密度線 (kg/m³)</label>
       </div>
       <p class="table-status" id="ph-status" role="status" aria-live="polite"></p>
-      <p class="field-hint" id="ph-interaction-hint">滑鼠移動或觸控點選可讀值；也可用 Tab 聚焦圖表後按方向鍵移動，按住 Shift 可加大步距，Esc 隱藏標記。</p>
+      <p class="field-hint" id="ph-interaction-hint">在圖框內移動滑鼠或點選可讀值，數值顯示在上方讀值框。先點圖表或按「啟用鍵盤讀值」，再按方向鍵移動；Shift 加大步距，Esc 隱藏標記。Tab 也可切換至圖表，綠框表示已聚焦。</p>
+      <button class="secondary" id="ph-focus-button" type="button">啟用鍵盤讀值</button>
       <p class="ph-readout" id="ph-readout" aria-live="off">尚未選取狀態點。</p>
       <div class="ph-chart" id="ph-chart"></div>
       <div class="ph-actions">
@@ -1916,6 +1926,7 @@
           marker.setAttribute("visibility", "hidden");
           return;
         }
+        if (event.type === "pointerdown") svg.focus({ preventScroll: true });
         showPoint(x, y);
       };
       svg.addEventListener("pointerdown", readPointer);
@@ -2022,6 +2033,16 @@
 
     phDownloadColorButton.addEventListener("click", () => downloadPhDiagram(false));
     phDownloadBwButton.addEventListener("click", () => downloadPhDiagram(true));
+    document.querySelector("#ph-focus-button").addEventListener("click", () => {
+      const svg = phChart.querySelector("svg");
+      if (!svg) {
+        phStatus.dataset.kind = "error";
+        phStatus.textContent = "請等待圖表繪製完成後，再啟用鍵盤讀值。";
+        return;
+      }
+      svg.focus({ preventScroll: true });
+      svg.scrollIntoView({ block: "nearest", inline: "nearest" });
+    });
 
     function saturationType() {
       return document.querySelector('input[name="saturation-type"]:checked').value;
