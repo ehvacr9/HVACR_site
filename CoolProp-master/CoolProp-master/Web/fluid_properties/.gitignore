@@ -1,9 +1,0 @@
-/report/
-/fluids/*
-!/fluids/molecule_sdf/
-*.pdf
-*.png
-!pt-flash-flowchart.png
-*.csv
-*.bib.bak
-*.rst.in

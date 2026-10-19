@@ -1,5 +1,0 @@
-build/
-pdsim_surface.cpp
-*.so
-__pycache__/
-.pytest_cache/

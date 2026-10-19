@@ -1,1 +1,0 @@
-For instructions of using CoolProp in LabVIEW see here: https://www.coolprop.org/coolprop/wrappers/Labview/index.html#labview
