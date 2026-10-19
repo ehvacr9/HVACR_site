@@ -1027,10 +1027,6 @@
         <input type="radio" name="mode-category" value="drawing">
         <span>繪製</span>
       </label>
-      <label class="mode-option">
-        <input type="radio" name="calculation-mode" value="ph-diagram">
-        <span>Ph 圖</span>
-      </label>
     </div>
 
     <div class="mode-submodes" id="calculation-submodes" hidden>
@@ -2965,6 +2961,13 @@
       phStatus.textContent = "CoolProp 載入失敗，無法繪製 Ph 圖，請重新整理頁面。";
       generateTableButton.disabled = true;
       generateTableButton.textContent = "模組載入失敗";
+    }
+  </script>
+  <script>
+    if ("serviceWorker" in navigator && location.protocol !== "file:") {
+      navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+        console.error("無法啟用 CoolProp 快取：", error);
+      });
     }
   </script>
 </body>
