@@ -1515,6 +1515,7 @@
       .ph-isentrope { fill: none; stroke: #2b6cb0; stroke-width: 1.2; stroke-dasharray: 5 3; }
       .ph-isochore { fill: none; stroke: #2f855a; stroke-width: 1.2; stroke-dasharray: 8 3 2 3; }
       .ph-quality { fill: none; stroke: #8a8f88; stroke-width: 1; stroke-dasharray: 2 3; }
+      .ph-cross { stroke: #172b2b; stroke-width: 1; stroke-dasharray: 3 3; opacity: .55; }
       .halo { paint-order: stroke; stroke: #ffffff; stroke-width: 3px; stroke-linejoin: round; }
       .ph-label-isotherm { fill: #c0392b; }
       .ph-label-isentrope { fill: #2b6cb0; }
@@ -1530,6 +1531,8 @@
       if (text !== undefined) element.textContent = text;
       return element;
     }
+
+    const phPropertyCache = new Map();
 
     function drawPhDiagram() {
       phChart.replaceChildren();
@@ -1554,13 +1557,18 @@
       const toY = (p) => margin.top + (1 - (Math.log10(p) - logMin) / (logMax - logMin)) * plotHeight;
       const fromX = (x) => hMin + ((x - margin.left) / plotWidth) * (hMax - hMin);
       const fromY = (y) => 10 ** (logMin + (1 - (y - margin.top) / plotHeight) * (logMax - logMin));
-      const props = (output, n1, v1, n2, v2) => {
+      const rawProps = (output, n1, v1, n2, v2) => {
         try {
           const value = coolprop.PropsSI(output, n1, v1, n2, v2, fluid);
           return Number.isFinite(value) ? value : null;
         } catch {
           return null;
         }
+      };
+      const props = (output, n1, v1, n2, v2) => {
+        const key = `${fluid}|${output}|${n1}|${v1}|${n2}|${v2}`;
+        if (!phPropertyCache.has(key)) phPropertyCache.set(key, rawProps(output, n1, v1, n2, v2));
+        return phPropertyCache.get(key);
       };
       const pathOf = (points) => points.map((point, index) => `${index ? "L" : "M"}${toX(point.h).toFixed(1)} ${toY(point.p).toFixed(1)}`).join("");
       const logSpace = (from, to, count) => Array.from({ length: count }, (_, index) => from * (to / from) ** (index / (count - 1)));
@@ -1642,7 +1650,7 @@
           layer.append(svgElement("path", { class: "ph-isentrope", d: pathOf(points) }));
           const end = points[points.length - 1];
           if (end.p <= 10 ** logMin * 1.001 && end.h >= hMin && end.h <= hMax) {
-            labels.append(svgElement("text", { class: "ph-label-isentrope", x: toX(end.h), y: margin.top + plotHeight + 30, "text-anchor": "middle" }, `s=${entropy}`));
+            labels.append(svgElement("text", { class: "ph-label-isentrope halo", x: toX(end.h), y: margin.top + plotHeight + 30, "text-anchor": "middle" }, `s=${entropy}`));
           }
         }
       }
@@ -1665,7 +1673,7 @@
             if (pSat === null || hLiquid === null || hVapor === null) continue;
             sample(descending.filter((p) => p > pSat * 1.001));
             points.push({ p: pSat, h: hLiquid / 1000 }, { p: pSat, h: hVapor / 1000 });
-            labels.append(svgElement("text", { class: "ph-label-isotherm halo", x: toX((hLiquid + hVapor) / 2000), y: toY(pSat) - 3, "text-anchor": "middle" }, `${celsius}°C`));
+            labels.append(svgElement("text", { class: "ph-label-isotherm halo", x: toX((hLiquid + hVapor) / 2000), y: toY(pSat) + (pSat > 5e6 ? 12 : -3), "text-anchor": "middle" }, `${celsius}°C`));
             sample(descending.filter((p) => p < pSat / 1.001));
           } else {
             sample(descending);
@@ -1674,7 +1682,7 @@
           layer.append(svgElement("path", { class: "ph-isotherm", d: pathOf(points) }));
           const start = points[0];
           if (start.p >= 10 ** logMax * .999 && start.h >= hMin && start.h <= hMax) {
-            labels.append(svgElement("text", { class: "ph-label-isotherm", x: toX(start.h), y: margin.top - 6, "text-anchor": "middle" }, `${celsius}°C`));
+            labels.append(svgElement("text", { class: "ph-label-isotherm halo", x: toX(start.h), y: margin.top - 6, "text-anchor": "middle" }, `${celsius}°C`));
           }
         }
       }
@@ -1703,7 +1711,7 @@
       if (edgeVapor !== null) svg.append(svgElement("text", { class: "ph-label-edge halo", x: toX(edgeVapor / 1000) + 8, y: toY(edgePressure) + 4 }, "x=1 saturated vapor"));
       if (critical.length) {
         svg.append(svgElement("circle", { cx: toX(critical[0].h), cy: toY(critical[0].p), r: 4.5, fill: "#c0392b" }));
-        svg.append(svgElement("text", { x: toX(critical[0].h) + 8, y: toY(critical[0].p) - 6 }, "臨界點"));
+        svg.append(svgElement("text", { class: "halo", x: toX(critical[0].h) - 9, y: toY(critical[0].p) + 16, "text-anchor": "end" }, "臨界點"));
       }
 
       svg.append(svgElement("rect", { class: "ph-frame", x: margin.left, y: margin.top, width: plotWidth, height: plotHeight }));
@@ -1711,23 +1719,49 @@
       svg.append(svgElement("text", { class: "axis-title", x: 18, y: margin.top + plotHeight / 2, "text-anchor": "middle", transform: `rotate(-90 18 ${margin.top + plotHeight / 2})` }, "壓力 P (kPa，對數刻度)"));
       svg.append(svgElement("text", { x: margin.left + 8, y: margin.top + 16 }, "水 Water"));
 
+      const marker = svgElement("g", { class: "ph-marker", visibility: "hidden", "pointer-events": "none" });
+      marker.append(
+        svgElement("line", { class: "ph-cross", id: "ph-cross-x", x1: margin.left, x2: margin.left + plotWidth }),
+        svgElement("line", { class: "ph-cross", id: "ph-cross-y", y1: margin.top, y2: margin.top + plotHeight }),
+        svgElement("circle", { id: "ph-marker-dot", r: 4, fill: "#ffffff", stroke: "#172b2b", "stroke-width": 2 }),
+      );
+      svg.append(marker);
+      const crossX = marker.querySelector("#ph-cross-x");
+      const crossY = marker.querySelector("#ph-cross-y");
+      const markerDot = marker.querySelector("#ph-marker-dot");
+
+      svg.addEventListener("mouseleave", () => marker.setAttribute("visibility", "hidden"));
       svg.addEventListener("mousemove", (event) => {
         const rect = svg.getBoundingClientRect();
         const x = ((event.clientX - rect.left) * width) / rect.width;
         const y = ((event.clientY - rect.top) * height) / rect.height;
-        if (x < margin.left || x > margin.left + plotWidth || y < margin.top || y > margin.top + plotHeight) return;
+        if (x < margin.left || x > margin.left + plotWidth || y < margin.top || y > margin.top + plotHeight) {
+          marker.setAttribute("visibility", "hidden");
+          return;
+        }
+        marker.setAttribute("visibility", "visible");
+        crossX.setAttribute("y1", y);
+        crossX.setAttribute("y2", y);
+        crossY.setAttribute("x1", x);
+        crossY.setAttribute("x2", x);
+        markerDot.setAttribute("cx", x);
+        markerDot.setAttribute("cy", y);
         const h = fromX(x);
         const p = fromY(y);
-        const temperature = props("T", "P", p, "H", h * 1000);
-        const entropy = props("S", "P", p, "H", h * 1000);
+        const temperature = rawProps("T", "P", p, "H", h * 1000);
+        const entropy = rawProps("S", "P", p, "H", h * 1000);
+        const density = rawProps("D", "P", p, "H", h * 1000);
+        const quality = p < pCritical ? rawProps("Q", "P", p, "H", h * 1000) : null;
         phStatus.dataset.kind = "success";
         phStatus.textContent = `P = ${formatNumber(p / 1000)} kPa，h = ${formatNumber(h)} kJ/kg`
           + (temperature === null ? "" : `，T = ${formatNumber(temperature - 273.15)} °C`)
-          + (entropy === null ? "" : `，s = ${formatNumber(entropy / 1000)} kJ/kg·K`);
+          + (entropy === null ? "" : `，s = ${formatNumber(entropy / 1000)} kJ/kg·K`)
+          + (density === null ? "" : `，ρ = ${formatNumber(density)} kg/m³`)
+          + (quality !== null && quality >= 0 && quality <= 1 ? `，x = ${formatNumber(quality)}` : "");
       });
       phChart.append(svg);
       phStatus.dataset.kind = "success";
-      phStatus.textContent = "已繪製水的 Ph 圖；將滑鼠移到圖上可讀取該點的壓力、焓、溫度與熵。";
+      phStatus.textContent = "已繪製水的 Ph 圖；將滑鼠移到圖上可讀取該點的壓力、焓、溫度、熵、密度與乾度。";
     }
 
     function downloadPhDiagram() {
@@ -1735,6 +1769,7 @@
       if (!svg) return;
       const [, , width, height] = svg.getAttribute("viewBox").split(" ").map(Number);
       const clone = svg.cloneNode(true);
+      clone.querySelector(".ph-marker")?.remove();
       clone.setAttribute("xmlns", svgNamespace);
       clone.setAttribute("width", width);
       clone.setAttribute("height", height);
