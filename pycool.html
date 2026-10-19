@@ -810,28 +810,12 @@
       width: 100%;
       min-width: 640px;
       height: auto;
-      background: #fff;
       border: 1px solid var(--line);
     }
 
-    .ph-chart text {
-      font-size: 11px;
-      fill: var(--muted);
+    .ph-actions {
+      margin-top: 14px;
     }
-
-    .ph-chart .axis-title {
-      font-size: 13px;
-      fill: var(--ink);
-    }
-
-    .ph-grid { stroke: #e6ebe3; stroke-width: 1; }
-    .ph-frame { fill: none; stroke: var(--ink); stroke-width: 1; }
-    .ph-dome { fill: rgba(29, 98, 82, .07); stroke: var(--green-dark); stroke-width: 2.4; }
-    .ph-isotherm { fill: none; stroke: #c0392b; stroke-width: 1.2; }
-    .ph-isentrope { fill: none; stroke: #2b6cb0; stroke-width: 1.2; stroke-dasharray: 5 3; }
-    .ph-quality { fill: none; stroke: #8a8f88; stroke-width: 1; stroke-dasharray: 2 3; }
-    .ph-label-isotherm { fill: #c0392b !important; }
-    .ph-label-isentrope { fill: #2b6cb0 !important; }
 
     .notes a {
       color: var(--green);
@@ -1247,14 +1231,18 @@
     </section>
     <section class="saturation-table-section ph-section" id="ph-section" hidden aria-labelledby="ph-title">
       <h2 id="ph-title">Ph 圖（壓力－焓圖）</h2>
-      <p class="table-intro">縱軸為絕對壓力（對數刻度），橫軸為比焓；紅色實線為等溫線，藍色虛線為等熵線，灰色點線為等乾度線（x = 0.1～0.9）。目前僅提供水的 Ph 圖，其他流體將陸續加入。</p>
+      <p class="table-intro">縱軸為絕對壓力（對數刻度），橫軸為比焓；紅色實線為等溫線，藍色虛線為等熵線，灰色點線為等乾度線（x = 0.1～0.9），綠色點劃線為等密度線。目前僅提供水的 Ph 圖，其他流體將陸續加入。</p>
       <div class="ph-options">
         <label><input type="checkbox" id="ph-isotherms" checked> 等溫線 (°C)</label>
         <label><input type="checkbox" id="ph-isentropes" checked> 等熵線 (kJ/kg·K)</label>
         <label><input type="checkbox" id="ph-qualities" checked> 等乾度線</label>
+        <label><input type="checkbox" id="ph-isochores" checked> 等密度線 (kg/m³)</label>
       </div>
       <p class="table-status" id="ph-status" role="status" aria-live="polite"></p>
       <div class="ph-chart" id="ph-chart"></div>
+      <div class="ph-actions">
+        <button class="secondary" id="ph-download-button" type="button">下載圖片 (PNG)</button>
+      </div>
     </section>
     <section class="basic-information-section" id="basic-information-section" aria-labelledby="basic-information-title">
       <h2 id="basic-information-title">基本資訊</h2>
@@ -1515,6 +1503,25 @@
     const phChart = document.querySelector("#ph-chart");
     const phStatus = document.querySelector("#ph-status");
     const phToggles = document.querySelectorAll(".ph-options input");
+    const phDownloadButton = document.querySelector("#ph-download-button");
+    const phChartStyle = `
+      text { font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif; font-size: 11px; fill: #5b6c68; }
+      .axis-title { font-size: 13px; fill: #172b2b; }
+      .ph-bg { fill: #ffffff; }
+      .ph-grid { stroke: #e6ebe3; stroke-width: 1; }
+      .ph-frame { fill: none; stroke: #172b2b; stroke-width: 1; }
+      .ph-dome { fill: rgba(29, 98, 82, .07); stroke: #16483e; stroke-width: 2.4; }
+      .ph-isotherm { fill: none; stroke: #c0392b; stroke-width: 1.2; }
+      .ph-isentrope { fill: none; stroke: #2b6cb0; stroke-width: 1.2; stroke-dasharray: 5 3; }
+      .ph-isochore { fill: none; stroke: #2f855a; stroke-width: 1.2; stroke-dasharray: 8 3 2 3; }
+      .ph-quality { fill: none; stroke: #8a8f88; stroke-width: 1; stroke-dasharray: 2 3; }
+      .halo { paint-order: stroke; stroke: #ffffff; stroke-width: 3px; stroke-linejoin: round; }
+      .ph-label-isotherm { fill: #c0392b; }
+      .ph-label-isentrope { fill: #2b6cb0; }
+      .ph-label-isochore { fill: #2f855a; }
+      .ph-label-quality { fill: #4d524b; }
+      .ph-label-edge { fill: #16483e; font-weight: bold; }
+    `;
     const svgNamespace = "http://www.w3.org/2000/svg";
 
     function svgElement(name, attributes = {}, text) {
@@ -1536,7 +1543,7 @@
 
       const width = 900;
       const height = 600;
-      const margin = { left: 72, right: 24, top: 30, bottom: 64 };
+      const margin = { left: 72, right: 64, top: 30, bottom: 64 };
       const plotWidth = width - margin.left - margin.right;
       const plotHeight = height - margin.top - margin.bottom;
       const hMin = 0;
@@ -1565,6 +1572,8 @@
 
       const svg = svgElement("svg", { viewBox: `0 0 ${width} ${height}`, role: "img", "aria-label": "水的壓力－焓 (Ph) 圖" });
       svg.append(svgElement("title", {}, "水的壓力－焓 (Ph) 圖"));
+      svg.append(svgElement("style", {}, phChartStyle));
+      svg.append(svgElement("rect", { class: "ph-bg", x: 0, y: 0, width, height }));
       const clipId = "ph-clip";
       const defs = svgElement("defs");
       defs.append(svgElement("clipPath", { id: clipId }));
@@ -1579,6 +1588,7 @@
           svg.append(svgElement("line", { class: "ph-grid", x1: margin.left, x2: margin.left + plotWidth, y1: y, y2: y, opacity: factor === 1 ? 1 : .45 }));
         }
         svg.append(svgElement("text", { x: margin.left - 8, y: toY(10 ** exponent) + 4, "text-anchor": "end" }, (10 ** (exponent - 3)).toLocaleString("en-US")));
+        svg.append(svgElement("text", { x: margin.left + plotWidth + 8, y: toY(10 ** exponent) + 4, "text-anchor": "start" }, (10 ** (exponent - 3)).toLocaleString("en-US")));
       }
       for (let h = hMin; h <= hMax; h += 500) {
         svg.append(svgElement("line", { class: "ph-grid", x1: toX(h), x2: toX(h), y1: margin.top, y2: margin.top + plotHeight }));
@@ -1597,6 +1607,28 @@
             .filter((point) => point.h !== null)
             .map((point) => ({ p: point.p, h: point.h / 1000 }));
           layer.append(svgElement("path", { class: "ph-quality", d: pathOf(points) }));
+          const labelEnthalpy = props("H", "P", 3000, "Q", quality);
+          if (labelEnthalpy !== null) {
+            labels.append(svgElement("text", { class: "ph-label-quality halo", x: toX(labelEnthalpy / 1000), y: toY(3000) - 4, "text-anchor": "middle" }, `x=${quality.toFixed(1)}`));
+          }
+        }
+      }
+
+      if (document.querySelector("#ph-isochores").checked) {
+        for (const density of [0.01, 0.1, 1, 10, 50, 100, 200, 400, 600, 800, 950]) {
+          const points = [];
+          for (let step = 0; step <= 240; step += 1) {
+            const temperature = 273.16 + ((1500 - 273.16) * step) / 240;
+            const p = props("P", "T", temperature, "D", density);
+            const h = props("H", "T", temperature, "D", density);
+            if (p === null || h === null || p < 10 ** logMin || p > 10 ** logMax) continue;
+            points.push({ p, h: h / 1000 });
+          }
+          if (points.length < 2) continue;
+          layer.append(svgElement("path", { class: "ph-isochore", d: pathOf(points) }));
+          const visible = points.filter((point) => point.h <= hMax - 120 && point.p <= 3e7);
+          const anchor = visible[visible.length - 1] ?? points[points.length - 1];
+          labels.append(svgElement("text", { class: "ph-label-isochore halo", x: toX(anchor.h) + 4, y: toY(anchor.p) - 4 }, `${density} kg/m³`));
         }
       }
 
@@ -1633,6 +1665,7 @@
             if (pSat === null || hLiquid === null || hVapor === null) continue;
             sample(descending.filter((p) => p > pSat * 1.001));
             points.push({ p: pSat, h: hLiquid / 1000 }, { p: pSat, h: hVapor / 1000 });
+            labels.append(svgElement("text", { class: "ph-label-isotherm halo", x: toX((hLiquid + hVapor) / 2000), y: toY(pSat) - 3, "text-anchor": "middle" }, `${celsius}°C`));
             sample(descending.filter((p) => p < pSat / 1.001));
           } else {
             sample(descending);
@@ -1663,6 +1696,11 @@
       const dome = [...liquidSide, ...critical, ...vaporSide.reverse()];
       layer.append(svgElement("path", { class: "ph-dome", d: `${pathOf(dome)}Z` }));
       svg.append(layer, labels);
+      const edgePressure = 1.5e6;
+      const edgeLiquid = props("H", "P", edgePressure, "Q", 0);
+      const edgeVapor = props("H", "P", edgePressure, "Q", 1);
+      if (edgeLiquid !== null) svg.append(svgElement("text", { class: "ph-label-edge halo", x: toX(edgeLiquid / 1000) - 8, y: toY(edgePressure) + 4, "text-anchor": "end" }, "x=0 saturated liquid"));
+      if (edgeVapor !== null) svg.append(svgElement("text", { class: "ph-label-edge halo", x: toX(edgeVapor / 1000) + 8, y: toY(edgePressure) + 4 }, "x=1 saturated vapor"));
       if (critical.length) {
         svg.append(svgElement("circle", { cx: toX(critical[0].h), cy: toY(critical[0].p), r: 4.5, fill: "#c0392b" }));
         svg.append(svgElement("text", { x: toX(critical[0].h) + 8, y: toY(critical[0].p) - 6 }, "臨界點"));
@@ -1691,6 +1729,44 @@
       phStatus.dataset.kind = "success";
       phStatus.textContent = "已繪製水的 Ph 圖；將滑鼠移到圖上可讀取該點的壓力、焓、溫度與熵。";
     }
+
+    function downloadPhDiagram() {
+      const svg = phChart.querySelector("svg");
+      if (!svg) return;
+      const [, , width, height] = svg.getAttribute("viewBox").split(" ").map(Number);
+      const clone = svg.cloneNode(true);
+      clone.setAttribute("xmlns", svgNamespace);
+      clone.setAttribute("width", width);
+      clone.setAttribute("height", height);
+      const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)], { type: "image/svg+xml;charset=utf-8" }));
+      const image = new Image();
+      image.onload = () => {
+        const scale = 2;
+        const canvas = document.createElement("canvas");
+        canvas.width = width * scale;
+        canvas.height = height * scale;
+        const context = canvas.getContext("2d");
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        canvas.toBlob((blob) => {
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "ph-diagram-water.png";
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+        }, "image/png");
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        phStatus.dataset.kind = "error";
+        phStatus.textContent = "圖片下載失敗，請重新整理後再試。";
+      };
+      image.src = url;
+    }
+
+    phDownloadButton.addEventListener("click", downloadPhDiagram);
 
     function saturationType() {
       return document.querySelector('input[name="saturation-type"]:checked').value;
