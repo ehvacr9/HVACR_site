@@ -814,11 +814,6 @@
       cursor: crosshair;
     }
 
-    .ph-chart svg:focus {
-      outline: 3px solid var(--green);
-      outline-offset: -3px;
-    }
-
     .ph-actions {
       margin-top: 14px;
     }
@@ -1260,8 +1255,7 @@
         <label><input type="checkbox" id="ph-isochores" checked> 等密度線 (kg/m³)</label>
       </div>
       <p class="table-status" id="ph-status" role="status" aria-live="polite"></p>
-      <p class="field-hint" id="ph-interaction-hint">在圖框內移動滑鼠或點選可讀值，數值顯示在上方讀值框。先點圖表或按「啟用鍵盤讀值」，再按方向鍵移動；Shift 加大步距，Esc 隱藏標記。Tab 也可切換至圖表，綠框表示已聚焦。</p>
-      <button class="secondary" id="ph-focus-button" type="button">啟用鍵盤讀值</button>
+      <p class="field-hint" id="ph-interaction-hint">在圖框內移動滑鼠可讀值。</p>
       <p class="ph-readout" id="ph-readout" aria-live="off">尚未選取狀態點。</p>
       <div class="ph-chart" id="ph-chart"></div>
       <div class="ph-actions">
@@ -1689,7 +1683,7 @@
       const fluidTitle = `${fluid} Pressure–Enthalpy (Ph) Diagram`;
 
       const svg = svgElement("svg", {
-        viewBox: `0 0 ${width} ${height}`, role: "img", tabindex: 0,
+        viewBox: `0 0 ${width} ${height}`, role: "img",
         "aria-label": fluidTitle, "aria-describedby": "ph-interaction-hint ph-readout",
       });
       svg.dataset.fluid = fluid;
@@ -1891,11 +1885,7 @@
       const crossY = marker.querySelector("#ph-cross-y");
       const markerDot = marker.querySelector("#ph-marker-dot");
 
-      let selectedX = margin.left + plotWidth / 2;
-      let selectedY = margin.top + plotHeight / 2;
       const showPoint = (x, y) => {
-        selectedX = x;
-        selectedY = y;
         marker.setAttribute("visibility", "visible");
         crossX.setAttribute("y1", y);
         crossX.setAttribute("y2", y);
@@ -1926,32 +1916,13 @@
           marker.setAttribute("visibility", "hidden");
           return;
         }
-        if (event.type === "pointerdown") svg.focus({ preventScroll: true });
         showPoint(x, y);
       };
-      svg.addEventListener("pointerdown", readPointer);
       svg.addEventListener("pointermove", (event) => {
         if (event.pointerType === "mouse") readPointer(event);
       });
       svg.addEventListener("pointerleave", (event) => {
         if (event.pointerType === "mouse") marker.setAttribute("visibility", "hidden");
-      });
-      svg.addEventListener("focus", () => showPoint(selectedX, selectedY));
-      svg.addEventListener("blur", () => marker.setAttribute("visibility", "hidden"));
-      svg.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-          marker.setAttribute("visibility", "hidden");
-          return;
-        }
-        const step = event.shiftKey ? 20 : 4;
-        const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
-        const move = moves[event.key];
-        if (!move) return;
-        event.preventDefault();
-        showPoint(
-          Math.max(margin.left, Math.min(margin.left + plotWidth, selectedX + move[0])),
-          Math.max(margin.top, Math.min(margin.top + plotHeight, selectedY + move[1])),
-        );
       });
       phChart.append(svg);
       const occupied = [...svg.querySelectorAll("text:not(.ph-label-isochore)")].map((text) => text.getBoundingClientRect());
@@ -1970,7 +1941,7 @@
         occupied.push(label.getBoundingClientRect());
       }
       phStatus.dataset.kind = "success";
-      phStatus.textContent = `已繪製 ${fluid} 的 Ph 圖；可用滑鼠、觸控或鍵盤選取狀態點，乾度僅在汽液共存區顯示。`;
+      phStatus.textContent = `已繪製 ${fluid} 的 Ph 圖；在圖框內移動滑鼠可讀值，乾度僅在汽液共存區顯示。`;
     }
 
     function downloadPhDiagram(blackWhite) {
@@ -1982,7 +1953,6 @@
       }
       const [, , width, height] = svg.getAttribute("viewBox").split(" ").map(Number);
       const clone = svg.cloneNode(true);
-      clone.removeAttribute("tabindex");
       clone.removeAttribute("aria-describedby");
       clone.querySelector(".ph-marker")?.remove();
       if (blackWhite) clone.querySelector("style").textContent += phBlackWhiteStyle;
@@ -2033,16 +2003,6 @@
 
     phDownloadColorButton.addEventListener("click", () => downloadPhDiagram(false));
     phDownloadBwButton.addEventListener("click", () => downloadPhDiagram(true));
-    document.querySelector("#ph-focus-button").addEventListener("click", () => {
-      const svg = phChart.querySelector("svg");
-      if (!svg) {
-        phStatus.dataset.kind = "error";
-        phStatus.textContent = "請等待圖表繪製完成後，再啟用鍵盤讀值。";
-        return;
-      }
-      svg.focus({ preventScroll: true });
-      svg.scrollIntoView({ block: "nearest", inline: "nearest" });
-    });
 
     function saturationType() {
       return document.querySelector('input[name="saturation-type"]:checked').value;
