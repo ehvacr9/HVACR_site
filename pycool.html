@@ -1559,8 +1559,8 @@
       }
 
       const width = 900;
-      const height = 600;
-      const margin = { left: 72, right: 64, top: 30, bottom: 64 };
+      const height = 630;
+      const margin = { left: 72, right: 64, top: 30, bottom: 94 };
       const plotWidth = width - margin.left - margin.right;
       const plotHeight = height - margin.top - margin.bottom;
       const hMin = 0;
@@ -1725,12 +1725,13 @@
       if (edgeVapor !== null) svg.append(svgElement("text", { class: "ph-label-edge halo", x: toX(edgeVapor / 1000) + 8, y: toY(edgePressure) + 4 }, "x=1 saturated vapor"));
       if (critical.length) {
         svg.append(svgElement("circle", { class: "ph-cp-dot", cx: toX(critical[0].h), cy: toY(critical[0].p), r: 4.5, fill: "#c0392b" }));
-        svg.append(svgElement("text", { class: "halo", x: toX(critical[0].h) - 9, y: toY(critical[0].p) + 16, "text-anchor": "end" }, "c.p."));
+        svg.append(svgElement("text", { class: "halo", x: toX(critical[0].h) + 8, y: toY(critical[0].p) - 6 }, "c.p."));
       }
 
       svg.append(svgElement("rect", { class: "ph-frame", x: margin.left, y: margin.top, width: plotWidth, height: plotHeight }));
-      svg.append(svgElement("text", { class: "axis-title", x: margin.left + plotWidth / 2, y: height - 10, "text-anchor": "middle" }, "比焓 h (kJ/kg)"));
-      svg.append(svgElement("text", { class: "axis-title", x: 18, y: margin.top + plotHeight / 2, "text-anchor": "middle", transform: `rotate(-90 18 ${margin.top + plotHeight / 2})` }, "壓力 P (kPa，對數刻度)"));
+      svg.append(svgElement("text", { class: "axis-title", x: margin.left + plotWidth / 2, y: height - 40, "text-anchor": "middle" }, "Specific Enthalpy h (kJ/kg)"));
+      svg.append(svgElement("text", { class: "axis-title", x: 18, y: margin.top + plotHeight / 2, "text-anchor": "middle", transform: `rotate(-90 18 ${margin.top + plotHeight / 2})` }, "Pressure P (kPa, logarithmic scale)"));
+      svg.append(svgElement("text", { class: "ph-reference-state", x: margin.left, y: height - 12 }, "Reference State: u = 0 kJ/kg, s = 0 kJ/(kg∙K) for saturated liquid at 0.01 °C"));
       svg.append(svgElement("text", { x: margin.left + 8, y: margin.top + 16 }, "水 Water"));
 
       const marker = svgElement("g", { class: "ph-marker", visibility: "hidden", "pointer-events": "none" });
