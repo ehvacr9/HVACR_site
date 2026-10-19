@@ -1031,6 +1031,7 @@
               <div class="result-row"><dt>比內能 u (kJ/kg)</dt><dd id="liquid-u">—</dd></div>
               <div class="result-row"><dt>比熱 cp (kJ/kg·K)</dt><dd id="liquid-cp">—</dd></div>
               <div class="result-row"><dt>比熱 cv (kJ/kg·K)</dt><dd id="liquid-cv">—</dd></div>
+              <div class="result-row"><dt>Viscosity 黏度 μ (μPa·s)</dt><dd id="liquid-viscosity">—</dd></div>
             </dl>
           </section>
           <section class="phase-card" aria-labelledby="vapor-title">
@@ -1042,6 +1043,7 @@
               <div class="result-row"><dt>比內能 u (kJ/kg)</dt><dd id="vapor-u">—</dd></div>
               <div class="result-row"><dt>比熱 cp (kJ/kg·K)</dt><dd id="vapor-cp">—</dd></div>
               <div class="result-row"><dt>比熱 cv (kJ/kg·K)</dt><dd id="vapor-cv">—</dd></div>
+              <div class="result-row"><dt>Viscosity 黏度 μ (μPa·s)</dt><dd id="vapor-viscosity">—</dd></div>
             </dl>
           </section>
         </div>
@@ -1058,6 +1060,7 @@
             <div class="state-output"><dt>比內能 u (kJ/kg)</dt><dd id="state-u">—</dd></div>
             <div class="state-output"><dt>比熱 cp (kJ/kg·K)</dt><dd id="state-cp">—</dd></div>
             <div class="state-output"><dt>比熱 cv (kJ/kg·K)</dt><dd id="state-cv">—</dd></div>
+            <div class="state-output"><dt>Viscosity 黏度 μ (μPa·s)</dt><dd id="state-viscosity">—</dd></div>
             <div class="state-output"><dt>乾度 x</dt><dd id="state-q">—</dd></div>
           </dl>
         </section>
@@ -1283,6 +1286,7 @@
       u: document.querySelector("#state-u"),
       cp: document.querySelector("#state-cp"),
       cv: document.querySelector("#state-cv"),
+      viscosity: document.querySelector("#state-viscosity"),
       q: document.querySelector("#state-q"),
     };
     const resultFields = {
@@ -1293,6 +1297,7 @@
         u: document.querySelector("#liquid-u"),
         cp: document.querySelector("#liquid-cp"),
         cv: document.querySelector("#liquid-cv"),
+        viscosity: document.querySelector("#liquid-viscosity"),
       },
       vapor: {
         rho: document.querySelector("#vapor-rho"),
@@ -1301,6 +1306,7 @@
         u: document.querySelector("#vapor-u"),
         cp: document.querySelector("#vapor-cp"),
         cv: document.querySelector("#vapor-cv"),
+        viscosity: document.querySelector("#vapor-viscosity"),
       },
     };
     const formatNumber = (value) => Number(value.toPrecision(6)).toString();
@@ -1355,6 +1361,7 @@
       ["u", "U", (value) => value / 1000],
       ["cp", "C", (value) => value / 1000],
       ["cv", "O", (value) => value / 1000],
+      ["viscosity", "V", (value) => value * 1e6],
       ["q", "Q", (value) => value],
     ];
     const phaseNames = {
@@ -2079,6 +2086,7 @@
             u: coolprop.PropsSI("U", "T", temperature, "Q", quality, activeFluid) / 1000,
             cp: coolprop.PropsSI("C", "T", temperature, "Q", quality, activeFluid) / 1000,
             cv: coolprop.PropsSI("O", "T", temperature, "Q", quality, activeFluid) / 1000,
+            viscosity: coolprop.PropsSI("V", "T", temperature, "Q", quality, activeFluid) * 1e6,
           };
           for (const [key, value] of Object.entries(properties)) {
             if (!Number.isFinite(value)) {
