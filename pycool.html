@@ -1673,6 +1673,7 @@
         for (const celsius of [10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700]) {
           const temperature = celsius + 273.15;
           const points = [];
+          let vaporLabelPressure = 5000;
           const sample = (list) => {
             for (const p of list) {
               const h = props("H", "T", temperature, "P", p);
@@ -1685,6 +1686,7 @@
             const hLiquid = props("H", "T", temperature, "Q", 0);
             const hVapor = props("H", "T", temperature, "Q", 1);
             if (pSat === null || hLiquid === null || hVapor === null) continue;
+            vaporLabelPressure = Math.min(vaporLabelPressure, Math.sqrt(10 ** logMin * pSat));
             sample(descending.filter((p) => p > pSat * 1.001));
             points.push({ p: pSat, h: hLiquid / 1000 }, { p: pSat, h: hVapor / 1000 });
             labels.append(svgElement("text", { class: "ph-label-isotherm halo", x: toX((hLiquid + hVapor) / 2000), y: toY(pSat) + (pSat > 5e6 ? 12 : -3), "text-anchor": "middle" }, `${celsius}°C`));
@@ -1694,6 +1696,18 @@
           }
           if (points.length < 2) continue;
           layer.append(svgElement("path", { class: "ph-isotherm", d: pathOf(points) }));
+          const vaporLabelEnthalpy = props("H", "T", temperature, "P", vaporLabelPressure);
+          if (vaporLabelEnthalpy !== null && vaporLabelEnthalpy / 1000 >= hMin && vaporLabelEnthalpy / 1000 <= hMax) {
+            const x = toX(vaporLabelEnthalpy / 1000) + 4;
+            const y = toY(vaporLabelPressure) - 4;
+            const nearBottom = y > margin.top + plotHeight - 30;
+            labels.append(svgElement("text", {
+              class: "ph-label-isotherm ph-label-superheated halo",
+              x,
+              y,
+              transform: nearBottom ? "" : `rotate(-90 ${x} ${y})`,
+            }, `${celsius}°C`));
+          }
           const start = points[0];
           if (start.p >= 10 ** logMax * .999 && start.h >= hMin && start.h <= hMax) {
             labels.append(svgElement("text", { class: "ph-label-isotherm halo", x: toX(start.h), y: margin.top - 6, "text-anchor": "middle" }, `${celsius}°C`));
