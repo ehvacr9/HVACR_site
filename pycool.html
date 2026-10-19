@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="PyCool Web 冷媒與水的物性計算器：查詢飽和性質或指定任兩項已知性質求狀態點。">
+  <meta name="description" content="PyCool Web 冷媒與水的物性計算器：查詢飽和性質、指定任兩項已知性質求狀態點、產生飽和表或繪製 Ph 圖。">
   <title>PyCool Web | 能源與冷凍空調小站</title>
   <style>
     :root {
@@ -146,6 +146,30 @@
       flex-wrap: wrap;
       gap: 8px;
       margin-bottom: 16px;
+    }
+
+    .mode-submodes {
+      margin: -4px 0 20px;
+      padding: 14px 16px 16px;
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--green);
+      background: #edf0e9;
+    }
+
+    .mode-submodes[hidden] {
+      display: none;
+    }
+
+    .mode-submodes-title {
+      margin: 0 0 9px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: .08em;
+    }
+
+    .mode-submodes .mode-switch {
+      margin: 0;
     }
 
     .shared-fluid-field {
@@ -966,7 +990,7 @@
   <main class="wrap page">
     <p class="eyebrow">Fluid Properties · CoolProp</p>
     <h1>PyCool Web</h1>
-    <p class="intro">選擇水或冷媒，查詢飽和性質、指定任兩項性質求狀態點，或產生飽和表。</p>
+    <p class="intro">選擇水或冷媒，查詢物性、產生飽和表，或繪製壓力－焓（Ph）圖。</p>
 
     <div class="field shared-fluid-field">
       <label for="fluid">流體</label>
@@ -990,27 +1014,51 @@
       </select>
     </div>
 
-    <div class="mode-switch" role="radiogroup" aria-label="計算模式">
+    <div class="mode-switch" role="radiogroup" aria-label="功能類別">
       <label class="mode-option">
-        <input type="radio" name="calculation-mode" value="basic-information" checked>
+        <input type="radio" name="mode-category" value="basic-information" checked>
         <span>基本資訊</span>
       </label>
       <label class="mode-option">
-        <input type="radio" name="calculation-mode" value="saturation">
-        <span>飽和輸入</span>
+        <input type="radio" name="mode-category" value="calculation">
+        <span>計算</span>
       </label>
       <label class="mode-option">
-        <input type="radio" name="calculation-mode" value="state">
-        <span>指定任兩性質（求狀態點）</span>
-      </label>
-      <label class="mode-option">
-        <input type="radio" name="calculation-mode" value="table">
-        <span>產生飽和表</span>
+        <input type="radio" name="mode-category" value="drawing">
+        <span>繪製</span>
       </label>
       <label class="mode-option">
         <input type="radio" name="calculation-mode" value="ph-diagram">
         <span>Ph 圖</span>
       </label>
+    </div>
+
+    <div class="mode-submodes" id="calculation-submodes" hidden>
+      <p class="mode-submodes-title">計算項目</p>
+      <div class="mode-switch" role="radiogroup" aria-label="計算項目">
+        <label class="mode-option">
+          <input type="radio" name="calculation-mode" value="saturation" checked>
+          <span>飽和輸入</span>
+        </label>
+        <label class="mode-option">
+          <input type="radio" name="calculation-mode" value="state">
+          <span>指定任兩性質（求狀態點）</span>
+        </label>
+        <label class="mode-option">
+          <input type="radio" name="calculation-mode" value="table">
+          <span>產生飽和表</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="mode-submodes" id="drawing-submodes" hidden>
+      <p class="mode-submodes-title">繪製項目</p>
+      <div class="mode-switch" role="radiogroup" aria-label="繪製項目">
+        <label class="mode-option">
+          <input type="radio" name="drawing-mode" value="ph-diagram" checked>
+          <span>Ph 圖（壓力－焓圖）</span>
+        </label>
+      </div>
     </div>
 
     <section class="calculator" id="calculator-section" hidden aria-label="PyCool 性質計算器">
@@ -1305,6 +1353,7 @@
   <script type="module">
     const form = document.querySelector("#calculator-form");
     const modeInputs = document.querySelectorAll('input[name="calculation-mode"]');
+    const drawingModeInputs = document.querySelectorAll('input[name="drawing-mode"]');
     const calculatorSection = document.querySelector("#calculator-section");
     const saturationTableSection = document.querySelector("#saturation-table-section");
     const basicInformationSection = document.querySelector("#basic-information-section");
@@ -2814,6 +2863,25 @@
 
     for (const input of modeInputs) {
       input.addEventListener("change", () => setMode(input.value));
+    }
+
+    for (const input of drawingModeInputs) {
+      input.addEventListener("change", () => setMode(input.value));
+    }
+
+    for (const input of document.querySelectorAll('input[name="mode-category"]')) {
+      input.addEventListener("change", () => {
+        const isCalculation = input.value === "calculation";
+        const isDrawing = input.value === "drawing";
+        document.querySelector("#calculation-submodes").hidden = !isCalculation;
+        document.querySelector("#drawing-submodes").hidden = !isDrawing;
+        const mode = isCalculation
+          ? document.querySelector('input[name="calculation-mode"]:checked').value
+          : isDrawing
+            ? document.querySelector('input[name="drawing-mode"]:checked').value
+            : "basic-information";
+        setMode(mode);
+      });
     }
 
     for (const input of tableVariationInputs) {
