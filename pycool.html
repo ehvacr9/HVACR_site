@@ -781,9 +781,57 @@
     }
 
     .saturation-table-section[hidden],
-    .saturation-table-result[hidden] {
+    .saturation-table-result[hidden],
+    .ph-section[hidden] {
       display: none;
     }
+
+    .ph-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+      margin-bottom: 14px;
+      font-size: 14px;
+    }
+
+    .ph-options label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ph-chart {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .ph-chart svg {
+      display: block;
+      width: 100%;
+      min-width: 640px;
+      height: auto;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .ph-chart text {
+      font-size: 11px;
+      fill: var(--muted);
+    }
+
+    .ph-chart .axis-title {
+      font-size: 13px;
+      fill: var(--ink);
+    }
+
+    .ph-grid { stroke: #e6ebe3; stroke-width: 1; }
+    .ph-frame { fill: none; stroke: var(--ink); stroke-width: 1; }
+    .ph-dome { fill: rgba(29, 98, 82, .07); stroke: var(--green-dark); stroke-width: 2.4; }
+    .ph-isotherm { fill: none; stroke: #c0392b; stroke-width: 1.2; }
+    .ph-isentrope { fill: none; stroke: #2b6cb0; stroke-width: 1.2; stroke-dasharray: 5 3; }
+    .ph-quality { fill: none; stroke: #8a8f88; stroke-width: 1; stroke-dasharray: 2 3; }
+    .ph-label-isotherm { fill: #c0392b !important; }
+    .ph-label-isentrope { fill: #2b6cb0 !important; }
 
     .notes a {
       color: var(--green);
@@ -958,6 +1006,10 @@
       <label class="mode-option">
         <input type="radio" name="calculation-mode" value="table">
         <span>產生飽和表</span>
+      </label>
+      <label class="mode-option">
+        <input type="radio" name="calculation-mode" value="ph-diagram">
+        <span>Ph 圖</span>
       </label>
     </div>
 
@@ -1192,6 +1244,17 @@
           </table>
         </div>
       </section>
+    </section>
+    <section class="saturation-table-section ph-section" id="ph-section" hidden aria-labelledby="ph-title">
+      <h2 id="ph-title">Ph 圖（壓力－焓圖）</h2>
+      <p class="table-intro">縱軸為絕對壓力（對數刻度），橫軸為比焓；紅色實線為等溫線，藍色虛線為等熵線，灰色點線為等乾度線（x = 0.1～0.9）。目前僅提供水的 Ph 圖，其他流體將陸續加入。</p>
+      <div class="ph-options">
+        <label><input type="checkbox" id="ph-isotherms" checked> 等溫線 (°C)</label>
+        <label><input type="checkbox" id="ph-isentropes" checked> 等熵線 (kJ/kg·K)</label>
+        <label><input type="checkbox" id="ph-qualities" checked> 等乾度線</label>
+      </div>
+      <p class="table-status" id="ph-status" role="status" aria-live="polite"></p>
+      <div class="ph-chart" id="ph-chart"></div>
     </section>
     <section class="basic-information-section" id="basic-information-section" aria-labelledby="basic-information-title">
       <h2 id="basic-information-title">基本資訊</h2>
@@ -1431,11 +1494,14 @@
     function setMode(mode) {
       const isTableMode = mode === "table";
       const isBasicInformationMode = mode === "basic-information";
+      const isPhMode = mode === "ph-diagram";
       const isStateMode = mode === "state";
-      calculatorSection.hidden = isTableMode || isBasicInformationMode;
+      calculatorSection.hidden = isTableMode || isBasicInformationMode || isPhMode;
       saturationTableSection.hidden = !isTableMode;
       basicInformationSection.hidden = !isBasicInformationMode;
-      if (isTableMode || isBasicInformationMode) return;
+      phSection.hidden = !isPhMode;
+      if (isPhMode) drawPhDiagram();
+      if (isTableMode || isBasicInformationMode || isPhMode) return;
       saturationInputs.hidden = isStateMode;
       stateInputs.hidden = !isStateMode;
       saturationResults.hidden = isStateMode;
@@ -1443,6 +1509,187 @@
       clearResults();
       status.dataset.kind = "success";
       status.textContent = isStateMode ? "請選擇兩項性質並輸入數值。" : "請輸入壓力或溫度。";
+    }
+
+    const phSection = document.querySelector("#ph-section");
+    const phChart = document.querySelector("#ph-chart");
+    const phStatus = document.querySelector("#ph-status");
+    const phToggles = document.querySelectorAll(".ph-options input");
+    const svgNamespace = "http://www.w3.org/2000/svg";
+
+    function svgElement(name, attributes = {}, text) {
+      const element = document.createElementNS(svgNamespace, name);
+      for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value);
+      if (text !== undefined) element.textContent = text;
+      return element;
+    }
+
+    function drawPhDiagram() {
+      phChart.replaceChildren();
+      if (!coolprop) return;
+      const fluid = fluidInput.value;
+      if (fluid !== "Water") {
+        phStatus.dataset.kind = "warning";
+        phStatus.textContent = "Ph 圖目前僅支援水，請將上方流體切換為「水 (Water)」。";
+        return;
+      }
+
+      const width = 900;
+      const height = 600;
+      const margin = { left: 72, right: 24, top: 30, bottom: 64 };
+      const plotWidth = width - margin.left - margin.right;
+      const plotHeight = height - margin.top - margin.bottom;
+      const hMin = 0;
+      const hMax = 4500;
+      const logMin = 3;
+      const logMax = 8;
+      const toX = (h) => margin.left + ((h - hMin) / (hMax - hMin)) * plotWidth;
+      const toY = (p) => margin.top + (1 - (Math.log10(p) - logMin) / (logMax - logMin)) * plotHeight;
+      const fromX = (x) => hMin + ((x - margin.left) / plotWidth) * (hMax - hMin);
+      const fromY = (y) => 10 ** (logMin + (1 - (y - margin.top) / plotHeight) * (logMax - logMin));
+      const props = (output, n1, v1, n2, v2) => {
+        try {
+          const value = coolprop.PropsSI(output, n1, v1, n2, v2, fluid);
+          return Number.isFinite(value) ? value : null;
+        } catch {
+          return null;
+        }
+      };
+      const pathOf = (points) => points.map((point, index) => `${index ? "L" : "M"}${toX(point.h).toFixed(1)} ${toY(point.p).toFixed(1)}`).join("");
+      const logSpace = (from, to, count) => Array.from({ length: count }, (_, index) => from * (to / from) ** (index / (count - 1)));
+
+      const triple = coolprop.PropsSI("Ttriple", "", 0, "", 0, fluid);
+      const tCritical = coolprop.PropsSI("Tcrit", "", 0, "", 0, fluid);
+      const pCritical = coolprop.PropsSI("pcrit", "", 0, "", 0, fluid);
+      const dCritical = coolprop.PropsSI("rhomass_critical", "", 0, "", 0, fluid);
+
+      const svg = svgElement("svg", { viewBox: `0 0 ${width} ${height}`, role: "img", "aria-label": "水的壓力－焓 (Ph) 圖" });
+      svg.append(svgElement("title", {}, "水的壓力－焓 (Ph) 圖"));
+      const clipId = "ph-clip";
+      const defs = svgElement("defs");
+      defs.append(svgElement("clipPath", { id: clipId }));
+      defs.firstChild.append(svgElement("rect", { x: margin.left, y: margin.top, width: plotWidth, height: plotHeight }));
+      svg.append(defs);
+
+      for (let exponent = logMin; exponent <= logMax; exponent += 1) {
+        for (let factor = 1; factor < 10; factor += 1) {
+          const p = factor * 10 ** exponent;
+          if (p > 10 ** logMax) break;
+          const y = toY(p).toFixed(1);
+          svg.append(svgElement("line", { class: "ph-grid", x1: margin.left, x2: margin.left + plotWidth, y1: y, y2: y, opacity: factor === 1 ? 1 : .45 }));
+        }
+        svg.append(svgElement("text", { x: margin.left - 8, y: toY(10 ** exponent) + 4, "text-anchor": "end" }, (10 ** (exponent - 3)).toLocaleString("en-US")));
+      }
+      for (let h = hMin; h <= hMax; h += 500) {
+        svg.append(svgElement("line", { class: "ph-grid", x1: toX(h), x2: toX(h), y1: margin.top, y2: margin.top + plotHeight }));
+        svg.append(svgElement("text", { x: toX(h), y: margin.top + plotHeight + 16, "text-anchor": "middle" }, String(h)));
+      }
+
+      const layer = svgElement("g", { "clip-path": `url(#${clipId})` });
+      const labels = svgElement("g");
+      const pressures = logSpace(10 ** logMin, 10 ** logMax, 90);
+
+      if (document.querySelector("#ph-qualities").checked) {
+        const qualityPressures = logSpace(10 ** logMin, pCritical * .985, 50);
+        for (let quality = .1; quality < .95; quality += .1) {
+          const points = qualityPressures
+            .map((p) => ({ p, h: props("H", "P", p, "Q", quality) }))
+            .filter((point) => point.h !== null)
+            .map((point) => ({ p: point.p, h: point.h / 1000 }));
+          layer.append(svgElement("path", { class: "ph-quality", d: pathOf(points) }));
+        }
+      }
+
+      if (document.querySelector("#ph-isentropes").checked) {
+        for (let entropy = 1; entropy <= 10; entropy += 1) {
+          const points = [...pressures].reverse()
+            .map((p) => ({ p, h: props("H", "P", p, "S", entropy * 1000) }))
+            .filter((point) => point.h !== null)
+            .map((point) => ({ p: point.p, h: point.h / 1000 }));
+          if (points.length < 2) continue;
+          layer.append(svgElement("path", { class: "ph-isentrope", d: pathOf(points) }));
+          const end = points[points.length - 1];
+          if (end.p <= 10 ** logMin * 1.001 && end.h >= hMin && end.h <= hMax) {
+            labels.append(svgElement("text", { class: "ph-label-isentrope", x: toX(end.h), y: margin.top + plotHeight + 30, "text-anchor": "middle" }, `s=${entropy}`));
+          }
+        }
+      }
+
+      if (document.querySelector("#ph-isotherms").checked) {
+        for (const celsius of [10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700]) {
+          const temperature = celsius + 273.15;
+          const points = [];
+          const sample = (list) => {
+            for (const p of list) {
+              const h = props("H", "T", temperature, "P", p);
+              if (h !== null) points.push({ p, h: h / 1000 });
+            }
+          };
+          const descending = [...pressures].reverse();
+          if (temperature < tCritical) {
+            const pSat = props("P", "T", temperature, "Q", 0);
+            const hLiquid = props("H", "T", temperature, "Q", 0);
+            const hVapor = props("H", "T", temperature, "Q", 1);
+            if (pSat === null || hLiquid === null || hVapor === null) continue;
+            sample(descending.filter((p) => p > pSat * 1.001));
+            points.push({ p: pSat, h: hLiquid / 1000 }, { p: pSat, h: hVapor / 1000 });
+            sample(descending.filter((p) => p < pSat / 1.001));
+          } else {
+            sample(descending);
+          }
+          if (points.length < 2) continue;
+          layer.append(svgElement("path", { class: "ph-isotherm", d: pathOf(points) }));
+          const start = points[0];
+          if (start.p >= 10 ** logMax * .999 && start.h >= hMin && start.h <= hMax) {
+            labels.append(svgElement("text", { class: "ph-label-isotherm", x: toX(start.h), y: margin.top - 6, "text-anchor": "middle" }, `${celsius}°C`));
+          }
+        }
+      }
+
+      const liquidSide = [];
+      const vaporSide = [];
+      for (let step = 0; step <= 160; step += 1) {
+        const fraction = Math.min(step / 160, .9995);
+        const temperature = tCritical - (tCritical - triple - .01) * (1 - fraction) ** 2;
+        const pSat = props("P", "T", temperature, "Q", 0);
+        const hLiquid = props("H", "T", temperature, "Q", 0);
+        const hVapor = props("H", "T", temperature, "Q", 1);
+        if (pSat === null || hLiquid === null || hVapor === null) continue;
+        liquidSide.push({ p: pSat, h: hLiquid / 1000 });
+        vaporSide.push({ p: pSat, h: hVapor / 1000 });
+      }
+      const hCritical = props("H", "T", tCritical, "D", dCritical);
+      const critical = hCritical === null ? [] : [{ p: pCritical, h: hCritical / 1000 }];
+      const dome = [...liquidSide, ...critical, ...vaporSide.reverse()];
+      layer.append(svgElement("path", { class: "ph-dome", d: `${pathOf(dome)}Z` }));
+      svg.append(layer, labels);
+      if (critical.length) {
+        svg.append(svgElement("circle", { cx: toX(critical[0].h), cy: toY(critical[0].p), r: 4.5, fill: "#c0392b" }));
+        svg.append(svgElement("text", { x: toX(critical[0].h) + 8, y: toY(critical[0].p) - 6 }, "臨界點"));
+      }
+
+      svg.append(svgElement("rect", { class: "ph-frame", x: margin.left, y: margin.top, width: plotWidth, height: plotHeight }));
+      svg.append(svgElement("text", { class: "axis-title", x: margin.left + plotWidth / 2, y: height - 10, "text-anchor": "middle" }, "比焓 h (kJ/kg)"));
+      svg.append(svgElement("text", { class: "axis-title", x: 18, y: margin.top + plotHeight / 2, "text-anchor": "middle", transform: `rotate(-90 18 ${margin.top + plotHeight / 2})` }, "壓力 P (kPa，對數刻度)"));
+      svg.append(svgElement("text", { x: margin.left + 8, y: margin.top + 16 }, "水 Water"));
+
+      svg.addEventListener("mousemove", (event) => {
+        const rect = svg.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) * width) / rect.width;
+        const y = ((event.clientY - rect.top) * height) / rect.height;
+        if (x < margin.left || x > margin.left + plotWidth || y < margin.top || y > margin.top + plotHeight) return;
+        const h = fromX(x);
+        const p = fromY(y);
+        const temperature = props("T", "P", p, "H", h * 1000);
+        const entropy = props("S", "P", p, "H", h * 1000);
+        phStatus.dataset.kind = "success";
+        phStatus.textContent = `P = ${formatNumber(p / 1000)} kPa，h = ${formatNumber(h)} kJ/kg`
+          + (temperature === null ? "" : `，T = ${formatNumber(temperature - 273.15)} °C`)
+          + (entropy === null ? "" : `，s = ${formatNumber(entropy / 1000)} kJ/kg·K`);
+      });
+      phChart.append(svg);
+      phStatus.dataset.kind = "success";
+      phStatus.textContent = "已繪製水的 Ph 圖；將滑鼠移到圖上可讀取該點的壓力、焓、溫度與熵。";
     }
 
     function saturationType() {
@@ -2266,10 +2513,13 @@
 
     exportTableButton.addEventListener("click", exportSaturationTable);
 
+    for (const toggle of phToggles) toggle.addEventListener("change", drawPhDiagram);
+
     fluidInput.addEventListener("change", () => {
       if (!coolprop) return;
       try {
         setFluid(fluidInput.value);
+        if (!phSection.hidden) drawPhDiagram();
         clearSaturationTable();
         tableStatus.dataset.kind = "success";
         tableStatus.textContent = "流體已切換；請重新產生飽和表。";
