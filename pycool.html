@@ -1557,7 +1557,10 @@
           ["table-quality-step", "乾度間隔", 0.1],
         ],
         QP: [
-          ["table-fixed", "固定壓力 (kPa)", Math.sqrt(startP * endP)],
+          ["table-fixed", "固定壓力 (kPa)", Math.min(
+            Math.max(Math.round(Math.sqrt(startP * endP) / pressureStep) * pressureStep, startP),
+            endP,
+          )],
           ["table-quality-start", "起始乾度 x", 0],
           ["table-quality-end", "終止乾度 x", 1],
           ["table-quality-step", "乾度間隔", 0.1],
