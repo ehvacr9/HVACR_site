@@ -817,6 +817,18 @@
       margin-top: 14px;
     }
 
+    .ph-readout {
+      height: 5.4em;
+      overflow-y: auto;
+      margin: 10px 0;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      font-size: 14px;
+      line-height: 1.8;
+      font-variant-numeric: tabular-nums;
+    }
+
     .notes a {
       color: var(--green);
       text-underline-offset: 3px;
@@ -1239,12 +1251,14 @@
         <label><input type="checkbox" id="ph-isochores" checked> 等密度線 (kg/m³)</label>
       </div>
       <p class="table-status" id="ph-status" role="status" aria-live="polite"></p>
+      <p class="field-hint" id="ph-interaction-hint">滑鼠移動或觸控點選可讀值；也可用 Tab 聚焦圖表後按方向鍵移動，按住 Shift 可加大步距，Esc 隱藏標記。</p>
+      <p class="ph-readout" id="ph-readout" aria-live="off">尚未選取狀態點。</p>
       <div class="ph-chart" id="ph-chart"></div>
       <div class="ph-actions">
         <button class="secondary" id="ph-download-color-button" type="button">下載彩色圖片 (PNG)</button>
         <button class="secondary" id="ph-download-bw-button" type="button">下載黑白圖片 (PNG)</button>
       </div>
-      <p class="table-intro">下載目前勾選的曲線，圖片不含滑鼠標記；黑白版以不同線型區分曲線，適合列印。c.p. 表示臨界點。</p>
+      <p class="table-intro">下載目前勾選的曲線，圖片包含線型圖例與參考狀態，不含滑鼠標記；黑白版以不同線型區分曲線，適合列印。c.p. 表示臨界點。</p>
     </section>
     <section class="basic-information-section" id="basic-information-section" aria-labelledby="basic-information-title">
       <h2 id="basic-information-title">基本資訊</h2>
@@ -1504,6 +1518,7 @@
     const phSection = document.querySelector("#ph-section");
     const phChart = document.querySelector("#ph-chart");
     const phStatus = document.querySelector("#ph-status");
+    const phReadout = document.querySelector("#ph-readout");
     const phToggles = document.querySelectorAll(".ph-options input");
     const phDownloadColorButton = document.querySelector("#ph-download-color-button");
     const phDownloadBwButton = document.querySelector("#ph-download-bw-button");
@@ -1550,6 +1565,7 @@
 
     function drawPhDiagram() {
       phChart.replaceChildren();
+      phReadout.textContent = "尚未選取狀態點。";
       if (!coolprop) return;
       const fluid = fluidInput.value;
       if (fluid !== "Water") {
@@ -1559,8 +1575,8 @@
       }
 
       const width = 900;
-      const height = 630;
-      const margin = { left: 72, right: 64, top: 30, bottom: 94 };
+      const height = 658;
+      const margin = { left: 72, right: 64, top: 30, bottom: 122 };
       const plotWidth = width - margin.left - margin.right;
       const plotHeight = height - margin.top - margin.bottom;
       const hMin = 0;
@@ -1592,7 +1608,10 @@
       const pCritical = coolprop.PropsSI("pcrit", "", 0, "", 0, fluid);
       const dCritical = coolprop.PropsSI("rhomass_critical", "", 0, "", 0, fluid);
 
-      const svg = svgElement("svg", { viewBox: `0 0 ${width} ${height}`, role: "img", "aria-label": "水的壓力－焓 (Ph) 圖" });
+      const svg = svgElement("svg", {
+        viewBox: `0 0 ${width} ${height}`, role: "img", tabindex: 0,
+        "aria-label": "水的壓力－焓 (Ph) 圖", "aria-describedby": "ph-interaction-hint ph-readout",
+      });
       svg.append(svgElement("title", {}, "水的壓力－焓 (Ph) 圖"));
       svg.append(svgElement("style", {}, phChartStyle));
       svg.append(svgElement("rect", { class: "ph-bg", x: 0, y: 0, width, height }));
@@ -1743,10 +1762,29 @@
       }
 
       svg.append(svgElement("rect", { class: "ph-frame", x: margin.left, y: margin.top, width: plotWidth, height: plotHeight }));
-      svg.append(svgElement("text", { class: "axis-title", x: margin.left + plotWidth / 2, y: height - 40, "text-anchor": "middle" }, "Specific Enthalpy h (kJ/kg)"));
+      svg.append(svgElement("text", { class: "axis-title", x: margin.left + plotWidth / 2, y: height - 68, "text-anchor": "middle" }, "Specific Enthalpy h (kJ/kg)"));
       svg.append(svgElement("text", { class: "axis-title", x: 18, y: margin.top + plotHeight / 2, "text-anchor": "middle", transform: `rotate(-90 18 ${margin.top + plotHeight / 2})` }, "Pressure P (kPa, logarithmic scale)"));
       svg.append(svgElement("text", { class: "ph-reference-state", x: margin.left, y: height - 12 }, "Reference State: u = 0 kJ/kg, s = 0 kJ/(kg∙K) for saturated liquid at 0.01 °C"));
       svg.append(svgElement("text", { x: margin.left + 8, y: margin.top + 16 }, "水 Water"));
+      const legend = svgElement("g", { class: "ph-legend" });
+      const legendEntries = [
+        ["#ph-isotherms", "ph-isotherm", "Isotherm (°C)"],
+        ["#ph-isentropes", "ph-isentrope", "Isentrope (kJ/kg·K)"],
+        ["#ph-qualities", "ph-quality", "Quality x"],
+        ["#ph-isochores", "ph-isochore", "Density (kg/m³)"],
+      ];
+      let legendIndex = 0;
+      for (const [selector, lineClass, text] of legendEntries) {
+        if (!document.querySelector(selector).checked) continue;
+        const x = margin.left + legendIndex * (plotWidth / 4);
+        const y = height - 40;
+        legend.append(
+          svgElement("line", { class: lineClass, x1: x, x2: x + 24, y1: y - 4, y2: y - 4 }),
+          svgElement("text", { x: x + 30, y }, text),
+        );
+        legendIndex += 1;
+      }
+      svg.append(legend);
 
       const marker = svgElement("g", { class: "ph-marker", visibility: "hidden", "pointer-events": "none" });
       marker.append(
@@ -1759,15 +1797,11 @@
       const crossY = marker.querySelector("#ph-cross-y");
       const markerDot = marker.querySelector("#ph-marker-dot");
 
-      svg.addEventListener("mouseleave", () => marker.setAttribute("visibility", "hidden"));
-      svg.addEventListener("mousemove", (event) => {
-        const rect = svg.getBoundingClientRect();
-        const x = ((event.clientX - rect.left) * width) / rect.width;
-        const y = ((event.clientY - rect.top) * height) / rect.height;
-        if (x < margin.left || x > margin.left + plotWidth || y < margin.top || y > margin.top + plotHeight) {
-          marker.setAttribute("visibility", "hidden");
-          return;
-        }
+      let selectedX = margin.left + plotWidth / 2;
+      let selectedY = margin.top + plotHeight / 2;
+      const showPoint = (x, y) => {
+        selectedX = x;
+        selectedY = y;
         marker.setAttribute("visibility", "visible");
         crossX.setAttribute("y1", y);
         crossX.setAttribute("y2", y);
@@ -1781,16 +1815,52 @@
         const entropy = rawProps("S", "P", p, "H", h * 1000);
         const density = rawProps("D", "P", p, "H", h * 1000);
         const quality = p < pCritical ? rawProps("Q", "P", p, "H", h * 1000) : null;
-        phStatus.dataset.kind = "success";
-        phStatus.textContent = `P = ${formatNumber(p / 1000)} kPa，h = ${formatNumber(h)} kJ/kg`
-          + (temperature === null ? "" : `，T = ${formatNumber(temperature - 273.15)} °C`)
-          + (entropy === null ? "" : `，s = ${formatNumber(entropy / 1000)} kJ/kg·K`)
-          + (density === null ? "" : `，ρ = ${formatNumber(density)} kg/m³`)
+        phReadout.textContent = `P = ${formatNumber(p / 1000)} kPa，h = ${formatNumber(h)} kJ/kg`
+          + (temperature === null ? "，T 無法計算" : `，T = ${formatNumber(temperature - 273.15)} °C`)
+          + (entropy === null ? "，s 無法計算" : `，s = ${formatNumber(entropy / 1000)} kJ/kg·K`)
+          + (density === null ? "，ρ 無法計算" : `，ρ = ${formatNumber(density)} kg/m³`)
           + (quality !== null && quality >= 0 && quality <= 1 ? `，x = ${formatNumber(quality)}` : "");
+      };
+      const readPointer = (event) => {
+        const point = svg.createSVGPoint();
+        point.x = event.clientX;
+        point.y = event.clientY;
+        const matrix = svg.getScreenCTM();
+        if (!matrix) return;
+        const { x, y } = point.matrixTransform(matrix.inverse());
+        if (x < margin.left || x > margin.left + plotWidth || y < margin.top || y > margin.top + plotHeight) {
+          marker.setAttribute("visibility", "hidden");
+          return;
+        }
+        showPoint(x, y);
+      };
+      svg.addEventListener("pointerdown", readPointer);
+      svg.addEventListener("pointermove", (event) => {
+        if (event.pointerType === "mouse") readPointer(event);
+      });
+      svg.addEventListener("pointerleave", (event) => {
+        if (event.pointerType === "mouse") marker.setAttribute("visibility", "hidden");
+      });
+      svg.addEventListener("focus", () => showPoint(selectedX, selectedY));
+      svg.addEventListener("blur", () => marker.setAttribute("visibility", "hidden"));
+      svg.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          marker.setAttribute("visibility", "hidden");
+          return;
+        }
+        const step = event.shiftKey ? 20 : 4;
+        const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+        const move = moves[event.key];
+        if (!move) return;
+        event.preventDefault();
+        showPoint(
+          Math.max(margin.left, Math.min(margin.left + plotWidth, selectedX + move[0])),
+          Math.max(margin.top, Math.min(margin.top + plotHeight, selectedY + move[1])),
+        );
       });
       phChart.append(svg);
       phStatus.dataset.kind = "success";
-      phStatus.textContent = "已繪製水的 Ph 圖；將滑鼠移到圖上可讀取該點的壓力、焓、溫度、熵、密度與乾度。";
+      phStatus.textContent = "已繪製水的 Ph 圖；可用滑鼠、觸控或鍵盤選取狀態點，乾度僅在汽液共存區顯示。";
     }
 
     function downloadPhDiagram(blackWhite) {
@@ -1802,6 +1872,8 @@
       }
       const [, , width, height] = svg.getAttribute("viewBox").split(" ").map(Number);
       const clone = svg.cloneNode(true);
+      clone.removeAttribute("tabindex");
+      clone.removeAttribute("aria-describedby");
       clone.querySelector(".ph-marker")?.remove();
       if (blackWhite) clone.querySelector("style").textContent += phBlackWhiteStyle;
       clone.setAttribute("xmlns", svgNamespace);
