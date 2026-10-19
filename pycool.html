@@ -2169,27 +2169,24 @@
       if (sublimationLineLimits) {
         const sublimationStartC = sublimationLineLimits.temperatureMin - 273.15;
         const sublimationEndC = sublimationLineLimits.temperatureMax - 273.15;
-        const sublimationStartP = sublimationLineLimits.pressureMin / 1000;
-        const sublimationEndP = sublimationLineLimits.pressureMax / 1000;
+        const sublimationTemperatureStep = niceIntegerStep(sublimationEndC - sublimationStartC);
+        const sublimationTemperatureStart = (Math.floor(sublimationStartC / sublimationTemperatureStep) + 1) * sublimationTemperatureStep;
+        const sublimationTemperatureEnd = (Math.floor(sublimationEndC / sublimationTemperatureStep) - 1) * sublimationTemperatureStep;
         saturationTableDefaults.SUBLIMATION_T = [
-          ["table-start", "起始溫度 (°C)", sublimationStartC],
-          ["table-end", "終止溫度 (°C)", sublimationEndC],
-          ["table-step", "間隔 (°C)", niceTableStep(sublimationEndC - sublimationStartC)],
+          ["table-start", "起始溫度 (°C)", sublimationTemperatureStart],
+          ["table-end", "終止溫度 (°C)", sublimationTemperatureEnd],
+          ["table-step", "間隔 (°C)", sublimationTemperatureStep],
         ];
         saturationTableDefaults.SUBLIMATION_P = [
-          ["table-start", "起始壓力 (kPa)", sublimationStartP],
-          ["table-end", "終止壓力 (kPa)", sublimationEndP],
-          ["table-step", "間隔 (kPa)", niceTableStep(sublimationEndP - sublimationStartP)],
+          ["table-start", "起始壓力 (kPa)", 0.05],
+          ["table-end", "終止壓力 (kPa)", 0.55],
+          ["table-step", "間隔 (kPa)", 0.05],
         ];
       }
       renderSaturationTableFields();
     }
 
     let saturationTableDefaults = {};
-
-    function niceTableStep(span) {
-      return Number((span / 20).toPrecision(3));
-    }
 
     function niceIntegerStep(span) {
       const target = Math.max(1, span / 20);
@@ -2230,7 +2227,7 @@
           : "此流體的 CoolProp 模型沒有熔化線資料。";
       } else if (isSublimationLine) {
         saturationLineHint.textContent = sublimationLineLimits
-          ? `CoolProp 水冰昇華線範圍：${formatNumber(sublimationLineLimits.temperatureMin - 273.15)} 至 ${formatNumber(sublimationLineLimits.temperatureMax - 273.15)} °C，${formatNumber(sublimationLineLimits.pressureMin / 1000)} 至 ${formatNumber(sublimationLineLimits.pressureMax / 1000)} kPa。`
+          ? `CoolProp 水冰昇華線範圍：${formatNumber(sublimationLineLimits.temperatureMin - 273.15)} 至 ${formatNumber(sublimationLineLimits.temperatureMax - 273.15)} °C，${formatNumber(sublimationLineLimits.pressureMin / 1000)} 至 ${formatNumber(sublimationLineLimits.pressureMax / 1000)} kPa。預設範圍避開模型下限與三相點；壓力保留 kPa，以 0.05 kPa 為間隔。`
           : "目前僅水的 CoolProp 模型提供昇華線資料。";
       } else {
         saturationLineHint.textContent = `此流體的汽液飽和範圍：${formatNumber(minimumTemperature - 273.15)} °C 至臨界溫度 ${formatNumber(criticalTemperature - 273.15)} °C 以下；壓力 ${formatNumber(minimumSaturationPressure / 1000)} kPa 至臨界壓力 ${formatNumber(criticalPressure / 1000)} kPa 以下。`;
