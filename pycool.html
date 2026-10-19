@@ -1073,7 +1073,7 @@
 
     <section class="saturation-table-section" id="saturation-table-section" hidden aria-labelledby="saturation-table-title">
       <h2 id="saturation-table-title">產生飽和表</h2>
-      <p class="table-intro">依所選流體與飽和線類型產生表格；汽液飽和表列出液體與蒸氣性質，熔化線表列出液相側性質，昇華線列出溫度與壓力。可依溫度、壓力或乾度取樣。</p>
+      <p class="table-intro">依所選流體與飽和線類型產生表格；汽液飽和表列出液體與蒸氣性質及黏度，熔化線表列出液相側性質與黏度，昇華線列出溫度與壓力。可依溫度、壓力或乾度取樣。</p>
       <form id="saturation-table-form">
         <div class="table-controls">
           <figure class="pt-diagram">
@@ -1316,15 +1316,17 @@
         "T (°C)", "P (kPa)", "ρf (kg/m³)", "ρg (kg/m³)", "vf (m³/kg)", "vg (m³/kg)",
         "hf (kJ/kg)", "hg (kJ/kg)", "hfg (kJ/kg)", "sf (kJ/kg·K)", "sg (kJ/kg·K)",
         "uf (kJ/kg)", "ug (kJ/kg)", "cp,f (kJ/kg·K)", "cp,g (kJ/kg·K)",
-        "cv,f (kJ/kg·K)", "cv,g (kJ/kg·K)",
+        "cv,f (kJ/kg·K)", "cv,g (kJ/kg·K)", "μf (μPa·s)", "μg (μPa·s)",
       ],
       Q: [
         "x", "T (°C)", "P (kPa)", "ρ (kg/m³)", "v (m³/kg)", "h (kJ/kg)",
         "s (kJ/kg·K)", "u (kJ/kg)", "cp (kJ/kg·K)", "cv (kJ/kg·K)",
+        "μf (μPa·s)", "μg (μPa·s)",
       ],
       MELT: [
         "T (°C)", "P (kPa)", "ρ (kg/m³)", "v (m³/kg)", "h (kJ/kg)",
         "s (kJ/kg·K)", "u (kJ/kg)", "cp (kJ/kg·K)", "cv (kJ/kg·K)",
+        "μ (μPa·s)",
       ],
       SUBLIMATION: ["T (°C)", "P (kPa)"],
     };
@@ -1760,7 +1762,7 @@
 
     function saturationEndpoint(key, value, quality) {
       const props = Object.fromEntries(
-        [["T", "T"], ["P", "P"], ["D", "D"], ["H", "H"], ["S", "S"], ["U", "U"], ["cp", "C"], ["cv", "O"]]
+        [["T", "T"], ["P", "P"], ["D", "D"], ["H", "H"], ["S", "S"], ["U", "U"], ["cp", "C"], ["cv", "O"], ["viscosity", "V"]]
           .map(([name, output]) => [name, saturationProperty(output, key, value, quality)]),
       );
       if (!Number.isFinite(props.T) || !Number.isFinite(props.P) || !Number.isFinite(props.D) || props.D <= 0) {
@@ -1777,7 +1779,7 @@
         1 / liquid.D, 1 / vapor.D, liquid.H / 1000, vapor.H / 1000,
         (vapor.H - liquid.H) / 1000, liquid.S / 1000, vapor.S / 1000,
         liquid.U / 1000, vapor.U / 1000, liquid.cp / 1000, vapor.cp / 1000,
-        liquid.cv / 1000, vapor.cv / 1000,
+        liquid.cv / 1000, vapor.cv / 1000, liquid.viscosity * 1e6, vapor.viscosity * 1e6,
       ];
     }
 
@@ -1791,6 +1793,7 @@
         mix("H"), mix("S"), mix("U"),
         quality === 0 ? liquid.cp / 1000 : quality === 1 ? vapor.cp / 1000 : NaN,
         quality === 0 ? liquid.cv / 1000 : quality === 1 ? vapor.cv / 1000 : NaN,
+        liquid.viscosity * 1e6, vapor.viscosity * 1e6,
       ];
     }
 
@@ -1815,7 +1818,7 @@
       return [
         temperature - 273.15, pressure / 1000, density, specificVolume,
         property("H") / 1000, property("S") / 1000, property("U") / 1000,
-        property("C") / 1000, property("O") / 1000,
+        property("C") / 1000, property("O") / 1000, property("V") * 1e6,
       ];
     }
 
