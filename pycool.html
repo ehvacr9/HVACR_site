@@ -1571,13 +1571,16 @@
         const meltEndC = meltingLineLimits.temperatureMax - 273.15;
         const meltStartP = meltingLineLimits.pressureMin / 1000;
         const meltEndP = meltingLineLimits.pressureMax / 1000;
+        const meltTemperatureStep = niceIntegerStep(meltEndC - meltStartC);
+        const meltTemperatureStart = (Math.floor(meltStartC / meltTemperatureStep) + 1) * meltTemperatureStep;
+        const meltTemperatureEnd = (Math.ceil(meltEndC / meltTemperatureStep) - 1) * meltTemperatureStep;
         const meltPressureStep = niceIntegerStep(meltEndP - meltStartP);
         const meltPressureStart = Math.ceil(meltStartP / meltPressureStep) * meltPressureStep;
         const meltPressureEnd = (Math.ceil(meltEndP / meltPressureStep) - 1) * meltPressureStep;
         saturationTableDefaults.MELT_T = [
-          ["table-start", "起始溫度 (°C)", meltStartC],
-          ["table-end", "終止溫度 (°C)", meltEndC],
-          ["table-step", "間隔 (°C)", niceTableStep(meltEndC - meltStartC)],
+          ["table-start", "起始溫度 (°C)", meltTemperatureStart],
+          ["table-end", "終止溫度 (°C)", meltTemperatureEnd],
+          ["table-step", "間隔 (°C)", meltTemperatureStep],
         ];
         saturationTableDefaults.MELT_P = [
           ["table-start", "起始壓力 (kPa)", meltPressureStart],
