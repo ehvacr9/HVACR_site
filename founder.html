@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="認識能源與冷凍空調學習網創辦人的專業關注與網站貢獻。">
+  <title>創辦人 | 能源與冷凍空調學習網</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172b2b;
+      --muted: #5b6c68;
+      --paper: #f6f5ef;
+      --surface: #fffefa;
+      --green: #1d6252;
+      --green-dark: #16483e;
+      --line: #dce2d8;
+      --serif: Georgia, "Noto Serif TC", "PMingLiU", serif;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.7;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    a:focus-visible {
+      outline: 3px solid #9ab952;
+      outline-offset: 4px;
+    }
+
+    .wrap {
+      width: min(1120px, calc(100% - 48px));
+      margin-inline: auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      width: 100%;
+      min-height: 82px;
+      align-items: center;
+      justify-content: space-between;
+      padding-inline: max(24px, calc((100% - 1120px) / 2));
+      border-bottom: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: .04em;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--green);
+      color: white;
+      font-family: var(--serif);
+      font-size: 19px;
+    }
+
+    nav {
+      display: flex;
+      gap: 24px;
+      font-size: 13px;
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      color: var(--green);
+    }
+
+    .page {
+      padding-block: 68px 88px;
+    }
+
+    .eyebrow {
+      margin: 0 0 13px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    p {
+      margin-top: 0;
+    }
+
+    h1,
+    h2 {
+      font-family: var(--serif);
+      font-weight: 500;
+      letter-spacing: -.035em;
+    }
+
+    h1 {
+      margin-bottom: 14px;
+      font-size: clamp(38px, 5vw, 54px);
+      line-height: 1.25;
+    }
+
+    .intro {
+      max-width: 720px;
+      margin-bottom: 36px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .profile {
+      display: grid;
+      grid-template-columns: 160px minmax(0, 1fr);
+      gap: 28px;
+      max-width: 880px;
+      margin-bottom: 42px;
+      padding: 30px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .avatar {
+      display: grid;
+      width: 144px;
+      height: 144px;
+      place-items: center;
+      border: 1px dashed #aab9ad;
+      border-radius: 50%;
+      background: #e9eee7;
+      color: var(--green);
+      font-family: var(--serif);
+      font-size: 42px;
+    }
+
+    .role {
+      margin-bottom: 12px;
+      color: var(--green-dark);
+      font-weight: 650;
+    }
+
+    .profile-copy {
+      margin-bottom: 0;
+      color: var(--muted);
+    }
+
+    .section-heading {
+      margin-bottom: 18px;
+      font-size: 28px;
+    }
+
+    .contributions {
+      display: grid;
+      max-width: 880px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    .contribution {
+      min-height: 150px;
+      padding: 21px;
+      border: 1px solid var(--line);
+      background: rgba(255, 254, 250, .72);
+    }
+
+    .contribution h3 {
+      margin: 0 0 8px;
+      color: var(--green-dark);
+      font-size: 17px;
+    }
+
+    .contribution p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .contribution a {
+      color: var(--green);
+      text-underline-offset: 3px;
+    }
+
+    .back-link {
+      color: var(--green);
+      font-size: 14px;
+      text-underline-offset: 3px;
+    }
+
+    .footer-inner {
+      display: flex;
+      min-height: 76px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .copyright {
+      padding: 0 24px 18px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .wrap {
+        width: min(100% - 36px, 560px);
+      }
+
+      .topbar {
+        min-height: 70px;
+        padding-inline: 18px;
+      }
+
+      nav {
+        gap: 14px;
+        font-size: 12px;
+      }
+
+      .page {
+        padding-block: 54px 66px;
+      }
+
+      .profile {
+        grid-template-columns: 1fr;
+      }
+
+      .contributions {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .topbar {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-block: 12px;
+      }
+
+      .brand {
+        gap: 8px;
+        font-size: 13px;
+      }
+
+      nav {
+        width: 100%;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .profile {
+        padding: 22px;
+      }
+
+      .footer-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        justify-content: center;
+        gap: 3px;
+        padding-block: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap topbar">
+    <a class="brand" href="index.html" aria-label="回到能源與冷凍空調學習網首頁">
+      <span class="brand-mark" aria-hidden="true">能</span>
+      <span>能源與冷凍空調學習網</span>
+    </a>
+    <nav aria-label="主選單">
+      <a href="index.html">首頁</a>
+      <a href="about.html">關於我們</a>
+      <a href="index.html#topics">主題筆記</a>
+      <a href="terminology.html">術語辭典</a>
+      <a href="pycool.html">PyCool</a>
+      <a href="unit-converter.html">單位換算</a>
+    </nav>
+  </header>
+
+  <main class="wrap page">
+    <p class="eyebrow">Author Profile</p>
+    <h1>創辦人</h1>
+    <p class="intro">能源與冷凍空調學習網的建立者，透過知識整理、實用工具與經驗分享，記錄持續學習的過程。</p>
+
+    <section class="profile" aria-labelledby="profile-title">
+      <div class="avatar" role="img" aria-label="個人照片待提供">我</div>
+      <div>
+        <h2 id="profile-title">個人資料</h2>
+        <p class="role">作者・網站建立者</p>
+        <p class="profile-copy">關注能源與冷凍空調領域，重視專業原理與實務觀察的連結。網站以清楚、實用的方式，分享知識整理、學習心得與方便查用的工具。</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="contributions-title">
+      <h2 class="section-heading" id="contributions-title">網站貢獻</h2>
+      <div class="contributions">
+        <article class="contribution">
+          <h3>知識與心得整理</h3>
+          <p>整理能源、冷凍空調原理與相關術語，並分享工作觀察和學習心得。</p>
+        </article>
+        <article class="contribution">
+          <h3>PyCool 物性工具</h3>
+          <p>提供流體物性查詢、飽和表產生與壓力－焓圖繪製功能。<a href="pycool.html">前往 PyCool</a></p>
+        </article>
+        <article class="contribution">
+          <h3>單位換算工具</h3>
+          <p>整理能源與冷凍空調常用單位換算，方便快速查詢。<a href="unit-converter.html">前往單位換算</a></p>
+        </article>
+        <article class="contribution">
+          <h3>術語辭典</h3>
+          <p>彙整冷凍空調領域常見術語與解釋。<a href="terminology.html">前往術語辭典</a></p>
+        </article>
+      </div>
+    </section>
+
+    <a class="back-link" href="about.html#people-title">← 返回作者與貢獻者</a>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <span>能源與冷凍空調學習網</span>
+      <a href="index.html">回首頁</a>
+    </div>
+    <div class="copyright">Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</div>
+  </footer>
+</body>
+</html>

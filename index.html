@@ -106,6 +106,75 @@
       color: var(--green);
     }
 
+    .nav-dropdown {
+      position: relative;
+      padding-bottom: 10px;
+      margin-bottom: -10px;
+    }
+
+    .nav-dropdown details {
+      position: relative;
+    }
+
+    .nav-dropdown summary {
+      color: var(--muted);
+      cursor: pointer;
+      list-style: none;
+      white-space: nowrap;
+    }
+
+    .nav-dropdown summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .nav-dropdown summary:hover {
+      color: var(--green);
+    }
+
+    .nav-chevron {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin: 0 0 3px 5px;
+      transform: rotate(45deg);
+      border-right: 1px solid currentColor;
+      border-bottom: 1px solid currentColor;
+    }
+
+    .nav-submenu {
+      position: absolute;
+      z-index: 110;
+      top: 100%;
+      left: 50%;
+      display: none;
+      min-width: 190px;
+      padding: 7px;
+      transform: translateX(-50%);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 0 12px 28px rgba(23, 43, 43, .12);
+    }
+
+    .nav-dropdown:hover .nav-submenu,
+    .nav-dropdown:focus-within .nav-submenu,
+    .nav-dropdown details[open] .nav-submenu {
+      display: grid;
+    }
+
+    nav .nav-submenu a {
+      padding: 8px 10px;
+      border-radius: 5px;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    nav .nav-submenu a:hover,
+    nav .nav-submenu a:focus-visible {
+      background: #edf2ea;
+      color: var(--green-dark);
+    }
+
     .hero {
       display: grid;
       min-height: 570px;
@@ -370,6 +439,13 @@
       gap: 20px;
     }
 
+    .copyright {
+      padding: 0 24px 18px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
     @media (max-width: 760px) {
       .wrap {
         width: min(100% - 36px, 560px);
@@ -478,8 +554,8 @@
       <span>能源與冷凍空調學習網</span>
     </a>
     <nav aria-label="主選單">
-      <a href="#about">關於我們</a>
-      <a href="#top">首頁</a>
+      <a href="#top" aria-current="page">首頁</a>
+      <a href="about.html">關於我們</a>
       <a href="#topics">主題筆記</a>
       <a href="terminology.html">術語辭典</a>
       <a href="pycool.html">PyCool</a>
@@ -572,13 +648,14 @@
 
     <section class="wrap about" id="about" aria-labelledby="about-title">
       <div>
-        <p class="eyebrow">About This Site</p>
-        <h2 id="about-title">好奇，是理解的起點。</h2>
+        <p class="eyebrow">About Us</p>
+        <h2 id="about-title">把專業與經驗，整理成能分享的知識。</h2>
       </div>
       <div class="about-copy">
-        <p>這裡是關於能源與冷凍空調的個人知識小站，分享設備原理、節能觀念，以及在工作與生活中累積的觀察。</p>
-        <p>內容會盡量用淺白方式說明，也歡迎把它當作進一步查證與學習的起點。</p>
+        <p>我關注能源與冷凍空調，希望把專業知識、工作經驗與學習心得，整理成清楚而實用的內容。</p>
+        <p>這個網站是持續累積與分享的地方，期待讓技術概念更容易理解，也讓知識與實務經驗彼此連結。</p>
         <div class="note">本站內容為一般知識分享，實際設備操作、維修與設計，請依現場條件並洽詢合格專業人員。</div>
+        <a class="button" href="about.html">認識作者與貢獻者 <span aria-hidden="true">→</span></a>
       </div>
     </section>
   </main>
@@ -588,6 +665,7 @@
       <span>能源與冷凍空調學習網</span>
       <span>以好奇心，持續認識能源。</span>
     </div>
+    <div class="copyright">Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</div>
   </footer>
   <script>
     if ("serviceWorker" in navigator && location.protocol !== "file:") {
