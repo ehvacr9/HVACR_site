@@ -1243,7 +1243,7 @@
     </section>
     <section class="saturation-table-section ph-section" id="ph-section" hidden aria-labelledby="ph-title">
       <h2 id="ph-title">Ph 圖（壓力－焓圖）</h2>
-      <p class="table-intro">縱軸為絕對壓力（對數刻度），橫軸為比焓；紅色實線為等溫線，藍色虛線為等熵線，灰色點線為等乾度線（x = 0.1～0.9），綠色點劃線為等密度線。目前僅提供水的 Ph 圖，其他流體將陸續加入。</p>
+      <p class="table-intro">依所選流體繪製 Ph 圖，刻度與曲線取樣範圍依物性模型自動設定。縱軸為絕對壓力（對數刻度），橫軸為比焓；紅色實線為等溫線，藍色虛線為等熵線，灰色點線為等乾度線（x = 0.1～0.9），綠色點劃線為等密度線。R410A 採用 CoolProp 的擬純流體模型。</p>
       <div class="ph-options">
         <label><input type="checkbox" id="ph-isotherms" checked> 等溫線 (°C)</label>
         <label><input type="checkbox" id="ph-isentropes" checked> 等熵線 (kJ/kg·K)</label>
@@ -1562,27 +1562,42 @@
     }
 
     const phPropertyCache = new Map();
+    let phCacheFluid = "";
 
     function drawPhDiagram() {
+      try {
+        buildPhDiagram();
+      } catch (error) {
+        phChart.replaceChildren();
+        phStatus.dataset.kind = "error";
+        phStatus.textContent = `無法繪製 Ph 圖：${error instanceof Error ? error.message : String(error)}`;
+      }
+    }
+
+    function buildPhDiagram() {
       phChart.replaceChildren();
       phReadout.textContent = "尚未選取狀態點。";
-      if (!coolprop) return;
-      const fluid = fluidInput.value;
-      if (fluid !== "Water") {
-        phStatus.dataset.kind = "warning";
-        phStatus.textContent = "Ph 圖目前僅支援水，請將上方流體切換為「水 (Water)」。";
+      if (!coolprop) {
+        phStatus.textContent = "等待 CoolProp 運算模組載入後繪製 Ph 圖。";
         return;
       }
+      const fluid = fluidInput.value;
+      if (phCacheFluid !== fluid) {
+        phPropertyCache.clear();
+        phCacheFluid = fluid;
+      }
+      const isWater = fluid === "Water";
 
       const width = 900;
       const height = 658;
       const margin = { left: 72, right: 64, top: 30, bottom: 122 };
       const plotWidth = width - margin.left - margin.right;
       const plotHeight = height - margin.top - margin.bottom;
-      const hMin = 0;
-      const hMax = 4500;
-      const logMin = 3;
-      const logMax = 8;
+      let hMin = 0;
+      let hMax = 4500;
+      let hStep = 500;
+      let logMin = 3;
+      let logMax = 8;
       const toX = (h) => margin.left + ((h - hMin) / (hMax - hMin)) * plotWidth;
       const toY = (p) => margin.top + (1 - (Math.log10(p) - logMin) / (logMax - logMin)) * plotHeight;
       const fromX = (x) => hMin + ((x - margin.left) / plotWidth) * (hMax - hMin);
@@ -1600,19 +1615,75 @@
         if (!phPropertyCache.has(key)) phPropertyCache.set(key, rawProps(output, n1, v1, n2, v2));
         return phPropertyCache.get(key);
       };
-      const pathOf = (points) => points.map((point, index) => `${index ? "L" : "M"}${toX(point.h).toFixed(1)} ${toY(point.p).toFixed(1)}`).join("");
+      const pathOf = (points) => {
+        let connected = false;
+        return points.map((point) => {
+          if (!point || !Number.isFinite(point.h) || !Number.isFinite(point.p) || point.p <= 0) {
+            connected = false;
+            return "";
+          }
+          const command = connected ? "L" : "M";
+          connected = true;
+          return `${command}${toX(point.h).toFixed(1)} ${toY(point.p).toFixed(1)}`;
+        }).join("");
+      };
       const logSpace = (from, to, count) => Array.from({ length: count }, (_, index) => from * (to / from) ** (index / (count - 1)));
 
       const triple = coolprop.PropsSI("Ttriple", "", 0, "", 0, fluid);
       const tCritical = coolprop.PropsSI("Tcrit", "", 0, "", 0, fluid);
       const pCritical = coolprop.PropsSI("pcrit", "", 0, "", 0, fluid);
       const dCritical = coolprop.PropsSI("rhomass_critical", "", 0, "", 0, fluid);
+      const modelMin = coolprop.PropsSI("Tmin", "", 0, "", 0, fluid);
+      const modelMax = coolprop.PropsSI("Tmax", "", 0, "", 0, fluid);
+      const saturationMin = Math.max(triple, modelMin) + .01;
+      const chartMinTemperature = isWater ? 273.16 : Math.max(saturationMin, tCritical - 140);
+      const chartMaxTemperature = isWater ? 1500 : Math.min(modelMax - .01, tCritical + 180);
+      const niceStep = (span, divisions) => {
+        const raw = span / divisions;
+        const power = 10 ** Math.floor(Math.log10(raw));
+        return [1, 2, 5, 10].find((factor) => factor * power >= raw) * power;
+      };
+      if (!isWater) {
+        const lowPressure = props("P", "T", chartMinTemperature, "Q", 0);
+        if (lowPressure === null || lowPressure <= 0) throw new Error("無法取得流體的飽和範圍。");
+        logMin = Math.floor(Math.log10(lowPressure));
+        logMax = Math.ceil(Math.log10(pCritical * 2));
+        const enthalpies = [
+          props("H", "T", chartMinTemperature, "Q", 0),
+          props("H", "T", tCritical - .1, "Q", 1),
+          props("H", "P", 10 ** logMin, "T", chartMaxTemperature),
+        ];
+        if (enthalpies.some((value) => value === null)) throw new Error("無法設定焓座標範圍。");
+        const low = Math.min(...enthalpies) / 1000;
+        const high = Math.max(...enthalpies) / 1000;
+        hStep = niceStep(high - low, 8);
+        hMin = Math.floor(low / hStep) * hStep;
+        hMax = Math.ceil(high / hStep) * hStep;
+      }
+      const minimumSaturationPressure = props("P", "T", saturationMin, "Q", 0);
+      if (minimumSaturationPressure === null) throw new Error("無法取得飽和線的最低壓力。");
+      const qualityMinPressure = Math.max(10 ** logMin, minimumSaturationPressure * 1.001);
+      const qualityLabelPressure = isWater ? 3000 : qualityMinPressure * 1.5;
+      const temperatureStep = niceStep(chartMaxTemperature - chartMinTemperature, 14);
+      const temperatures = isWater ? [10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700]
+        : Array.from({ length: Math.floor((chartMaxTemperature - 273.15 - Math.ceil((chartMinTemperature - 273.15) / temperatureStep) * temperatureStep) / temperatureStep) + 1 },
+          (_, index) => Math.ceil((chartMinTemperature - 273.15) / temperatureStep) * temperatureStep + index * temperatureStep);
+      const entropyLow = props("S", "P", qualityMinPressure, "Q", 0);
+      const entropyHigh = props("S", "P", 10 ** logMin, "T", chartMaxTemperature);
+      if (entropyLow === null || entropyHigh === null) throw new Error("無法設定等熵線範圍。");
+      const entropyStep = isWater ? 1 : niceStep((entropyHigh - entropyLow) / 1000, 9);
+      const entropyMin = isWater ? 1 : Math.ceil(entropyLow / 1000 / entropyStep) * entropyStep;
+      const entropyMax = isWater ? 10 : entropyHigh / 1000;
+      const densities = isWater ? [0.01, 0.1, 1, 10, 50, 100, 200, 400, 600, 800, 950]
+        : [.002, .01, .05, .1, .25, .5, 1, 1.5, 2, 3].map((factor) => Number((dCritical * factor).toPrecision(2)));
+      const fluidTitle = `${fluid} Pressure–Enthalpy (Ph) Diagram`;
 
       const svg = svgElement("svg", {
         viewBox: `0 0 ${width} ${height}`, role: "img", tabindex: 0,
-        "aria-label": "水的壓力－焓 (Ph) 圖", "aria-describedby": "ph-interaction-hint ph-readout",
+        "aria-label": fluidTitle, "aria-describedby": "ph-interaction-hint ph-readout",
       });
-      svg.append(svgElement("title", {}, "水的壓力－焓 (Ph) 圖"));
+      svg.dataset.fluid = fluid;
+      svg.append(svgElement("title", {}, fluidTitle));
       svg.append(svgElement("style", {}, phChartStyle));
       svg.append(svgElement("rect", { class: "ph-bg", x: 0, y: 0, width, height }));
       const clipId = "ph-clip";
@@ -1631,92 +1702,101 @@
         svg.append(svgElement("text", { x: margin.left - 8, y: toY(10 ** exponent) + 4, "text-anchor": "end" }, (10 ** (exponent - 3)).toLocaleString("en-US")));
         svg.append(svgElement("text", { x: margin.left + plotWidth + 8, y: toY(10 ** exponent) + 4, "text-anchor": "start" }, (10 ** (exponent - 3)).toLocaleString("en-US")));
       }
-      for (let h = hMin; h <= hMax; h += 500) {
+      for (let h = hMin; h <= hMax; h += hStep) {
         svg.append(svgElement("line", { class: "ph-grid", x1: toX(h), x2: toX(h), y1: margin.top, y2: margin.top + plotHeight }));
         svg.append(svgElement("text", { x: toX(h), y: margin.top + plotHeight + 16, "text-anchor": "middle" }, String(h)));
       }
 
       const layer = svgElement("g", { "clip-path": `url(#${clipId})` });
       const labels = svgElement("g");
+      const densityLabels = [];
       const pressures = logSpace(10 ** logMin, 10 ** logMax, 90);
 
       if (document.querySelector("#ph-qualities").checked) {
-        const qualityPressures = logSpace(10 ** logMin, pCritical * .985, 50);
+        const qualityPressures = logSpace(qualityMinPressure, pCritical * .985, 50);
         for (let quality = .1; quality < .95; quality += .1) {
           const points = qualityPressures
             .map((p) => ({ p, h: props("H", "P", p, "Q", quality) }))
             .filter((point) => point.h !== null)
             .map((point) => ({ p: point.p, h: point.h / 1000 }));
           layer.append(svgElement("path", { class: "ph-quality", d: pathOf(points) }));
-          const labelEnthalpy = props("H", "P", 3000, "Q", quality);
+          const labelEnthalpy = props("H", "P", qualityLabelPressure, "Q", quality);
           if (labelEnthalpy !== null) {
-            labels.append(svgElement("text", { class: "ph-label-quality halo", x: toX(labelEnthalpy / 1000), y: toY(3000) - 4, "text-anchor": "middle" }, `x=${quality.toFixed(1)}`));
+            labels.append(svgElement("text", { class: "ph-label-quality halo", x: toX(labelEnthalpy / 1000), y: toY(qualityLabelPressure) - 4, "text-anchor": "middle" }, `x=${quality.toFixed(1)}`));
           }
         }
       }
 
       if (document.querySelector("#ph-isochores").checked) {
-        for (const density of [0.01, 0.1, 1, 10, 50, 100, 200, 400, 600, 800, 950]) {
+        for (const density of densities) {
           const points = [];
           for (let step = 0; step <= 240; step += 1) {
-            const temperature = 273.16 + ((1500 - 273.16) * step) / 240;
+            const temperature = chartMinTemperature + ((chartMaxTemperature - chartMinTemperature) * step) / 240;
             const p = props("P", "T", temperature, "D", density);
             const h = props("H", "T", temperature, "D", density);
-            if (p === null || h === null || p < 10 ** logMin || p > 10 ** logMax) continue;
+            if (p === null || h === null || p < 10 ** logMin || p > 10 ** logMax) {
+              points.push(null);
+              continue;
+            }
             points.push({ p, h: h / 1000 });
           }
-          if (points.length < 2) continue;
+          if (points.filter(Boolean).length < 2) continue;
           layer.append(svgElement("path", { class: "ph-isochore", d: pathOf(points) }));
-          const visible = points.filter((point) => point.h <= hMax - 120 && point.p <= 3e7);
-          const anchor = visible[visible.length - 1] ?? points[points.length - 1];
-          labels.append(svgElement("text", { class: "ph-label-isochore halo", x: toX(anchor.h) + 4, y: toY(anchor.p) - 4 }, `${density} kg/m³`));
+          const visible = points.filter((point) => point && point.h >= hMin && point.h <= hMax - (hMax - hMin) * .12 && point.p <= 10 ** (logMax - .5));
+          const anchor = visible[visible.length - 1];
+          if (!anchor) continue;
+          const label = svgElement("text", { class: "ph-label-isochore halo", x: toX(anchor.h) + 4, y: toY(anchor.p) - 4 }, `${density} kg/m³`);
+          labels.append(label);
+          densityLabels.push({ label, points: [anchor, ...visible.reverse()] });
         }
       }
 
       if (document.querySelector("#ph-isentropes").checked) {
-        for (let entropy = 1; entropy <= 10; entropy += 1) {
+        for (let entropy = entropyMin; entropy <= entropyMax; entropy += entropyStep) {
           const points = [...pressures].reverse()
             .map((p) => ({ p, h: props("H", "P", p, "S", entropy * 1000) }))
-            .filter((point) => point.h !== null)
-            .map((point) => ({ p: point.p, h: point.h / 1000 }));
-          if (points.length < 2) continue;
+            .map((point) => point.h === null ? null : ({ p: point.p, h: point.h / 1000 }));
+          if (points.filter(Boolean).length < 2) continue;
           layer.append(svgElement("path", { class: "ph-isentrope", d: pathOf(points) }));
-          const end = points[points.length - 1];
+          const end = points.filter(Boolean).slice(-1)[0];
           if (end.p <= 10 ** logMin * 1.001 && end.h >= hMin && end.h <= hMax) {
-            labels.append(svgElement("text", { class: "ph-label-isentrope halo", x: toX(end.h), y: margin.top + plotHeight + 30, "text-anchor": "middle" }, `s=${entropy}`));
+            labels.append(svgElement("text", { class: "ph-label-isentrope halo", x: toX(end.h), y: margin.top + plotHeight + 30, "text-anchor": "middle" }, `s=${Number(entropy.toPrecision(4))}`));
           }
         }
       }
 
       if (document.querySelector("#ph-isotherms").checked) {
-        for (const celsius of [10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700]) {
+        for (const celsius of temperatures) {
           const temperature = celsius + 273.15;
           const points = [];
-          let vaporLabelPressure = 5000;
+          let vaporLabelPressure = 10 ** logMin * 5;
           const sample = (list) => {
             for (const p of list) {
               const h = props("H", "T", temperature, "P", p);
-              if (h !== null) points.push({ p, h: h / 1000 });
+              points.push(h === null ? null : { p, h: h / 1000 });
             }
           };
           const descending = [...pressures].reverse();
           if (temperature < tCritical) {
             const pSat = props("P", "T", temperature, "Q", 0);
+            const pDew = props("P", "T", temperature, "Q", 1);
             const hLiquid = props("H", "T", temperature, "Q", 0);
             const hVapor = props("H", "T", temperature, "Q", 1);
-            if (pSat === null || hLiquid === null || hVapor === null) continue;
-            vaporLabelPressure = Math.min(vaporLabelPressure, Math.sqrt(10 ** logMin * pSat));
+            if (pSat === null || pDew === null || hLiquid === null || hVapor === null) continue;
+            vaporLabelPressure = Math.min(vaporLabelPressure, Math.sqrt(10 ** logMin * pDew));
             sample(descending.filter((p) => p > pSat * 1.001));
-            points.push({ p: pSat, h: hLiquid / 1000 }, { p: pSat, h: hVapor / 1000 });
-            labels.append(svgElement("text", { class: "ph-label-isotherm halo", x: toX((hLiquid + hVapor) / 2000), y: toY(pSat) + (pSat > 5e6 ? 12 : -3), "text-anchor": "middle" }, `${celsius}°C`));
-            sample(descending.filter((p) => p < pSat / 1.001));
+            points.push({ p: pSat, h: hLiquid / 1000 }, { p: pDew, h: hVapor / 1000 });
+            if (pSat >= 10 ** logMin && pSat <= 10 ** logMax) {
+              labels.append(svgElement("text", { class: "ph-label-isotherm halo", x: toX((hLiquid + hVapor) / 2000), y: toY(pSat) + (pSat > 5e6 ? 12 : -3), "text-anchor": "middle" }, `${celsius}°C`));
+            }
+            sample(descending.filter((p) => p < pDew / 1.001));
           } else {
             sample(descending);
           }
           if (points.length < 2) continue;
           layer.append(svgElement("path", { class: "ph-isotherm", d: pathOf(points) }));
           const vaporLabelEnthalpy = props("H", "T", temperature, "P", vaporLabelPressure);
-          if (vaporLabelEnthalpy !== null && vaporLabelEnthalpy / 1000 >= hMin && vaporLabelEnthalpy / 1000 <= hMax) {
+          if (vaporLabelPressure >= 10 ** logMin && vaporLabelEnthalpy !== null && vaporLabelEnthalpy / 1000 >= hMin && vaporLabelEnthalpy / 1000 <= hMax) {
             const x = toX(vaporLabelEnthalpy / 1000) + 4;
             const y = toY(vaporLabelPressure) - 4;
             const nearBottom = y > margin.top + plotHeight - 30;
@@ -1727,7 +1807,8 @@
               transform: nearBottom ? "" : `rotate(-90 ${x} ${y})`,
             }, `${celsius}°C`));
           }
-          const start = points[0];
+          const start = points.find(Boolean);
+          if (!start) continue;
           if (start.p >= 10 ** logMax * .999 && start.h >= hMin && start.h <= hMax) {
             labels.append(svgElement("text", { class: "ph-label-isotherm halo", x: toX(start.h), y: margin.top - 6, "text-anchor": "middle" }, `${celsius}°C`));
           }
@@ -1738,20 +1819,21 @@
       const vaporSide = [];
       for (let step = 0; step <= 160; step += 1) {
         const fraction = Math.min(step / 160, .9995);
-        const temperature = tCritical - (tCritical - triple - .01) * (1 - fraction) ** 2;
+        const temperature = tCritical - (tCritical - saturationMin) * (1 - fraction) ** 2;
         const pSat = props("P", "T", temperature, "Q", 0);
+        const pDew = props("P", "T", temperature, "Q", 1);
         const hLiquid = props("H", "T", temperature, "Q", 0);
         const hVapor = props("H", "T", temperature, "Q", 1);
-        if (pSat === null || hLiquid === null || hVapor === null) continue;
+        if (pSat === null || pDew === null || hLiquid === null || hVapor === null) continue;
         liquidSide.push({ p: pSat, h: hLiquid / 1000 });
-        vaporSide.push({ p: pSat, h: hVapor / 1000 });
+        vaporSide.push({ p: pDew, h: hVapor / 1000 });
       }
       const hCritical = props("H", "T", tCritical, "D", dCritical);
       const critical = hCritical === null ? [] : [{ p: pCritical, h: hCritical / 1000 }];
       const dome = [...liquidSide, ...critical, ...vaporSide.reverse()];
       layer.append(svgElement("path", { class: "ph-dome", d: `${pathOf(dome)}Z` }));
       svg.append(layer, labels);
-      const edgePressure = 1.5e6;
+      const edgePressure = isWater ? 1.5e6 : Math.sqrt(10 ** logMin * pCritical);
       const edgeLiquid = props("H", "P", edgePressure, "Q", 0);
       const edgeVapor = props("H", "P", edgePressure, "Q", 1);
       if (edgeLiquid !== null) svg.append(svgElement("text", { class: "ph-label-edge halo", x: toX(edgeLiquid / 1000) - 8, y: toY(edgePressure) + 4, "text-anchor": "end" }, "x=0 saturated liquid"));
@@ -1764,8 +1846,10 @@
       svg.append(svgElement("rect", { class: "ph-frame", x: margin.left, y: margin.top, width: plotWidth, height: plotHeight }));
       svg.append(svgElement("text", { class: "axis-title", x: margin.left + plotWidth / 2, y: height - 68, "text-anchor": "middle" }, "Specific Enthalpy h (kJ/kg)"));
       svg.append(svgElement("text", { class: "axis-title", x: 18, y: margin.top + plotHeight / 2, "text-anchor": "middle", transform: `rotate(-90 18 ${margin.top + plotHeight / 2})` }, "Pressure P (kPa, logarithmic scale)"));
-      svg.append(svgElement("text", { class: "ph-reference-state", x: margin.left, y: height - 12 }, "Reference State: u = 0 kJ/kg, s = 0 kJ/(kg∙K) for saturated liquid at 0.01 °C"));
-      svg.append(svgElement("text", { x: margin.left + 8, y: margin.top + 16 }, "水 Water"));
+      svg.append(svgElement("text", { class: "ph-reference-state", x: margin.left, y: height - 12 }, isWater
+        ? "Reference State: u = 0 kJ/kg, s = 0 kJ/(kg∙K) for saturated liquid at 0.01 °C"
+        : "Reference State: CoolProp default for this fluid (enthalpy and entropy offsets are model-specific)."));
+      svg.append(svgElement("text", { x: margin.left + 8, y: margin.top + 16 }, fluid));
       const legend = svgElement("g", { class: "ph-legend" });
       const legendEntries = [
         ["#ph-isotherms", "ph-isotherm", "Isotherm (°C)"],
@@ -1859,15 +1943,30 @@
         );
       });
       phChart.append(svg);
+      const occupied = [...svg.querySelectorAll("text:not(.ph-label-isochore)")].map((text) => text.getBoundingClientRect());
+      const svgBounds = svg.getBoundingClientRect();
+      for (const { label, points } of densityLabels) {
+        for (const point of points) {
+          label.setAttribute("x", toX(point.h) + 4);
+          label.setAttribute("y", toY(point.p) - 4);
+          const box = label.getBoundingClientRect();
+          const fits = box.left >= svgBounds.left && box.right <= svgBounds.right
+            && box.top >= svgBounds.top && box.bottom <= svgBounds.bottom;
+          const overlaps = occupied.some((other) => box.left < other.right + 3 && box.right + 3 > other.left
+            && box.top < other.bottom + 3 && box.bottom + 3 > other.top);
+          if (fits && !overlaps) break;
+        }
+        occupied.push(label.getBoundingClientRect());
+      }
       phStatus.dataset.kind = "success";
-      phStatus.textContent = "已繪製水的 Ph 圖；可用滑鼠、觸控或鍵盤選取狀態點，乾度僅在汽液共存區顯示。";
+      phStatus.textContent = `已繪製 ${fluid} 的 Ph 圖；可用滑鼠、觸控或鍵盤選取狀態點，乾度僅在汽液共存區顯示。`;
     }
 
     function downloadPhDiagram(blackWhite) {
       const svg = phChart.querySelector("svg");
       if (!svg) {
         phStatus.dataset.kind = "error";
-        phStatus.textContent = "請先選擇水並繪製 Ph 圖，再下載圖片。";
+        phStatus.textContent = "請先繪製 Ph 圖，再下載圖片。";
         return;
       }
       const [, , width, height] = svg.getAttribute("viewBox").split(" ").map(Number);
@@ -1905,7 +2004,8 @@
           }
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
-          link.download = blackWhite ? "ph-diagram-water-bw.png" : "ph-diagram-water.png";
+          const name = svg.dataset.fluid.toLowerCase().replace(/[^a-z0-9-]/g, "");
+          link.download = `ph-diagram-${name}${blackWhite ? "-bw" : ""}.png`;
           document.body.append(link);
           link.click();
           link.remove();
@@ -2792,6 +2892,7 @@
       status.dataset.kind = "success";
       status.textContent = "CoolProp 運算模組已就緒。";
       tableStatus.textContent = "設定變化範圍後即可產生表格。";
+      if (!phSection.hidden) drawPhDiagram();
     } catch (error) {
       temperatureRange.textContent = "無法載入";
       stateTemperatureRange.textContent = "無法載入";
@@ -2800,6 +2901,8 @@
       calculateButton.textContent = "模組載入失敗";
       tableStatus.dataset.kind = "error";
       tableStatus.textContent = "CoolProp 載入失敗，無法產生飽和表。";
+      phStatus.dataset.kind = "error";
+      phStatus.textContent = "CoolProp 載入失敗，無法繪製 Ph 圖，請重新整理頁面。";
       generateTableButton.disabled = true;
       generateTableButton.textContent = "模組載入失敗";
     }
