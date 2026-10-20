@@ -173,6 +173,16 @@
       padding-block: 68px 88px;
     }
 
+    .breadcrumb {
+      margin: 0 0 26px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .breadcrumb a {
+      text-underline-offset: 3px;
+    }
+
     .eyebrow {
       display: flex;
       align-items: center;
@@ -1154,6 +1164,7 @@
   </header>
 
   <main class="wrap page">
+    <p class="breadcrumb"><a href="index.html">首頁</a> ／ <span aria-current="page">PyCool</span></p>
     <p class="eyebrow">Fluid Properties · CoolProp</p>
     <h1>PyCool Web</h1>
     <p class="intro">選擇水或冷媒，查詢物性、產生飽和表，或繪製壓力－焓（Ph）圖。</p>
