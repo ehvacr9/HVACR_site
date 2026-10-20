@@ -351,6 +351,81 @@
       font-size: 12px;
     }
 
+    .footer-brand-group {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .footer-brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 750;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .footer-brand-link:hover {
+      color: var(--green);
+    }
+
+    .footer-brand-logo {
+      width: 32px;
+      height: 32px;
+      flex: 0 0 32px;
+      object-fit: contain;
+    }
+
+    .footer-page-name {
+      color: var(--muted);
+    }
+
+    .scroll-top-button {
+      position: fixed;
+      right: max(24px, env(safe-area-inset-right));
+      bottom: max(24px, env(safe-area-inset-bottom));
+      z-index: 110;
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      padding: 0;
+      border: 1px solid var(--green);
+      border-radius: 50%;
+      background: var(--green);
+      color: #fffefa;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(23, 43, 43, .18);
+      transition: background-color .18s ease, transform .18s ease;
+    }
+
+    .scroll-top-button[hidden] {
+      display: none;
+    }
+
+    .scroll-top-icon {
+      width: 11px;
+      height: 11px;
+      margin-top: 5px;
+      transform: rotate(45deg);
+      border-top: 2px solid currentColor;
+      border-left: 2px solid currentColor;
+    }
+
+    .scroll-top-button:hover {
+      transform: translateY(-2px);
+      background: #174f43;
+    }
+
+    .scroll-top-button:focus-visible {
+      outline: 3px solid #9ab952;
+      outline-offset: 4px;
+    }
+
     .copyright {
       padding: 0 24px 18px;
       color: var(--muted);
@@ -415,6 +490,11 @@
         gap: 3px;
         padding-block: 16px;
       }
+
+      .scroll-top-button {
+        right: max(16px, env(safe-area-inset-right));
+        bottom: max(16px, env(safe-area-inset-bottom));
+      }
     }
   </style>
 </head>
@@ -427,7 +507,7 @@
     <nav aria-label="主選單">
       <a href="index.html">首頁</a>
       <a href="about.html">關於我們</a>
-      <a href="index.html#topics">主題筆記</a>
+      <a href="exam-years.html">技師考題</a>
       <a href="terminology.html">術語辭典</a>
       <a href="pycool.html">PyCool</a>
       <a href="unit-converter.html" aria-current="page">單位換算</a>
@@ -480,13 +560,33 @@
 
   <footer>
     <div class="wrap footer-inner">
-      <span>能源與冷凍空調學習網 · 單位換算</span>
-      <a href="index.html">回首頁</a>
+      <div class="footer-brand-group">
+        <a class="footer-brand-link" href="index.html" aria-label="能源與冷凍空調學習網首頁">
+          <img class="footer-brand-logo" src="assets/hvacr-learning-logo.svg?v=3" alt="">
+          <span>能源與冷凍空調學習網</span>
+        </a>
+        <span class="footer-page-name">· 單位換算</span>
+      </div>
     </div>
     <div class="copyright">Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</div>
   </footer>
+  <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
 
   <script>
+    const scrollTopButton = document.querySelector(".scroll-top-button");
+
+    function updateScrollTopButton() {
+      scrollTopButton.hidden = window.scrollY <= 0;
+    }
+
+    window.addEventListener("scroll", updateScrollTopButton, { passive: true });
+    scrollTopButton.addEventListener("click", () => {
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      window.scrollTo({ top: 0, behavior });
+      updateScrollTopButton();
+    });
+    updateScrollTopButton();
+
     const unitDefinitions = {
       temperature: [
         { id: "C", label: "攝氏 (°C)" },

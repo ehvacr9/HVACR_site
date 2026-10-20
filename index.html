@@ -173,11 +173,19 @@
 
     .hero {
       display: grid;
-      min-height: 570px;
-      grid-template-columns: 1.02fr .98fr;
+      min-height: 620px;
+      grid-template-columns: 1fr 1fr;
       align-items: center;
-      gap: 48px;
-      padding-block: 66px 76px;
+      gap: clamp(38px, 6vw, 82px);
+      padding-block: 76px 88px;
+    }
+
+    .hero-content {
+      max-width: 560px;
+    }
+
+    .hero-gallery {
+      min-width: 0;
     }
 
     .eyebrow {
@@ -199,6 +207,24 @@
       content: "";
     }
 
+    .hero .eyebrow {
+      display: inline-flex;
+      gap: 9px;
+      margin-bottom: 25px;
+      padding: 8px 12px;
+      border: 1px solid rgba(29, 98, 82, .16);
+      border-radius: 999px;
+      background: #edf1e7;
+      font-size: 10px;
+      letter-spacing: .14em;
+    }
+
+    .hero .eyebrow::before {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
     h1,
     h2,
     h3,
@@ -207,24 +233,26 @@
     }
 
     h1 {
-      max-width: 590px;
-      margin-bottom: 22px;
+      max-width: 570px;
+      margin-bottom: 25px;
       font-family: var(--serif);
-      font-size: clamp(42px, 5vw, 67px);
+      font-size: clamp(44px, 5.3vw, 72px);
       font-weight: 500;
-      letter-spacing: -.055em;
-      line-height: 1.22;
+      letter-spacing: -.06em;
+      line-height: 1.18;
     }
 
     h1 span {
       color: var(--green);
+      white-space: nowrap;
     }
 
     .hero-copy {
-      max-width: 470px;
-      margin-bottom: 30px;
+      max-width: 430px;
+      margin-bottom: 0;
       color: var(--muted);
       font-size: 16px;
+      line-height: 1.95;
     }
 
     .button {
@@ -253,70 +281,128 @@
 
     .visual {
       position: relative;
-      display: grid;
-      min-height: 390px;
+      min-height: 440px;
+      margin: 0;
       overflow: hidden;
-      place-items: center;
-      border-radius: 48% 48% 5px 5px;
-      background:
-        radial-gradient(ellipse at 50% 48%, rgba(228, 238, 196, .92) 0 23%, transparent 23.5%),
-        linear-gradient(150deg, #dce8d0, #b8d0bd 52%, #6f9d8c);
+      isolation: isolate;
+      border: 1px solid rgba(255, 255, 255, .55);
+      border-radius: 18px;
+      background: #174b40;
+      box-shadow: 0 24px 58px rgba(23, 43, 43, .14);
     }
 
-    .visual::before,
+    .hero-photo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
     .visual::after {
       position: absolute;
-      width: 290px;
-      height: 290px;
-      border: 1px solid rgba(255, 255, 255, .62);
-      border-radius: 50%;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(13, 40, 35, .54), transparent 34%, transparent 55%, rgba(13, 40, 35, .74));
       content: "";
+      pointer-events: none;
     }
 
-    .visual::after {
-      width: 390px;
-      height: 390px;
-    }
-
-    .sun {
+    .visual-credit {
       position: absolute;
-      top: 13%;
-      right: 16%;
-      width: 74px;
-      height: 74px;
-      border-radius: 50%;
-      background: var(--lime);
-      box-shadow: 0 0 0 16px rgba(217, 233, 155, .2);
-    }
-
-    .coil {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      width: 164px;
-      height: 164px;
-      place-items: center;
-      border: 1px solid rgba(255, 255, 255, .8);
-      border-radius: 50%;
-      background: rgba(255, 254, 250, .27);
-      color: var(--green-dark);
-      font-family: var(--serif);
-      font-size: 63px;
-      backdrop-filter: blur(3px);
-    }
-
-    .visual-note {
-      position: absolute;
-      right: 17px;
-      bottom: 17px;
+      right: 14px;
+      bottom: 14px;
+      left: 14px;
       z-index: 2;
-      padding: 8px 12px;
-      border: 1px solid rgba(255, 255, 255, .65);
-      border-radius: 2px;
-      background: rgba(255, 254, 250, .78);
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      color: #fffefa;
+      font-size: 10px;
+      line-height: 1.5;
+      text-shadow: 0 1px 5px rgba(0, 0, 0, .75);
+    }
+
+    .visual-credit a {
+      flex: 0 0 auto;
+      color: inherit;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .slide-description {
+      min-height: 3.4em;
+      margin: 11px 2px 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .gallery-controls {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 13px;
+    }
+
+    .hero-gallery.is-ready .gallery-controls {
+      display: flex;
+    }
+
+    .gallery-button {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: var(--surface);
       color: var(--green-dark);
+      cursor: pointer;
+      font: inherit;
+      font-size: 19px;
+      line-height: 1;
+      transition: background .2s ease, border-color .2s ease, transform .2s ease;
+    }
+
+    .gallery-button:hover {
+      transform: translateY(-1px);
+      border-color: var(--green);
+      background: #edf2ea;
+    }
+
+    .gallery-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+    }
+
+    .gallery-dot {
+      width: 9px;
+      height: 9px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: #c8d2c7;
+      cursor: pointer;
+      transition: background .2s ease, transform .2s ease;
+    }
+
+    .gallery-dot[aria-pressed="true"] {
+      transform: scale(1.25);
+      background: var(--green);
+    }
+
+    .gallery-position {
+      min-width: 37px;
+      color: var(--muted);
       font-size: 11px;
-      letter-spacing: .04em;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
     }
 
     .topics {
@@ -359,6 +445,10 @@
       gap: 16px;
     }
 
+    #exam-questions {
+      scroll-margin-top: 140px;
+    }
+
     .topic-card {
       min-height: 250px;
       padding: 24px 23px;
@@ -370,6 +460,17 @@
     .topic-card:hover {
       transform: translateY(-4px);
       border-color: #98b2a2;
+    }
+
+    .topic-card--link {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .topic-card--link:focus-visible {
+      outline: 3px solid #9ab952;
+      outline-offset: 4px;
     }
 
     .card-number {
@@ -435,6 +536,81 @@
       gap: 20px;
     }
 
+    .footer-brand-group {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .footer-brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 750;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .footer-brand-link:hover {
+      color: var(--green);
+    }
+
+    .footer-brand-logo {
+      width: 32px;
+      height: 32px;
+      flex: 0 0 32px;
+      object-fit: contain;
+    }
+
+    .footer-page-name {
+      color: var(--muted);
+    }
+
+    .scroll-top-button {
+      position: fixed;
+      right: max(24px, env(safe-area-inset-right));
+      bottom: max(24px, env(safe-area-inset-bottom));
+      z-index: 110;
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      padding: 0;
+      border: 1px solid var(--green);
+      border-radius: 50%;
+      background: var(--green);
+      color: #fffefa;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(23, 43, 43, .18);
+      transition: background-color .18s ease, transform .18s ease;
+    }
+
+    .scroll-top-button[hidden] {
+      display: none;
+    }
+
+    .scroll-top-icon {
+      width: 11px;
+      height: 11px;
+      margin-top: 5px;
+      transform: rotate(45deg);
+      border-top: 2px solid currentColor;
+      border-left: 2px solid currentColor;
+    }
+
+    .scroll-top-button:hover {
+      transform: translateY(-2px);
+      background: #174f43;
+    }
+
+    .scroll-top-button:focus-visible {
+      outline: 3px solid #9ab952;
+      outline-offset: 4px;
+    }
+
     .copyright {
       padding: 0 24px 18px;
       color: var(--muted);
@@ -462,8 +638,8 @@
       .hero {
         min-height: 0;
         grid-template-columns: 1fr;
-        gap: 38px;
-        padding-block: 65px 55px;
+        gap: 35px;
+        padding-block: 58px 60px;
       }
 
       h1 {
@@ -471,7 +647,8 @@
       }
 
       .visual {
-        min-height: 320px;
+        min-height: 350px;
+        border-radius: 16px;
       }
 
       .topics {
@@ -506,6 +683,35 @@
     }
 
     @media (max-width: 420px) {
+      .hero {
+        gap: 28px;
+        padding-block: 43px 48px;
+      }
+
+      h1 {
+        font-size: clamp(40px, 11.5vw, 50px);
+      }
+
+      .hero .eyebrow {
+        margin-bottom: 20px;
+      }
+
+      .visual {
+        min-height: 300px;
+      }
+
+      .visual-credit {
+        right: 11px;
+        bottom: 11px;
+        left: 11px;
+        gap: 8px;
+        font-size: 9px;
+      }
+
+      .slide-credit {
+        max-width: 57%;
+      }
+
       .topbar {
         flex-wrap: wrap;
         gap: 8px;
@@ -531,6 +737,11 @@
         gap: 3px;
         padding-block: 16px;
       }
+
+      .scroll-top-button {
+        right: max(16px, env(safe-area-inset-right));
+        bottom: max(16px, env(safe-area-inset-bottom));
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -552,7 +763,7 @@
     <nav aria-label="主選單">
       <a href="#top" aria-current="page">首頁</a>
       <a href="about.html">關於我們</a>
-      <a href="#topics">主題筆記</a>
+      <a href="exam-years.html">技師考題</a>
       <a href="terminology.html">術語辭典</a>
       <a href="pycool.html">PyCool</a>
       <a href="unit-converter.html">單位換算</a>
@@ -561,58 +772,52 @@
 
   <main id="top">
     <section class="wrap hero" aria-labelledby="hero-title">
-      <div>
+      <div class="hero-content">
         <p class="eyebrow">Energy · HVAC · Everyday</p>
         <h1 id="hero-title">把能源與冷凍空調，<span>說得清楚一點。</span></h1>
         <p class="hero-copy">從一台冷氣、一座冰水主機，到每天使用的能源，整理值得理解的原理與實用觀念。</p>
-        <a class="button" href="#topics">從主題開始 <span aria-hidden="true">→</span></a>
       </div>
-      <div class="visual" role="img" aria-label="以綠色圓形線條呈現能源循環的抽象插畫">
-        <span class="sun" aria-hidden="true"></span>
-        <span class="coil" aria-hidden="true">能</span>
-        <span class="visual-note">理解原理，做出更好的選擇</span>
-      </div>
-    </section>
-
-    <section class="topics" id="topics" aria-labelledby="topics-title">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Field Notes</p>
-            <h2 id="topics-title">從日常設備開始</h2>
-          </div>
-          <p class="section-intro">把專業名詞拆解成看得懂的觀念，持續累積能源與空調的知識地圖。</p>
-        </div>
-        <div class="card-grid">
-          <article class="topic-card">
-            <span class="card-number">01 / 原理</span>
-            <h3>冷氣如何搬運熱？</h3>
-            <p>認識冷媒循環、蒸發器與冷凝器，理解冷房不是「製造冷氣」，而是把熱移到室外。</p>
-          </article>
-          <article class="topic-card">
-            <span class="card-number">02 / 設備</span>
-            <h3>冰水主機入門</h3>
-            <p>從冷凍機、冷卻水塔到泵浦，建立中央空調系統的基本輪廓與設備關係。</p>
-          </article>
-          <article class="topic-card">
-            <span class="card-number">03 / 節能</span>
-            <h3>效率數字怎麼看？</h3>
-            <p>認識 COP、EER 與部分負載效率，讓設備規格不再只是難懂的數字。</p>
-          </article>
+      <div class="hero-gallery" role="region" aria-roledescription="carousel" aria-label="冷凍空調設備與工作實景照片">
+        <figure class="visual">
+          <img class="hero-photo" src="assets/hvac-hero.jpg" alt="空調技術人員使用壓力表檢查冷氣設備" fetchpriority="high">
+          <figcaption class="visual-credit">
+            <span class="slide-credit">攝影者：美國空軍 A1C Derrick Bole｜授權：公有領域</span>
+            <a class="slide-source" href="https://commons.wikimedia.org/wiki/File:379th_ECES_HVAC_technicians_combat_rising_temperatures_(8502255).jpg" target="_blank" rel="noopener noreferrer">照片來源</a>
+          </figcaption>
+        </figure>
+        <p class="slide-description" aria-live="polite">空調技術人員以壓力表檢查修復後的冷氣設備，展現現場檢測與維護工作。</p>
+        <div class="gallery-controls" aria-label="照片瀏覽控制">
+          <button class="gallery-button" type="button" data-gallery-direction="-1" aria-label="上一張照片">‹</button>
+          <div class="gallery-pagination" aria-label="選擇照片"></div>
+          <span class="gallery-position" aria-live="polite">1 / 5</span>
+          <button class="gallery-button" type="button" data-gallery-direction="1" aria-label="下一張照片">›</button>
         </div>
       </div>
     </section>
 
-    <section class="topics" aria-labelledby="pycool-link-title">
+    <section class="wrap about" id="about" aria-labelledby="about-title">
+      <div>
+        <p class="eyebrow">About Us</p>
+        <h2 id="about-title">把專業與經驗，整理成能分享的知識。</h2>
+      </div>
+      <div class="about-copy">
+        <p>我關注能源與冷凍空調，希望把專業知識、工作經驗與學習心得，整理成清楚而實用的內容。</p>
+        <p>這個網站是持續累積與分享的地方，期待讓技術概念更容易理解，也讓知識與實務經驗彼此連結。</p>
+        <div class="note">本站內容為一般知識分享，實際設備操作、維修與設計，請依現場條件並洽詢合格專業人員。</div>
+        <a class="button" href="about.html">認識作者與貢獻者 <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
+    <section class="topics" id="exam-questions" aria-labelledby="exam-questions-title">
       <div class="wrap">
         <div class="section-head">
           <div>
-            <p class="eyebrow">PyCool · Water Properties</p>
-            <h2 id="pycool-link-title">飽和水蒸汽計算</h2>
+            <p class="eyebrow">HVACR Professional Engineer · Exam Archive</p>
+            <h2 id="exam-questions-title">冷凍空調工程技師歷年考題</h2>
           </div>
-          <p class="section-intro">輸入壓力或溫度，查詢飽和液體與蒸汽的密度及比熱。</p>
+          <p class="section-intro">考科可能逐年調整，改以年度整理考題。進入年度後即可查看該年度考科與 PDF。</p>
         </div>
-        <a class="button" href="pycool.html">前往 PyCool <span aria-hidden="true">→</span></a>
+        <a class="button" href="exam-years.html">瀏覽年度考題 <span aria-hidden="true">→</span></a>
       </div>
     </section>
 
@@ -629,6 +834,19 @@
       </div>
     </section>
 
+    <section class="topics" aria-labelledby="pycool-link-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">PyCool · Water Properties</p>
+            <h2 id="pycool-link-title">飽和水蒸汽計算</h2>
+          </div>
+          <p class="section-intro">輸入壓力或溫度，查詢飽和液體與蒸汽的密度及比熱。</p>
+        </div>
+        <a class="button" href="pycool.html">前往 PyCool <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
     <section class="topics" aria-labelledby="unit-converter-link-title">
       <div class="wrap">
         <div class="section-head">
@@ -641,29 +859,120 @@
         <a class="button" href="unit-converter.html">前往單位換算 <span aria-hidden="true">→</span></a>
       </div>
     </section>
-
-    <section class="wrap about" id="about" aria-labelledby="about-title">
-      <div>
-        <p class="eyebrow">About Us</p>
-        <h2 id="about-title">把專業與經驗，整理成能分享的知識。</h2>
-      </div>
-      <div class="about-copy">
-        <p>我關注能源與冷凍空調，希望把專業知識、工作經驗與學習心得，整理成清楚而實用的內容。</p>
-        <p>這個網站是持續累積與分享的地方，期待讓技術概念更容易理解，也讓知識與實務經驗彼此連結。</p>
-        <div class="note">本站內容為一般知識分享，實際設備操作、維修與設計，請依現場條件並洽詢合格專業人員。</div>
-        <a class="button" href="about.html">認識作者與貢獻者 <span aria-hidden="true">→</span></a>
-      </div>
-    </section>
   </main>
 
   <footer>
     <div class="wrap footer-inner">
-      <span>能源與冷凍空調學習網</span>
+      <div class="footer-brand-group">
+        <a class="footer-brand-link" href="index.html" aria-label="能源與冷凍空調學習網首頁">
+          <img class="footer-brand-logo" src="assets/hvacr-learning-logo.svg?v=3" alt="">
+          <span>能源與冷凍空調學習網</span>
+        </a>
+        <span class="footer-page-name">· 首頁</span>
+      </div>
       <span>以好奇心，持續認識能源。</span>
     </div>
     <div class="copyright">Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</div>
   </footer>
+  <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
   <script>
+    const scrollTopButton = document.querySelector(".scroll-top-button");
+
+    function updateScrollTopButton() {
+      scrollTopButton.hidden = window.scrollY <= 0;
+    }
+
+    window.addEventListener("scroll", updateScrollTopButton, { passive: true });
+    scrollTopButton.addEventListener("click", () => {
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      window.scrollTo({ top: 0, behavior });
+      updateScrollTopButton();
+    });
+    updateScrollTopButton();
+
+    const heroSlides = [
+      {
+        src: "assets/hvac-hero.jpg",
+        alt: "空調技術人員使用壓力表檢查冷氣設備。",
+        credit: "攝影者：美國空軍 A1C Derrick Bole｜授權：公有領域",
+        description: "空調技術人員以壓力表檢查修復後的冷氣設備，展現現場檢測與維護工作。",
+        source: "https://commons.wikimedia.org/wiki/File:379th_ECES_HVAC_technicians_combat_rising_temperatures_(8502255).jpg"
+      },
+      {
+        src: "assets/hvac-field-2.jpg",
+        alt: "商業建築屋頂上的箱型空調機組。",
+        credit: "攝影者：P199｜授權：公有領域",
+        description: "屋頂箱型空調機組將冷房與供暖設備整合於戶外機箱，常見於商業建築。",
+        source: "https://commons.wikimedia.org/wiki/File:Rooftop_Packaged_Units.JPG"
+      },
+      {
+        src: "assets/hvac-field-3.jpg",
+        alt: "Science City Kolkata 展館外的空調冷卻設備與管路。",
+        credit: "攝影者：Biswarup Ganguly｜授權：CC BY 3.0",
+        description: "建築外可見空調冷卻設備與大型管路，呈現中央空調系統如何連結室內外設備。",
+        source: "https://commons.wikimedia.org/wiki/File:Air_Conditioning_Plant_-_Science_Exploration_Hall_-_Science_City_-_Kolkata_2015-08-27_2475.JPG"
+      },
+      {
+        src: "assets/hvac-field-4.jpg",
+        alt: "大型商業建築空調箱與上方風管、設備管線的機房實景。",
+        credit: "攝影者：Kgbo｜授權：CC BY-SA 4.0",
+        description: "大型空調箱與密集風管同置於機房，讓人一覽空氣處理設備的規模與配置。",
+        source: "https://commons.wikimedia.org/wiki/File:Air_handling_units_in_large_commercial_building,_Brisbane.jpg"
+      },
+      {
+        src: "assets/hvac-field-5.jpg",
+        alt: "大型冷卻水塔內部的軸流風扇與風機組件。",
+        credit: "攝影者：beeveephoto｜授權：CC BY-SA 2.0",
+        description: "從冷卻塔內向上望去，可見大型軸流風扇；它協助空氣流動，帶走循環水中的熱量。",
+        source: "https://commons.wikimedia.org/wiki/File:Chiller_(19270066402).jpg"
+      }
+    ];
+
+    const gallery = document.querySelector(".hero-gallery");
+    if (gallery) {
+      const photo = gallery.querySelector(".hero-photo");
+      const credit = gallery.querySelector(".slide-credit");
+      const description = gallery.querySelector(".slide-description");
+      const source = gallery.querySelector(".slide-source");
+      const position = gallery.querySelector(".gallery-position");
+      const pagination = gallery.querySelector(".gallery-pagination");
+      let activeSlideIndex = 0;
+
+      const showSlide = (index) => {
+        activeSlideIndex = (index + heroSlides.length) % heroSlides.length;
+        const currentSlide = heroSlides[activeSlideIndex];
+        photo.src = currentSlide.src;
+        photo.alt = currentSlide.alt;
+        credit.textContent = currentSlide.credit;
+        description.textContent = currentSlide.description;
+        source.href = currentSlide.source;
+        source.textContent = "照片來源";
+        position.textContent = `${activeSlideIndex + 1} / ${heroSlides.length}`;
+        pagination.querySelectorAll(".gallery-dot").forEach((dot, dotIndex) => {
+          dot.setAttribute("aria-pressed", String(dotIndex === activeSlideIndex));
+        });
+      };
+
+      heroSlides.forEach((_, index) => {
+        const dot = document.createElement("button");
+        dot.className = "gallery-dot";
+        dot.type = "button";
+        dot.setAttribute("aria-label", `查看第 ${index + 1} 張照片`);
+        dot.setAttribute("aria-pressed", "false");
+        dot.addEventListener("click", () => showSlide(index));
+        pagination.append(dot);
+      });
+
+      gallery.querySelectorAll("[data-gallery-direction]").forEach((button) => {
+        button.addEventListener("click", () => {
+          showSlide(activeSlideIndex + Number(button.dataset.galleryDirection));
+        });
+      });
+
+      showSlide(activeSlideIndex);
+      gallery.classList.add("is-ready");
+    }
+
     if ("serviceWorker" in navigator && location.protocol !== "file:") {
       const workerScript = new URL("./service-worker.js", location.href).href;
       navigator.serviceWorker.getRegistrations()
