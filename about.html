@@ -317,8 +317,10 @@
       display: flex;
       min-height: 76px;
       align-items: center;
-      justify-content: space-between;
-      gap: 20px;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      text-align: center;
       border-top: 1px solid var(--line);
       color: var(--muted);
       font-size: 12px;
@@ -328,6 +330,8 @@
       display: flex;
       min-width: 0;
       align-items: center;
+      justify-content: center;
+      width: 100%;
       gap: 12px;
     }
 
@@ -460,7 +464,7 @@
       }
 
       .footer-inner {
-        align-items: flex-start;
+        align-items: center;
         flex-direction: column;
         justify-content: center;
         gap: 3px;
