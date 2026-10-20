@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Water calculation regression tests</title>
+</head>
+<body>
+  <h1>Water calculation regression tests</h1>
+  <p>Open this page in a browser. Tests run locally using the same modules as PyCool.</p>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    import { runWaterTests } from "./water.test.js";
+    const results = document.querySelector("#results");
+    try {
+      const summary = await runWaterTests();
+      results.dataset.kind = "success";
+      results.textContent = JSON.stringify(summary, null, 2);
+    } catch (error) {
+      results.dataset.kind = "error";
+      results.textContent = error.stack;
+      console.error(error);
+    }
+  </script>
+</body>
+</html>

@@ -1165,7 +1165,7 @@
 
   <main class="wrap page">
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ <span aria-current="page">PyCool</span></p>
-    <p class="eyebrow">Fluid Properties · CoolProp</p>
+    <p class="eyebrow">Fluid Properties</p>
     <h1>PyCool Web</h1>
     <p class="intro">選擇水或冷媒，查詢物性、產生飽和表，或繪製壓力－焓（Ph）圖。</p>
 
@@ -1286,14 +1286,14 @@
               <input id="property-two-value" type="number" inputmode="decimal" step="any" autocomplete="off" aria-label="已知性質 2 數值">
             </div>
           </div>
-          <p class="field-hint">密度與比容代表同一種物性，不能同時選取。CoolProp 模型溫度範圍：<span id="state-temperature-range">載入中…</span>；實際可解狀態依輸入性質而定。</p>
+          <p class="field-hint">密度與比容代表同一種物性，不能同時選取。所選模型溫度範圍：<span id="state-temperature-range">載入中…</span>；實際可解狀態依輸入性質而定。</p>
         </div>
 
         <div class="actions">
           <button id="calculate-button" type="submit" disabled>載入運算模組…</button>
           <button class="secondary" id="clear-button" type="button">清除</button>
         </div>
-        <p class="status" id="status" role="status" aria-live="polite">正在載入本站的 CoolProp 計算模組…</p>
+        <p class="status" id="status" role="status" aria-live="polite">正在載入計算模組…</p>
       </form>
 
       <div class="results-panel">
@@ -1343,15 +1343,14 @@
           </dl>
         </section>
         <div class="notes">
-          <p>飽和輸入適用於所選流體的汽液飽和狀態，溫度範圍由模型最低溫度至臨界點以下；指定任兩性質可計算模型範圍內的過冷液體、過熱蒸氣及其他狀態，實際範圍依輸入性質而定。狀態點中的「—」表示該性質在該相態下無定義或無法計算。</p>
-          <p>性質計算由 <a href="https://github.com/CoolProp/CoolProp" target="_blank" rel="noopener noreferrer">CoolProp 8.0.0</a> 提供，並使用所選流體對應的物性模型。</p>
+          <p>飽和輸入適用於所選流體的汽液飽和狀態，溫度不得低於三相點或模型最低溫度，且須低於臨界點；指定任兩性質可計算模型範圍內的過冷液體、過熱蒸氣及其他狀態，實際範圍依輸入性質而定。狀態點中的「—」表示該性質在該相態下無定義或無法計算。</p>
         </div>
       </div>
     </section>
 
     <section class="saturation-table-section" id="saturation-table-section" hidden aria-labelledby="saturation-table-title">
       <h2 id="saturation-table-title">產生飽和表</h2>
-      <p class="table-intro">汽液飽和表與熔化線採用 CoolProp；水冰昇華線依 <a href="https://doi.org/10.1063/1.3657937" target="_blank" rel="noopener noreferrer" title="Wagner, Riethmann, Feistel and Harvey (2011), J. Phys. Chem. Ref. Data 40, 043103">Wagner 等人（2011）</a>計算。熔化線與昇華線僅列溫度、壓力，不進行物性外推。</p>
+      <p class="table-intro">選擇飽和線與取樣方式。水的固相表分列冰相與共存液相或氣相；超出各相模型範圍的性質標示「無資料」，不外推。</p>
       <form id="saturation-table-form">
         <div class="table-controls">
           <figure class="pt-diagram">
@@ -1414,7 +1413,7 @@
                   <input type="radio" name="saturation-type" value="melt">
                   <span>固液飽和（熔化線）</span>
                 </label>
-                <label class="mode-option" title="僅水冰：Wagner 等人（2011）昇華壓力關聯式">
+                <label class="mode-option" title="僅提供水冰昇華線">
                   <input type="radio" name="saturation-type" value="sublimation">
                   <span>固氣飽和（昇華線）</span>
                 </label>
@@ -1447,7 +1446,7 @@
         </div>
         <div class="table-actions">
           <button id="generate-table-button" type="submit" disabled>載入運算模組…</button>
-          <p class="table-status" id="table-status" role="status" aria-live="polite">載入 CoolProp 後即可產生表格。</p>
+          <p class="table-status" id="table-status" role="status" aria-live="polite">載入計算模組後即可產生表格。</p>
         </div>
       </form>
       <section class="saturation-table-result" id="saturation-table-result" hidden aria-labelledby="saturation-table-result-title">
@@ -1468,7 +1467,7 @@
     </section>
     <section class="saturation-table-section ph-section" id="ph-section" hidden aria-labelledby="ph-title">
       <h2 id="ph-title">Ph 圖（壓力－焓圖）</h2>
-      <p class="table-intro">依所選流體繪製 Ph 圖，刻度與曲線取樣範圍依物性模型自動設定。縱軸為絕對壓力（對數刻度），橫軸為比焓；紅色實線為等溫線，藍色虛線為等熵線，灰色點線為等乾度線（x = 0.1～0.9），綠色點劃線為等密度線。R410A 採用 CoolProp 的擬純流體模型。</p>
+      <p class="table-intro">依所選流體繪製 Ph 圖，刻度與曲線取樣範圍依物性模型自動設定。縱軸為絕對壓力（對數刻度），橫軸為比焓；紅色實線為等溫線，藍色虛線為等熵線，灰色點線為等乾度線（x = 0.1～0.9），綠色點劃線為等密度線。R410A 採用擬純流體模型。</p>
       <div class="ph-options">
         <label><input type="checkbox" id="ph-isotherms" checked> 等溫線 (°C)</label>
         <label><input type="checkbox" id="ph-isentropes" checked> 等熵線 (kJ/kg·K)</label>
@@ -1525,6 +1524,14 @@
           <div class="basic-information-item"><dt>密度 (kg/m³)</dt><dd id="basic-critical-density">載入中…</dd></div>
         </dl>
       </div>
+      <div class="basic-information-group">
+        <h3>計算模型與來源</h3>
+        <p>所有計算均在瀏覽器執行。氣液性質與熔化壓力使用 <a href="https://github.com/CoolProp/CoolProp" target="_blank" rel="noopener noreferrer">CoolProp 8.0.0</a>；水的氣液性質採 IAPWS-95，R410A 採擬純流體模型。</p>
+        <div id="water-model-sources">
+          <p>冰相性質採 <a href="https://iapws.org/technical-guidance/release/Ice-2009" target="_blank" rel="noopener noreferrer">IAPWS Ice Ih（2009 修訂）</a>；水冰昇華壓力採 <a href="https://doi.org/10.1063/1.3657937" target="_blank" rel="noopener noreferrer">Wagner 等人（2011）</a>。水的熔化線限定一般冰（Ice Ih）分支。</p>
+          <p>冰相與氣液相使用一致的焓熵參考：三相點飽和液體的內能與熵為零。氣液模型溫度下限為 273.16 K；固相表低於此下限的共存液相／氣相欄位為「無資料」。冰相不提供黏度。</p>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -1542,6 +1549,7 @@
   <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
 
   <script type="module">
+    import { iceIhProperties, iceSublimationPressure as sublimationPressure } from "./assets/water-ice.js";
     const scrollTopButton = document.querySelector(".scroll-top-button");
 
     function updateScrollTopButton() {
@@ -1667,15 +1675,32 @@
       MELT: [
         "T (°C)", "P (kPa)",
       ],
-      SUBLIMATION: [
-        "T (°C)", "P (kPa)",
-      ],
     };
 
     let coolprop;
+    let fluidReady = false;
+    let calculationBusy = false;
+
+    async function runCalculation(action) {
+      if (calculationBusy) return;
+      calculationBusy = true;
+      const controls = [...document.querySelectorAll("input, select, button")];
+      const inertStates = controls.map((control) => control.inert);
+      for (const control of controls) control.inert = true;
+      document.body.setAttribute("aria-busy", "true");
+      try {
+        await action();
+      } finally {
+        controls.forEach((control, index) => { control.inert = inertStates[index]; });
+        document.body.removeAttribute("aria-busy");
+        calculationBusy = false;
+      }
+    }
     let activeFluid;
     let minimumTemperature;
+    let modelMinimumTemperature;
     let maximumTemperature;
+    let maximumPressure;
     let criticalTemperature;
     let criticalPressure;
     let minimumSaturationPressure;
@@ -1773,7 +1798,7 @@
       saturationTableSection.hidden = !isTableMode;
       basicInformationSection.hidden = !isBasicInformationMode;
       phSection.hidden = !isPhMode;
-      if (isPhMode) drawPhDiagram();
+      if (isPhMode) runCalculation(drawPhDiagram);
       if (isTableMode || isBasicInformationMode || isPhMode) return;
       saturationInputs.hidden = isStateMode;
       stateInputs.hidden = !isStateMode;
@@ -1834,9 +1859,11 @@
     const phPropertyCache = new Map();
     let phCacheFluid = "";
 
-    function drawPhDiagram() {
+    async function drawPhDiagram() {
+      phStatus.dataset.kind = "";
+      phStatus.textContent = "正在繪製 Ph 圖…";
       try {
-        buildPhDiagram();
+        await buildPhDiagram();
       } catch (error) {
         phChart.replaceChildren();
         phStatus.dataset.kind = "error";
@@ -1844,13 +1871,14 @@
       }
     }
 
-    function buildPhDiagram() {
+    async function buildPhDiagram() {
       phChart.replaceChildren();
       phReadout.textContent = "尚未選取狀態點。";
       if (!coolprop) {
-        phStatus.textContent = "等待 CoolProp 運算模組載入後繪製 Ph 圖。";
+        phStatus.textContent = "等待運算模組載入後繪製 Ph 圖。";
         return;
       }
+      if (!fluidReady) throw new Error("所選流體資料尚未就緒，請重新選取流體或重新整理頁面。");
       const fluid = fluidInput.value;
       if (phCacheFluid !== fluid) {
         phPropertyCache.clear();
@@ -1873,9 +1901,9 @@
       const toY = (p) => margin.top + (1 - (Math.log10(p) - logMin) / (logMax - logMin)) * plotHeight;
       const fromX = (x) => hMin + ((x - margin.left) / plotWidth) * (hMax - hMin);
       const fromY = (y) => 10 ** (logMin + (1 - (y - margin.top) / plotHeight) * (logMax - logMin));
-      const rawProps = (output, n1, v1, n2, v2) => {
+      const rawProps = async (output, n1, v1, n2, v2) => {
         try {
-          const value = coolprop.PropsSI(output, n1, v1, n2, v2, fluid);
+          const value = await coolprop.PropsSI(output, n1, v1, n2, v2, fluid);
           return Number.isFinite(value) ? value : null;
         } catch {
           return null;
@@ -1900,12 +1928,12 @@
       };
       const logSpace = (from, to, count) => Array.from({ length: count }, (_, index) => from * (to / from) ** (index / (count - 1)));
 
-      const triple = coolprop.PropsSI("Ttriple", "", 0, "", 0, fluid);
-      const tCritical = coolprop.PropsSI("Tcrit", "", 0, "", 0, fluid);
-      const pCritical = coolprop.PropsSI("pcrit", "", 0, "", 0, fluid);
-      const dCritical = coolprop.PropsSI("rhomass_critical", "", 0, "", 0, fluid);
-      const modelMin = coolprop.PropsSI("Tmin", "", 0, "", 0, fluid);
-      const modelMax = coolprop.PropsSI("Tmax", "", 0, "", 0, fluid);
+      const triple = await coolprop.PropsSI("Ttriple", "", 0, "", 0, fluid);
+      const tCritical = await coolprop.PropsSI("Tcrit", "", 0, "", 0, fluid);
+      const pCritical = await coolprop.PropsSI("pcrit", "", 0, "", 0, fluid);
+      const dCritical = await coolprop.PropsSI("rhomass_critical", "", 0, "", 0, fluid);
+      const modelMin = await coolprop.PropsSI("Tmin", "", 0, "", 0, fluid);
+      const modelMax = await coolprop.PropsSI("Tmax", "", 0, "", 0, fluid);
       const saturationMin = Math.max(triple, modelMin) + .01;
       const chartMinTemperature = isWater ? 273.16 : isR134a ? saturationMin : Math.max(saturationMin, tCritical - 140);
       const chartMaxTemperature = isWater ? 1500 : Math.min(modelMax - .01, tCritical + 180);
@@ -1915,15 +1943,15 @@
         return [1, 2, 5, 10].find((factor) => factor * power >= raw) * power;
       };
       if (!isWater) {
-        const lowPressure = props("P", "T", chartMinTemperature, "Q", 0);
+        const lowPressure = await props("P", "T", chartMinTemperature, "Q", 0);
         if (lowPressure === null || lowPressure <= 0) throw new Error("無法取得流體的飽和範圍。");
         logMin = isR134a ? 3 : Math.floor(Math.log10(lowPressure));
         logMax = Math.ceil(Math.log10(pCritical * 2));
-        const enthalpies = [
+        const enthalpies = await Promise.all([
           props("H", "T", chartMinTemperature, "Q", 0),
           props("H", "T", tCritical - .1, "Q", 1),
           props("H", "P", 10 ** logMin, "T", chartMaxTemperature),
-        ];
+        ]);
         if (enthalpies.some((value) => value === null)) throw new Error("無法設定焓座標範圍。");
         const low = Math.min(...enthalpies) / 1000;
         const high = Math.max(...enthalpies) / 1000;
@@ -1931,7 +1959,7 @@
         hMin = Math.floor(low / hStep) * hStep;
         hMax = Math.ceil(high / hStep) * hStep;
       }
-      const minimumSaturationPressure = props("P", "T", saturationMin, "Q", 0);
+      const minimumSaturationPressure = await props("P", "T", saturationMin, "Q", 0);
       if (minimumSaturationPressure === null) throw new Error("無法取得飽和線的最低壓力。");
       const qualityMinPressure = Math.max(10 ** logMin, minimumSaturationPressure * 1.001);
       const qualityLabelPressure = isWater ? 3000 : qualityMinPressure * 1.5;
@@ -1943,8 +1971,10 @@
           }, (_, index) => (Math.ceil((chartMinTemperature - 273.15) / 20) + index) * 20)
           : Array.from({ length: Math.floor((chartMaxTemperature - 273.15 - Math.ceil((chartMinTemperature - 273.15) / temperatureStep) * temperatureStep) / temperatureStep) + 1 },
             (_, index) => Math.ceil((chartMinTemperature - 273.15) / temperatureStep) * temperatureStep + index * temperatureStep);
-      const entropyLow = props("S", "P", qualityMinPressure, "Q", 0);
-      const entropyHigh = props("S", "P", 10 ** logMin, "T", chartMaxTemperature);
+      const [entropyLow, entropyHigh] = await Promise.all([
+        props("S", "P", qualityMinPressure, "Q", 0),
+        props("S", "P", 10 ** logMin, "T", chartMaxTemperature),
+      ]);
       if (entropyLow === null || entropyHigh === null) throw new Error("無法設定等熵線範圍。");
       const entropyStep = isWater ? 1 : niceStep((entropyHigh - entropyLow) / 1000, isR134a ? 24 : 9);
       const entropyMin = isWater ? 1 : Math.ceil(entropyLow / 1000 / entropyStep) * entropyStep;
@@ -1996,12 +2026,12 @@
       if (document.querySelector("#ph-qualities").checked) {
         const qualityPressures = logSpace(qualityMinPressure, pCritical * .985, 50);
         for (let quality = .1; quality < .95; quality += .1) {
-          const points = qualityPressures
-            .map((p) => ({ p, h: props("H", "P", p, "Q", quality) }))
+          const points = (await Promise.all(qualityPressures
+            .map(async (p) => ({ p, h: await props("H", "P", p, "Q", quality) }))))
             .filter((point) => point.h !== null)
             .map((point) => ({ p: point.p, h: point.h / 1000 }));
           layer.append(svgElement("path", { class: "ph-quality", d: pathOf(points) }));
-          const labelEnthalpy = props("H", "P", qualityLabelPressure, "Q", quality);
+          const labelEnthalpy = await props("H", "P", qualityLabelPressure, "Q", quality);
           if (labelEnthalpy !== null) {
             labels.append(svgElement("text", { class: "ph-label-quality halo", x: toX(labelEnthalpy / 1000), y: toY(qualityLabelPressure) - 4, "text-anchor": "middle" }, `x=${quality.toFixed(1)}`));
           }
@@ -2010,38 +2040,41 @@
 
       if (document.querySelector("#ph-isochores").checked) {
         for (const density of densities) {
-          const points = [];
           const isochoreMinTemperature = isR134a ? saturationMin : chartMinTemperature;
           const isochoreSteps = isR134a ? 360 : 240;
-          for (let step = 0; step <= isochoreSteps; step += 1) {
+          const points = await Promise.all(Array.from({ length: isochoreSteps + 1 }, async (_, step) => {
             const temperature = isochoreMinTemperature
               + ((chartMaxTemperature - isochoreMinTemperature) * step) / isochoreSteps;
-            const p = props("P", "T", temperature, "D", density);
-            const h = props("H", "T", temperature, "D", density);
+            const [p, h] = await Promise.all([
+              props("P", "T", temperature, "D", density),
+              props("H", "T", temperature, "D", density),
+            ]);
             if (p === null || h === null || p < 10 ** logMin || p > 10 ** logMax) {
-              points.push(null);
-              continue;
+              return null;
             }
-            points.push({ p, h: h / 1000 });
-          }
+            return { p, h: h / 1000 };
+          }));
           if (points.filter(Boolean).length < 2) continue;
           layer.append(svgElement("path", { class: "ph-isochore", d: pathOf(points) }));
           if (densityLabelValues && !densityLabelValues.has(density)) continue;
           const labelVisible = points.filter((point) => point
             && point.h >= hMin && point.h <= hMax - (hMax - hMin) * .12
             && point.p <= 10 ** (isR134a ? logMax - .02 : logMax - .5));
-          const labelPoints = isR134a || (isWater && [400, 600].includes(density))
-            ? labelVisible.filter((point) => {
+          const outsideDome = isR134a || (isWater && [400, 600].includes(density))
+            ? await Promise.all(labelVisible.map(async (point) => {
               if (point.p >= pCritical) return true;
-              const saturatedLiquidH = props("H", "P", point.p, "Q", 0);
-              const saturatedVaporH = props("H", "P", point.p, "Q", 1);
+              const [saturatedLiquidH, saturatedVaporH] = await Promise.all([
+                props("H", "P", point.p, "Q", 0),
+                props("H", "P", point.p, "Q", 1),
+              ]);
               if (saturatedLiquidH === null || saturatedVaporH === null) return true;
               const domeLeft = saturatedLiquidH / 1000;
               const domeRight = saturatedVaporH / 1000;
               const clearance = (hMax - hMin) * .025;
               return point.h < domeLeft - clearance || point.h > domeRight + clearance;
-            })
-            : labelVisible;
+            }))
+            : null;
+          const labelPoints = outsideDome ? labelVisible.filter((_, index) => outsideDome[index]) : labelVisible;
           if (!labelPoints.length) continue;
           const label = svgElement("text", { class: "ph-label-isochore halo", "text-anchor": "middle" }, `${density} kg/m³`);
           labels.append(label);
@@ -2061,8 +2094,8 @@
 
       if (document.querySelector("#ph-isentropes").checked) {
         for (let entropy = entropyMin; entropy <= entropyMax; entropy += entropyStep) {
-          const points = [...pressures].reverse()
-            .map((p) => ({ p, h: props("H", "P", p, "S", entropy * 1000) }))
+          const points = (await Promise.all([...pressures].reverse()
+            .map(async (p) => ({ p, h: await props("H", "P", p, "S", entropy * 1000) }))))
             .map((point) => point.h === null ? null : ({ p: point.p, h: point.h / 1000 }));
           if (points.filter(Boolean).length < 2) continue;
           layer.append(svgElement("path", { class: "ph-isentrope", d: pathOf(points) }));
@@ -2080,33 +2113,34 @@
           const temperature = celsius + 273.15;
           const points = [];
           let vaporLabelPressure = 10 ** logMin * 5;
-          const sample = (list) => {
-            for (const p of list) {
-              const h = props("H", "T", temperature, "P", p);
-              points.push(h === null ? null : { p, h: h / 1000 });
-            }
+          const sample = async (list) => {
+            const samples = await Promise.all(list.map(async (p) => {
+              const h = await props("H", "T", temperature, "P", p);
+              return h === null ? null : { p, h: h / 1000 };
+            }));
+            points.push(...samples);
           };
           const descending = [...pressures].reverse();
           if (temperature < tCritical) {
-            const pSat = props("P", "T", temperature, "Q", 0);
-            const pDew = props("P", "T", temperature, "Q", 1);
-            const hLiquid = props("H", "T", temperature, "Q", 0);
-            const hVapor = props("H", "T", temperature, "Q", 1);
+            const [pSat, pDew, hLiquid, hVapor] = await Promise.all([
+              props("P", "T", temperature, "Q", 0), props("P", "T", temperature, "Q", 1),
+              props("H", "T", temperature, "Q", 0), props("H", "T", temperature, "Q", 1),
+            ]);
             if (pSat === null || pDew === null || hLiquid === null || hVapor === null) continue;
             vaporLabelPressure = Math.min(vaporLabelPressure, Math.sqrt(10 ** logMin * pDew));
-            sample(descending.filter((p) => p > pSat * 1.001));
+            await sample(descending.filter((p) => p > pSat * 1.001));
             points.push({ p: pSat, h: hLiquid / 1000 }, { p: pDew, h: hVapor / 1000 });
             const showIsothermLabel = !isR134a || celsius % 20 === 0;
             if (showIsothermLabel && pSat >= 10 ** logMin && pSat <= 10 ** logMax) {
               labels.append(svgElement("text", { class: "ph-label-isotherm halo", x: toX((hLiquid + hVapor) / 2000), y: toY(pSat) + (pSat > 5e6 ? 12 : -3), "text-anchor": "middle" }, `${celsius}°C`));
             }
-            sample(descending.filter((p) => p < pDew / 1.001));
+            await sample(descending.filter((p) => p < pDew / 1.001));
           } else {
-            sample(descending);
+            await sample(descending);
           }
           if (points.length < 2) continue;
           layer.append(svgElement("path", { class: "ph-isotherm", d: pathOf(points) }));
-          const vaporLabelEnthalpy = props("H", "T", temperature, "P", vaporLabelPressure);
+          const vaporLabelEnthalpy = await props("H", "T", temperature, "P", vaporLabelPressure);
           if ((!isR134a || celsius % 20 === 0)
             && vaporLabelPressure >= 10 ** logMin && vaporLabelEnthalpy !== null && vaporLabelEnthalpy / 1000 >= hMin && vaporLabelEnthalpy / 1000 <= hMax) {
             const x = toX(vaporLabelEnthalpy / 1000) + 4;
@@ -2130,25 +2164,27 @@
 
       const liquidSide = [];
       const vaporSide = [];
-      for (let step = 0; step <= 160; step += 1) {
+      const saturationSamples = await Promise.all(Array.from({ length: 161 }, async (_, step) => {
         const fraction = Math.min(step / 160, .9995);
         const temperature = tCritical - (tCritical - saturationMin) * (1 - fraction) ** 2;
-        const pSat = props("P", "T", temperature, "Q", 0);
-        const pDew = props("P", "T", temperature, "Q", 1);
-        const hLiquid = props("H", "T", temperature, "Q", 0);
-        const hVapor = props("H", "T", temperature, "Q", 1);
+        return Promise.all([
+          props("P", "T", temperature, "Q", 0), props("P", "T", temperature, "Q", 1),
+          props("H", "T", temperature, "Q", 0), props("H", "T", temperature, "Q", 1),
+        ]);
+      }));
+      for (const [pSat, pDew, hLiquid, hVapor] of saturationSamples) {
         if (pSat === null || pDew === null || hLiquid === null || hVapor === null) continue;
         liquidSide.push({ p: pSat, h: hLiquid / 1000 });
         vaporSide.push({ p: pDew, h: hVapor / 1000 });
       }
-      const hCritical = props("H", "T", tCritical, "D", dCritical);
+      const hCritical = await props("H", "T", tCritical, "D", dCritical);
       const critical = hCritical === null ? [] : [{ p: pCritical, h: hCritical / 1000 }];
       const dome = [...liquidSide, ...critical, ...vaporSide.reverse()];
       layer.append(svgElement("path", { class: "ph-dome", d: `${pathOf(dome)}Z` }));
       svg.append(layer, labels);
       const edgePressure = isWater ? 1.5e6 : Math.sqrt(10 ** logMin * pCritical);
-      const edgeLiquid = props("H", "P", edgePressure, "Q", 0);
-      const edgeVapor = props("H", "P", edgePressure, "Q", 1);
+      const edgeLiquid = await props("H", "P", edgePressure, "Q", 0);
+      const edgeVapor = await props("H", "P", edgePressure, "Q", 1);
       if (edgeLiquid !== null) svg.append(svgElement("text", { class: "ph-label-edge halo", x: toX(edgeLiquid / 1000) - 8, y: toY(edgePressure) + 4, "text-anchor": "end" }, "x=0 saturated liquid"));
       if (edgeVapor !== null) svg.append(svgElement("text", { class: "ph-label-edge halo", x: toX(edgeVapor / 1000) + 8, y: toY(edgePressure) + 4 }, "x=1 saturated vapor"));
       if (critical.length) {
@@ -2163,7 +2199,7 @@
         ? "Reference State: u = 0 kJ/kg, s = 0 kJ/(kg∙K) for saturated liquid at 0.01 °C"
         : isR134a
           ? "Reference State: h = 200.0 kJ/kg, s = 1.00 kJ/(kg∙K) for saturated liquid at 0 °C"
-          : "Reference State: CoolProp default for this fluid (enthalpy and entropy offsets are model-specific)."));
+          : "Reference State: Fluid model default (enthalpy and entropy offsets are model-specific)."));
       svg.append(svgElement("text", { x: margin.left + 8, y: margin.top + 16 }, fluid));
       const legend = svgElement("g", { class: "ph-legend" });
       const legendEntries = [
@@ -2196,7 +2232,9 @@
       const crossY = marker.querySelector("#ph-cross-y");
       const markerDot = marker.querySelector("#ph-marker-dot");
 
-      const showPoint = (x, y) => {
+      let pointerSequence = 0;
+      const showPoint = async (x, y) => {
+        const sequence = ++pointerSequence;
         marker.setAttribute("visibility", "visible");
         crossX.setAttribute("y1", y);
         crossX.setAttribute("y2", y);
@@ -2206,15 +2244,22 @@
         markerDot.setAttribute("cy", y);
         const h = fromX(x);
         const p = fromY(y);
-        const temperature = rawProps("T", "P", p, "H", h * 1000);
-        const entropy = rawProps("S", "P", p, "H", h * 1000);
-        const density = rawProps("D", "P", p, "H", h * 1000);
-        const quality = p < pCritical ? rawProps("Q", "P", p, "H", h * 1000) : null;
-        phReadout.textContent = `P = ${formatNumber(p / 1000)} kPa，h = ${formatNumber(h)} kJ/kg`
-          + (temperature === null ? "，T 無法計算" : `，T = ${formatNumber(temperature - 273.15)} °C`)
-          + (entropy === null ? "，s 無法計算" : `，s = ${formatNumber(entropy / 1000)} kJ/kg·K`)
-          + (density === null ? "，ρ 無法計算" : `，ρ = ${formatNumber(density)} kg/m³`)
-          + (quality !== null && quality >= 0 && quality <= 1 ? `，x = ${formatNumber(quality)}` : "");
+        try {
+          const [temperature, entropy, density, quality] = await Promise.all([
+            rawProps("T", "P", p, "H", h * 1000),
+            rawProps("S", "P", p, "H", h * 1000),
+            rawProps("D", "P", p, "H", h * 1000),
+            p < pCritical ? rawProps("Q", "P", p, "H", h * 1000) : null,
+          ]);
+          if (sequence !== pointerSequence || !svg.isConnected) return;
+          phReadout.textContent = `P = ${formatNumber(p / 1000)} kPa，h = ${formatNumber(h)} kJ/kg`
+            + (temperature === null ? "，T 無法計算" : `，T = ${formatNumber(temperature - 273.15)} °C`)
+            + (entropy === null ? "，s 無法計算" : `，s = ${formatNumber(entropy / 1000)} kJ/kg·K`)
+            + (density === null ? "，ρ 無法計算" : `，ρ = ${formatNumber(density)} kg/m³`)
+            + (quality !== null && quality >= 0 && quality <= 1 ? `，x = ${formatNumber(quality)}` : "");
+        } catch (error) {
+          if (sequence === pointerSequence && svg.isConnected) phReadout.textContent = error.message;
+        }
       };
       const readPointer = (event) => {
         const point = svg.createSVGPoint();
@@ -2224,6 +2269,7 @@
         if (!matrix) return;
         const { x, y } = point.matrixTransform(matrix.inverse());
         if (x < margin.left || x > margin.left + plotWidth || y < margin.top || y > margin.top + plotHeight) {
+          pointerSequence += 1;
           marker.setAttribute("visibility", "hidden");
           return;
         }
@@ -2233,7 +2279,10 @@
         if (event.pointerType === "mouse") readPointer(event);
       });
       svg.addEventListener("pointerleave", (event) => {
-        if (event.pointerType === "mouse") marker.setAttribute("visibility", "hidden");
+        if (event.pointerType === "mouse") {
+          pointerSequence += 1;
+          marker.setAttribute("visibility", "hidden");
+        }
       });
       phChart.append(svg);
       const occupied = [...svg.querySelectorAll("text:not(.ph-label-isochore)")].map((text) => text.getBoundingClientRect());
@@ -2346,14 +2395,21 @@
       return document.querySelector('input[name="table-variation"]:checked').value;
     }
 
-    function setFluid(fluid) {
+    async function setFluid(fluid) {
+      fluidReady = false;
+      const modelMinimum = await coolprop.PropsSI("Tmin", "", 0, "", 0, fluid);
       const properties = {
-        minimumTemperature: coolprop.PropsSI("Tmin", "", 0, "", 0, fluid),
-        maximumTemperature: coolprop.PropsSI("Tmax", "", 0, "", 0, fluid),
-        criticalTemperature: coolprop.PropsSI("Tcrit", "", 0, "", 0, fluid),
-        criticalPressure: coolprop.PropsSI("pcrit", "", 0, "", 0, fluid),
+        minimumTemperature: Math.max(modelMinimum, await coolprop.PropsSI("Ttriple", "", 0, "", 0, fluid)),
+        maximumTemperature: await coolprop.PropsSI("Tmax", "", 0, "", 0, fluid),
+        criticalTemperature: await coolprop.PropsSI("Tcrit", "", 0, "", 0, fluid),
+        criticalPressure: await coolprop.PropsSI("pcrit", "", 0, "", 0, fluid),
       };
-      properties.minimumSaturationPressure = coolprop.PropsSI(
+      modelMinimumTemperature = modelMinimum;
+      maximumPressure = await coolprop.PropsSI("pmax", "", 0, "", 0, fluid);
+      if (![modelMinimumTemperature, maximumPressure, ...Object.values(properties)].every(Number.isFinite)) {
+        throw new Error("無法取得有效的模型計算範圍。");
+      }
+      properties.minimumSaturationPressure = await coolprop.PropsSI(
         "P",
         "T",
         properties.minimumTemperature,
@@ -2362,20 +2418,21 @@
         fluid,
       );
       activeFluid = fluid;
+      document.querySelector("#water-model-sources").hidden = fluid !== "Water";
       const basicState = coolprop.factory("HEOS", fluid);
       const molarMass = basicState.molar_mass();
       if (!Number.isFinite(molarMass) || molarMass <= 0) {
-        throw new Error("CoolProp 無法取得有效的分子量。");
+        throw new Error("無法取得有效的分子量。");
       }
       const tripleTemperature = basicState.Ttriple();
       const triplePressure = basicState.p_triple();
       const isPseudoPure = Boolean(mixtureMetadata[fluid]);
       const hasNormalPoint = triplePressure <= 101325;
-      const normalPointTemperature = (quality) => {
+      const normalPointTemperature = async (quality) => {
         if (!hasNormalPoint) return "無定義（1 atm 下無液汽相平衡）";
-        const temperature = coolprop.PropsSI("T", "P", 101325, "Q", quality, fluid);
+        const temperature = await coolprop.PropsSI("T", "P", 101325, "Q", quality, fluid);
         if (!Number.isFinite(temperature)) {
-          throw new Error(`CoolProp 無法計算常壓${quality === 1 ? "露點" : isPseudoPure ? "泡點" : "沸點"}。`);
+          throw new Error(`無法計算常壓${quality === 1 ? "露點" : isPseudoPure ? "泡點" : "沸點"}。`);
         }
         return temperature - 273.15;
       };
@@ -2388,8 +2445,8 @@
         cas: mixtureMetadata[fluid]?.cas ?? (cas && cas !== "N/A" ? cas : "—"),
         molarMass: molarMass * 1000,
         gasConstant: basicState.gas_constant() / molarMass,
-        normalPoint: normalPointTemperature(0),
-        dewPoint: isPseudoPure ? normalPointTemperature(1) : "不適用（純流體）",
+        normalPoint: await normalPointTemperature(0),
+        dewPoint: isPseudoPure ? await normalPointTemperature(1) : "不適用（純流體）",
         tripleTemperature: tripleTemperature - 273.15,
         triplePressure: triplePressure / 1000,
         criticalTemperature: basicState.T_critical() - 273.15,
@@ -2398,7 +2455,7 @@
       };
       for (const [key, value] of Object.entries(basicInformation)) {
         if (typeof value === "number") {
-          if (!Number.isFinite(value)) throw new Error(`CoolProp 無法取得基本資訊：${key}。`);
+          if (!Number.isFinite(value)) throw new Error(`無法取得基本資訊：${key}。`);
         } else if (typeof value !== "string" || !value) {
           throw new Error(`尚未設定此流體的化學名稱：${fluid}。`);
         }
@@ -2413,12 +2470,12 @@
         const parameters = coolprop.parameters;
         // Water's reported Tmin omits the decreasing Ice Ih branch (IAPWS-Melting-2011).
         const temperatureMin = fluid === "Water" ? 251.165
-          : meltingLineState.melting_line(parameters.iT_min.value, 0, 0);
+          : await meltingLineState.melting_line(parameters.iT_min.value, 0, 0);
         const temperatureMax = fluid === "Water" ? 273.16
-          : meltingLineState.melting_line(parameters.iT_max.value, 0, 0);
-        const endpointPressures = [temperatureMin, temperatureMax].map(
+          : await meltingLineState.melting_line(parameters.iT_max.value, 0, 0);
+        const endpointPressures = await Promise.all([temperatureMin, temperatureMax].map(
           (temperature) => meltingLineState.melting_line(parameters.iP.value, parameters.iT.value, temperature),
-        );
+        ));
         meltingLineLimits = {
           temperatureMin,
           temperatureMax,
@@ -2429,7 +2486,7 @@
           || meltingLineLimits.pressureMin <= 0
           || meltingLineLimits.pressureMax <= meltingLineLimits.pressureMin
           || temperatureMax <= temperatureMin) {
-          throw new Error("CoolProp 無法取得有效的熔化線範圍。");
+          throw new Error("無法取得有效的熔化線範圍。");
         }
       }
       ({
@@ -2440,7 +2497,7 @@
         minimumSaturationPressure,
       } = properties);
       temperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(criticalTemperature - 273.15)} °C 以下`;
-      stateTemperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(maximumTemperature - 273.15)} °C`;
+      stateTemperatureRange.textContent = `${formatNumber(modelMinimum - 273.15)} °C 至 ${formatNumber(maximumTemperature - 273.15)} °C`;
       const meltingOption = document.querySelector('input[name="saturation-type"][value="melt"]');
       meltingOption.disabled = !meltingLineLimits;
       if (!meltingLineLimits && saturationType() === "melt") {
@@ -2458,6 +2515,7 @@
         document.querySelector('input[name="saturation-type"][value="vle"]').checked = true;
       }
       setSaturationTableDefaults();
+      fluidReady = true;
     }
 
     function setSaturationTableDefaults() {
@@ -2547,12 +2605,7 @@
 
     function iceSublimationPressure(temperature) {
       temperature = boundedSolidLineValue(temperature, 50, 273.16, "水冰昇華線溫度 (K)");
-      // Wagner et al. (2011): pressure in Pa, valid for Ice Ih at 50-273.16 K.
-      const theta = temperature / 273.16;
-      const sum = -21.2144006 * theta ** 0.00333333333
-        + 27.3203819 * theta ** 1.20666667
-        - 6.1059813 * theta ** 1.70333333;
-      return 611.657 * Math.exp(sum / theta);
+      return sublimationPressure(temperature);
     }
 
     function iceSublimationTemperature(pressure) {
@@ -2578,11 +2631,11 @@
       const isSolidLine = isMeltingLine || isSublimationLine;
       if (isMeltingLine) {
         saturationLineHint.textContent = meltingLineLimits
-          ? `熔化線範圍：${formatNumber(meltingLineLimits.temperatureMin - 273.15)} 至 ${formatNumber(meltingLineLimits.temperatureMax - 273.15)} °C，${formatNumber(meltingLineLimits.pressureMin / 1000)} 至 ${formatNumber(meltingLineLimits.pressureMax / 1000)} kPa。僅列溫度與壓力。${activeFluid === "Water" ? " 水僅提供一般冰（Ice Ih）分支。" : ""}`
-          : "此流體的 CoolProp 模型沒有熔化線資料。";
+          ? `熔化線範圍：${formatNumber(meltingLineLimits.temperatureMin - 273.15)} 至 ${formatNumber(meltingLineLimits.temperatureMax - 273.15)} °C，${formatNumber(meltingLineLimits.pressureMin / 1000)} 至 ${formatNumber(meltingLineLimits.pressureMax / 1000)} kPa。${activeFluid === "Water" ? " 分列一般冰（Ice Ih）與液相性質。" : " 僅列溫度與壓力。"}`
+          : "此流體沒有熔化線資料。";
       } else if (isSublimationLine) {
         saturationLineHint.textContent = sublimationLineLimits
-          ? "水冰昇華線：−223.15 至 0.01 °C（50 至 273.16 K）。僅列溫壓；極低壓段建議依溫度取樣。"
+          ? "水冰昇華線：−223.15 至 0.01 °C（50 至 273.16 K）。分列冰相與氣相性質；極低壓段建議依溫度取樣。"
           : "目前僅提供水冰的昇華線。";
       } else {
         saturationLineHint.textContent = `此流體的汽液飽和範圍：${formatNumber(minimumTemperature - 273.15)} °C 至臨界溫度 ${formatNumber(criticalTemperature - 273.15)} °C 以下；壓力 ${formatNumber(minimumSaturationPressure / 1000)} kPa 至臨界壓力 ${formatNumber(criticalPressure / 1000)} kPa 以下。`;
@@ -2674,29 +2727,28 @@
       return values;
     }
 
-    function saturationProperty(output, key, value, quality) {
+    async function saturationProperty(output, key, value, quality) {
       try {
-        const result = coolprop.PropsSI(output, key, value, "Q", quality, activeFluid);
+        const result = await coolprop.PropsSI(output, key, value, "Q", quality, activeFluid);
         return Number.isFinite(result) ? result : NaN;
       } catch {
         return NaN;
       }
     }
 
-    function saturationEndpoint(key, value, quality) {
+    async function saturationEndpoint(key, value, quality) {
       const props = Object.fromEntries(
-        [["T", "T"], ["P", "P"], ["D", "D"], ["H", "H"], ["S", "S"], ["U", "U"], ["cp", "C"], ["cv", "O"], ["viscosity", "V"]]
-          .map(([name, output]) => [name, saturationProperty(output, key, value, quality)]),
+        await Promise.all([["T", "T"], ["P", "P"], ["D", "D"], ["H", "H"], ["S", "S"], ["U", "U"], ["cp", "C"], ["cv", "O"], ["viscosity", "V"]]
+          .map(async ([name, output]) => [name, await saturationProperty(output, key, value, quality)])),
       );
       if (!Number.isFinite(props.T) || !Number.isFinite(props.P) || !Number.isFinite(props.D) || props.D <= 0) {
-        throw new Error("CoolProp 無法計算此範圍的汽液飽和狀態，請調整範圍或間隔。");
+        throw new Error("無法計算此範圍的汽液飽和狀態，請調整範圍或間隔。");
       }
       return props;
     }
 
-    function twoPhaseSaturationRow(key, value) {
-      const liquid = saturationEndpoint(key, value, 0);
-      const vapor = saturationEndpoint(key, value, 1);
+    async function twoPhaseSaturationRow(key, value) {
+      const [liquid, vapor] = await Promise.all([saturationEndpoint(key, value, 0), saturationEndpoint(key, value, 1)]);
       const endpoints = [
         liquid.D, vapor.D,
         1 / liquid.D, 1 / vapor.D, liquid.H / 1000, vapor.H / 1000,
@@ -2709,13 +2761,13 @@
         : [liquid.T - 273.15, liquid.P / 1000, ...endpoints];
     }
 
-    function qualitySaturationRow(key, value, quality) {
-      const liquid = saturationEndpoint(key, value, 0);
-      const vapor = saturationEndpoint(key, value, 1);
-      const temperature = saturationProperty("T", key, value, quality);
-      const pressure = saturationProperty("P", key, value, quality);
+    async function qualitySaturationRow(key, value, quality) {
+      const [liquid, vapor, temperature, pressure] = await Promise.all([
+        saturationEndpoint(key, value, 0), saturationEndpoint(key, value, 1),
+        saturationProperty("T", key, value, quality), saturationProperty("P", key, value, quality),
+      ]);
       if (!Number.isFinite(temperature) || !Number.isFinite(pressure)) {
-        throw new Error("CoolProp 無法計算此乾度下的汽液飽和狀態。");
+        throw new Error("無法計算此乾度下的汽液飽和狀態。");
       }
       const specificVolume = (1 - quality) / liquid.D + quality / vapor.D;
       const mix = (property) => ((1 - quality) * liquid[property] + quality * vapor[property]) / 1000;
@@ -2728,7 +2780,7 @@
       ];
     }
 
-    function meltingLineTemperature(pressure) {
+    async function meltingLineTemperature(pressure) {
       pressure = boundedSolidLineValue(
         pressure, meltingLineLimits.pressureMin, meltingLineLimits.pressureMax, "熔化線壓力 (Pa)",
       );
@@ -2744,8 +2796,8 @@
       // Invert only the selected monotonic branch; Water's native T(P) can select another ice phase.
       for (let iteration = 0; iteration < 64; iteration += 1) {
         const middle = (low + high) / 2;
-        const middlePressure = meltingLineState.melting_line(parameters.iP.value, parameters.iT.value, middle);
-        if (!Number.isFinite(middlePressure)) throw new Error("CoolProp 無法反算熔化線溫度。");
+        const middlePressure = await meltingLineState.melting_line(parameters.iP.value, parameters.iT.value, middle);
+        if (!Number.isFinite(middlePressure)) throw new Error("無法反算熔化線溫度。");
         if ((middlePressure < pressure) === (activeFluid !== "Water")) low = middle;
         else high = middle;
       }
@@ -2759,23 +2811,27 @@
         || value > maximum + tolerance(maximum)) {
         throw new Error(`${label}須介於 ${Number(minimum.toPrecision(12))} 至 ${Number(maximum.toPrecision(12))}。`);
       }
-      // Normalize only roundoff from the input precision and curve inversion.
+      // Snap endpoint roundoff on either side so T and P sampling share the same endpoint state.
+      if (Math.abs(value - minimum) <= tolerance(minimum)) return minimum;
+      if (Math.abs(value - maximum) <= tolerance(maximum)) return maximum;
       return Math.max(minimum, Math.min(maximum, value));
     }
 
-    function meltingLineRow(variation, value) {
+    async function meltingLineRow(variation, value) {
       const parameters = coolprop.parameters;
       const temperature = boundedSolidLineValue(
-        variation === "T" ? value + 273.15 : meltingLineTemperature(value * 1000),
+        variation === "T" ? value + 273.15 : await meltingLineTemperature(value * 1000),
         meltingLineLimits.temperatureMin, meltingLineLimits.temperatureMax, "溫度 (K)",
       );
       let pressure = variation === "P"
         ? value * 1000
-        : meltingLineState.melting_line(parameters.iP.value, parameters.iT.value, temperature);
+        : await meltingLineState.melting_line(parameters.iP.value, parameters.iT.value, temperature);
       pressure = boundedSolidLineValue(
         pressure, meltingLineLimits.pressureMin, meltingLineLimits.pressureMax, "壓力 (Pa)",
       );
-      return [temperature - 273.15, pressure / 1000];
+      return activeFluid === "Water"
+        ? waterSolidLineRow(temperature, pressure, "liquid")
+        : [temperature - 273.15, pressure / 1000];
     }
 
     function sublimationLineRow(variation, value) {
@@ -2787,7 +2843,54 @@
         variation === "P" ? value * 1000 : iceSublimationPressure(temperature),
         sublimationLineLimits.pressureMin, sublimationLineLimits.pressureMax, "壓力 (Pa)",
       );
-      return [temperature - 273.15, pressure / 1000];
+      return waterSolidLineRow(temperature, pressure, "gas");
+    }
+
+    const solidLineProperties = [
+      ["rho", "D", "ρ", "kg/m³", 1], ["v", "D", "v", "m³/kg", 1],
+      ["h", "H", "h", "kJ/kg", .001], ["s", "S", "s", "kJ/kg·K", .001],
+      ["u", "U", "u", "kJ/kg", .001], ["cp", "C", "cp", "kJ/kg·K", .001],
+      ["cv", "O", "cv", "kJ/kg·K", .001],
+    ];
+
+    function waterSolidLineHeaders(phase) {
+      const phaseName = phase === "liquid" ? "液" : "氣";
+      return [
+        "T (°C)", "P (kPa)",
+        ...solidLineProperties.flatMap(([, , symbol, unit]) => [`${symbol}冰 (${unit})`, `${symbol}${phaseName} (${unit})`]),
+        `Δh${phase === "liquid" ? "熔化" : "昇華"} (kJ/kg)`, `μ${phaseName} (μPa·s)`,
+      ];
+    }
+
+    function waterSolidLineRow(temperature, pressure, phase) {
+      const ice = iceIhProperties(temperature, pressure);
+      const fluidMinimum = coolprop.PropsSI("Tmin", "", 0, "", 0, "Water");
+      const fluidMaximum = coolprop.PropsSI("Tmax", "", 0, "", 0, "Water");
+      const fluidPressureMaximum = coolprop.PropsSI("pmax", "", 0, "", 0, "Water");
+      if (![fluidMinimum, fluidMaximum, fluidPressureMaximum].every(Number.isFinite)) {
+        throw new Error("無法取得共存相的模型範圍。");
+      }
+      const fluid = {};
+      const inRange = temperature >= fluidMinimum && temperature <= fluidMaximum && pressure <= fluidPressureMaximum;
+      if (inRange) {
+        // Select the coexisting phase only inside the fluid model's declared domain.
+        for (const [, output] of solidLineProperties) {
+          if (output in fluid) continue;
+          fluid[output] = coolprop.PropsSI(output, `T|${phase}`, temperature, "P", pressure, "Water");
+          if (!Number.isFinite(fluid[output])) throw new Error(`無法計算共存${phase === "liquid" ? "液" : "氣"}相的 ${output}。`);
+        }
+        fluid.V = coolprop.PropsSI("V", `T|${phase}`, temperature, "P", pressure, "Water");
+        if (!Number.isFinite(fluid.V)) throw new Error("無法計算共存相的黏度。");
+      }
+      return [
+        temperature - 273.15, pressure / 1000,
+        ...solidLineProperties.flatMap(([key, output, , , factor]) => [
+          ice[key] * factor,
+          inRange ? (key === "v" ? 1 / fluid.D : fluid[output]) * factor : "無資料",
+        ]),
+        inRange ? (fluid.H - ice.h) / 1000 : "無資料",
+        inRange ? fluid.V * 1e6 : "無資料",
+      ];
     }
 
     function renderSaturationTable(headers, rows) {
@@ -2807,7 +2910,7 @@
         const tableRow = document.createElement("tr");
         for (const value of row) {
           const cell = document.createElement("td");
-          cell.textContent = Number.isFinite(value) ? formatNumber(value) : "—";
+          cell.textContent = typeof value === "string" ? value : Number.isFinite(value) ? formatNumber(value) : "—";
           tableRow.append(cell);
         }
         fragment.append(tableRow);
@@ -2817,9 +2920,12 @@
       saturationTableResult.hidden = false;
     }
 
-    function generateSaturationTable() {
+    async function generateSaturationTable() {
       clearSaturationTable();
+      tableStatus.dataset.kind = "";
+      tableStatus.textContent = "正在產生飽和表…";
       try {
+        if (!fluidReady) throw new Error("所選流體資料尚未就緒，請重新選取流體或重新整理頁面。");
         const saturationLineType = saturationType();
         const variation = tableVariation();
         if (mixtureMetadata[activeFluid] && variation === "QT") {
@@ -2846,12 +2952,12 @@
           const end = boundedSolidLineValue(tableNumber("table-end", "終止值"), minimum, maximum, label);
           const step = tableNumber("table-step", "間隔");
           rows = tableRangePoints(start, end, step).map((point) => sublimationLineRow(variation, point));
-          headers = saturationTableHeaders.SUBLIMATION;
+          headers = waterSolidLineHeaders("gas");
           if (variation === "P") {
-            headers = [headers[1], headers[0]];
-            rows = rows.map(([temperature, pressure]) => [pressure, temperature]);
+            headers = [headers[1], headers[0], ...headers.slice(2)];
+            rows = rows.map(([temperature, pressure, ...properties]) => [pressure, temperature, ...properties]);
           }
-          description = `${formatNumber(start)} 至 ${formatNumber(end)}，間隔 ${formatNumber(step)} ${variation === "T" ? "°C" : "kPa"} · Wagner 等人（2011）水冰昇華線，僅列溫壓`;
+          description = `${formatNumber(start)} 至 ${formatNumber(end)}，間隔 ${formatNumber(step)} ${variation === "T" ? "°C" : "kPa"}`;
         } else if (saturationLineType === "melt") {
           if (!meltingLineState || !meltingLineLimits) {
             throw new Error("目前流體不支援固液熔化線。");
@@ -2867,13 +2973,13 @@
           const start = boundedSolidLineValue(tableNumber("table-start", "起始值"), minimum, maximum, label);
           const end = boundedSolidLineValue(tableNumber("table-end", "終止值"), minimum, maximum, label);
           const step = tableNumber("table-step", "間隔");
-          rows = tableRangePoints(start, end, step).map((point) => meltingLineRow(variation, point));
-          headers = saturationTableHeaders.MELT;
+          rows = await Promise.all(tableRangePoints(start, end, step).map((point) => meltingLineRow(variation, point)));
+          headers = activeFluid === "Water" ? waterSolidLineHeaders("liquid") : saturationTableHeaders.MELT;
           if (variation === "P") {
             headers = [headers[1], headers[0], ...headers.slice(2)];
             rows = rows.map(([temperature, pressure, ...properties]) => [pressure, temperature, ...properties]);
           }
-          description = `${formatNumber(start)} 至 ${formatNumber(end)}，間隔 ${formatNumber(step)} ${variation === "T" ? "°C" : "kPa"} · 僅列溫度與壓力${activeFluid === "Water" ? "；一般冰（Ice Ih）分支" : ""}`;
+          description = `${formatNumber(start)} 至 ${formatNumber(end)}，間隔 ${formatNumber(step)} ${variation === "T" ? "°C" : "kPa"}${activeFluid === "Water" ? " · 一般冰（Ice Ih）分支" : " · 僅列溫度與壓力"}`;
         } else if (variation === "T" || variation === "P") {
           const start = tableNumber("table-start", "起始值");
           const end = tableNumber("table-end", "終止值");
@@ -2887,10 +2993,10 @@
           }
           const points = tableRangePoints(start, end, step);
           const key = variation;
-          rows = points.map((point) => twoPhaseSaturationRow(
+          rows = await Promise.all(points.map((point) => twoPhaseSaturationRow(
             key,
             variation === "T" ? point + 273.15 : point * 1000,
-          ));
+          )));
           const hasSaturationGlide = Boolean(mixtureMetadata[activeFluid]);
           headers = hasSaturationGlide ? saturationTableHeaders.TP_GLIDE : saturationTableHeaders.TP;
           if (variation === "P" && !hasSaturationGlide) {
@@ -2912,7 +3018,7 @@
           const qualities = tableRangePoints(start, end, step);
           const key = variation === "QT" ? "T" : "P";
           const known = variation === "QT" ? fixed + 273.15 : fixed * 1000;
-          rows = qualities.map((quality) => qualitySaturationRow(key, known, quality));
+          rows = await Promise.all(qualities.map((quality) => qualitySaturationRow(key, known, quality)));
           headers = saturationTableHeaders.Q;
           description = `${variation === "QT" ? "T" : "P"} = ${formatNumber(fixed)} ${variation === "QT" ? "°C" : "kPa"}，乾度 ${formatNumber(start)} 至 ${formatNumber(end)}，間隔 ${formatNumber(step)}`;
         }
@@ -2925,7 +3031,9 @@
         }[saturationLineType];
         saturationTableSummary.textContent = `${fluidName} · ${lineName} · ${labels[variation]} · 共 ${rows.length} 列 · ${description}`;
         tableStatus.dataset.kind = "success";
-        tableStatus.textContent = "飽和表已產生。";
+        tableStatus.textContent = rows.some((row) => row.includes("無資料"))
+          ? "飽和表已產生；「無資料」表示共存液相或氣相超出模型範圍，未進行外推。"
+          : "飽和表已產生。";
       } catch (error) {
         tableStatus.dataset.kind = "error";
         tableStatus.textContent = `無法產生飽和表：${error instanceof Error ? error.message : String(error)}`;
@@ -2956,7 +3064,7 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    function calculateSaturation() {
+    async function calculateSaturation() {
       const pressureText = pressureInput.value.trim();
       const temperatureText = temperatureInput.value.trim();
       if (!pressureText && !temperatureText) {
@@ -2978,11 +3086,12 @@
         let mismatch = false;
         if (enteredTemperature !== null) {
           temperature = enteredTemperature + 273.15;
-          if (temperature < minimumTemperature || temperature >= criticalTemperature) {
+          if (temperature < minimumTemperature - 1e-10 * Math.abs(minimumTemperature) || temperature >= criticalTemperature) {
             showError(`溫度須介於 ${formatNumber(minimumTemperature - 273.15)} °C 與臨界溫度 ${formatNumber(criticalTemperature - 273.15)} °C 之間。`);
             return;
           }
-          pressure = coolprop.PropsSI("P", "T", temperature, "Q", 0, activeFluid);
+          temperature = Math.max(minimumTemperature, temperature);
+          pressure = await coolprop.PropsSI("P", "T", temperature, "Q", 0, activeFluid);
           if (enteredPressure !== null) {
             mismatch = Math.abs(enteredPressure * 1000 - pressure) / pressure > 0.01;
           }
@@ -2992,7 +3101,7 @@
             showError(`壓力須低於臨界壓力 ${formatNumber(criticalPressure / 1000)} kPa。`);
             return;
           }
-          temperature = coolprop.PropsSI("T", "P", pressure, "Q", 0, activeFluid);
+          temperature = await coolprop.PropsSI("T", "P", pressure, "Q", 0, activeFluid);
           if (temperature < minimumTemperature) {
             showError(`壓力低於模型最低飽和壓力 ${formatNumber(minimumSaturationPressure / 1000)} kPa，無法計算汽液飽和性質。`);
             return;
@@ -3002,17 +3111,17 @@
         const phases = { liquid: 0, vapor: 1 };
         for (const [phase, quality] of Object.entries(phases)) {
           const properties = {
-            rho: coolprop.PropsSI("D", "T", temperature, "Q", quality, activeFluid),
-            v: 1 / coolprop.PropsSI("D", "T", temperature, "Q", quality, activeFluid),
-            h: coolprop.PropsSI("H", "T", temperature, "Q", quality, activeFluid) / 1000,
-            u: coolprop.PropsSI("U", "T", temperature, "Q", quality, activeFluid) / 1000,
-            cp: coolprop.PropsSI("C", "T", temperature, "Q", quality, activeFluid) / 1000,
-            cv: coolprop.PropsSI("O", "T", temperature, "Q", quality, activeFluid) / 1000,
-            viscosity: coolprop.PropsSI("V", "T", temperature, "Q", quality, activeFluid) * 1e6,
+            rho: await coolprop.PropsSI("D", "T", temperature, "Q", quality, activeFluid),
+            v: 1 / await coolprop.PropsSI("D", "T", temperature, "Q", quality, activeFluid),
+            h: await coolprop.PropsSI("H", "T", temperature, "Q", quality, activeFluid) / 1000,
+            u: await coolprop.PropsSI("U", "T", temperature, "Q", quality, activeFluid) / 1000,
+            cp: await coolprop.PropsSI("C", "T", temperature, "Q", quality, activeFluid) / 1000,
+            cv: await coolprop.PropsSI("O", "T", temperature, "Q", quality, activeFluid) / 1000,
+            viscosity: await coolprop.PropsSI("V", "T", temperature, "Q", quality, activeFluid) * 1e6,
           };
           for (const [key, value] of Object.entries(properties)) {
             if (!Number.isFinite(value)) {
-              throw new Error("CoolProp 回傳了非有限的物性值，請改用較遠離臨界點的狀態。");
+              throw new Error("無法取得有效的物性值，請改用較遠離臨界點的狀態。");
             }
             resultFields[phase][key].textContent = formatNumber(value);
           }
@@ -3031,7 +3140,7 @@
       }
     }
 
-    function calculateStatePoint() {
+    async function calculateStatePoint() {
       const selectedOne = propertyOne.value;
       const selectedTwo = propertyTwo.value;
       const propertyOneSpec = inputProperties[selectedOne];
@@ -3075,7 +3184,7 @@
       try {
         const inputOne = propertyOneSpec.convert(rawOne);
         const inputTwo = propertyTwoSpec.convert(rawTwo);
-        const phase = coolprop.PropsSI(
+        const phase = await coolprop.PropsSI(
           "Phase",
           propertyOneSpec.key,
           inputOne,
@@ -3084,16 +3193,26 @@
           activeFluid,
         );
         if (phaseNames[phase] === undefined) {
-          throw new Error("輸入可能位於飽和邊界，無法只靠這兩項判定液相或汽相；請改用壓力與乾度等性質組合。");
+          console.warn("狀態求解失敗：", coolprop.get_global_param_string("errstring"));
+          throw new Error("所選性質組合不受支援、超出範圍或無法判定相態；請改用壓力與溫度，或壓力與乾度等組合。");
         }
+        const solvedTemperature = await coolprop.PropsSI("T", propertyOneSpec.key, inputOne, propertyTwoSpec.key, inputTwo, activeFluid);
+        const solvedPressure = await coolprop.PropsSI("P", propertyOneSpec.key, inputOne, propertyTwoSpec.key, inputTwo, activeFluid);
+        if (!Number.isFinite(solvedTemperature) || !Number.isFinite(solvedPressure)
+          || solvedTemperature < modelMinimumTemperature - 1e-10 * Math.abs(modelMinimumTemperature)
+          || solvedTemperature > maximumTemperature || solvedPressure <= 0 || solvedPressure > maximumPressure) {
+          throw new Error("求解結果超出模型的溫度或壓力範圍，不進行外推。");
+        }
+        const quality = await coolprop.PropsSI("Q", propertyOneSpec.key, inputOne, propertyTwoSpec.key, inputTwo, activeFluid);
+        const isTwoPhaseMixture = phase === 6 && quality > 0 && quality < 1;
         const values = {};
         for (const [field, output, convert] of outputProperties) {
-          if (phase === 6 && (field === "cp" || field === "cv")) {
+          if (isTwoPhaseMixture && ["cp", "cv", "viscosity"].includes(field)) {
             values[field] = "—（兩相無定義）";
             continue;
           }
           try {
-            const raw = coolprop.PropsSI(
+            const raw = await coolprop.PropsSI(
               output,
               propertyOneSpec.key,
               inputOne,
@@ -3119,10 +3238,11 @@
         }
 
         if (Object.values(values).every((value) => value === "—" || value.startsWith("—"))) {
-          throw new Error("輸入不在有效範圍內，或 CoolProp 無法求解此狀態點。");
+          throw new Error("輸入不在有效範圍內，或無法求解此狀態點。");
         }
 
-        stateResultFields.phase.textContent = phaseNames[phase] ?? `未知相態 (${phase})`;
+        stateResultFields.phase.textContent = phase === 6 && quality === 0 ? "飽和液體"
+          : phase === 6 && quality === 1 ? "飽和蒸氣" : phaseNames[phase];
         for (const [field, value] of Object.entries(values)) {
           stateResultFields[field].textContent = value;
         }
@@ -3136,19 +3256,25 @@
       }
     }
 
-    function calculate() {
+    async function calculate() {
       clearResults();
+      if (!fluidReady) {
+        showError("所選流體資料尚未就緒，請重新選取流體或重新整理頁面。");
+        return;
+      }
+      status.dataset.kind = "";
+      status.textContent = "正在計算…";
       const mode = document.querySelector('input[name="calculation-mode"]:checked').value;
       if (mode === "state") {
-        calculateStatePoint();
+        await calculateStatePoint();
       } else {
-        calculateSaturation();
+        await calculateSaturation();
       }
     }
 
     form.addEventListener("submit", (event) => {
       event.preventDefault();
-      calculate();
+      runCalculation(calculate);
     });
 
     for (const input of modeInputs) {
@@ -3189,18 +3315,18 @@
 
     saturationTableForm.addEventListener("submit", (event) => {
       event.preventDefault();
-      generateSaturationTable();
+      runCalculation(generateSaturationTable);
     });
 
     exportTableButton.addEventListener("click", exportSaturationTable);
 
-    for (const toggle of phToggles) toggle.addEventListener("change", drawPhDiagram);
+    for (const toggle of phToggles) toggle.addEventListener("change", () => runCalculation(drawPhDiagram));
 
-    fluidInput.addEventListener("change", () => {
+    fluidInput.addEventListener("change", () => runCalculation(async () => {
       if (!coolprop) return;
       try {
-        setFluid(fluidInput.value);
-        if (!phSection.hidden) drawPhDiagram();
+        await setFluid(fluidInput.value);
+        if (!phSection.hidden) await drawPhDiagram();
         clearSaturationTable();
         tableStatus.dataset.kind = "success";
         tableStatus.textContent = "流體已切換；請重新產生飽和表。";
@@ -3210,13 +3336,25 @@
         propertyTwoValue.value = "";
         clearResults();
         calculateButton.disabled = false;
+        calculateButton.textContent = "計算";
+        generateTableButton.disabled = false;
+        generateTableButton.textContent = "產生飽和表";
         status.dataset.kind = "success";
         status.textContent = `已切換至 ${fluidInput.options[fluidInput.selectedIndex].text}。`;
       } catch (error) {
         calculateButton.disabled = true;
+        generateTableButton.disabled = true;
+        clearResults();
+        clearSaturationTable();
+        phChart.replaceChildren();
+        for (const field of Object.values(basicInformationFields)) field.textContent = "無法載入";
+        tableStatus.dataset.kind = "error";
+        tableStatus.textContent = "所選流體資料載入失敗，無法產生飽和表。";
+        phStatus.dataset.kind = "error";
+        phStatus.textContent = "所選流體資料載入失敗，無法繪製 Ph 圖。";
         showError(`無法載入所選流體資料：${error instanceof Error ? error.message : String(error)}`);
       }
-    });
+    }));
 
     clearButton.addEventListener("click", () => {
       pressureInput.value = "";
@@ -3234,15 +3372,15 @@
     try {
       const { default: initCoolProp } = await import("./assets/coolprop/coolprop.js");
       coolprop = await initCoolProp();
-      setFluid(fluidInput.value);
+      await runCalculation(() => setFluid(fluidInput.value));
       calculateButton.disabled = false;
       calculateButton.textContent = "計算";
       generateTableButton.disabled = false;
       generateTableButton.textContent = "產生飽和表";
       status.dataset.kind = "success";
-      status.textContent = "CoolProp 運算模組已就緒。";
+      status.textContent = "運算模組已就緒。";
       tableStatus.textContent = "設定變化範圍後即可產生表格。";
-      if (!phSection.hidden) drawPhDiagram();
+      if (!phSection.hidden) await runCalculation(drawPhDiagram);
     } catch (error) {
       temperatureRange.textContent = "無法載入";
       stateTemperatureRange.textContent = "無法載入";
@@ -3250,9 +3388,9 @@
       showError(`本站運算模組載入失敗：${error instanceof Error ? error.message : String(error)}。請重新整理頁面；若問題持續，請聯絡網站管理者。`);
       calculateButton.textContent = "模組載入失敗";
       tableStatus.dataset.kind = "error";
-      tableStatus.textContent = "CoolProp 載入失敗，無法產生飽和表。";
+      tableStatus.textContent = "運算模組載入失敗，無法產生飽和表。";
       phStatus.dataset.kind = "error";
-      phStatus.textContent = "CoolProp 載入失敗，無法繪製 Ph 圖，請重新整理頁面。";
+      phStatus.textContent = "運算模組載入失敗，無法繪製 Ph 圖，請重新整理頁面。";
       generateTableButton.disabled = true;
       generateTableButton.textContent = "模組載入失敗";
     }
