@@ -955,14 +955,18 @@
       display: flex;
       min-height: 76px;
       align-items: center;
-      justify-content: space-between;
-      gap: 20px;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      text-align: center;
     }
 
     .footer-brand-group {
       display: flex;
       min-width: 0;
       align-items: center;
+      justify-content: center;
+      width: 100%;
       gap: 12px;
     }
 
@@ -1129,7 +1133,7 @@
       }
 
       .footer-inner {
-        align-items: flex-start;
+        align-items: center;
         flex-direction: column;
         justify-content: center;
         gap: 3px;
@@ -1347,7 +1351,7 @@
 
     <section class="saturation-table-section" id="saturation-table-section" hidden aria-labelledby="saturation-table-title">
       <h2 id="saturation-table-title">產生飽和表</h2>
-      <p class="table-intro">依所選流體與飽和線類型產生表格；汽液飽和表列出液體與蒸氣性質及黏度，熔化線表列出液相側性質與黏度，昇華線表列出氣相側性質與黏度（非冰的性質）。昇華線氣相性質使用 CoolProp 強制氣相外推，三相點以下的結果不保證精度；無法計算或非正值的密度、比熱與黏度顯示「—」。可依溫度、壓力或乾度取樣。</p>
+      <p class="table-intro">依所選流體與飽和線類型產生表格；汽液飽和表列出液體與蒸氣性質及黏度，R410A 另分列泡點與露點溫度、壓力；熔化線表列出液相側性質與黏度，昇華線表列出氣相側性質與黏度（非冰的性質）。昇華線氣相性質使用 CoolProp 強制氣相外推，三相點以下的結果不保證精度；無法計算或非正值的密度、比熱與黏度顯示「—」。可依溫度、壓力或乾度取樣。</p>
       <form id="saturation-table-form">
         <div class="table-controls">
           <figure class="pt-diagram">
@@ -1486,6 +1490,7 @@
       <div class="basic-information-group">
         <h3>物質識別</h3>
         <dl class="basic-information-grid">
+          <div class="basic-information-item"><dt>冷媒編號</dt><dd id="basic-refrigerant-number">載入中…</dd></div>
           <div class="basic-information-item"><dt>化學名稱 (chemical-name)</dt><dd id="basic-chemical-name">載入中…</dd></div>
           <div class="basic-information-item"><dt>化學式</dt><dd id="basic-formula">載入中…</dd></div>
           <div class="basic-information-item"><dt>CAS 登錄號</dt><dd id="basic-cas">載入中…</dd></div>
@@ -1577,6 +1582,7 @@
     const saturationResults = document.querySelector(".result-grid");
     const stateResults = document.querySelector("#state-results");
     const basicInformationFields = {
+      refrigerantNumber: document.querySelector("#basic-refrigerant-number"),
       chemicalName: document.querySelector("#basic-chemical-name"),
       formula: document.querySelector("#basic-formula"),
       cas: document.querySelector("#basic-cas"),
@@ -1628,6 +1634,13 @@
     const saturationTableHeaders = {
       TP: [
         "T (°C)", "P (kPa)", "ρf (kg/m³)", "ρg (kg/m³)", "vf (m³/kg)", "vg (m³/kg)",
+        "hf (kJ/kg)", "hg (kJ/kg)", "hfg (kJ/kg)", "sf (kJ/kg·K)", "sg (kJ/kg·K)",
+        "uf (kJ/kg)", "ug (kJ/kg)", "cp,f (kJ/kg·K)", "cp,g (kJ/kg·K)",
+        "cv,f (kJ/kg·K)", "cv,g (kJ/kg·K)", "μf (μPa·s)", "μg (μPa·s)",
+      ],
+      TP_GLIDE: [
+        "Tf (°C)", "Tg (°C)", "Pf (kPa)", "Pg (kPa)",
+        "ρf (kg/m³)", "ρg (kg/m³)", "vf (m³/kg)", "vg (m³/kg)",
         "hf (kJ/kg)", "hg (kJ/kg)", "hfg (kJ/kg)", "sf (kJ/kg·K)", "sg (kJ/kg·K)",
         "uf (kJ/kg)", "ug (kJ/kg)", "cp,f (kJ/kg·K)", "cp,g (kJ/kg·K)",
         "cv,f (kJ/kg·K)", "cv,g (kJ/kg·K)", "μf (μPa·s)", "μg (μPa·s)",
@@ -1777,7 +1790,7 @@
       .ph-isentrope { stroke: #000000; stroke-dasharray: 6 3; }
       .ph-isochore { stroke: #000000; stroke-dasharray: 9 3 2 3; }
       .ph-quality { stroke: #555555; stroke-dasharray: 1 3; }
-      .ph-cp-dot { fill: #000000; }
+      .ph-cp-dot { fill: #ffffff; stroke: #000000; }
     `;
     const phChartStyle = `
       text { font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif; font-size: 11px; fill: #5b6c68; }
@@ -1786,6 +1799,7 @@
       .ph-grid { stroke: #e6ebe3; stroke-width: 1; }
       .ph-frame { fill: none; stroke: #172b2b; stroke-width: 1; }
       .ph-dome { fill: rgba(29, 98, 82, .07); stroke: #16483e; stroke-width: 2.4; }
+      .ph-cp-dot { fill: #ffffff; stroke: #16483e; stroke-width: 2; }
       .ph-isotherm { fill: none; stroke: #c0392b; stroke-width: 1.2; }
       .ph-isentrope { fill: none; stroke: #2b6cb0; stroke-width: 1.2; stroke-dasharray: 5 3; }
       .ph-isochore { fill: none; stroke: #2f855a; stroke-width: 1.2; stroke-dasharray: 8 3 2 3; }
@@ -1833,6 +1847,7 @@
         phCacheFluid = fluid;
       }
       const isWater = fluid === "Water";
+      const isR134a = fluid === "R134a";
 
       const width = 900;
       const height = 658;
@@ -1882,7 +1897,7 @@
       const modelMin = coolprop.PropsSI("Tmin", "", 0, "", 0, fluid);
       const modelMax = coolprop.PropsSI("Tmax", "", 0, "", 0, fluid);
       const saturationMin = Math.max(triple, modelMin) + .01;
-      const chartMinTemperature = isWater ? 273.16 : Math.max(saturationMin, tCritical - 140);
+      const chartMinTemperature = isWater ? 273.16 : isR134a ? saturationMin : Math.max(saturationMin, tCritical - 140);
       const chartMaxTemperature = isWater ? 1500 : Math.min(modelMax - .01, tCritical + 180);
       const niceStep = (span, divisions) => {
         const raw = span / divisions;
@@ -1892,7 +1907,7 @@
       if (!isWater) {
         const lowPressure = props("P", "T", chartMinTemperature, "Q", 0);
         if (lowPressure === null || lowPressure <= 0) throw new Error("無法取得流體的飽和範圍。");
-        logMin = Math.floor(Math.log10(lowPressure));
+        logMin = isR134a ? 3 : Math.floor(Math.log10(lowPressure));
         logMax = Math.ceil(Math.log10(pCritical * 2));
         const enthalpies = [
           props("H", "T", chartMinTemperature, "Q", 0),
@@ -1912,16 +1927,26 @@
       const qualityLabelPressure = isWater ? 3000 : qualityMinPressure * 1.5;
       const temperatureStep = niceStep(chartMaxTemperature - chartMinTemperature, 14);
       const temperatures = isWater ? [10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700]
-        : Array.from({ length: Math.floor((chartMaxTemperature - 273.15 - Math.ceil((chartMinTemperature - 273.15) / temperatureStep) * temperatureStep) / temperatureStep) + 1 },
-          (_, index) => Math.ceil((chartMinTemperature - 273.15) / temperatureStep) * temperatureStep + index * temperatureStep);
+        : isR134a
+          ? Array.from({
+            length: Math.floor((chartMaxTemperature - 273.15) / 20) - Math.ceil((chartMinTemperature - 273.15) / 20) + 1,
+          }, (_, index) => (Math.ceil((chartMinTemperature - 273.15) / 20) + index) * 20)
+          : Array.from({ length: Math.floor((chartMaxTemperature - 273.15 - Math.ceil((chartMinTemperature - 273.15) / temperatureStep) * temperatureStep) / temperatureStep) + 1 },
+            (_, index) => Math.ceil((chartMinTemperature - 273.15) / temperatureStep) * temperatureStep + index * temperatureStep);
       const entropyLow = props("S", "P", qualityMinPressure, "Q", 0);
       const entropyHigh = props("S", "P", 10 ** logMin, "T", chartMaxTemperature);
       if (entropyLow === null || entropyHigh === null) throw new Error("無法設定等熵線範圍。");
-      const entropyStep = isWater ? 1 : niceStep((entropyHigh - entropyLow) / 1000, 9);
+      const entropyStep = isWater ? 1 : niceStep((entropyHigh - entropyLow) / 1000, isR134a ? 24 : 9);
       const entropyMin = isWater ? 1 : Math.ceil(entropyLow / 1000 / entropyStep) * entropyStep;
       const entropyMax = isWater ? 10 : entropyHigh / 1000;
-      const densities = isWater ? [0.01, 0.1, 1, 10, 50, 100, 200, 400, 600, 800, 950]
-        : [.002, .01, .05, .1, .25, .5, 1, 1.5, 2, 3].map((factor) => Number((dCritical * factor).toPrecision(2)));
+      const densities = isWater
+        ? [0.01, 0.1, 1, 10, 50, 100, 200, 400, 600, 800, 950]
+        : isR134a
+          ? [1, 2, 5, 10, 20, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400]
+          : [.002, .01, .05, .1, .25, .5, 1, 1.5, 2, 3].map((factor) => Number((dCritical * factor).toPrecision(2)));
+      const densityLabelValues = isR134a
+        ? new Set([1, 2, 5, 10, 20, 50, 100, 200, 400, 600, 800, 1000, 1200, 1400])
+        : null;
       const fluidTitle = `${fluid} Pressure–Enthalpy (Ph) Diagram`;
 
       const svg = svgElement("svg", {
@@ -1976,8 +2001,11 @@
       if (document.querySelector("#ph-isochores").checked) {
         for (const density of densities) {
           const points = [];
-          for (let step = 0; step <= 240; step += 1) {
-            const temperature = chartMinTemperature + ((chartMaxTemperature - chartMinTemperature) * step) / 240;
+          const isochoreMinTemperature = isR134a ? saturationMin : chartMinTemperature;
+          const isochoreSteps = isR134a ? 360 : 240;
+          for (let step = 0; step <= isochoreSteps; step += 1) {
+            const temperature = isochoreMinTemperature
+              + ((chartMaxTemperature - isochoreMinTemperature) * step) / isochoreSteps;
             const p = props("P", "T", temperature, "D", density);
             const h = props("H", "T", temperature, "D", density);
             if (p === null || h === null || p < 10 ** logMin || p > 10 ** logMax) {
@@ -1988,12 +2016,36 @@
           }
           if (points.filter(Boolean).length < 2) continue;
           layer.append(svgElement("path", { class: "ph-isochore", d: pathOf(points) }));
-          const visible = points.filter((point) => point && point.h >= hMin && point.h <= hMax - (hMax - hMin) * .12 && point.p <= 10 ** (logMax - .5));
-          const anchor = visible[visible.length - 1];
-          if (!anchor) continue;
-          const label = svgElement("text", { class: "ph-label-isochore halo", x: toX(anchor.h) + 4, y: toY(anchor.p) - 4 }, `${density} kg/m³`);
+          if (densityLabelValues && !densityLabelValues.has(density)) continue;
+          const labelVisible = points.filter((point) => point
+            && point.h >= hMin && point.h <= hMax - (hMax - hMin) * .12
+            && point.p <= 10 ** (isR134a ? logMax - .02 : logMax - .5));
+          const labelPoints = isR134a || (isWater && [400, 600].includes(density))
+            ? labelVisible.filter((point) => {
+              if (point.p >= pCritical) return true;
+              const saturatedLiquidH = props("H", "P", point.p, "Q", 0);
+              const saturatedVaporH = props("H", "P", point.p, "Q", 1);
+              if (saturatedLiquidH === null || saturatedVaporH === null) return true;
+              const domeLeft = saturatedLiquidH / 1000;
+              const domeRight = saturatedVaporH / 1000;
+              const clearance = (hMax - hMin) * .025;
+              return point.h < domeLeft - clearance || point.h > domeRight + clearance;
+            })
+            : labelVisible;
+          if (!labelPoints.length) continue;
+          const label = svgElement("text", { class: "ph-label-isochore halo", "text-anchor": "middle" }, `${density} kg/m³`);
           labels.append(label);
-          densityLabels.push({ label, points: [anchor, ...visible.reverse()] });
+          densityLabels.push({
+            label,
+            points: [...labelPoints].reverse().map((point) => {
+              const index = labelVisible.indexOf(point);
+              return {
+                point,
+                tangentStart: labelVisible[Math.max(0, index - 2)],
+                tangentEnd: labelVisible[Math.min(labelVisible.length - 1, index + 2)],
+              };
+            }),
+          });
         }
       }
 
@@ -2005,7 +2057,9 @@
           if (points.filter(Boolean).length < 2) continue;
           layer.append(svgElement("path", { class: "ph-isentrope", d: pathOf(points) }));
           const end = points.filter(Boolean).slice(-1)[0];
-          if (end.p <= 10 ** logMin * 1.001 && end.h >= hMin && end.h <= hMax) {
+          const entropyIndex = Math.round((entropy - entropyMin) / entropyStep);
+          if (end.p <= 10 ** logMin * 1.001 && end.h >= hMin && end.h <= hMax
+            && (!isR134a || entropyIndex % 2 === 0)) {
             labels.append(svgElement("text", { class: "ph-label-isentrope halo", x: toX(end.h), y: margin.top + plotHeight + 30, "text-anchor": "middle" }, `s=${Number(entropy.toPrecision(4))}`));
           }
         }
@@ -2032,7 +2086,8 @@
             vaporLabelPressure = Math.min(vaporLabelPressure, Math.sqrt(10 ** logMin * pDew));
             sample(descending.filter((p) => p > pSat * 1.001));
             points.push({ p: pSat, h: hLiquid / 1000 }, { p: pDew, h: hVapor / 1000 });
-            if (pSat >= 10 ** logMin && pSat <= 10 ** logMax) {
+            const showIsothermLabel = !isR134a || celsius % 20 === 0;
+            if (showIsothermLabel && pSat >= 10 ** logMin && pSat <= 10 ** logMax) {
               labels.append(svgElement("text", { class: "ph-label-isotherm halo", x: toX((hLiquid + hVapor) / 2000), y: toY(pSat) + (pSat > 5e6 ? 12 : -3), "text-anchor": "middle" }, `${celsius}°C`));
             }
             sample(descending.filter((p) => p < pDew / 1.001));
@@ -2042,7 +2097,8 @@
           if (points.length < 2) continue;
           layer.append(svgElement("path", { class: "ph-isotherm", d: pathOf(points) }));
           const vaporLabelEnthalpy = props("H", "T", temperature, "P", vaporLabelPressure);
-          if (vaporLabelPressure >= 10 ** logMin && vaporLabelEnthalpy !== null && vaporLabelEnthalpy / 1000 >= hMin && vaporLabelEnthalpy / 1000 <= hMax) {
+          if ((!isR134a || celsius % 20 === 0)
+            && vaporLabelPressure >= 10 ** logMin && vaporLabelEnthalpy !== null && vaporLabelEnthalpy / 1000 >= hMin && vaporLabelEnthalpy / 1000 <= hMax) {
             const x = toX(vaporLabelEnthalpy / 1000) + 4;
             const y = toY(vaporLabelPressure) - 4;
             const nearBottom = y > margin.top + plotHeight - 30;
@@ -2055,7 +2111,8 @@
           }
           const start = points.find(Boolean);
           if (!start) continue;
-          if (start.p >= 10 ** logMax * .999 && start.h >= hMin && start.h <= hMax) {
+          if ((!isR134a || celsius % 20 === 0)
+            && start.p >= 10 ** logMax * .999 && start.h >= hMin && start.h <= hMax) {
             labels.append(svgElement("text", { class: "ph-label-isotherm halo", x: toX(start.h), y: margin.top - 6, "text-anchor": "middle" }, `${celsius}°C`));
           }
         }
@@ -2085,16 +2142,18 @@
       if (edgeLiquid !== null) svg.append(svgElement("text", { class: "ph-label-edge halo", x: toX(edgeLiquid / 1000) - 8, y: toY(edgePressure) + 4, "text-anchor": "end" }, "x=0 saturated liquid"));
       if (edgeVapor !== null) svg.append(svgElement("text", { class: "ph-label-edge halo", x: toX(edgeVapor / 1000) + 8, y: toY(edgePressure) + 4 }, "x=1 saturated vapor"));
       if (critical.length) {
-        svg.append(svgElement("circle", { class: "ph-cp-dot", cx: toX(critical[0].h), cy: toY(critical[0].p), r: 4.5, fill: "#c0392b" }));
+        svg.append(svgElement("circle", { class: "ph-cp-dot", cx: toX(critical[0].h), cy: toY(critical[0].p), r: 4.5 }));
         svg.append(svgElement("text", { class: "halo", x: toX(critical[0].h) + 8, y: toY(critical[0].p) - 6 }, "c.p."));
       }
 
       svg.append(svgElement("rect", { class: "ph-frame", x: margin.left, y: margin.top, width: plotWidth, height: plotHeight }));
       svg.append(svgElement("text", { class: "axis-title", x: margin.left + plotWidth / 2, y: height - 68, "text-anchor": "middle" }, "Specific Enthalpy h (kJ/kg)"));
-      svg.append(svgElement("text", { class: "axis-title", x: 18, y: margin.top + plotHeight / 2, "text-anchor": "middle", transform: `rotate(-90 18 ${margin.top + plotHeight / 2})` }, "Pressure P (kPa, logarithmic scale)"));
+      svg.append(svgElement("text", { class: "axis-title", x: 18, y: margin.top + plotHeight / 2, "text-anchor": "middle", transform: `rotate(-90 18 ${margin.top + plotHeight / 2})` }, `Pressure P (${isWater ? "MPa" : "kPa"})`));
       svg.append(svgElement("text", { class: "ph-reference-state", x: margin.left, y: height - 12 }, isWater
         ? "Reference State: u = 0 kJ/kg, s = 0 kJ/(kg∙K) for saturated liquid at 0.01 °C"
-        : "Reference State: CoolProp default for this fluid (enthalpy and entropy offsets are model-specific)."));
+        : isR134a
+          ? "Reference State: h = 200.0 kJ/kg, s = 1.00 kJ/(kg∙K) for saturated liquid at 0 °C"
+          : "Reference State: CoolProp default for this fluid (enthalpy and entropy offsets are model-specific)."));
       svg.append(svgElement("text", { x: margin.left + 8, y: margin.top + 16 }, fluid));
       const legend = svgElement("g", { class: "ph-legend" });
       const legendEntries = [
@@ -2170,17 +2229,40 @@
       const occupied = [...svg.querySelectorAll("text:not(.ph-label-isochore)")].map((text) => text.getBoundingClientRect());
       const svgBounds = svg.getBoundingClientRect();
       for (const { label, points } of densityLabels) {
-        for (const point of points) {
-          label.setAttribute("x", toX(point.h) + 4);
-          label.setAttribute("y", toY(point.p) - 4);
-          const box = label.getBoundingClientRect();
-          const fits = box.left >= svgBounds.left && box.right <= svgBounds.right
-            && box.top >= svgBounds.top && box.bottom <= svgBounds.bottom;
-          const overlaps = occupied.some((other) => box.left < other.right + 3 && box.right + 3 > other.left
-            && box.top < other.bottom + 3 && box.bottom + 3 > other.top);
-          if (fits && !overlaps) break;
+        let placed = false;
+        for (const { point, tangentStart, tangentEnd } of points) {
+          const anchorX = toX(point.h);
+          const anchorY = toY(point.p);
+          const tangentX = toX(tangentEnd.h) - toX(tangentStart.h);
+          const tangentY = toY(tangentEnd.p) - toY(tangentStart.p);
+          let angle = Math.atan2(tangentY, tangentX) * 180 / Math.PI;
+          if (angle > 90) angle -= 180;
+          if (angle < -90) angle += 180;
+          const tangentLength = Math.hypot(tangentX, tangentY) || 1;
+          const offsets = isR134a ? [0, 8, -8, 16, -16, 24, -24, 32, -32] : [0];
+          for (const offset of offsets) {
+            const x = anchorX - (tangentY / tangentLength) * offset;
+            const y = anchorY + (tangentX / tangentLength) * offset;
+            label.setAttribute("x", x);
+            label.setAttribute("y", y);
+            label.setAttribute("transform", `rotate(${angle} ${x} ${y})`);
+            const box = label.getBoundingClientRect();
+            const fits = box.left >= svgBounds.left && box.right <= svgBounds.right
+              && box.top >= svgBounds.top && box.bottom <= svgBounds.bottom;
+            const overlaps = occupied.some((other) => box.left < other.right + 3 && box.right + 3 > other.left
+              && box.top < other.bottom + 3 && box.bottom + 3 > other.top);
+            if (!fits || overlaps) continue;
+            occupied.push(box);
+            placed = true;
+            break;
+          }
+          if (placed) break;
         }
-        occupied.push(label.getBoundingClientRect());
+        if (!placed && isR134a) {
+          label.setAttribute("display", "none");
+        } else if (!placed) {
+          occupied.push(label.getBoundingClientRect());
+        }
       }
       phStatus.dataset.kind = "success";
       phStatus.textContent = `已繪製 ${fluid} 的 Ph 圖；在圖框內移動滑鼠可讀值，乾度僅在汽液共存區顯示。`;
@@ -2283,6 +2365,7 @@
       const formula = coolprop.get_fluid_param_string(fluid, "formula");
       const cas = coolprop.get_fluid_param_string(fluid, "CAS");
       const basicInformation = {
+        refrigerantNumber: fluid === "Water" ? "R718" : fluid,
         chemicalName: chemicalNames[fluid],
         formula: mixtureMetadata[fluid]?.formula ?? formulaOverrides[fluid] ?? formatChemicalFormula(formula),
         cas: mixtureMetadata[fluid]?.cas ?? (cas && cas !== "N/A" ? cas : "—"),
@@ -2348,15 +2431,14 @@
     function setSaturationTableDefaults() {
       const minC = minimumTemperature - 273.15;
       const criticalC = criticalTemperature - 273.15;
-      const startC = Math.ceil(minC / 10) * 10;
-      const endC = Math.floor(criticalC / 10) * 10;
-      const safeStartC = startC < criticalC ? startC : minC;
-      const safeEndC = endC > safeStartC ? endC : criticalC - 0.01;
+      const safeStartC = minC;
+      const safeEndC = criticalC - 0.1;
       const minimumPressureKPa = minimumSaturationPressure / 1000;
       const maximumPressureKPa = criticalPressure / 1000;
       const pressureStep = niceIntegerStep(maximumPressureKPa - minimumPressureKPa);
-      const startP = Math.ceil(minimumPressureKPa / pressureStep) * pressureStep;
-      const endP = (Math.ceil(maximumPressureKPa / pressureStep) - 1) * pressureStep;
+      const startP = minimumPressureKPa;
+      const endP = maximumPressureKPa * 0.999;
+      const qualityPressureStart = Math.max(minimumPressureKPa, pressureStep);
       const defaultFixedT = Math.min(Math.max(25, safeStartC), safeEndC);
 
       saturationTableDefaults = {
@@ -2378,7 +2460,7 @@
         ],
         QP: [
           ["table-fixed", "固定壓力 (kPa)", Math.min(
-            Math.max(Math.round(Math.sqrt(startP * endP) / pressureStep) * pressureStep, startP),
+            Math.max(Math.round(Math.sqrt(qualityPressureStart * endP) / pressureStep) * pressureStep, startP),
             endP,
           )],
           ["table-quality-start", "起始乾度 x", 0],
@@ -2474,11 +2556,16 @@
       } else {
         saturationLineHint.textContent = `此流體的汽液飽和範圍：${formatNumber(minimumTemperature - 273.15)} °C 至臨界溫度 ${formatNumber(criticalTemperature - 273.15)} °C 以下；壓力 ${formatNumber(minimumSaturationPressure / 1000)} kPa 至臨界壓力 ${formatNumber(criticalPressure / 1000)} kPa 以下。`;
       }
-      for (const input of tableVariationInputs) {
-        input.disabled = isSolidLine && !["T", "P"].includes(input.value);
+      if (mixtureMetadata[activeFluid]) {
+        saturationLineHint.textContent += " R410A 擬純流體模型不支援固定溫度下的中間乾度計算，請使用固定壓力下變化乾度。";
       }
-      if (isSolidLine && !["T", "P"].includes(tableVariation())) {
-        document.querySelector('input[name="table-variation"][value="T"]').checked = true;
+      for (const input of tableVariationInputs) {
+        input.disabled = (isSolidLine && !["T", "P"].includes(input.value))
+          || (Boolean(mixtureMetadata[activeFluid]) && input.value === "QT");
+      }
+      if ((isSolidLine && !["T", "P"].includes(tableVariation()))
+        || (mixtureMetadata[activeFluid] && tableVariation() === "QT")) {
+        document.querySelector(`input[name="table-variation"][value="${mixtureMetadata[activeFluid] ? "QP" : "T"}"]`).checked = true;
       }
       const variation = tableVariation();
       const defaultsKey = isMeltingLine
@@ -2511,7 +2598,7 @@
         input.inputMode = "decimal";
         input.step = "any";
         input.required = true;
-        input.value = formatNumber(value);
+        input.value = Number(value.toPrecision(12)).toString();
         field.append(label, input);
         tableRangeFields.append(field);
       }
@@ -2582,22 +2669,30 @@
     function twoPhaseSaturationRow(key, value) {
       const liquid = saturationEndpoint(key, value, 0);
       const vapor = saturationEndpoint(key, value, 1);
-      return [
-        liquid.T - 273.15, liquid.P / 1000, liquid.D, vapor.D,
+      const endpoints = [
+        liquid.D, vapor.D,
         1 / liquid.D, 1 / vapor.D, liquid.H / 1000, vapor.H / 1000,
         (vapor.H - liquid.H) / 1000, liquid.S / 1000, vapor.S / 1000,
         liquid.U / 1000, vapor.U / 1000, liquid.cp / 1000, vapor.cp / 1000,
         liquid.cv / 1000, vapor.cv / 1000, liquid.viscosity * 1e6, vapor.viscosity * 1e6,
       ];
+      return mixtureMetadata[activeFluid]
+        ? [liquid.T - 273.15, vapor.T - 273.15, liquid.P / 1000, vapor.P / 1000, ...endpoints]
+        : [liquid.T - 273.15, liquid.P / 1000, ...endpoints];
     }
 
     function qualitySaturationRow(key, value, quality) {
       const liquid = saturationEndpoint(key, value, 0);
       const vapor = saturationEndpoint(key, value, 1);
+      const temperature = saturationProperty("T", key, value, quality);
+      const pressure = saturationProperty("P", key, value, quality);
+      if (!Number.isFinite(temperature) || !Number.isFinite(pressure)) {
+        throw new Error("CoolProp 無法計算此乾度下的汽液飽和狀態。");
+      }
       const specificVolume = (1 - quality) / liquid.D + quality / vapor.D;
       const mix = (property) => ((1 - quality) * liquid[property] + quality * vapor[property]) / 1000;
       return [
-        quality, liquid.T - 273.15, liquid.P / 1000, 1 / specificVolume, specificVolume,
+        quality, temperature - 273.15, pressure / 1000, 1 / specificVolume, specificVolume,
         mix("H"), mix("S"), mix("U"),
         quality === 0 ? liquid.cp / 1000 : quality === 1 ? vapor.cp / 1000 : NaN,
         quality === 0 ? liquid.cv / 1000 : quality === 1 ? vapor.cv / 1000 : NaN,
@@ -2677,6 +2772,9 @@
       try {
         const saturationLineType = saturationType();
         const variation = tableVariation();
+        if (mixtureMetadata[activeFluid] && variation === "QT") {
+          throw new Error("R410A 的擬純流體模型不支援固定溫度下的中間乾度計算，請改用固定壓力下變化乾度。");
+        }
         const labels = {
           T: "溫度變化",
           P: "壓力變化",
@@ -2791,8 +2889,9 @@
             key,
             variation === "T" ? point + 273.15 : point * 1000,
           ));
-          headers = saturationTableHeaders.TP;
-          if (variation === "P") {
+          const hasSaturationGlide = Boolean(mixtureMetadata[activeFluid]);
+          headers = hasSaturationGlide ? saturationTableHeaders.TP_GLIDE : saturationTableHeaders.TP;
+          if (variation === "P" && !hasSaturationGlide) {
             headers = [headers[1], headers[0], ...headers.slice(2)];
             rows = rows.map(([temperature, pressure, ...properties]) => [pressure, temperature, ...properties]);
           }
