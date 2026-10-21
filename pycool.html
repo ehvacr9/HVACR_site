@@ -1395,6 +1395,10 @@
                   <input type="radio" name="saturation-type" value="melt">
                   <span>固液飽和（熔化線）</span>
                 </label>
+                <label class="mode-option" title="目前運算模組不支援昇華線計算">
+                  <input type="radio" name="saturation-type" value="sublimation" disabled>
+                  <span>固氣飽和（昇華線）</span>
+                </label>
               </div>
               <p class="field-hint" id="saturation-line-hint"></p>
             </fieldset>
@@ -1501,11 +1505,6 @@
           <div class="basic-information-item"><dt>壓力 (kPa)</dt><dd id="basic-critical-pressure">載入中…</dd></div>
           <div class="basic-information-item"><dt>密度 (kg/m³)</dt><dd id="basic-critical-density">載入中…</dd></div>
         </dl>
-      </div>
-      <div class="basic-information-group">
-        <h3>計算模型與來源</h3>
-        <p>所有計算均在瀏覽器執行。氣液性質與熔化壓力使用 <a href="https://github.com/CoolProp/CoolProp" target="_blank" rel="noopener noreferrer">CoolProp 8.0.0</a>；水的氣液性質採 IAPWS-95，R410A 採擬純流體模型。</p>
-        <p>熔化線僅列 CoolProp 提供的溫度與壓力；水限定一般冰（Ice Ih）分支。不另行建立冰相物性或昇華線模型。</p>
       </div>
     </section>
   </main>
