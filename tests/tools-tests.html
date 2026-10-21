@@ -4,7 +4,7 @@
 <body>
   <h1>Tools navigation regression tests</h1>
   <p>Serve the site over HTTP and open this page. Checks navigation across all public pages, tool cards,
-    breadcrumbs, removal of the former product name, existing tool URLs and responsive card layouts.</p>
+    breadcrumbs, removal of the former product name, existing tool URLs, tool categories and responsive card layouts.</p>
   <pre id="results" role="status">Running...</pre>
   <script type="module">
     const output = document.querySelector("#results");
@@ -53,6 +53,19 @@
             assert(doc.querySelectorAll("#tools-link-title").length === 1
               && doc.querySelector('a.button[href="tools.html"]'), "Home has a single tools section and overview link");
           }
+          if (path === "tools.html") {
+            const groups = [...doc.querySelectorAll(".tool-group")];
+            assert(groups.length === 2, "Tools has two categories");
+            groups.forEach((group, index) => {
+              const heading = group.querySelector("h2");
+              assert(heading.textContent === ["熱物性分析", "工程計算與輔助"][index],
+                `Tools category heading ${index}`);
+              assert(group.getAttribute("aria-labelledby") === heading.id,
+                `Tools category accessible label ${index}`);
+              assert([...group.querySelectorAll(".tool-card")].map((card) => card.getAttribute("href")).join("|")
+                === tools.slice(index * 2, index * 2 + 2).join("|"), `Tools category destinations ${index}`);
+            });
+          }
         }
       }
       document.body.append(frame);
@@ -67,6 +80,12 @@
           await new Promise((resolve) => frame.contentWindow.requestAnimationFrame(() =>
             frame.contentWindow.requestAnimationFrame(resolve)));
           const doc = frame.contentDocument;
+          if (path === "tools.html") {
+            for (const cards of doc.querySelectorAll(".tool-cards")) {
+              assert(frame.contentWindow.getComputedStyle(cards).gridTemplateColumns.split(" ").length
+                === (width <= 760 ? 1 : 2), `Tools category column count ${width}`);
+            }
+          }
           assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth, `${path} no overflow ${width}`);
           for (const card of doc.querySelectorAll(".tool-card")) {
             const bounds = card.getBoundingClientRect();
