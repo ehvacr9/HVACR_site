@@ -11,11 +11,9 @@
   <pre id="results" role="status">Running...</pre>
   <script type="module">
     import { runWaterTests } from "./water.test.js";
-    import { runRefpropAdapterTests } from "./refprop-adapter.test.js";
     const results = document.querySelector("#results");
     try {
       const summary = await runWaterTests();
-      summary.refpropAdapter = await runRefpropAdapterTests();
       results.dataset.kind = "success";
       results.textContent = JSON.stringify(summary, null, 2);
     } catch (error) {

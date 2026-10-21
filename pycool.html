@@ -1526,11 +1526,10 @@
       </div>
       <div class="basic-information-group">
         <h3>計算模型與來源</h3>
-        <p id="browser-model-source">所有計算均在瀏覽器執行。氣液性質與熔化壓力使用 <a href="https://github.com/CoolProp/CoolProp" target="_blank" rel="noopener noreferrer">CoolProp 8.0.0</a>；水的氣液性質採 IAPWS-95，R410A 採擬純流體模型。</p>
-        <p id="refprop-model-source" hidden>水的氣液性質、基本常數及熔化／昇華壓力使用本機安裝的 REFPROP，透過本機服務計算，服務中斷時不切換模型。其他冷媒仍於瀏覽器使用 CoolProp 8.0.0 計算，R410A 採擬純流體模型。</p>
+        <p>所有計算均在瀏覽器執行。氣液性質與熔化壓力使用 <a href="https://github.com/CoolProp/CoolProp" target="_blank" rel="noopener noreferrer">CoolProp 8.0.0</a>；水的氣液性質採 IAPWS-95，R410A 採擬純流體模型。</p>
         <div id="water-model-sources">
-          <p>冰相性質採 <a href="https://iapws.org/technical-guidance/release/Ice-2009" target="_blank" rel="noopener noreferrer">IAPWS Ice Ih（2009 修訂）</a>。<span id="browser-sublimation-source">水冰昇華壓力採 <a href="https://doi.org/10.1063/1.3657937" target="_blank" rel="noopener noreferrer">Wagner 等人（2011）</a>。</span>水的熔化線限定一般冰（Ice Ih）分支。<span id="refprop-ice-note" hidden>冰相完整物性為獨立模型補充，並非 REFPROP DLL 輸出；熔化線端點遵守所安裝版本的原生限制。</span></p>
-          <p>冰相與氣液相使用一致的焓熵參考：三相點飽和液體的內能與熵為零。氣液模型溫度下限為 <span id="water-fluid-minimum">273.16</span> K；固相表低於此下限的共存液相／氣相欄位為「無資料」。冰相不提供黏度。</p>
+          <p>冰相性質採 <a href="https://iapws.org/technical-guidance/release/Ice-2009" target="_blank" rel="noopener noreferrer">IAPWS Ice Ih（2009 修訂）</a>；水冰昇華壓力採 <a href="https://doi.org/10.1063/1.3657937" target="_blank" rel="noopener noreferrer">Wagner 等人（2011）</a>。水的熔化線限定一般冰（Ice Ih）分支。</p>
+          <p>冰相與氣液相使用一致的焓熵參考：三相點飽和液體的內能與熵為零。氣液模型溫度下限為 273.16 K；固相表低於此下限的共存液相／氣相欄位為「無資料」。冰相不提供黏度。</p>
         </div>
       </div>
     </section>
@@ -1881,7 +1880,6 @@
       }
       if (!fluidReady) throw new Error("所選流體資料尚未就緒，請重新選取流體或重新整理頁面。");
       const fluid = fluidInput.value;
-      if (fluid === "Water") await coolprop.refpropWater?.assertReady();
       if (phCacheFluid !== fluid) {
         phPropertyCache.clear();
         phCacheFluid = fluid;
@@ -1907,8 +1905,7 @@
         try {
           const value = await coolprop.PropsSI(output, n1, v1, n2, v2, fluid);
           return Number.isFinite(value) ? value : null;
-        } catch (error) {
-          if (error?.name === "RefpropConnectionError") throw error;
+        } catch {
           return null;
         }
       };
@@ -2400,7 +2397,6 @@
 
     async function setFluid(fluid) {
       fluidReady = false;
-      if (fluid === "Water") await coolprop.refpropWater?.assertReady();
       const modelMinimum = await coolprop.PropsSI("Tmin", "", 0, "", 0, fluid);
       const properties = {
         minimumTemperature: Math.max(modelMinimum, await coolprop.PropsSI("Ttriple", "", 0, "", 0, fluid)),
@@ -2423,7 +2419,6 @@
       );
       activeFluid = fluid;
       document.querySelector("#water-model-sources").hidden = fluid !== "Water";
-      if (fluid === "Water") document.querySelector("#water-fluid-minimum").textContent = formatNumber(modelMinimum);
       const basicState = coolprop.factory("HEOS", fluid);
       const molarMass = basicState.molar_mass();
       if (!Number.isFinite(molarMass) || molarMass <= 0) {
@@ -2476,7 +2471,7 @@
         // Water's reported Tmin omits the decreasing Ice Ih branch (IAPWS-Melting-2011).
         const temperatureMin = fluid === "Water" ? 251.165
           : await meltingLineState.melting_line(parameters.iT_min.value, 0, 0);
-        const temperatureMax = fluid === "Water" ? coolprop.refpropWater?.melting.temperatureMax ?? 273.16
+        const temperatureMax = fluid === "Water" ? 273.16
           : await meltingLineState.melting_line(parameters.iT_max.value, 0, 0);
         const endpointPressures = await Promise.all([temperatureMin, temperatureMax].map(
           (temperature) => meltingLineState.melting_line(parameters.iP.value, parameters.iT.value, temperature),
@@ -2512,8 +2507,8 @@
       sublimationLineLimits = fluid === "Water" ? {
         temperatureMin: 50,
         temperatureMax: 273.16,
-        pressureMin: await iceSublimationPressure(50),
-        pressureMax: await iceSublimationPressure(273.16),
+        pressureMin: iceSublimationPressure(50),
+        pressureMax: iceSublimationPressure(273.16),
       } : null;
       sublimationOption.disabled = !sublimationLineLimits;
       if (!sublimationLineLimits && saturationType() === "sublimation") {
@@ -2608,14 +2603,12 @@
       return Math.max(minimum, factor * magnitude);
     }
 
-    async function iceSublimationPressure(temperature) {
+    function iceSublimationPressure(temperature) {
       temperature = boundedSolidLineValue(temperature, 50, 273.16, "水冰昇華線溫度 (K)");
-      return coolprop.refpropWater
-        ? coolprop.refpropWater.linePressure("sublimation", temperature)
-        : sublimationPressure(temperature);
+      return sublimationPressure(temperature);
     }
 
-    async function iceSublimationTemperature(pressure) {
+    function iceSublimationTemperature(pressure) {
       pressure = boundedSolidLineValue(
         pressure, sublimationLineLimits.pressureMin, sublimationLineLimits.pressureMax, "昇華線壓力 (Pa)",
       );
@@ -2625,7 +2618,7 @@
       let high = sublimationLineLimits.temperatureMax;
       for (let iteration = 0; iteration < 64; iteration += 1) {
         const middle = (low + high) / 2;
-        if (await iceSublimationPressure(middle) < pressure) low = middle;
+        if (iceSublimationPressure(middle) < pressure) low = middle;
         else high = middle;
       }
       return (low + high) / 2;
@@ -2738,8 +2731,7 @@
       try {
         const result = await coolprop.PropsSI(output, key, value, "Q", quality, activeFluid);
         return Number.isFinite(result) ? result : NaN;
-      } catch (error) {
-        if (error?.name === "RefpropConnectionError") throw error;
+      } catch {
         return NaN;
       }
     }
@@ -2842,13 +2834,13 @@
         : [temperature - 273.15, pressure / 1000];
     }
 
-    async function sublimationLineRow(variation, value) {
+    function sublimationLineRow(variation, value) {
       const temperature = boundedSolidLineValue(
-        variation === "T" ? value + 273.15 : await iceSublimationTemperature(value * 1000),
+        variation === "T" ? value + 273.15 : iceSublimationTemperature(value * 1000),
         sublimationLineLimits.temperatureMin, sublimationLineLimits.temperatureMax, "溫度 (K)",
       );
       const pressure = boundedSolidLineValue(
-        variation === "P" ? value * 1000 : await iceSublimationPressure(temperature),
+        variation === "P" ? value * 1000 : iceSublimationPressure(temperature),
         sublimationLineLimits.pressureMin, sublimationLineLimits.pressureMax, "壓力 (Pa)",
       );
       return waterSolidLineRow(temperature, pressure, "gas");
@@ -2870,11 +2862,11 @@
       ];
     }
 
-    async function waterSolidLineRow(temperature, pressure, phase) {
+    function waterSolidLineRow(temperature, pressure, phase) {
       const ice = iceIhProperties(temperature, pressure);
-      const fluidMinimum = await coolprop.PropsSI("Tmin", "", 0, "", 0, "Water");
-      const fluidMaximum = await coolprop.PropsSI("Tmax", "", 0, "", 0, "Water");
-      const fluidPressureMaximum = await coolprop.PropsSI("pmax", "", 0, "", 0, "Water");
+      const fluidMinimum = coolprop.PropsSI("Tmin", "", 0, "", 0, "Water");
+      const fluidMaximum = coolprop.PropsSI("Tmax", "", 0, "", 0, "Water");
+      const fluidPressureMaximum = coolprop.PropsSI("pmax", "", 0, "", 0, "Water");
       if (![fluidMinimum, fluidMaximum, fluidPressureMaximum].every(Number.isFinite)) {
         throw new Error("無法取得共存相的模型範圍。");
       }
@@ -2884,10 +2876,10 @@
         // Select the coexisting phase only inside the fluid model's declared domain.
         for (const [, output] of solidLineProperties) {
           if (output in fluid) continue;
-          fluid[output] = await coolprop.PropsSI(output, `T|${phase}`, temperature, "P", pressure, "Water");
+          fluid[output] = coolprop.PropsSI(output, `T|${phase}`, temperature, "P", pressure, "Water");
           if (!Number.isFinite(fluid[output])) throw new Error(`無法計算共存${phase === "liquid" ? "液" : "氣"}相的 ${output}。`);
         }
-        fluid.V = await coolprop.PropsSI("V", `T|${phase}`, temperature, "P", pressure, "Water");
+        fluid.V = coolprop.PropsSI("V", `T|${phase}`, temperature, "P", pressure, "Water");
         if (!Number.isFinite(fluid.V)) throw new Error("無法計算共存相的黏度。");
       }
       return [
@@ -2934,7 +2926,6 @@
       tableStatus.textContent = "正在產生飽和表…";
       try {
         if (!fluidReady) throw new Error("所選流體資料尚未就緒，請重新選取流體或重新整理頁面。");
-        if (activeFluid === "Water") await coolprop.refpropWater?.assertReady();
         const saturationLineType = saturationType();
         const variation = tableVariation();
         if (mixtureMetadata[activeFluid] && variation === "QT") {
@@ -2960,7 +2951,7 @@
           const start = boundedSolidLineValue(tableNumber("table-start", "起始值"), minimum, maximum, label);
           const end = boundedSolidLineValue(tableNumber("table-end", "終止值"), minimum, maximum, label);
           const step = tableNumber("table-step", "間隔");
-          rows = await Promise.all(tableRangePoints(start, end, step).map((point) => sublimationLineRow(variation, point)));
+          rows = tableRangePoints(start, end, step).map((point) => sublimationLineRow(variation, point));
           headers = waterSolidLineHeaders("gas");
           if (variation === "P") {
             headers = [headers[1], headers[0], ...headers.slice(2)];
@@ -3090,7 +3081,6 @@
       }
 
       try {
-        if (activeFluid === "Water") await coolprop.refpropWater?.assertReady();
         let temperature;
         let pressure;
         let mismatch = false;
@@ -3192,7 +3182,6 @@
 
       clearResults();
       try {
-        if (activeFluid === "Water") await coolprop.refpropWater?.assertReady();
         const inputOne = propertyOneSpec.convert(rawOne);
         const inputTwo = propertyTwoSpec.convert(rawTwo);
         const phase = await coolprop.PropsSI(
@@ -3243,8 +3232,7 @@
             } else {
               values[field] = formatNumber(converted);
             }
-          } catch (error) {
-            if (error?.name === "RefpropConnectionError") throw error;
+          } catch {
             values[field] = "—";
           }
         }
@@ -3384,17 +3372,6 @@
     try {
       const { default: initCoolProp } = await import("./assets/coolprop/coolprop.js");
       coolprop = await initCoolProp();
-      if (new URLSearchParams(location.search).get("water") === "refprop") {
-        if (location.protocol !== "http:" || location.hostname !== "127.0.0.1") {
-          throw new Error("此計算模式需由本機服務開啟，請參閱 local/README.md 的啟動方式。");
-        }
-        const { withRefpropWater } = await import("./assets/refprop-water.js");
-        coolprop = await withRefpropWater(coolprop);
-        document.querySelector("#browser-model-source").hidden = true;
-        document.querySelector("#refprop-model-source").hidden = false;
-        document.querySelector("#browser-sublimation-source").hidden = true;
-        document.querySelector("#refprop-ice-note").hidden = false;
-      }
       await runCalculation(() => setFluid(fluidInput.value));
       calculateButton.disabled = false;
       calculateButton.textContent = "計算";
