@@ -884,6 +884,33 @@
       overflow-x: auto;
     }
 
+    #ph-status[data-kind="loading"] {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #ph-status[data-kind="loading"]::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      flex: 0 0 20px;
+      border: 3px solid var(--line);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: ph-loading-spin .8s linear infinite;
+    }
+
+    @keyframes ph-loading-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #ph-status[data-kind="loading"]::before {
+        animation: none;
+      }
+    }
+
     .ph-chart svg {
       display: block;
       width: 100%;
@@ -1838,14 +1865,19 @@
     let phCacheFluid = "";
 
     async function drawPhDiagram() {
-      phStatus.dataset.kind = "";
+      phStatus.dataset.kind = "loading";
       phStatus.textContent = "正在繪製 Ph 圖…";
+      phChart.setAttribute("aria-busy", "true");
       try {
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
         await buildPhDiagram();
       } catch (error) {
         phChart.replaceChildren();
         phStatus.dataset.kind = "error";
         phStatus.textContent = `無法繪製 Ph 圖：${error instanceof Error ? error.message : String(error)}`;
+      } finally {
+        phChart.removeAttribute("aria-busy");
+        if (phStatus.dataset.kind === "loading") phStatus.dataset.kind = "";
       }
     }
 

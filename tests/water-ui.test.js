@@ -294,11 +294,29 @@ export async function runWaterUiTests() {
     }
 
     categories.add("Ph diagram and fluid switching");
-    await pick("mode-category", "drawing");
+    q('input[name="mode-category"][value="drawing"]').click();
+    assert(q("#ph-status").dataset.kind === "loading" && q("#ph-chart").getAttribute("aria-busy") === "true",
+      "Drawing immediately shows loading status and marks chart busy");
+    assert(frame.contentWindow.getComputedStyle(q("#ph-status"), "::before").animationName === "ph-loading-spin"
+      || frame.contentWindow.matchMedia("(prefers-reduced-motion: reduce)").matches,
+      "Drawing spinner animates unless reduced motion is requested");
+    await idle();
+    assert(q("#ph-status").dataset.kind === "success" && !q("#ph-chart").hasAttribute("aria-busy"),
+      "Successful drawing clears loading state");
     for (const toggle of doc.querySelectorAll(".ph-options input")) toggle.checked = false;
     change("#fluid", "R134a");
     await idle();
     assert(q("#ph-status").dataset.kind === "success", "Existing refrigerant Ph still draws");
+    const invalidFluid = new frame.contentWindow.Option("Invalid test fluid", "InvalidTestFluid");
+    q("#fluid").append(invalidFluid);
+    value("#fluid", invalidFluid.value);
+    q("#ph-isotherms").dispatchEvent(new frame.contentWindow.Event("change"));
+    assert(q("#ph-status").dataset.kind === "loading", "Redrawing shows loading status");
+    await idle();
+    assert(q("#ph-status").dataset.kind === "error" && !q("#ph-chart").hasAttribute("aria-busy"),
+      "Failed drawing clears spinner and busy state and reports error");
+    value("#fluid", "R134a");
+    invalidFluid.remove();
     categories.add("R22 Ph range and curve accuracy");
     change("#fluid", "R22");
     await idle();
