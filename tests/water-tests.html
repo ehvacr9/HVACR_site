@@ -8,12 +8,23 @@
 <body>
   <h1>Water calculation regression tests</h1>
   <p>Open this page in a browser. Tests run locally using the same modules as PyCool.</p>
+  <p>Numerical checks: IAPWS-95 (2018) Tables 7–8; IAPWS viscosity (2008) Table 4;
+    IAPWS R14-08(2011) Table 3 for internal solid-region validation;
+    valid domains, quality mixing and temperature/pressure round trips.</p>
+  <p>Integration checks run the real PyCool page in a temporary same-origin iframe:
+    displayed units, supported/unsupported property pairs, range rejection (including solid water),
+    vapor-liquid tables and CSV, integer defaults for all fluids, removal of solid-line controls and Ph charts.
+    Serve the site over HTTP and open this page; no package installation is required.</p>
   <pre id="results" role="status">Running...</pre>
   <script type="module">
     import { runWaterTests } from "./water.test.js";
+    import { runWaterUiTests } from "./water-ui.test.js";
     const results = document.querySelector("#results");
     try {
-      const summary = await runWaterTests();
+      const numerical = await runWaterTests();
+      results.textContent = `Numerical PASS (${numerical.checks} checks). Running PyCool integration checks...`;
+      const integration = await runWaterUiTests();
+      const summary = { status: "PASS", checks: numerical.checks + integration.checks, numerical, integration };
       results.dataset.kind = "success";
       results.textContent = JSON.stringify(summary, null, 2);
     } catch (error) {

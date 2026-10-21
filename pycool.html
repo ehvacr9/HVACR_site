@@ -302,29 +302,27 @@
       cursor: not-allowed;
     }
 
-    .saturation-type-fieldset {
+    .saturation-type-fieldset,
+    .variation-fieldset {
       min-width: 0;
       margin: 0 0 16px;
       padding: 0;
       border: 0;
     }
 
-    .saturation-type-fieldset legend {
+    .saturation-type-fieldset legend,
+    .variation-fieldset legend {
       margin-bottom: 6px;
       font-size: 13px;
       font-weight: 650;
     }
 
-    .saturation-type-options {
-      margin-bottom: 0;
-    }
-
-    .variation-fieldset {
-      margin-bottom: 16px;
-    }
-
     .variation-options .mode-option span {
       height: 100%;
+    }
+
+    .saturation-type-options {
+      margin-bottom: 0;
     }
 
     .calculator {
@@ -656,16 +654,6 @@
       stroke-width: 1.5;
     }
 
-    #pt-diagram[data-saturation-type="melt"] .pt-saturation {
-      stroke: #84908a;
-      stroke-width: 1.5;
-    }
-
-    #pt-diagram[data-saturation-type="melt"] .pt-melting {
-      stroke: #b33a30;
-      stroke-width: 4;
-    }
-
     .pt-label {
       fill: var(--ink);
       font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
@@ -692,7 +680,6 @@
     }
 
     .pt-sample-points,
-    .pt-melt-sample-points,
     .pt-fixed-temperature,
     .pt-fixed-pressure {
       display: none;
@@ -750,15 +737,13 @@
       overflow-wrap: anywhere;
     }
 
-    #pt-diagram[data-saturation-type="vle"][data-variation="T"] .pt-sample-points,
-    #pt-diagram[data-saturation-type="vle"][data-variation="P"] .pt-sample-points,
-    #pt-diagram[data-saturation-type="melt"][data-variation="T"] .pt-melt-sample-points,
-    #pt-diagram[data-saturation-type="melt"][data-variation="P"] .pt-melt-sample-points {
+    #pt-diagram[data-variation="T"] .pt-sample-points,
+    #pt-diagram[data-variation="P"] .pt-sample-points {
       display: inline;
     }
 
-    #pt-diagram[data-saturation-type="vle"][data-variation="QT"] .pt-fixed-temperature,
-    #pt-diagram[data-saturation-type="vle"][data-variation="QP"] .pt-fixed-pressure {
+    #pt-diagram[data-variation="QT"] .pt-fixed-temperature,
+    #pt-diagram[data-variation="QP"] .pt-fixed-pressure {
       display: inline;
     }
 
@@ -1236,7 +1221,6 @@
           <div class="field">
             <label for="temperature">溫度 T (°C)</label>
             <input id="temperature" name="temperature" type="number" inputmode="decimal" step="any" autocomplete="off">
-            <p class="field-hint" id="temperature-range">範圍載入中…</p>
           </div>
         </div>
 
@@ -1273,7 +1257,6 @@
               <input id="property-two-value" type="number" inputmode="decimal" step="any" autocomplete="off" aria-label="已知性質 2 數值">
             </div>
           </div>
-          <p class="field-hint">密度與比容代表同一種物性，不能同時選取。所選模型溫度範圍：<span id="state-temperature-range">載入中…</span>；實際可解狀態依輸入性質而定。</p>
         </div>
 
         <div class="actions">
@@ -1329,15 +1312,12 @@
             <div class="state-output"><dt>乾度 x</dt><dd id="state-q">—</dd></div>
           </dl>
         </section>
-        <div class="notes">
-          <p>飽和輸入適用於所選流體的汽液飽和狀態，溫度不得低於三相點或模型最低溫度，且須低於臨界點；指定任兩性質可計算模型範圍內的過冷液體、過熱蒸氣及其他狀態，實際範圍依輸入性質而定。狀態點中的「—」表示該性質在該相態下無定義或無法計算。</p>
-        </div>
       </div>
     </section>
 
     <section class="saturation-table-section" id="saturation-table-section" hidden aria-labelledby="saturation-table-title">
       <h2 id="saturation-table-title">產生飽和表</h2>
-      <p class="table-intro">選擇飽和線與取樣方式。預設起訖值採有效範圍內的整數；熔化線僅列溫度與壓力。</p>
+      <p class="table-intro">選擇取樣方式，設定起訖值及間隔。</p>
       <form id="saturation-table-form">
         <div class="table-controls">
           <figure class="pt-diagram">
@@ -1358,11 +1338,6 @@
               <text class="pt-label" x="68" y="202">三相點</text>
               <circle class="pt-critical" cx="285" cy="42" r="6" />
               <text class="pt-label" x="291" y="39" fill="#b33a30">臨界點</text>
-              <g class="pt-melt-sample-points" aria-hidden="true">
-                <circle class="pt-point" cx="98" cy="177" r="4.5" />
-                <circle class="pt-point" cx="97" cy="130" r="4.5" />
-                <circle class="pt-point" cx="99" cy="77" r="4.5" />
-              </g>
               <g class="pt-sample-points" aria-hidden="true">
                 <circle class="pt-point" cx="148" cy="174" r="4.5" />
                 <circle class="pt-point" cx="207" cy="137" r="4.5" />
@@ -1391,18 +1366,9 @@
                   <input type="radio" name="saturation-type" value="vle" checked>
                   <span>汽液飽和</span>
                 </label>
-                <label class="mode-option">
-                  <input type="radio" name="saturation-type" value="melt">
-                  <span>固液飽和（熔化線）</span>
-                </label>
-                <label class="mode-option" title="目前運算模組不支援昇華線計算">
-                  <input type="radio" name="saturation-type" value="sublimation" disabled>
-                  <span>固氣飽和（昇華線）</span>
-                </label>
               </div>
-              <p class="field-hint" id="saturation-line-hint"></p>
             </fieldset>
-            <fieldset class="saturation-type-fieldset variation-fieldset">
+            <fieldset class="variation-fieldset">
               <legend>變化方式</legend>
               <div class="mode-switch variation-options" role="radiogroup" aria-label="變化方式">
                 <label class="mode-option">
@@ -1449,7 +1415,7 @@
     </section>
     <section class="saturation-table-section ph-section" id="ph-section" hidden aria-labelledby="ph-title">
       <h2 id="ph-title">Ph 圖（壓力－焓圖）</h2>
-      <p class="table-intro">依所選流體繪製 Ph 圖，刻度與曲線取樣範圍依物性模型自動設定。縱軸為絕對壓力（對數刻度），橫軸為比焓；紅色實線為等溫線，藍色虛線為等熵線，灰色點線為等乾度線（x = 0.1～0.9），綠色點劃線為等密度線。R410A 採用擬純流體模型。</p>
+      <p class="table-intro">縱軸為絕對壓力（對數刻度），橫軸為比焓。勾選下方項目以顯示曲線。</p>
       <div class="ph-options">
         <label><input type="checkbox" id="ph-isotherms" checked> 等溫線 (°C)</label>
         <label><input type="checkbox" id="ph-isentropes" checked> 等熵線 (kJ/kg·K)</label>
@@ -1464,7 +1430,7 @@
         <button class="secondary" id="ph-download-color-button" type="button">下載彩色圖片 (PNG)</button>
         <button class="secondary" id="ph-download-bw-button" type="button">下載黑白圖片 (PNG)</button>
       </div>
-      <p class="table-intro">下載目前勾選的曲線，圖片包含線型圖例與參考狀態，不含滑鼠標記；黑白版以不同線型區分曲線，適合列印。c.p. 表示臨界點。</p>
+      <p class="table-intro">黑白版適合列印；c.p. 表示臨界點。</p>
     </section>
     <section class="basic-information-section" id="basic-information-section" aria-labelledby="basic-information-title">
       <h2 id="basic-information-title">基本資訊</h2>
@@ -1523,6 +1489,10 @@
   <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
 
   <script type="module">
+    import {
+      waterFluidLimits, validateWaterFluidState, waterViscosityInRange,
+    } from "./assets/water-phase-boundaries.js";
+
     const scrollTopButton = document.querySelector(".scroll-top-button");
 
     function updateScrollTopButton() {
@@ -1556,13 +1526,9 @@
     const clearButton = document.querySelector("#clear-button");
     const status = document.querySelector("#status");
     const resultSummary = document.querySelector("#result-summary");
-    const temperatureRange = document.querySelector("#temperature-range");
-    const stateTemperatureRange = document.querySelector("#state-temperature-range");
     const saturationTableForm = document.querySelector("#saturation-table-form");
-    const tableSaturationTypes = document.querySelectorAll('input[name="saturation-type"]');
     const tableVariationInputs = document.querySelectorAll('input[name="table-variation"]');
     const tableRangeFields = document.querySelector("#table-range-fields");
-    const saturationLineHint = document.querySelector("#saturation-line-hint");
     const ptDiagram = document.querySelector("#pt-diagram");
     const ptDiagramDescription = document.querySelector("#pt-diagram-description");
     const generateTableButton = document.querySelector("#generate-table-button");
@@ -1645,9 +1611,6 @@
         "s (kJ/kg·K)", "u (kJ/kg)", "cp (kJ/kg·K)", "cv (kJ/kg·K)",
         "μf (μPa·s)", "μg (μPa·s)",
       ],
-      MELT: [
-        "T (°C)", "P (kPa)",
-      ],
     };
 
     let coolprop;
@@ -1677,8 +1640,6 @@
     let criticalTemperature;
     let criticalPressure;
     let minimumSaturationPressure;
-    let meltingLineState;
-    let meltingLineLimits;
     let saturationTableRows = [];
 
     const inputProperties = {
@@ -1876,6 +1837,13 @@
       const rawProps = async (output, n1, v1, n2, v2) => {
         try {
           const value = await coolprop.PropsSI(output, n1, v1, n2, v2, fluid);
+          if (isWater && Number.isFinite(value)) {
+            const temperature = output === "T" ? value : n1 === "T" ? v1 : n2 === "T" ? v2
+              : await coolprop.PropsSI("T", n1, v1, n2, v2, fluid);
+            const pressure = output === "P" ? value : n1 === "P" ? v1 : n2 === "P" ? v2
+              : await coolprop.PropsSI("P", n1, v1, n2, v2, fluid);
+            validateWaterFluidState(temperature, pressure);
+          }
           return Number.isFinite(value) ? value : null;
         } catch {
           return null;
@@ -1908,7 +1876,7 @@
       const modelMax = await coolprop.PropsSI("Tmax", "", 0, "", 0, fluid);
       const saturationMin = Math.max(triple, modelMin) + .01;
       const chartMinTemperature = isWater ? 273.16 : isR134a ? saturationMin : Math.max(saturationMin, tCritical - 140);
-      const chartMaxTemperature = isWater ? 1500 : Math.min(modelMax - .01, tCritical + 180);
+      const chartMaxTemperature = isWater ? waterFluidLimits.temperatureMax : Math.min(modelMax - .01, tCritical + 180);
       const niceStep = (span, divisions) => {
         const raw = span / divisions;
         const power = 10 ** Math.floor(Math.log10(raw));
@@ -2359,10 +2327,6 @@
     phDownloadColorButton.addEventListener("click", () => downloadPhDiagram(false));
     phDownloadBwButton.addEventListener("click", () => downloadPhDiagram(true));
 
-    function saturationType() {
-      return document.querySelector('input[name="saturation-type"]:checked').value;
-    }
-
     function tableVariation() {
       return document.querySelector('input[name="table-variation"]:checked').value;
     }
@@ -2376,8 +2340,10 @@
         criticalTemperature: await coolprop.PropsSI("Tcrit", "", 0, "", 0, fluid),
         criticalPressure: await coolprop.PropsSI("pcrit", "", 0, "", 0, fluid),
       };
+      if (fluid === "Water") properties.maximumTemperature = Math.min(properties.maximumTemperature, waterFluidLimits.temperatureMax);
       modelMinimumTemperature = modelMinimum;
       maximumPressure = await coolprop.PropsSI("pmax", "", 0, "", 0, fluid);
+      if (fluid === "Water") maximumPressure = Math.min(maximumPressure, waterFluidLimits.pressureMax);
       if (![modelMinimumTemperature, maximumPressure, ...Object.values(properties)].every(Number.isFinite)) {
         throw new Error("無法取得有效的模型計算範圍。");
       }
@@ -2434,32 +2400,6 @@
       }
       normalPointLabel.textContent = isPseudoPure ? "泡點 (°C)" : "沸點 (°C)";
       dewPointItem.hidden = !isPseudoPure;
-      const meltingLineFluids = new Set(["Water", "R290", "R600a", "R744", "R600"]);
-      meltingLineState = meltingLineFluids.has(fluid) ? coolprop.factory("HEOS", fluid) : null;
-      meltingLineLimits = null;
-      if (meltingLineState) {
-        const parameters = coolprop.parameters;
-        // Water's reported Tmin omits the decreasing Ice Ih branch (IAPWS-Melting-2011).
-        const temperatureMin = fluid === "Water" ? 251.165
-          : await meltingLineState.melting_line(parameters.iT_min.value, 0, 0);
-        const temperatureMax = fluid === "Water" ? 273.16
-          : await meltingLineState.melting_line(parameters.iT_max.value, 0, 0);
-        const endpointPressures = await Promise.all([temperatureMin, temperatureMax].map(
-          (temperature) => meltingLineState.melting_line(parameters.iP.value, parameters.iT.value, temperature),
-        ));
-        meltingLineLimits = {
-          temperatureMin,
-          temperatureMax,
-          pressureMin: Math.min(...endpointPressures),
-          pressureMax: Math.max(...endpointPressures),
-        };
-        if (Object.values(meltingLineLimits).some((value) => !Number.isFinite(value))
-          || meltingLineLimits.pressureMin <= 0
-          || meltingLineLimits.pressureMax <= meltingLineLimits.pressureMin
-          || temperatureMax <= temperatureMin) {
-          throw new Error("無法取得有效的熔化線範圍。");
-        }
-      }
       ({
         minimumTemperature,
         maximumTemperature,
@@ -2467,124 +2407,72 @@
         criticalPressure,
         minimumSaturationPressure,
       } = properties);
-      temperatureRange.textContent = `${formatNumber(minimumTemperature - 273.15)} °C 至 ${formatNumber(criticalTemperature - 273.15)} °C 以下`;
-      stateTemperatureRange.textContent = `${formatNumber(modelMinimum - 273.15)} °C 至 ${formatNumber(maximumTemperature - 273.15)} °C`;
-      const meltingOption = document.querySelector('input[name="saturation-type"][value="melt"]');
-      meltingOption.disabled = !meltingLineLimits;
-      if (!meltingLineLimits && saturationType() === "melt") {
-        document.querySelector('input[name="saturation-type"][value="vle"]').checked = true;
-      }
       setSaturationTableDefaults();
       fluidReady = true;
     }
 
     function setSaturationTableDefaults() {
-      const minC = minimumTemperature - 273.15;
-      const criticalC = criticalTemperature - 273.15;
-      const safeStartC = Math.ceil(minC);
-      const safeEndC = Math.ceil(criticalC) - 1;
-      const minimumPressureKPa = minimumSaturationPressure / 1000;
-      const maximumPressureKPa = criticalPressure / 1000;
-      const pressureStep = niceTableStep(maximumPressureKPa - minimumPressureKPa);
-      const startP = Math.ceil(minimumPressureKPa);
-      const endP = Math.ceil(maximumPressureKPa) - 1;
-      const qualityPressureStart = Math.max(minimumPressureKPa, pressureStep);
-      const defaultFixedT = Math.min(Math.max(25, safeStartC), safeEndC);
-
+      const temperature = integerTableRange(minimumTemperature - 273.15, Math.ceil(criticalTemperature - 273.15) - 1);
+      const pressure = integerTableRange(minimumSaturationPressure / 1000, Math.ceil(criticalPressure / 1000) - 1);
+      const rangeFields = (range, property, unit) => [
+        ["table-start", `起始${property} (${unit})`, range.start],
+        ["table-end", `終止${property} (${unit})`, range.end],
+        ["table-step", `間隔 (${unit})`, range.step],
+      ];
       saturationTableDefaults = {
-        T: [
-          ["table-start", "起始溫度 (°C)", safeStartC],
-          ["table-end", "終止溫度 (°C)", safeEndC],
-          ["table-step", "間隔 (°C)", Math.min(10, safeEndC - safeStartC)],
-        ],
-        P: [
-          ["table-start", "起始壓力 (kPa)", startP],
-          ["table-end", "終止壓力 (kPa)", endP],
-          ["table-step", "間隔 (kPa)", pressureStep],
-        ],
+        T: rangeFields(temperature, "溫度", "°C"),
+        P: rangeFields(pressure, "壓力", "kPa"),
         QT: [
-          ["table-fixed", "固定溫度 (°C)", defaultFixedT],
+          ["table-fixed", "固定溫度 (°C)", Math.min(Math.max(25, temperature.start), temperature.end)],
           ["table-quality-start", "起始乾度 x", 0],
           ["table-quality-end", "終止乾度 x", 1],
           ["table-quality-step", "乾度間隔", 0.1],
         ],
         QP: [
-          ["table-fixed", "固定壓力 (kPa)", Math.min(
-            Math.max(Math.round(Math.sqrt(qualityPressureStart * endP) / pressureStep) * pressureStep, startP),
-            endP,
-          )],
+          ["table-fixed", "固定壓力 (kPa)", Math.min(Math.max(100, pressure.start), pressure.end)],
           ["table-quality-start", "起始乾度 x", 0],
           ["table-quality-end", "終止乾度 x", 1],
           ["table-quality-step", "乾度間隔", 0.1],
         ],
       };
-      if (meltingLineLimits) {
-        const meltStartC = Math.ceil(meltingLineLimits.temperatureMin - 273.15);
-        const meltEndC = Math.floor(meltingLineLimits.temperatureMax - 273.15);
-        const meltStartP = Math.ceil(meltingLineLimits.pressureMin / 1000);
-        const meltEndP = Math.floor(meltingLineLimits.pressureMax / 1000);
-        const meltTemperatureStep = niceTableStep(meltEndC - meltStartC, 0);
-        const meltPressureStep = niceTableStep(meltEndP - meltStartP);
-        saturationTableDefaults.MELT_T = [
-          ["table-start", "起始溫度 (°C)", meltStartC],
-          ["table-end", "終止溫度 (°C)", meltEndC],
-          ["table-step", "間隔 (°C)", meltTemperatureStep],
-        ];
-        saturationTableDefaults.MELT_P = [
-          ["table-start", "起始壓力 (kPa)", meltStartP],
-          ["table-end", "終止壓力 (kPa)", meltEndP],
-          ["table-step", "間隔 (kPa)", meltPressureStep],
-        ];
-      }
       renderSaturationTableFields();
     }
 
     let saturationTableDefaults = {};
 
-    function niceTableStep(span, minimum = 1) {
-      const target = Math.max(minimum, span / 20);
+    function integerTableRange(minimum, maximum) {
+      const low = Math.ceil(minimum);
+      const high = Math.floor(maximum);
+      if (!Number.isFinite(low) || !Number.isFinite(high) || low > high) {
+        throw new Error("此範圍沒有可用的整數取樣值。");
+      }
+      const target = Math.max(1, (high - low) / 20);
       const magnitude = 10 ** Math.floor(Math.log10(target));
       const normalized = target / magnitude;
       const factor = normalized < 1.5 ? 1 : normalized < 3.5 ? 2 : normalized < 7.5 ? 5 : 10;
-      return Math.max(minimum, factor * magnitude);
+      const step = Math.max(1, Math.round(factor * magnitude));
+      const start = Math.ceil(low / step) * step;
+      const end = Math.floor(high / step) * step;
+      return start < end ? { start, end, step } : { start: low, end: high, step: 1 };
     }
 
     function renderSaturationTableFields() {
-      const selectedType = saturationType();
-      const isMeltingLine = selectedType === "melt";
-      const isSolidLine = isMeltingLine;
-      if (isMeltingLine) {
-        saturationLineHint.textContent = meltingLineLimits
-          ? `熔化線範圍：${formatNumber(meltingLineLimits.temperatureMin - 273.15)} 至 ${formatNumber(meltingLineLimits.temperatureMax - 273.15)} °C，${formatNumber(meltingLineLimits.pressureMin / 1000)} 至 ${formatNumber(meltingLineLimits.pressureMax / 1000)} kPa。僅列溫度與壓力。`
-          : "此流體沒有熔化線資料。";
-      } else {
-        saturationLineHint.textContent = `此流體的汽液飽和範圍：${formatNumber(minimumTemperature - 273.15)} °C 至臨界溫度 ${formatNumber(criticalTemperature - 273.15)} °C 以下；壓力 ${formatNumber(minimumSaturationPressure / 1000)} kPa 至臨界壓力 ${formatNumber(criticalPressure / 1000)} kPa 以下。`;
-      }
-      if (mixtureMetadata[activeFluid]) {
-        saturationLineHint.textContent += " R410A 擬純流體模型不支援固定溫度下的中間乾度計算，請使用固定壓力下變化乾度。";
-      }
       for (const input of tableVariationInputs) {
-        input.disabled = (isSolidLine && !["T", "P"].includes(input.value))
-          || (Boolean(mixtureMetadata[activeFluid]) && input.value === "QT");
+        input.disabled = Boolean(mixtureMetadata[activeFluid]) && input.value === "QT";
       }
-      if ((isSolidLine && !["T", "P"].includes(tableVariation()))
-        || (mixtureMetadata[activeFluid] && tableVariation() === "QT")) {
-        document.querySelector(`input[name="table-variation"][value="${mixtureMetadata[activeFluid] ? "QP" : "T"}"]`).checked = true;
+      if (mixtureMetadata[activeFluid] && tableVariation() === "QT") {
+        document.querySelector('input[name="table-variation"][value="QP"]').checked = true;
       }
       const variation = tableVariation();
-      const defaultsKey = isMeltingLine ? `MELT_${variation}` : variation;
-      const fields = saturationTableDefaults[defaultsKey] ?? [];
+      const fields = saturationTableDefaults[variation] ?? [];
       tableRangeFields.replaceChildren();
-      ptDiagram.dataset.saturationType = selectedType;
       ptDiagram.dataset.variation = variation;
-      ptDiagramDescription.textContent = isSolidLine
-        ? `沿固液熔化線依${variation === "T" ? "溫度" : "壓力"}取樣。`
-        : {
-          T: "沿汽液飽和線依溫度取樣。",
-          P: "沿汽液飽和線依壓力取樣。",
-          QT: "固定溫度，沿乾度方向取樣汽液飽和狀態。",
-          QP: "固定壓力，沿乾度方向取樣汽液飽和狀態。",
-        }[variation];
+      ptDiagramDescription.textContent = {
+        T: "沿汽液飽和線依溫度取樣。",
+        P: "沿汽液飽和線依壓力取樣。",
+        QT: "固定溫度，沿乾度方向取樣汽液飽和狀態。",
+        QP: "固定壓力，沿乾度方向取樣汽液飽和狀態。",
+      }[variation];
       for (const [id, labelText, value] of fields) {
         const field = document.createElement("div");
         field.className = "field";
@@ -2621,12 +2509,12 @@
     }
 
     function checkTableRange(value, minimum, maximum, label, exclusiveMaximum = false) {
-      const tolerance = 1e-9 * Math.max(1, Math.abs(minimum), Math.abs(maximum));
-      if (value < minimum - tolerance
-        || (exclusiveMaximum ? value >= maximum : value > maximum + tolerance)) {
+      const bounded = boundedRangeValue(value, minimum, maximum, label);
+      if (exclusiveMaximum && value >= maximum) {
         const upperText = exclusiveMaximum ? "以下（不含上限）" : "以下";
         throw new Error(`${label}須介於 ${formatNumber(minimum)} 至 ${formatNumber(maximum)} ${upperText}。`);
       }
+      return exclusiveMaximum ? Math.max(value, minimum) : bounded;
     }
 
     function tableRangePoints(start, end, step) {
@@ -2662,6 +2550,9 @@
       );
       if (!Number.isFinite(props.T) || !Number.isFinite(props.P) || !Number.isFinite(props.D) || props.D <= 0) {
         throw new Error("無法計算此範圍的汽液飽和狀態，請調整範圍或間隔。");
+      }
+      if (activeFluid === "Water" && Object.values(props).some((value) => !Number.isFinite(value))) {
+        throw new Error("無法取得完整的水飽和物性，請調整範圍或遠離臨界點。");
       }
       return props;
     }
@@ -2699,31 +2590,7 @@
       ];
     }
 
-    async function meltingLineTemperature(pressure) {
-      pressure = boundedSolidLineValue(
-        pressure, meltingLineLimits.pressureMin, meltingLineLimits.pressureMax, "熔化線壓力 (Pa)",
-      );
-      if (pressure === meltingLineLimits.pressureMin) {
-        return activeFluid === "Water" ? meltingLineLimits.temperatureMax : meltingLineLimits.temperatureMin;
-      }
-      if (pressure === meltingLineLimits.pressureMax) {
-        return activeFluid === "Water" ? meltingLineLimits.temperatureMin : meltingLineLimits.temperatureMax;
-      }
-      let low = meltingLineLimits.temperatureMin;
-      let high = meltingLineLimits.temperatureMax;
-      const parameters = coolprop.parameters;
-      // Invert only the selected monotonic branch; Water's native T(P) can select another ice phase.
-      for (let iteration = 0; iteration < 64; iteration += 1) {
-        const middle = (low + high) / 2;
-        const middlePressure = await meltingLineState.melting_line(parameters.iP.value, parameters.iT.value, middle);
-        if (!Number.isFinite(middlePressure)) throw new Error("無法反算熔化線溫度。");
-        if ((middlePressure < pressure) === (activeFluid !== "Water")) low = middle;
-        else high = middle;
-      }
-      return (low + high) / 2;
-    }
-
-    function boundedSolidLineValue(value, minimum, maximum, label) {
+    function boundedRangeValue(value, minimum, maximum, label) {
       const tolerance = (bound) => 1e-10 * Math.abs(bound);
       if (!Number.isFinite(value)
         || value < minimum - tolerance(minimum)
@@ -2734,21 +2601,6 @@
       if (Math.abs(value - minimum) <= tolerance(minimum)) return minimum;
       if (Math.abs(value - maximum) <= tolerance(maximum)) return maximum;
       return Math.max(minimum, Math.min(maximum, value));
-    }
-
-    async function meltingLineRow(variation, value) {
-      const parameters = coolprop.parameters;
-      const temperature = boundedSolidLineValue(
-        variation === "T" ? value + 273.15 : await meltingLineTemperature(value * 1000),
-        meltingLineLimits.temperatureMin, meltingLineLimits.temperatureMax, "溫度 (K)",
-      );
-      let pressure = variation === "P"
-        ? value * 1000
-        : await meltingLineState.melting_line(parameters.iP.value, parameters.iT.value, temperature);
-      pressure = boundedSolidLineValue(
-        pressure, meltingLineLimits.pressureMin, meltingLineLimits.pressureMax, "壓力 (Pa)",
-      );
-      return [temperature - 273.15, pressure / 1000];
     }
 
     function renderSaturationTable(headers, rows) {
@@ -2784,7 +2636,6 @@
       tableStatus.textContent = "正在產生飽和表…";
       try {
         if (!fluidReady) throw new Error("所選流體資料尚未就緒，請重新選取流體或重新整理頁面。");
-        const saturationLineType = saturationType();
         const variation = tableVariation();
         if (mixtureMetadata[activeFluid] && variation === "QT") {
           throw new Error("R410A 的擬純流體模型不支援固定溫度下的中間乾度計算，請改用固定壓力下變化乾度。");
@@ -2798,38 +2649,16 @@
         let headers;
         let rows;
         let description;
-        if (saturationLineType === "melt") {
-          if (!meltingLineState || !meltingLineLimits) {
-            throw new Error("目前流體不支援固液熔化線。");
-          }
-          if (variation !== "T" && variation !== "P") {
-            throw new Error("熔化線僅支援溫度或壓力變化。");
-          }
-          const minimum = variation === "T"
-            ? meltingLineLimits.temperatureMin - 273.15 : meltingLineLimits.pressureMin / 1000;
-          const maximum = variation === "T"
-            ? meltingLineLimits.temperatureMax - 273.15 : meltingLineLimits.pressureMax / 1000;
-          const label = variation === "T" ? "溫度 (°C)" : "壓力 (kPa)";
-          const start = boundedSolidLineValue(tableNumber("table-start", "起始值"), minimum, maximum, label);
-          const end = boundedSolidLineValue(tableNumber("table-end", "終止值"), minimum, maximum, label);
-          const step = tableNumber("table-step", "間隔");
-          rows = await Promise.all(tableRangePoints(start, end, step).map((point) => meltingLineRow(variation, point)));
-          headers = saturationTableHeaders.MELT;
-          if (variation === "P") {
-            headers = [headers[1], headers[0], ...headers.slice(2)];
-            rows = rows.map(([temperature, pressure, ...properties]) => [pressure, temperature, ...properties]);
-          }
-          description = `${formatNumber(start)} 至 ${formatNumber(end)}，間隔 ${formatNumber(step)} ${variation === "T" ? "°C" : "kPa"} · 僅列溫度與壓力${activeFluid === "Water" ? " · 一般冰（Ice Ih）分支" : ""}`;
-        } else if (variation === "T" || variation === "P") {
-          const start = tableNumber("table-start", "起始值");
-          const end = tableNumber("table-end", "終止值");
+        if (variation === "T" || variation === "P") {
+          let start = tableNumber("table-start", "起始值");
+          let end = tableNumber("table-end", "終止值");
           const step = tableNumber("table-step", "間隔");
           if (variation === "T") {
-            checkTableRange(start, minimumTemperature - 273.15, criticalTemperature - 273.15, "溫度", true);
-            checkTableRange(end, minimumTemperature - 273.15, criticalTemperature - 273.15, "溫度", true);
+            start = checkTableRange(start, minimumTemperature - 273.15, criticalTemperature - 273.15, "溫度", true);
+            end = checkTableRange(end, minimumTemperature - 273.15, criticalTemperature - 273.15, "溫度", true);
           } else {
-            checkTableRange(start, minimumSaturationPressure / 1000, criticalPressure / 1000, "壓力", true);
-            checkTableRange(end, minimumSaturationPressure / 1000, criticalPressure / 1000, "壓力", true);
+            start = checkTableRange(start, minimumSaturationPressure / 1000, criticalPressure / 1000, "壓力", true);
+            end = checkTableRange(end, minimumSaturationPressure / 1000, criticalPressure / 1000, "壓力", true);
           }
           const points = tableRangePoints(start, end, step);
           const key = variation;
@@ -2845,14 +2674,14 @@
           }
           description = `${formatNumber(start)} 至 ${formatNumber(end)}，間隔 ${formatNumber(step)} ${variation === "T" ? "°C" : "kPa"}`;
         } else {
-          const fixed = tableNumber("table-fixed", variation === "QT" ? "固定溫度" : "固定壓力");
+          let fixed = tableNumber("table-fixed", variation === "QT" ? "固定溫度" : "固定壓力");
           const start = tableNumber("table-quality-start", "起始乾度");
           const end = tableNumber("table-quality-end", "終止乾度");
           const step = tableNumber("table-quality-step", "乾度間隔");
           if (variation === "QT") {
-            checkTableRange(fixed, minimumTemperature - 273.15, criticalTemperature - 273.15, "固定溫度", true);
+            fixed = checkTableRange(fixed, minimumTemperature - 273.15, criticalTemperature - 273.15, "固定溫度", true);
           } else {
-            checkTableRange(fixed, minimumSaturationPressure / 1000, criticalPressure / 1000, "固定壓力", true);
+            fixed = checkTableRange(fixed, minimumSaturationPressure / 1000, criticalPressure / 1000, "固定壓力", true);
           }
           if (start < 0 || end > 1) throw new Error("乾度範圍需介於 0 至 1。");
           const qualities = tableRangePoints(start, end, step);
@@ -2864,11 +2693,7 @@
         }
         renderSaturationTable(headers, rows);
         const fluidName = fluidInput.options[fluidInput.selectedIndex].text;
-        const lineName = {
-          vle: "汽液飽和線",
-          melt: "固液熔化線",
-        }[saturationLineType];
-        saturationTableSummary.textContent = `${fluidName} · ${lineName} · ${labels[variation]} · 共 ${rows.length} 列 · ${description}`;
+        saturationTableSummary.textContent = `${fluidName} · 汽液飽和線 · ${labels[variation]} · 共 ${rows.length} 列 · ${description}`;
         tableStatus.dataset.kind = "success";
         tableStatus.textContent = "飽和表已產生。";
       } catch (error) {
@@ -2889,11 +2714,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      const lineType = {
-        vle: "saturation",
-        melt: "melting-line",
-      }[saturationType()];
-      link.download = `${lineType}-${activeFluid}.csv`;
+      link.download = `saturation-${activeFluid}.csv`;
       document.body.append(link);
       link.click();
       link.remove();
@@ -2937,11 +2758,9 @@
             showError(`壓力須低於臨界壓力 ${formatNumber(criticalPressure / 1000)} kPa。`);
             return;
           }
+          pressure = boundedRangeValue(pressure, minimumSaturationPressure, criticalPressure, "汽液飽和壓力 (Pa)");
           temperature = await coolprop.PropsSI("T", "P", pressure, "Q", 0, activeFluid);
-          if (temperature < minimumTemperature) {
-            showError(`壓力低於模型最低飽和壓力 ${formatNumber(minimumSaturationPressure / 1000)} kPa，無法計算汽液飽和性質。`);
-            return;
-          }
+          temperature = boundedRangeValue(temperature, minimumTemperature, criticalTemperature, "汽液飽和溫度 (K)");
         }
 
         const phases = { liquid: 0, vapor: 1 };
@@ -3018,8 +2837,30 @@
 
       clearResults();
       try {
-        const inputOne = propertyOneSpec.convert(rawOne);
-        const inputTwo = propertyTwoSpec.convert(rawTwo);
+        const convertInput = (spec, value) => {
+          const converted = spec.convert(value);
+          return spec.key === "T" ? boundedRangeValue(converted, modelMinimumTemperature, maximumTemperature, "溫度 (K)") : converted;
+        };
+        const inputOne = convertInput(propertyOneSpec, rawOne);
+        const inputTwo = convertInput(propertyTwoSpec, rawTwo);
+        for (const [spec, value] of [[propertyOneSpec, inputOne], [propertyTwoSpec, inputTwo]]) {
+          if (!Number.isFinite(value)) throw new Error("輸入換算後超出有效數值範圍。");
+          if (spec.key === "T" && (value < modelMinimumTemperature || value > maximumTemperature)) {
+            throw new Error(`溫度須介於 ${formatNumber(modelMinimumTemperature - 273.15)} 至 ${formatNumber(maximumTemperature - 273.15)} °C，不進行外推。`);
+          }
+          if (spec.key === "P" && value > maximumPressure) throw new Error(`壓力不可超過 ${formatNumber(maximumPressure / 1000)} kPa。`);
+          if (selectedOne === "Q" || selectedTwo === "Q") {
+            if ((spec.key === "T" && value >= criticalTemperature)
+              || (spec.key === "P" && (value < minimumSaturationPressure || value >= criticalPressure))) {
+              throw new Error("乾度只適用於三相點至臨界點以下的汽液飽和範圍；臨界點無乾度定義。");
+            }
+          }
+        }
+        if (activeFluid === "Water" && [propertyOneSpec.key, propertyTwoSpec.key].includes("T")
+          && [propertyOneSpec.key, propertyTwoSpec.key].includes("P")) {
+          validateWaterFluidState(propertyOneSpec.key === "T" ? inputOne : inputTwo,
+            propertyOneSpec.key === "P" ? inputOne : inputTwo);
+        }
         const phase = await coolprop.PropsSI(
           "Phase",
           propertyOneSpec.key,
@@ -3039,7 +2880,12 @@
           || solvedTemperature > maximumTemperature || solvedPressure <= 0 || solvedPressure > maximumPressure) {
           throw new Error("求解結果超出模型的溫度或壓力範圍，不進行外推。");
         }
+        if (activeFluid === "Water") validateWaterFluidState(
+          boundedRangeValue(solvedTemperature, modelMinimumTemperature, maximumTemperature, "溫度 (K)"), solvedPressure);
         const quality = await coolprop.PropsSI("Q", propertyOneSpec.key, inputOne, propertyTwoSpec.key, inputTwo, activeFluid);
+        if (phase === 6 && (!Number.isFinite(quality) || quality < 0 || quality > 1)) {
+          throw new Error("無法取得有效的汽液共存乾度。");
+        }
         const isTwoPhaseMixture = phase === 6 && quality > 0 && quality < 1;
         const values = {};
         for (const [field, output, convert] of outputProperties) {
@@ -3047,29 +2893,26 @@
             values[field] = "—（兩相無定義）";
             continue;
           }
-          try {
-            const raw = await coolprop.PropsSI(
-              output,
-              propertyOneSpec.key,
-              inputOne,
-              propertyTwoSpec.key,
-              inputTwo,
-              activeFluid,
-            );
-            if (!Number.isFinite(raw)) {
-              values[field] = "—";
-              continue;
-            }
-            const converted = convert(raw);
-            if (!Number.isFinite(converted)) {
-              values[field] = "—";
-            } else if (field === "q" && (converted < 0 || converted > 1)) {
-              values[field] = "—（單相）";
-            } else {
-              values[field] = formatNumber(converted);
-            }
-          } catch {
-            values[field] = "—";
+          if (phase === 4 && ["cp", "cv"].includes(field)) {
+            values[field] = "—（臨界點發散）";
+            continue;
+          }
+          if (activeFluid === "Water" && field === "viscosity"
+            && !waterViscosityInRange(Math.max(modelMinimumTemperature, solvedTemperature), solvedPressure)) {
+            values[field] = "—（超出黏度公式有效範圍）";
+            continue;
+          }
+          const raw = await coolprop.PropsSI(
+            output, propertyOneSpec.key, inputOne, propertyTwoSpec.key, inputTwo, activeFluid,
+          );
+          if (!Number.isFinite(raw)) throw new Error(`無法取得 ${output} 物性；請調整輸入或遠離臨界點。`);
+          const converted = convert(raw);
+          if (!Number.isFinite(converted)) {
+            throw new Error(`無法換算 ${output} 物性的單位。`);
+          } else if (field === "q" && (converted < 0 || converted > 1)) {
+            values[field] = phase === 4 ? "—（臨界點無乾度定義）" : "—（單相）";
+          } else {
+            values[field] = formatNumber(converted);
           }
         }
 
@@ -3084,8 +2927,10 @@
         }
 
         resultSummary.textContent = `${propertyOneSpec.label} = ${formatNumber(rawOne)} · ${propertyTwoSpec.label} = ${formatNumber(rawTwo)}`;
-        status.dataset.kind = "success";
-        status.textContent = "狀態點計算完成。";
+        const unavailableViscosity = values.viscosity.includes("有效範圍");
+        status.dataset.kind = unavailableViscosity ? "warning" : "success";
+        status.textContent = unavailableViscosity
+          ? "熱力性質計算完成；此狀態超出水黏度公式有效範圍，未外推黏度。" : "狀態點計算完成。";
       } catch (error) {
         clearResults();
         showError(`無法求解此狀態點：${error instanceof Error ? error.message : String(error)}`);
@@ -3127,6 +2972,9 @@
         const isDrawing = input.value === "drawing";
         document.querySelector("#calculation-submodes").hidden = !isCalculation;
         document.querySelector("#drawing-submodes").hidden = !isDrawing;
+        if (isDrawing && !document.querySelector('input[name="drawing-mode"]:checked')) {
+          document.querySelector('input[name="drawing-mode"][value="ph-diagram"]').checked = true;
+        }
         const mode = isCalculation
           ? document.querySelector('input[name="calculation-mode"]:checked').value
           : isDrawing
@@ -3137,12 +2985,6 @@
     }
 
     for (const input of tableVariationInputs) {
-      input.addEventListener("change", () => {
-        clearSaturationTable();
-        renderSaturationTableFields();
-      });
-    }
-    for (const input of tableSaturationTypes) {
       input.addEventListener("change", () => {
         clearSaturationTable();
         renderSaturationTableFields();
@@ -3218,8 +3060,6 @@
       tableStatus.textContent = "設定變化範圍後即可產生表格。";
       if (!phSection.hidden) await runCalculation(drawPhDiagram);
     } catch (error) {
-      temperatureRange.textContent = "無法載入";
-      stateTemperatureRange.textContent = "無法載入";
       for (const field of Object.values(basicInformationFields)) field.textContent = "無法載入";
       showError(`本站運算模組載入失敗：${error instanceof Error ? error.message : String(error)}。請重新整理頁面；若問題持續，請聯絡網站管理者。`);
       calculateButton.textContent = "模組載入失敗";
