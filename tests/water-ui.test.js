@@ -12,7 +12,8 @@ export async function runWaterUiTests() {
   const frame = document.createElement("iframe");
   frame.title = "PyCool water integration test";
   frame.src = new URL("../pycool.html", import.meta.url).href;
-  frame.hidden = true;
+  frame.style.cssText = "position: fixed; left: -10000px; width: 1100px; height: 1000px; pointer-events: none;";
+  frame.setAttribute("aria-hidden", "true");
   document.body.append(frame);
   const wait = async (predicate, label) => {
     const deadline = Date.now() + 120000;
@@ -298,6 +299,295 @@ export async function runWaterUiTests() {
     change("#fluid", "R134a");
     await idle();
     assert(q("#ph-status").dataset.kind === "success", "Existing refrigerant Ph still draws");
+    categories.add("R22 Ph range and curve accuracy");
+    change("#fluid", "R22");
+    await idle();
+    const r22 = q("#ph-chart svg");
+    assert(q("#ph-status").dataset.kind === "success" && r22.dataset.fluid === "R22", "R22 Ph draws");
+    close(Number(r22.dataset.enthalpyMin), 100, "R22 enthalpy lower limit");
+    close(Number(r22.dataset.enthalpyMax), 550, "R22 enthalpy upper limit");
+    close(Number(r22.dataset.pressureMin), 50000, "R22 pressure lower limit in Pa");
+    close(Number(r22.dataset.pressureMax), 6000000, "R22 pressure upper limit in Pa");
+    for (const toggle of doc.querySelectorAll(".ph-options input")) toggle.checked = true;
+    q("#ph-isotherms").dispatchEvent(new frame.contentWindow.Event("change"));
+    await idle();
+    const chart = q("#ph-chart svg");
+    const r22Props = (output, one, first, two, second) => cp.PropsSI(output, one, first, two, second, "R22");
+    close(r22Props("H", "T", 273.15, "Q", 0) / 1000, 200, "R22 IIR reference enthalpy");
+    close(r22Props("S", "T", 273.15, "Q", 0) / 1000, 1, "R22 IIR reference entropy");
+    assert(chart.querySelector(".ph-reference-state").textContent.includes("h = 200.0 kJ/kg"),
+      "R22 chart states its enthalpy and entropy reference");
+    const frameBox = chart.querySelector(".ph-frame");
+    const left = Number(frameBox.getAttribute("x"));
+    const top = Number(frameBox.getAttribute("y"));
+    const width = Number(frameBox.getAttribute("width"));
+    const height = Number(frameBox.getAttribute("height"));
+    const minPressure = Number(chart.dataset.pressureMin);
+    const maxPressure = Number(chart.dataset.pressureMax);
+    const pointState = ([x, y]) => ({
+      h: (100 + (x - left) / width * 450) * 1000,
+      p: minPressure * (maxPressure / minPressure) ** (1 - (y - top) / height),
+    });
+    const coordinates = (path) => [...path.getAttribute("d").matchAll(/[ML](-?[\d.]+) (-?[\d.]+)/g)]
+      .map((match) => [Number(match[1]), Number(match[2])]);
+    assert(chart.querySelectorAll("path.ph-quality").length === 9, "Nine R22 quality curves");
+    assert(chart.querySelectorAll("path.ph-isotherm").length === 20, "R22 low-temperature and superheated isotherms");
+    for (const temperature of [-50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50]) {
+      const path = chart.querySelector(`path.ph-isotherm[data-temperature="${temperature}"]`);
+      const points = coordinates(path);
+      const pressure = r22Props("P", "T", temperature + 273.15, "Q", 0);
+      for (const quality of [0, 1]) {
+        const enthalpy = r22Props("H", "T", temperature + 273.15, "Q", quality);
+        assert(points.some((point) => {
+          const state = pointState(point);
+          return Math.abs(state.p / pressure - 1) < .001 && Math.abs(state.h - enthalpy) < 40;
+        }), `R22 isotherm reaches saturation endpoint ${temperature}/${quality}`);
+      }
+    }
+    for (const path of chart.querySelectorAll("path.ph-quality, path.ph-isentrope, path.ph-isochore")) {
+      const points = coordinates(path);
+      assert(points.length >= 2 && !/NaN|Infinity/.test(path.getAttribute("d")), "Finite R22 curve");
+      for (const index of [0, Math.floor(points.length / 2), points.length - 1]) {
+        const state = pointState(points[index]);
+        if (path.dataset.quality) {
+          const expected = r22Props("H", "P", state.p, "Q", Number(path.dataset.quality));
+          assert(Math.abs(state.h - expected) < 150, "R22 quality curve SI conversion and position");
+        } else if (path.dataset.entropy) {
+          const expected = r22Props("H", "P", state.p, "S", Number(path.dataset.entropy) * 1000);
+          assert(Math.abs(state.h - expected) < 150, "R22 entropy curve SI conversion and position");
+        } else {
+          const temperature = r22Props("T", "P", state.p, "H", state.h);
+          const expected = r22Props("H", "T", temperature, "D", Number(path.dataset.density));
+          assert(Math.abs(state.h - expected) < 250, "R22 density curve SI conversion and position");
+        }
+      }
+    }
+    const dome = chart.querySelector(".ph-dome");
+    assert(coordinates(dome).length === 483, "R22 saturation dome uses dense critical-point sampling");
+    assert([...chart.querySelectorAll("path")].every((path) => !/NaN|Infinity/.test(path.getAttribute("d"))),
+      "All R22 paths have finite coordinates");
+    categories.add("mixture bubble/dew points and temperature glide");
+    for (const blend of ["R410A", "R407C"]) {
+      change("#fluid", blend);
+      await idle();
+      await pick("mode-category", "calculation");
+      await pick("calculation-mode", "saturation");
+      const blendProps = (output, one, first, two, second) => cp.PropsSI(output, one, first, two, second, blend);
+      assert(q("#basic-refrigerant-number").textContent === blend, `Mixture basic information ${blend}`);
+      assert(q("#basic-formula").textContent.includes(blend === "R407C" ? "23/25/52" : "50/50"),
+        `Mixture composition ${blend}`);
+      for (const pressure of [500000, 1000000, 2000000]) {
+        value("#temperature", "");
+        value("#pressure", pressure / 1000);
+        await submit("#calculator-form");
+        assert(q("#status").dataset.kind === "success", "Mixture pressure saturation solves");
+        const bubble = blendProps("T", "P", pressure, "Q", 0);
+        const dew = blendProps("T", "P", pressure, "Q", 1);
+        if (blend === "R407C") assert(dew - bubble > 4, "R407C has substantial temperature glide");
+        assert(dew > bubble && q("#result-summary").textContent.includes("溫度滑移"), "Mixture displays bubble/dew temperature glide");
+        for (const [phase, quality] of [["liquid", 0], ["vapor", 1]]) {
+          close(Number(q(`#${phase}-h`).textContent), blendProps("H", "P", pressure, "Q", quality) / 1000,
+            "Both saturation endpoints share entered pressure");
+        }
+        await pick("calculation-mode", "state");
+        for (const quality of [.1, .5, .9]) {
+          const temperature = blendProps("T", "P", pressure, "Q", quality);
+          await state("T", temperature - 273.15, "P", pressure / 1000);
+          assert(q("#status").dataset.kind === "success", "Mixture P-T inside glide solves");
+          close(Number(q("#state-q").textContent), quality, "Mixture P-T quality");
+          close(Number(q("#state-h").textContent), blendProps("H", "P", pressure, "Q", quality) / 1000, "Mixture P-T enthalpy");
+          await state("T", temperature - 273.15, "Q", quality);
+          assert(q("#status").dataset.kind === "success", "Mixture T-Q inverse solves");
+          close(Number(q("#state-p").textContent), pressure / 1000, "Mixture T-Q inverse pressure");
+        }
+        await pick("calculation-mode", "saturation");
+      }
+      value("#temperature", 10);
+      value("#pressure", "");
+      await submit("#calculator-form");
+      assert(q("#result-summary").textContent.includes("泡點壓力")
+        && q("#result-summary").textContent.includes("露點壓力"), "Fixed-temperature bubble/dew pressures displayed");
+      await pick("calculation-mode", "state");
+      await state("T", 20, "P", 1);
+      assert(q("#status").dataset.kind === "success", "Mixture low-pressure vapor remains calculable");
+      close(Number(q("#state-h").textContent), blendProps("H", "T", 293.15, "P", 1000) / 1000,
+        "Mixture single-phase calculation is unchanged");
+      await pick("calculation-mode", "table");
+      for (const variation of ["QT", "QP"]) {
+        await pick("table-variation", variation);
+        value("#table-fixed", variation === "QT" ? 10 : 1000);
+        value("#table-quality-start", 0);
+        value("#table-quality-end", 1);
+        value("#table-quality-step", .1);
+        await submit("#saturation-table-form");
+        assert(q("#table-status").dataset.kind === "success", `Mixture quality table ${variation}`);
+        const rows = cells();
+        assert(rows.length === 11, "Mixture quality table row count");
+        for (const row of rows) {
+          const pressure = row[2] * 1000;
+          close(row[1] + 273.15, blendProps("T", "P", pressure, "Q", row[0]), "Mixture table glide temperature");
+          close(row[5], blendProps("H", "P", pressure, "Q", row[0]) / 1000, "Mixture table model enthalpy");
+        }
+        assert(variation === "QT" ? rows[0][2] > rows.at(-1)[2] : rows[0][1] < rows.at(-1)[1],
+          "Mixture quality variation preserves glide rather than a pure-fluid plateau");
+      }
+      await pick("mode-category", "drawing");
+      const blendChart = q("#ph-chart svg");
+      const blendData = blendChart.dataset;
+      const blendCoordinates = coordinates(blendChart.querySelector('path.ph-isotherm[data-temperature="10"]'));
+      const bubbleP = blendProps("P", "T", 283.15, "Q", 0);
+      const dewP = blendProps("P", "T", 283.15, "Q", 1);
+      const middleP = (bubbleP + dewP) / 2;
+      const bubbleT = blendProps("T", "P", middleP, "Q", 0);
+      const dewT = blendProps("T", "P", middleP, "Q", 1);
+      const middleQ = (283.15 - bubbleT) / (dewT - bubbleT);
+      const middleH = blendProps("H", "P", middleP, "Q", middleQ) / 1000;
+      const expectedX = 72 + (middleH - Number(blendData.enthalpyMin))
+        / (Number(blendData.enthalpyMax) - Number(blendData.enthalpyMin)) * 764;
+      const expectedY = 30 + (1 - Math.log(middleP / Number(blendData.pressureMin))
+        / Math.log(Number(blendData.pressureMax) / Number(blendData.pressureMin))) * 506;
+      assert(blendCoordinates.some(([x, y], index) => {
+        const next = blendCoordinates[index + 1];
+        if (!next || expectedX < Math.min(x, next[0]) || expectedX > Math.max(x, next[0])) return false;
+        const fraction = (expectedX - x) / (next[0] - x);
+        return Number.isFinite(fraction) && Math.abs(y + fraction * (next[1] - y) - expectedY) < .1;
+      }),
+        "Mixture isotherm samples the glide interior using P-Q equilibrium");
+    }
+    categories.add("all-fluid Ph accuracy, labels, interaction and PNG");
+    for (const fluid of [...q("#fluid").options].map((option) => option.value)) {
+      change("#fluid", fluid);
+      await idle();
+      assert(q("#ph-status").dataset.kind === "success", `Ph chart draws ${fluid}: ${q("#ph-status").textContent}`);
+      const svg = q("#ph-chart svg");
+      const data = Object.fromEntries(Object.entries(svg.dataset).map(([key, value]) => [key, Number(value)]));
+      assert(data.enthalpyMax > data.enthalpyMin && data.pressureMax > data.pressureMin
+        && data.pressureMin > 0, `Valid chart limits ${fluid}`);
+      assert(svg.querySelectorAll(".axis-title")[1].textContent === "Pressure P (kPa)", `Pressure axis uses kPa ${fluid}`);
+      if (fluid === "R23") close(data.temperatureMin, 173.15, "R23 includes ultra-low-temperature refrigeration");
+      if (fluid === "R744") assert(data.pressureMax >= 14e6, "CO2 includes transcritical operation");
+      const criticalPoint = svg.querySelector(".ph-cp-dot");
+      assert(criticalPoint && Number(criticalPoint.getAttribute("cx")) >= 72
+        && Number(criticalPoint.getAttribute("cx")) <= 836 && Number(criticalPoint.getAttribute("cy")) >= 30
+        && Number(criticalPoint.getAttribute("cy")) <= 536, `Critical point within plot ${fluid}`);
+      const stateAt = ([x, y]) => ({
+        h: (data.enthalpyMin + (x - 72) / 764 * (data.enthalpyMax - data.enthalpyMin)) * 1000,
+        p: data.pressureMin * (data.pressureMax / data.pressureMin) ** (1 - (y - 30) / 506),
+      });
+      const fluidProps = (output, one, first, two, second) => cp.PropsSI(output, one, first, two, second, fluid);
+      const tolerance = (data.enthalpyMax - data.enthalpyMin) * 2;
+      for (const family of ["isotherm", "isentrope", "quality", "isochore"]) {
+        const paths = [...svg.querySelectorAll(`path.ph-${family}`)];
+        assert(paths.length >= (family === "quality" ? 9 : 3), `Curve family exists ${fluid}/${family}`);
+        for (const path of paths) {
+          const points = coordinates(path);
+          assert(points.length >= 2 && !/NaN|Infinity/.test(path.getAttribute("d")), `Finite curve ${fluid}/${family}`);
+          const visible = points.filter(([x, y]) => x >= 72 && x <= 836 && y >= 30 && y <= 536);
+          if (!visible.length) continue;
+          if (family === "isochore") {
+            const samples = Array.from({ length: 361 }, (_, index) => {
+              const temperature = data.temperatureMin + (data.temperatureMax - data.temperatureMin) * index / 360;
+              const pressure = fluidProps("P", "T", temperature, "D", Number(path.dataset.density));
+              const enthalpy = fluidProps("H", "T", temperature, "D", Number(path.dataset.density));
+              return [
+                72 + (enthalpy / 1000 - data.enthalpyMin) / (data.enthalpyMax - data.enthalpyMin) * 764,
+                30 + (1 - Math.log(pressure / data.pressureMin) / Math.log(data.pressureMax / data.pressureMin)) * 506,
+              ];
+            });
+            for (const point of [visible[0], visible[Math.floor(visible.length / 2)], visible.at(-1)]) {
+              assert(samples.some((sample) => Math.abs(sample[0] - point[0]) <= .051
+                && Math.abs(sample[1] - point[1]) <= .051), `Density coordinates match model ${fluid}`);
+            }
+            continue;
+          }
+          for (const point of [visible[0], visible[Math.floor(visible.length / 2)], visible.at(-1)]) {
+            const state = stateAt(point);
+            let expected;
+            if (family === "quality") {
+              expected = fluidProps("H", "P", state.p, "Q", Number(path.dataset.quality));
+            } else if (family === "isentrope") {
+              expected = fluidProps("H", "P", state.p, "S", Number(path.dataset.entropy) * 1000);
+            } else {
+              const temperature = Number(path.dataset.temperature) + 273.15;
+              const actual = fluidProps("T", "P", state.p, "H", state.h);
+              assert(Math.abs(actual - temperature) < .3, `Isotherm temperature ${fluid}/${temperature}`);
+              continue;
+            }
+            assert(Number.isFinite(expected) && Math.abs(expected - state.h) < tolerance,
+              `Curve property matches model ${fluid}/${family}: ${expected} vs ${state.h}`);
+          }
+        }
+      }
+      const bounds = svg.getBoundingClientRect();
+      const texts = [...svg.querySelectorAll("text:not([display='none'])")];
+      for (const text of texts.filter((element) => element.matches(
+        ".ph-label-isotherm,.ph-label-isentrope,.ph-label-quality,.ph-label-isochore"))) {
+        const box = text.getBoundingClientRect();
+        assert(box.left >= bounds.left && box.right <= bounds.right && box.top >= bounds.top
+          && box.bottom <= bounds.bottom, `Label within chart ${fluid}/${text.textContent}`);
+        assert(!texts.some((other) => {
+          if (other === text) return false;
+          const rect = other.getBoundingClientRect();
+          return box.left < rect.right && box.right > rect.left && box.top < rect.bottom && box.bottom > rect.top;
+        }), `Label does not overlap ${fluid}/${text.textContent}`);
+      }
+      const pressure = Math.sqrt(Math.max(data.pressureMin, fluidProps("ptriple", "", 0, "", 0)) * fluidProps("pcrit", "", 0, "", 0));
+      const enthalpy = fluidProps("H", "P", pressure, "Q", .5) / 1000;
+      const cursor = svg.createSVGPoint();
+      cursor.x = 72 + (enthalpy - data.enthalpyMin) / (data.enthalpyMax - data.enthalpyMin) * 764;
+      cursor.y = 30 + (1 - Math.log(pressure / data.pressureMin) / Math.log(data.pressureMax / data.pressureMin)) * 506;
+      const screen = cursor.matrixTransform(svg.getScreenCTM());
+      svg.dispatchEvent(new frame.contentWindow.PointerEvent("pointermove",
+        { clientX: screen.x, clientY: screen.y, pointerType: "mouse" }));
+      await wait(() => q("#ph-readout").textContent.includes("x = "), `Pointer readout ${fluid}`);
+      const readout = q("#ph-readout").textContent;
+      close(Number(readout.match(/P = ([\d.e+-]+)/)[1]), pressure / 1000, `Pointer pressure ${fluid}`);
+      close(Number(readout.match(/h = ([\d.e+-]+)/)[1]), enthalpy, `Pointer enthalpy ${fluid}`);
+      close(Number(readout.match(/x = ([\d.e+-]+)/)[1]), .5, `Pointer quality ${fluid}`);
+      const win = frame.contentWindow;
+      const originalClick = win.HTMLAnchorElement.prototype.click;
+      try {
+        for (const [button, suffix] of [["#ph-download-color-button", ""], ["#ph-download-bw-button", "-bw"]]) {
+          let result;
+          win.HTMLAnchorElement.prototype.click = function () { result = { url: this.href, filename: this.download }; };
+          q(button).click();
+          await wait(() => result || q("#ph-status").dataset.kind === "error", `PNG export ${fluid}/${suffix}`);
+          assert(result, `PNG export succeeds ${fluid}/${suffix}: ${q("#ph-status").textContent}`);
+          const blob = await (await fetch(result.url)).blob();
+          const image = await createImageBitmap(blob);
+          assert(image.width === 1800 && image.height === 1316 && blob.type === "image/png", `PNG dimensions ${fluid}/${suffix}`);
+          assert(result.filename === `ph-diagram-${fluid.toLowerCase().replace(/[^a-z0-9-]/g, "")}${suffix}.png`,
+            `PNG filename ${fluid}/${suffix}`);
+          const canvas = document.createElement("canvas");
+          canvas.width = image.width;
+          canvas.height = image.height;
+          const context = canvas.getContext("2d");
+          context.drawImage(image, 0, 0);
+          const pixels = context.getImageData(0, 0, image.width, image.height).data;
+          let chromatic = 0;
+          for (let index = 0; index < pixels.length; index += 16) {
+            if (Math.max(pixels[index], pixels[index + 1], pixels[index + 2])
+              - Math.min(pixels[index], pixels[index + 1], pixels[index + 2]) > 15) chromatic += 1;
+          }
+          assert(suffix ? chromatic === 0 : chromatic > 100, `PNG color mode ${fluid}/${suffix}`);
+          image.close();
+        }
+      } finally {
+        win.HTMLAnchorElement.prototype.click = originalClick;
+      }
+      for (const [toggle, family] of [["#ph-isotherms", "isotherm"], ["#ph-isentropes", "isentrope"],
+        ["#ph-qualities", "quality"], ["#ph-isochores", "isochore"]]) {
+        q(toggle).checked = false;
+        q(toggle).dispatchEvent(new frame.contentWindow.Event("change"));
+        await idle();
+        assert(q("#ph-status").dataset.kind === "success" && !q(`#ph-chart path.ph-${family}`),
+          `Curve toggle hides family ${fluid}/${family}`);
+      }
+      for (const toggle of doc.querySelectorAll(".ph-options input")) toggle.checked = true;
+      q("#ph-isotherms").dispatchEvent(new frame.contentWindow.Event("change"));
+      await idle();
+      assert(q("#ph-status").dataset.kind === "success", `All curves restored ${fluid}`);
+    }
     change("#fluid", "Water");
     await idle();
     for (const toggle of doc.querySelectorAll(".ph-options input")) toggle.checked = true;

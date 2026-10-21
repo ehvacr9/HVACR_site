@@ -1148,6 +1148,7 @@
         <option value="R134a">R134a</option>
         <option value="R22">R22</option>
         <option value="R410A">R410A</option>
+        <option value="R407C">R407C</option>
         <option value="R32">R32</option>
         <option value="R125">R125</option>
         <option value="R1234yf">R1234yf</option>
@@ -1679,6 +1680,7 @@
       R134a: "1,1,1,2-tetrafluoroethane",
       R22: "Chlorodifluoromethane",
       R410A: "Blend of R32 and R125 (50/50 mass fraction)",
+      R407C: "Blend of R32, R125 and R134a (23/25/52 mass fraction)",
       R32: "Difluoromethane",
       R125: "Pentafluoroethane",
       R1234yf: "2,3,3,3-tetrafluoroprop-1-ene",
@@ -1697,10 +1699,53 @@
         formula: "R32 / R125 (50/50 mass fraction)",
         cas: "無單一 CAS 登錄號（混合冷媒）",
       },
+      R407C: {
+        formula: "R32 / R125 / R134a (23/25/52 mass fraction)",
+        cas: "無單一 CAS 登錄號（混合冷媒）",
+      },
     };
     const formulaOverrides = {
       R717: "NH₃",
     };
+
+    async function mixtureQualityAtTemperature(fluid, pressure, temperature) {
+      const [bubble, dew] = await Promise.all([0, 1].map((quality) =>
+        coolprop.PropsSI("T", "P", pressure, "Q", quality, fluid)));
+      if (![bubble, dew].every(Number.isFinite)) throw new Error("無法取得混合冷媒的泡點與露點。");
+      if (temperature < Math.min(bubble, dew) || temperature > Math.max(bubble, dew)) return null;
+      if (Math.abs(dew - bubble) < 1e-9) return null;
+      if (temperature === bubble) return 0;
+      if (temperature === dew) return 1;
+      let low = 0;
+      let high = 1;
+      // Invert the model's P-Q temperature instead of assuming a pure-fluid plateau.
+      for (let iteration = 0; iteration < 36; iteration += 1) {
+        const middle = (low + high) / 2;
+        const solvedTemperature = await coolprop.PropsSI("T", "P", pressure, "Q", middle, fluid);
+        if (!Number.isFinite(solvedTemperature)) throw new Error("無法求解混合冷媒的兩相乾度。");
+        if ((solvedTemperature < temperature) === (dew > bubble)) low = middle;
+        else high = middle;
+      }
+      return (low + high) / 2;
+    }
+
+    async function mixtureSaturationPressure(fluid, temperature, quality) {
+      const [bubble, dew] = await Promise.all([0, 1].map((endpoint) =>
+        coolprop.PropsSI("P", "T", temperature, "Q", endpoint, fluid)));
+      if (![bubble, dew].every(Number.isFinite)) throw new Error("無法取得混合冷媒的飽和壓力。");
+      if (quality === 0) return bubble;
+      if (quality === 1) return dew;
+      let low = Math.min(bubble, dew);
+      let high = Math.max(bubble, dew);
+      for (let iteration = 0; iteration < 36; iteration += 1) {
+        const middle = (low + high) / 2;
+        const solvedTemperature = await coolprop.PropsSI("T", "P", middle, "Q", quality, fluid);
+        if (!Number.isFinite(solvedTemperature)) throw new Error("無法求解混合冷媒的兩相溫度。");
+        if (solvedTemperature < temperature) low = middle;
+        else high = middle;
+      }
+      return (low + high) / 2;
+    }
 
     function formatChemicalFormula(formula) {
       if (!formula || formula === "N/A") return "—";
@@ -1818,7 +1863,8 @@
         phCacheFluid = fluid;
       }
       const isWater = fluid === "Water";
-      const isR134a = fluid === "R134a";
+      const isR22 = fluid === "R22";
+      const hasGlide = Boolean(mixtureMetadata[fluid]);
 
       const width = 900;
       const height = 658;
@@ -1836,13 +1882,25 @@
       const fromY = (y) => 10 ** (logMin + (1 - (y - margin.top) / plotHeight) * (logMax - logMin));
       const rawProps = async (output, n1, v1, n2, v2) => {
         try {
+          if (hasGlide && n1 === "T" && n2 === "Q" && v2 > 0 && v2 < 1) {
+            const pressure = await mixtureSaturationPressure(fluid, v1, v2);
+            return rawProps(output, "P", pressure, "Q", v2);
+          }
+          if (hasGlide && n1 === "T" && n2 === "P" && v2 >= minimumSaturationPressure && v2 < pCritical
+            && v1 >= saturationMin && v1 < tCritical) {
+            const quality = await mixtureQualityAtTemperature(fluid, v2, v1);
+            if (quality !== null) return rawProps(output, "P", v2, "Q", quality);
+          }
           const value = await coolprop.PropsSI(output, n1, v1, n2, v2, fluid);
-          if (isWater && Number.isFinite(value)) {
+          if (Number.isFinite(value)) {
             const temperature = output === "T" ? value : n1 === "T" ? v1 : n2 === "T" ? v2
               : await coolprop.PropsSI("T", n1, v1, n2, v2, fluid);
             const pressure = output === "P" ? value : n1 === "P" ? v1 : n2 === "P" ? v2
               : await coolprop.PropsSI("P", n1, v1, n2, v2, fluid);
-            validateWaterFluidState(temperature, pressure);
+            if (!Number.isFinite(temperature) || !Number.isFinite(pressure)
+              || temperature < modelMin || temperature > modelMax
+              || pressure <= 0 || pressure > modelMaxPressure) return null;
+            if (isWater) validateWaterFluidState(temperature, pressure);
           }
           return Number.isFinite(value) ? value : null;
         } catch {
@@ -1874,22 +1932,30 @@
       const dCritical = await coolprop.PropsSI("rhomass_critical", "", 0, "", 0, fluid);
       const modelMin = await coolprop.PropsSI("Tmin", "", 0, "", 0, fluid);
       const modelMax = await coolprop.PropsSI("Tmax", "", 0, "", 0, fluid);
+      const modelMaxPressure = await coolprop.PropsSI("pmax", "", 0, "", 0, fluid);
       const saturationMin = Math.max(triple, modelMin) + .01;
-      const chartMinTemperature = isWater ? 273.16 : isR134a ? saturationMin : Math.max(saturationMin, tCritical - 140);
-      const chartMaxTemperature = isWater ? waterFluidLimits.temperatureMax : Math.min(modelMax - .01, tCritical + 180);
+      const chartMinTemperature = isWater ? 273.16
+        : Math.max(saturationMin, fluid === "R23" ? 173.15 : Math.min(213.15, tCritical - 60));
+      const chartMaxTemperature = isWater ? waterFluidLimits.temperatureMax
+        : Math.min(modelMax - .01, isR22 ? 453.15 : Math.max(423.15, tCritical + 60));
       const niceStep = (span, divisions) => {
         const raw = span / divisions;
         const power = 10 ** Math.floor(Math.log10(raw));
         return [1, 2, 5, 10].find((factor) => factor * power >= raw) * power;
       };
-      if (!isWater) {
+      if (!isWater && !isR22) {
         const lowPressure = await props("P", "T", chartMinTemperature, "Q", 0);
         if (lowPressure === null || lowPressure <= 0) throw new Error("無法取得流體的飽和範圍。");
-        logMin = isR134a ? 3 : Math.floor(Math.log10(lowPressure));
-        logMax = Math.ceil(Math.log10(pCritical * 2));
+        const pressurePower = 10 ** Math.floor(Math.log10(lowPressure));
+        const pressureFloor = [5, 2, 1].find((factor) => factor * pressurePower <= lowPressure);
+        logMin = Math.log10(pressureFloor * pressurePower);
+        const upperPressure = Math.min(modelMaxPressure, fluid === "R744" ? 14e6 : pCritical * 1.4);
+        const pressureStep = niceStep(upperPressure, 10);
+        logMax = Math.log10(Math.min(modelMaxPressure, Math.ceil(upperPressure / pressureStep) * pressureStep));
         const enthalpies = await Promise.all([
           props("H", "T", chartMinTemperature, "Q", 0),
-          props("H", "T", tCritical - .1, "Q", 1),
+          ...Array.from({ length: 9 }, (_, index) => props("H", "T",
+            chartMinTemperature + (tCritical - .1 - chartMinTemperature) * index / 8, "Q", 1)),
           props("H", "P", 10 ** logMin, "T", chartMaxTemperature),
         ]);
         if (enthalpies.some((value) => value === null)) throw new Error("無法設定焓座標範圍。");
@@ -1899,34 +1965,35 @@
         hMin = Math.floor(low / hStep) * hStep;
         hMax = Math.ceil(high / hStep) * hStep;
       }
+      if (isR22) {
+        hMin = 100;
+        hMax = 550;
+        hStep = 50;
+        logMin = Math.log10(50000);
+        logMax = Math.log10(6000000);
+      }
       const minimumSaturationPressure = await props("P", "T", saturationMin, "Q", 0);
       if (minimumSaturationPressure === null) throw new Error("無法取得飽和線的最低壓力。");
       const qualityMinPressure = Math.max(10 ** logMin, minimumSaturationPressure * 1.001);
-      const qualityLabelPressure = isWater ? 3000 : qualityMinPressure * 1.5;
-      const temperatureStep = niceStep(chartMaxTemperature - chartMinTemperature, 14);
+      const qualityLabelPressure = isWater ? 3000 : qualityMinPressure * 1.6;
+      const temperatureStep = 10;
       const temperatures = isWater ? [10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700]
-        : isR134a
-          ? Array.from({
-            length: Math.floor((chartMaxTemperature - 273.15) / 20) - Math.ceil((chartMinTemperature - 273.15) / 20) + 1,
-          }, (_, index) => (Math.ceil((chartMinTemperature - 273.15) / 20) + index) * 20)
-          : Array.from({ length: Math.floor((chartMaxTemperature - 273.15 - Math.ceil((chartMinTemperature - 273.15) / temperatureStep) * temperatureStep) / temperatureStep) + 1 },
-            (_, index) => Math.ceil((chartMinTemperature - 273.15) / temperatureStep) * temperatureStep + index * temperatureStep);
+        : isR22 ? [-50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180]
+        : Array.from({ length: Math.floor((chartMaxTemperature - 273.15 - Math.ceil((chartMinTemperature - 273.15) / temperatureStep) * temperatureStep) / temperatureStep) + 1 },
+          (_, index) => Math.ceil((chartMinTemperature - 273.15) / temperatureStep) * temperatureStep + index * temperatureStep)
+          .filter((temperature) => temperature <= 100 || temperature % 20 === 0);
       const [entropyLow, entropyHigh] = await Promise.all([
         props("S", "P", qualityMinPressure, "Q", 0),
         props("S", "P", 10 ** logMin, "T", chartMaxTemperature),
       ]);
       if (entropyLow === null || entropyHigh === null) throw new Error("無法設定等熵線範圍。");
-      const entropyStep = isWater ? 1 : niceStep((entropyHigh - entropyLow) / 1000, isR134a ? 24 : 9);
+      const entropyStep = isWater ? .5 : isR22 ? .1 : niceStep((entropyHigh - entropyLow) / 1000, 20);
       const entropyMin = isWater ? 1 : Math.ceil(entropyLow / 1000 / entropyStep) * entropyStep;
       const entropyMax = isWater ? 10 : entropyHigh / 1000;
       const densities = isWater
         ? [0.01, 0.1, 1, 10, 50, 100, 200, 400, 600, 800, 950]
-        : isR134a
-          ? [1, 2, 5, 10, 20, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400]
-          : [.002, .01, .05, .1, .25, .5, 1, 1.5, 2, 3].map((factor) => Number((dCritical * factor).toPrecision(2)));
-      const densityLabelValues = isR134a
-        ? new Set([1, 2, 5, 10, 20, 50, 100, 200, 400, 600, 800, 1000, 1200, 1400])
-        : null;
+        : [0.1, .2, .5, 1, 2, 5, 10, 20, 50, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1600]
+          .filter((density) => density >= dCritical * .001 && density <= dCritical * 3);
       const fluidTitle = `${fluid} Pressure–Enthalpy (Ph) Diagram`;
 
       const svg = svgElement("svg", {
@@ -1934,6 +2001,12 @@
         "aria-label": fluidTitle, "aria-describedby": "ph-interaction-hint ph-readout",
       });
       svg.dataset.fluid = fluid;
+      svg.dataset.enthalpyMin = hMin;
+      svg.dataset.enthalpyMax = hMax;
+      svg.dataset.pressureMin = 10 ** logMin;
+      svg.dataset.pressureMax = 10 ** logMax;
+      svg.dataset.temperatureMin = chartMinTemperature;
+      svg.dataset.temperatureMax = chartMaxTemperature;
       svg.append(svgElement("title", {}, fluidTitle));
       svg.append(svgElement("style", {}, phChartStyle));
       svg.append(svgElement("rect", { class: "ph-bg", x: 0, y: 0, width, height }));
@@ -1943,15 +2016,19 @@
       defs.firstChild.append(svgElement("rect", { x: margin.left, y: margin.top, width: plotWidth, height: plotHeight }));
       svg.append(defs);
 
-      for (let exponent = logMin; exponent <= logMax; exponent += 1) {
+      for (let exponent = Math.floor(logMin); exponent <= logMax; exponent += 1) {
         for (let factor = 1; factor < 10; factor += 1) {
           const p = factor * 10 ** exponent;
+          if (p < 10 ** logMin) continue;
           if (p > 10 ** logMax) break;
           const y = toY(p).toFixed(1);
           svg.append(svgElement("line", { class: "ph-grid", x1: margin.left, x2: margin.left + plotWidth, y1: y, y2: y, opacity: factor === 1 ? 1 : .45 }));
+          if ([1, 2, 5].includes(factor)) {
+            for (const [x, anchor] of [[margin.left - 8, "end"], [margin.left + plotWidth + 8, "start"]]) {
+              svg.append(svgElement("text", { x, y: toY(p) + 4, "text-anchor": anchor }, (p / 1000).toLocaleString("en-US")));
+            }
+          }
         }
-        svg.append(svgElement("text", { x: margin.left - 8, y: toY(10 ** exponent) + 4, "text-anchor": "end" }, (10 ** (exponent - 3)).toLocaleString("en-US")));
-        svg.append(svgElement("text", { x: margin.left + plotWidth + 8, y: toY(10 ** exponent) + 4, "text-anchor": "start" }, (10 ** (exponent - 3)).toLocaleString("en-US")));
       }
       for (let h = hMin; h <= hMax; h += hStep) {
         svg.append(svgElement("line", { class: "ph-grid", x1: toX(h), x2: toX(h), y1: margin.top, y2: margin.top + plotHeight }));
@@ -1961,16 +2038,15 @@
       const layer = svgElement("g", { "clip-path": `url(#${clipId})` });
       const labels = svgElement("g");
       const densityLabels = [];
-      const pressures = logSpace(10 ** logMin, 10 ** logMax, 90);
+      const pressures = logSpace(10 ** logMin, 10 ** logMax, 240);
 
       if (document.querySelector("#ph-qualities").checked) {
         const qualityPressures = logSpace(qualityMinPressure, pCritical * .985, 50);
         for (let quality = .1; quality < .95; quality += .1) {
           const points = (await Promise.all(qualityPressures
             .map(async (p) => ({ p, h: await props("H", "P", p, "Q", quality) }))))
-            .filter((point) => point.h !== null)
-            .map((point) => ({ p: point.p, h: point.h / 1000 }));
-          layer.append(svgElement("path", { class: "ph-quality", d: pathOf(points) }));
+            .map((point) => point.h === null ? null : ({ p: point.p, h: point.h / 1000 }));
+          layer.append(svgElement("path", { class: "ph-quality", "data-quality": quality.toFixed(1), d: pathOf(points) }));
           const labelEnthalpy = await props("H", "P", qualityLabelPressure, "Q", quality);
           if (labelEnthalpy !== null) {
             labels.append(svgElement("text", { class: "ph-label-quality halo", x: toX(labelEnthalpy / 1000), y: toY(qualityLabelPressure) - 4, "text-anchor": "middle" }, `x=${quality.toFixed(1)}`));
@@ -1980,8 +2056,8 @@
 
       if (document.querySelector("#ph-isochores").checked) {
         for (const density of densities) {
-          const isochoreMinTemperature = isR134a ? saturationMin : chartMinTemperature;
-          const isochoreSteps = isR134a ? 360 : 240;
+          const isochoreMinTemperature = chartMinTemperature;
+          const isochoreSteps = 360;
           const points = await Promise.all(Array.from({ length: isochoreSteps + 1 }, async (_, step) => {
             const temperature = isochoreMinTemperature
               + ((chartMaxTemperature - isochoreMinTemperature) * step) / isochoreSteps;
@@ -1995,26 +2071,23 @@
             return { p, h: h / 1000 };
           }));
           if (points.filter(Boolean).length < 2) continue;
-          layer.append(svgElement("path", { class: "ph-isochore", d: pathOf(points) }));
-          if (densityLabelValues && !densityLabelValues.has(density)) continue;
+          layer.append(svgElement("path", { class: "ph-isochore", "data-density": density, d: pathOf(points) }));
           const labelVisible = points.filter((point) => point
             && point.h >= hMin && point.h <= hMax - (hMax - hMin) * .12
-            && point.p <= 10 ** (isR134a ? logMax - .02 : logMax - .5));
-          const outsideDome = isR134a || (isWater && [400, 600].includes(density))
-            ? await Promise.all(labelVisible.map(async (point) => {
-              if (point.p >= pCritical) return true;
-              const [saturatedLiquidH, saturatedVaporH] = await Promise.all([
-                props("H", "P", point.p, "Q", 0),
-                props("H", "P", point.p, "Q", 1),
-              ]);
-              if (saturatedLiquidH === null || saturatedVaporH === null) return true;
-              const domeLeft = saturatedLiquidH / 1000;
-              const domeRight = saturatedVaporH / 1000;
-              const clearance = (hMax - hMin) * .025;
-              return point.h < domeLeft - clearance || point.h > domeRight + clearance;
-            }))
-            : null;
-          const labelPoints = outsideDome ? labelVisible.filter((_, index) => outsideDome[index]) : labelVisible;
+            && point.p <= 10 ** (logMax - .02));
+          const outsideDome = await Promise.all(labelVisible.map(async (point) => {
+            if (point.p >= pCritical) return true;
+            const [saturatedLiquidH, saturatedVaporH] = await Promise.all([
+              props("H", "P", point.p, "Q", 0),
+              props("H", "P", point.p, "Q", 1),
+            ]);
+            if (saturatedLiquidH === null || saturatedVaporH === null) return true;
+            const domeLeft = saturatedLiquidH / 1000;
+            const domeRight = saturatedVaporH / 1000;
+            const clearance = (hMax - hMin) * .025;
+            return point.h < domeLeft - clearance || point.h > domeRight + clearance;
+          }));
+          const labelPoints = labelVisible.filter((_, index) => outsideDome[index]);
           if (!labelPoints.length) continue;
           const label = svgElement("text", { class: "ph-label-isochore halo", "text-anchor": "middle" }, `${density} kg/m³`);
           labels.append(label);
@@ -2038,11 +2111,11 @@
             .map(async (p) => ({ p, h: await props("H", "P", p, "S", entropy * 1000) }))))
             .map((point) => point.h === null ? null : ({ p: point.p, h: point.h / 1000 }));
           if (points.filter(Boolean).length < 2) continue;
-          layer.append(svgElement("path", { class: "ph-isentrope", d: pathOf(points) }));
+          layer.append(svgElement("path", { class: "ph-isentrope", "data-entropy": Number(entropy.toPrecision(6)), d: pathOf(points) }));
           const end = points.filter(Boolean).slice(-1)[0];
           const entropyIndex = Math.round((entropy - entropyMin) / entropyStep);
           if (end.p <= 10 ** logMin * 1.001 && end.h >= hMin && end.h <= hMax
-            && (!isR134a || entropyIndex % 2 === 0)) {
+            && entropyIndex % 2 === 0) {
             labels.append(svgElement("text", { class: "ph-label-isentrope halo", x: toX(end.h), y: margin.top + plotHeight + 30, "text-anchor": "middle" }, `s=${Number(entropy.toPrecision(4))}`));
           }
         }
@@ -2069,9 +2142,19 @@
             if (pSat === null || pDew === null || hLiquid === null || hVapor === null) continue;
             vaporLabelPressure = Math.min(vaporLabelPressure, Math.sqrt(10 ** logMin * pDew));
             await sample(descending.filter((p) => p > pSat * 1.001));
-            points.push({ p: pSat, h: hLiquid / 1000 }, { p: pDew, h: hVapor / 1000 });
-            const showIsothermLabel = !isR134a || celsius % 20 === 0;
-            if (showIsothermLabel && pSat >= 10 ** logMin && pSat <= 10 ** logMax) {
+            points.push({ p: pSat, h: hLiquid / 1000 });
+            if (hasGlide) {
+              for (let index = 1; index < 20; index += 1) {
+                const quality = index / 20;
+                const [p, h] = await Promise.all([
+                  props("P", "T", temperature, "Q", quality),
+                  props("H", "T", temperature, "Q", quality),
+                ]);
+                points.push(p === null || h === null ? null : { p, h: h / 1000 });
+              }
+            }
+            points.push({ p: pDew, h: hVapor / 1000 });
+            if (pSat >= 10 ** logMin && pSat <= 10 ** logMax) {
               labels.append(svgElement("text", { class: "ph-label-isotherm halo", x: toX((hLiquid + hVapor) / 2000), y: toY(pSat) + (pSat > 5e6 ? 12 : -3), "text-anchor": "middle" }, `${celsius}°C`));
             }
             await sample(descending.filter((p) => p < pDew / 1.001));
@@ -2079,9 +2162,9 @@
             await sample(descending);
           }
           if (points.length < 2) continue;
-          layer.append(svgElement("path", { class: "ph-isotherm", d: pathOf(points) }));
+          layer.append(svgElement("path", { class: "ph-isotherm", "data-temperature": celsius, d: pathOf(points) }));
           const vaporLabelEnthalpy = await props("H", "T", temperature, "P", vaporLabelPressure);
-          if ((!isR134a || celsius % 20 === 0)
+          if ((isWater || celsius % 20 === 0)
             && vaporLabelPressure >= 10 ** logMin && vaporLabelEnthalpy !== null && vaporLabelEnthalpy / 1000 >= hMin && vaporLabelEnthalpy / 1000 <= hMax) {
             const x = toX(vaporLabelEnthalpy / 1000) + 4;
             const y = toY(vaporLabelPressure) - 4;
@@ -2095,7 +2178,7 @@
           }
           const start = points.find(Boolean);
           if (!start) continue;
-          if ((!isR134a || celsius % 20 === 0)
+          if ((isWater || celsius % 20 === 0)
             && start.p >= 10 ** logMax * .999 && start.h >= hMin && start.h <= hMax) {
             labels.append(svgElement("text", { class: "ph-label-isotherm halo", x: toX(start.h), y: margin.top - 6, "text-anchor": "middle" }, `${celsius}°C`));
           }
@@ -2104,16 +2187,24 @@
 
       const liquidSide = [];
       const vaporSide = [];
-      const saturationSamples = await Promise.all(Array.from({ length: 161 }, async (_, step) => {
-        const fraction = Math.min(step / 160, .9995);
-        const temperature = tCritical - (tCritical - saturationMin) * (1 - fraction) ** 2;
+      const domeMinimum = 10 ** logMin > minimumSaturationPressure
+        ? await props("T", "P", 10 ** logMin, "Q", 0) : saturationMin;
+      if (domeMinimum === null) throw new Error("無法取得飽和曲線的起點。");
+      const domeSteps = 240;
+      const saturationSamples = await Promise.all(Array.from({ length: domeSteps + 1 }, async (_, step) => {
+        const fraction = Math.min(step / domeSteps, .9995);
+        const temperature = tCritical - (tCritical - domeMinimum) * (1 - fraction) ** 2;
         return Promise.all([
           props("P", "T", temperature, "Q", 0), props("P", "T", temperature, "Q", 1),
           props("H", "T", temperature, "Q", 0), props("H", "T", temperature, "Q", 1),
         ]);
       }));
       for (const [pSat, pDew, hLiquid, hVapor] of saturationSamples) {
-        if (pSat === null || pDew === null || hLiquid === null || hVapor === null) continue;
+        if (pSat === null || pDew === null || hLiquid === null || hVapor === null) {
+          liquidSide.push(null);
+          vaporSide.push(null);
+          continue;
+        }
         liquidSide.push({ p: pSat, h: hLiquid / 1000 });
         vaporSide.push({ p: pDew, h: hVapor / 1000 });
       }
@@ -2125,8 +2216,8 @@
       const edgePressure = isWater ? 1.5e6 : Math.sqrt(10 ** logMin * pCritical);
       const edgeLiquid = await props("H", "P", edgePressure, "Q", 0);
       const edgeVapor = await props("H", "P", edgePressure, "Q", 1);
-      if (edgeLiquid !== null) svg.append(svgElement("text", { class: "ph-label-edge halo", x: toX(edgeLiquid / 1000) - 8, y: toY(edgePressure) + 4, "text-anchor": "end" }, "x=0 saturated liquid"));
-      if (edgeVapor !== null) svg.append(svgElement("text", { class: "ph-label-edge halo", x: toX(edgeVapor / 1000) + 8, y: toY(edgePressure) + 4 }, "x=1 saturated vapor"));
+      if (edgeLiquid !== null) svg.append(svgElement("text", { class: "ph-label-edge halo", x: toX(edgeLiquid / 1000) - 8, y: toY(edgePressure) + 4, "text-anchor": "end" }, hasGlide ? "x=0 bubble" : "x=0"));
+      if (edgeVapor !== null) svg.append(svgElement("text", { class: "ph-label-edge halo", x: toX(edgeVapor / 1000) + 8, y: toY(edgePressure) + 4 }, hasGlide ? "x=1 dew" : "x=1"));
       if (critical.length) {
         svg.append(svgElement("circle", { class: "ph-cp-dot", cx: toX(critical[0].h), cy: toY(critical[0].p), r: 4.5 }));
         svg.append(svgElement("text", { class: "halo", x: toX(critical[0].h) + 8, y: toY(critical[0].p) - 6 }, "c.p."));
@@ -2134,10 +2225,10 @@
 
       svg.append(svgElement("rect", { class: "ph-frame", x: margin.left, y: margin.top, width: plotWidth, height: plotHeight }));
       svg.append(svgElement("text", { class: "axis-title", x: margin.left + plotWidth / 2, y: height - 68, "text-anchor": "middle" }, "Specific Enthalpy h (kJ/kg)"));
-      svg.append(svgElement("text", { class: "axis-title", x: 18, y: margin.top + plotHeight / 2, "text-anchor": "middle", transform: `rotate(-90 18 ${margin.top + plotHeight / 2})` }, `Pressure P (${isWater ? "MPa" : "kPa"})`));
+      svg.append(svgElement("text", { class: "axis-title", x: 18, y: margin.top + plotHeight / 2, "text-anchor": "middle", transform: `rotate(-90 18 ${margin.top + plotHeight / 2})` }, "Pressure P (kPa)"));
       svg.append(svgElement("text", { class: "ph-reference-state", x: margin.left, y: height - 12 }, isWater
         ? "Reference State: u = 0 kJ/kg, s = 0 kJ/(kg∙K) for saturated liquid at 0.01 °C"
-        : isR134a
+        : isR22 || fluid === "R134a"
           ? "Reference State: h = 200.0 kJ/kg, s = 1.00 kJ/(kg∙K) for saturated liquid at 0 °C"
           : "Reference State: Fluid model default (enthalpy and entropy offsets are model-specific)."));
       svg.append(svgElement("text", { x: margin.left + 8, y: margin.top + 16 }, fluid));
@@ -2225,8 +2316,26 @@
         }
       });
       phChart.append(svg);
-      const occupied = [...svg.querySelectorAll("text:not(.ph-label-isochore)")].map((text) => text.getBoundingClientRect());
       const svgBounds = svg.getBoundingClientRect();
+      const overlapsBox = (box, other) => box.left < other.right + 3 && box.right + 3 > other.left
+        && box.top < other.bottom + 3 && box.bottom + 3 > other.top;
+      {
+        const fixedLabels = [...svg.querySelectorAll("text:not(.ph-label-isochore):not(.ph-label-isotherm):not(.ph-label-isentrope):not(.ph-label-quality)")]
+          .map((text) => text.getBoundingClientRect());
+        for (const text of labels.querySelectorAll("text:not(.ph-label-isochore)")) {
+          const box = text.getBoundingClientRect();
+          if (box.left < svgBounds.left || box.right > svgBounds.right
+            || box.top < svgBounds.top || box.bottom > svgBounds.bottom
+            || fixedLabels.some((other) => overlapsBox(box, other))) {
+            text.setAttribute("display", "none");
+          } else {
+            fixedLabels.push(box);
+          }
+        }
+      }
+      const occupied = [...svg.querySelectorAll("text:not(.ph-label-isochore):not([display='none'])")]
+        .map((text) => text.getBoundingClientRect());
+      const plotBounds = svg.querySelector(".ph-frame").getBoundingClientRect();
       for (const { label, points } of densityLabels) {
         let placed = false;
         for (const { point, tangentStart, tangentEnd } of points) {
@@ -2238,7 +2347,7 @@
           if (angle > 90) angle -= 180;
           if (angle < -90) angle += 180;
           const tangentLength = Math.hypot(tangentX, tangentY) || 1;
-          const offsets = isR134a ? [0, 8, -8, 16, -16, 24, -24, 32, -32] : [0];
+          const offsets = [0, 8, -8, 16, -16, 24, -24, 32, -32];
           for (const offset of offsets) {
             const x = anchorX - (tangentY / tangentLength) * offset;
             const y = anchorY + (tangentX / tangentLength) * offset;
@@ -2246,10 +2355,10 @@
             label.setAttribute("y", y);
             label.setAttribute("transform", `rotate(${angle} ${x} ${y})`);
             const box = label.getBoundingClientRect();
-            const fits = box.left >= svgBounds.left && box.right <= svgBounds.right
-              && box.top >= svgBounds.top && box.bottom <= svgBounds.bottom;
-            const overlaps = occupied.some((other) => box.left < other.right + 3 && box.right + 3 > other.left
-              && box.top < other.bottom + 3 && box.bottom + 3 > other.top);
+            const bounds = plotBounds;
+            const fits = box.left >= bounds.left && box.right <= bounds.right
+              && box.top >= bounds.top && box.bottom <= bounds.bottom;
+            const overlaps = occupied.some((other) => overlapsBox(box, other));
             if (!fits || overlaps) continue;
             occupied.push(box);
             placed = true;
@@ -2257,10 +2366,8 @@
           }
           if (placed) break;
         }
-        if (!placed && isR134a) {
+        if (!placed) {
           label.setAttribute("display", "none");
-        } else if (!placed) {
-          occupied.push(label.getBoundingClientRect());
         }
       }
       phStatus.dataset.kind = "success";
@@ -2400,6 +2507,8 @@
       }
       normalPointLabel.textContent = isPseudoPure ? "泡點 (°C)" : "沸點 (°C)";
       dewPointItem.hidden = !isPseudoPure;
+      document.querySelector("#liquid-title").textContent = isPseudoPure ? "飽和液體／泡點 (f)" : "飽和液體 (f)";
+      document.querySelector("#vapor-title").textContent = isPseudoPure ? "飽和蒸氣／露點 (g)" : "飽和蒸氣 (g)";
       ({
         minimumTemperature,
         maximumTemperature,
@@ -2457,12 +2566,6 @@
     }
 
     function renderSaturationTableFields() {
-      for (const input of tableVariationInputs) {
-        input.disabled = Boolean(mixtureMetadata[activeFluid]) && input.value === "QT";
-      }
-      if (mixtureMetadata[activeFluid] && tableVariation() === "QT") {
-        document.querySelector('input[name="table-variation"][value="QP"]').checked = true;
-      }
       const variation = tableVariation();
       const fields = saturationTableDefaults[variation] ?? [];
       tableRangeFields.replaceChildren();
@@ -2536,6 +2639,10 @@
 
     async function saturationProperty(output, key, value, quality) {
       try {
+        if (mixtureMetadata[activeFluid] && key === "T" && quality > 0 && quality < 1) {
+          const pressure = await mixtureSaturationPressure(activeFluid, value, quality);
+          return saturationProperty(output, "P", pressure, quality);
+        }
         const result = await coolprop.PropsSI(output, key, value, "Q", quality, activeFluid);
         return Number.isFinite(result) ? result : NaN;
       } catch {
@@ -2581,9 +2688,15 @@
       }
       const specificVolume = (1 - quality) / liquid.D + quality / vapor.D;
       const mix = (property) => ((1 - quality) * liquid[property] + quality * vapor[property]) / 1000;
+      const properties = mixtureMetadata[activeFluid]
+        ? await Promise.all(["D", "H", "S", "U"].map((output) => saturationProperty(output, key, value, quality)))
+        : [1 / specificVolume, mix("H") * 1000, mix("S") * 1000, mix("U") * 1000];
+      if (properties.some((property) => !Number.isFinite(property)) || properties[0] <= 0) {
+        throw new Error("無法取得有效的兩相物性。");
+      }
       return [
-        quality, temperature - 273.15, pressure / 1000, 1 / specificVolume, specificVolume,
-        mix("H"), mix("S"), mix("U"),
+        quality, temperature - 273.15, pressure / 1000, properties[0], 1 / properties[0],
+        properties[1] / 1000, properties[2] / 1000, properties[3] / 1000,
         quality === 0 ? liquid.cp / 1000 : quality === 1 ? vapor.cp / 1000 : NaN,
         quality === 0 ? liquid.cv / 1000 : quality === 1 ? vapor.cv / 1000 : NaN,
         liquid.viscosity * 1e6, vapor.viscosity * 1e6,
@@ -2637,9 +2750,6 @@
       try {
         if (!fluidReady) throw new Error("所選流體資料尚未就緒，請重新選取流體或重新整理頁面。");
         const variation = tableVariation();
-        if (mixtureMetadata[activeFluid] && variation === "QT") {
-          throw new Error("R410A 的擬純流體模型不支援固定溫度下的中間乾度計算，請改用固定壓力下變化乾度。");
-        }
         const labels = {
           T: "溫度變化",
           P: "壓力變化",
@@ -2763,16 +2873,26 @@
           temperature = boundedRangeValue(temperature, minimumTemperature, criticalTemperature, "汽液飽和溫度 (K)");
         }
 
+        const saturationKey = enteredTemperature !== null ? "T" : "P";
+        const saturationValue = saturationKey === "T" ? temperature : pressure;
+        const hasGlide = Boolean(mixtureMetadata[activeFluid]);
+        const endpoints = await Promise.all([0, 1].map(async (quality) => ({
+          temperature: await coolprop.PropsSI("T", saturationKey, saturationValue, "Q", quality, activeFluid),
+          pressure: await coolprop.PropsSI("P", saturationKey, saturationValue, "Q", quality, activeFluid),
+        })));
+        if (endpoints.some((endpoint) => !Number.isFinite(endpoint.temperature) || !Number.isFinite(endpoint.pressure))) {
+          throw new Error("無法取得飽和端點。");
+        }
         const phases = { liquid: 0, vapor: 1 };
         for (const [phase, quality] of Object.entries(phases)) {
           const properties = {
-            rho: await coolprop.PropsSI("D", "T", temperature, "Q", quality, activeFluid),
-            v: 1 / await coolprop.PropsSI("D", "T", temperature, "Q", quality, activeFluid),
-            h: await coolprop.PropsSI("H", "T", temperature, "Q", quality, activeFluid) / 1000,
-            u: await coolprop.PropsSI("U", "T", temperature, "Q", quality, activeFluid) / 1000,
-            cp: await coolprop.PropsSI("C", "T", temperature, "Q", quality, activeFluid) / 1000,
-            cv: await coolprop.PropsSI("O", "T", temperature, "Q", quality, activeFluid) / 1000,
-            viscosity: await coolprop.PropsSI("V", "T", temperature, "Q", quality, activeFluid) * 1e6,
+            rho: await coolprop.PropsSI("D", saturationKey, saturationValue, "Q", quality, activeFluid),
+            v: 1 / await coolprop.PropsSI("D", saturationKey, saturationValue, "Q", quality, activeFluid),
+            h: await coolprop.PropsSI("H", saturationKey, saturationValue, "Q", quality, activeFluid) / 1000,
+            u: await coolprop.PropsSI("U", saturationKey, saturationValue, "Q", quality, activeFluid) / 1000,
+            cp: await coolprop.PropsSI("C", saturationKey, saturationValue, "Q", quality, activeFluid) / 1000,
+            cv: await coolprop.PropsSI("O", saturationKey, saturationValue, "Q", quality, activeFluid) / 1000,
+            viscosity: await coolprop.PropsSI("V", saturationKey, saturationValue, "Q", quality, activeFluid) * 1e6,
           };
           for (const [key, value] of Object.entries(properties)) {
             if (!Number.isFinite(value)) {
@@ -2784,7 +2904,11 @@
 
         pressureInput.value = formatNumber(pressure / 1000);
         temperatureInput.value = formatNumber(temperature - 273.15);
-        resultSummary.textContent = `飽和壓力 ${formatNumber(pressure / 1000)} kPa · 飽和溫度 ${formatNumber(temperature - 273.15)} °C`;
+        resultSummary.textContent = hasGlide
+          ? saturationKey === "P"
+            ? `壓力 ${formatNumber(pressure / 1000)} kPa · 泡點 ${formatNumber(endpoints[0].temperature - 273.15)} °C · 露點 ${formatNumber(endpoints[1].temperature - 273.15)} °C · 溫度滑移 ${formatNumber(endpoints[1].temperature - endpoints[0].temperature)} °C`
+            : `溫度 ${formatNumber(temperature - 273.15)} °C · 泡點壓力 ${formatNumber(endpoints[0].pressure / 1000)} kPa · 露點壓力 ${formatNumber(endpoints[1].pressure / 1000)} kPa`
+          : `飽和壓力 ${formatNumber(pressure / 1000)} kPa · 飽和溫度 ${formatNumber(temperature - 273.15)} °C`;
         status.dataset.kind = mismatch ? "warning" : "success";
         status.textContent = mismatch
           ? `兩個輸入值不相符（溫度對應壓力為 ${formatNumber(pressure / 1000)} kPa）；已依照溫度計算。`
@@ -2861,20 +2985,26 @@
           validateWaterFluidState(propertyOneSpec.key === "T" ? inputOne : inputTwo,
             propertyOneSpec.key === "P" ? inputOne : inputTwo);
         }
-        const phase = await coolprop.PropsSI(
-          "Phase",
-          propertyOneSpec.key,
-          inputOne,
-          propertyTwoSpec.key,
-          inputTwo,
-          activeFluid,
-        );
+        let stateInputs = [propertyOneSpec.key, inputOne, propertyTwoSpec.key, inputTwo];
+        if (mixtureMetadata[activeFluid]) {
+          const inputs = { [propertyOneSpec.key]: inputOne, [propertyTwoSpec.key]: inputTwo };
+          if (inputs.T !== undefined && inputs.P !== undefined
+            && inputs.P >= minimumSaturationPressure && inputs.P < criticalPressure
+            && inputs.T >= minimumTemperature && inputs.T < criticalTemperature) {
+            const quality = await mixtureQualityAtTemperature(activeFluid, inputs.P, inputs.T);
+            if (quality !== null) stateInputs = ["P", inputs.P, "Q", quality];
+          } else if (inputs.T !== undefined && inputs.Q > 0 && inputs.Q < 1) {
+            stateInputs = ["P", await mixtureSaturationPressure(activeFluid, inputs.T, inputs.Q), "Q", inputs.Q];
+          }
+        }
+        const stateProperty = (output) => coolprop.PropsSI(output, ...stateInputs, activeFluid);
+        const phase = await stateProperty("Phase");
         if (phaseNames[phase] === undefined) {
           console.warn("狀態求解失敗：", coolprop.get_global_param_string("errstring"));
           throw new Error("所選性質組合不受支援、超出範圍或無法判定相態；請改用壓力與溫度，或壓力與乾度等組合。");
         }
-        const solvedTemperature = await coolprop.PropsSI("T", propertyOneSpec.key, inputOne, propertyTwoSpec.key, inputTwo, activeFluid);
-        const solvedPressure = await coolprop.PropsSI("P", propertyOneSpec.key, inputOne, propertyTwoSpec.key, inputTwo, activeFluid);
+        const solvedTemperature = await stateProperty("T");
+        const solvedPressure = await stateProperty("P");
         if (!Number.isFinite(solvedTemperature) || !Number.isFinite(solvedPressure)
           || solvedTemperature < modelMinimumTemperature - 1e-10 * Math.abs(modelMinimumTemperature)
           || solvedTemperature > maximumTemperature || solvedPressure <= 0 || solvedPressure > maximumPressure) {
@@ -2882,7 +3012,7 @@
         }
         if (activeFluid === "Water") validateWaterFluidState(
           boundedRangeValue(solvedTemperature, modelMinimumTemperature, maximumTemperature, "溫度 (K)"), solvedPressure);
-        const quality = await coolprop.PropsSI("Q", propertyOneSpec.key, inputOne, propertyTwoSpec.key, inputTwo, activeFluid);
+        const quality = await stateProperty("Q");
         if (phase === 6 && (!Number.isFinite(quality) || quality < 0 || quality > 1)) {
           throw new Error("無法取得有效的汽液共存乾度。");
         }
@@ -2902,9 +3032,7 @@
             values[field] = "—（超出黏度公式有效範圍）";
             continue;
           }
-          const raw = await coolprop.PropsSI(
-            output, propertyOneSpec.key, inputOne, propertyTwoSpec.key, inputTwo, activeFluid,
-          );
+          const raw = await stateProperty(output);
           if (!Number.isFinite(raw)) throw new Error(`無法取得 ${output} 物性；請調整輸入或遠離臨界點。`);
           const converted = convert(raw);
           if (!Number.isFinite(converted)) {
