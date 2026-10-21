@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Tools navigation regression tests</title></head>
+<body>
+  <h1>Tools navigation regression tests</h1>
+  <p>Serve the site over HTTP and open this page. Checks navigation across all public pages, tool cards,
+    breadcrumbs, removal of the former product name, existing tool URLs and responsive card layouts.</p>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+    const pages = [
+      "index.html", "about.html", "founder.html", "exam-years.html", "exam-year-113.html",
+      "exam-year-114.html", "exam-paper.html", "terminology.html", "tools.html",
+      "pycool.html", "refrigeration-cycle.html", "unit-converter.html",
+    ];
+    const tools = ["pycool.html", "refrigeration-cycle.html", "unit-converter.html"];
+    const names = ["流體熱物理性質", "冷凍循環分析器", "單位換算"];
+    const frame = document.createElement("iframe");
+    frame.title = "Tool navigation layout tests";
+    frame.style.cssText = "position:fixed;left:-10000px;width:1100px;height:1000px;";
+    try {
+      for (const path of pages) {
+        const response = await fetch(`../${path}`);
+        assert(response.ok, `${path} remains available`);
+        const doc = new DOMParser().parseFromString(await response.text(), "text/html");
+        const nav = doc.querySelector('nav[aria-label="主選單"]');
+        assert(nav && [...nav.querySelectorAll("a")].map((a) => a.textContent).join("|")
+          === "首頁|關於我們|技師考題|術語辭典|計算工具", `${path} unified navigation`);
+        assert(nav.querySelector('a[href="tools.html"]'), `${path} tools entry`);
+        assert(!/PyCool/i.test(doc.body.textContent + doc.title), `${path} former product name removed`);
+        if (tools.includes(path)) {
+          const index = tools.indexOf(path);
+          assert(doc.querySelector("h1").textContent === names[index], `${path} tool heading`);
+          assert(doc.querySelector('.breadcrumb a[href="tools.html"]'), `${path} return to tools`);
+          assert(doc.querySelector('.breadcrumb [aria-current="page"]').textContent === names[index],
+            `${path} current breadcrumb`);
+          assert(nav.querySelector('a[href="tools.html"][aria-current="location"]'),
+            `${path} current navigation section`);
+        }
+        if (["index.html", "tools.html"].includes(path)) {
+          const cards = [...doc.querySelectorAll(".tool-card")];
+          assert(cards.length === 3, `${path} exactly three tool cards`);
+          cards.forEach((card, index) => {
+            assert(card.getAttribute("href") === tools[index], `${path} tool destination ${index}`);
+            assert(card.querySelector("h3").textContent === names[index], `${path} tool name ${index}`);
+          });
+          if (path === "index.html") {
+            assert(doc.querySelectorAll("#tools-link-title").length === 1
+              && doc.querySelector('a.button[href="tools.html"]'), "Home has a single tools section and overview link");
+          }
+        }
+      }
+      document.body.append(frame);
+      for (const path of ["tools.html", "index.html"]) {
+        await new Promise((resolve, reject) => {
+          frame.onload = resolve;
+          frame.onerror = () => reject(new Error(`Unable to load ${path}`));
+          frame.src = `../${path}`;
+        });
+        for (const width of [320, 768, 1440]) {
+          frame.style.width = `${width}px`;
+          await new Promise((resolve) => frame.contentWindow.requestAnimationFrame(() =>
+            frame.contentWindow.requestAnimationFrame(resolve)));
+          const doc = frame.contentDocument;
+          assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth, `${path} no overflow ${width}`);
+          for (const card of doc.querySelectorAll(".tool-card")) {
+            const bounds = card.getBoundingClientRect();
+            assert(bounds.width > 0 && bounds.left >= 0 && bounds.right <= doc.documentElement.clientWidth,
+              `${path} card visible ${width}`);
+          }
+        }
+      }
+      output.dataset.kind = "success";
+      output.textContent = JSON.stringify({ status: "PASS", checks, pages: pages.length }, null, 2);
+    } catch (error) {
+      output.dataset.kind = "error";
+      output.textContent = error.stack;
+      console.error(error);
+    } finally {
+      frame.remove();
+    }
+  </script>
+</body>
+</html>

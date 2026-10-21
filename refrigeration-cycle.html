@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="單級蒸氣壓縮冷凍循環分析：計算 COP、四個狀態點、壓縮功與冷媒質量流率，並繪製 Ph 循環圖。">
+  <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
+  <link rel="stylesheet" href="assets/refrigeration-cycle.css">
+  <title>冷凍循環分析器 | 能源與冷凍空調學習網</title>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="回到能源與冷凍空調學習網首頁">
+      <img src="assets/hvacr-learning-logo.svg?v=3" alt="">
+      <span>能源與冷凍空調學習網</span>
+    </a>
+    <nav aria-label="主選單">
+      <a href="index.html">首頁</a>
+      <a href="about.html">關於我們</a>
+      <a href="exam-years.html">技師考題</a>
+      <a href="terminology.html">術語辭典</a>
+      <a href="tools.html" aria-current="location">計算工具</a>
+    </nav>
+  </header>
+  <main class="wrap">
+    <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="tools.html">計算工具</a> ／ <span aria-current="page">冷凍循環分析器</span></p>
+    <p class="eyebrow">Vapor-compression Cycle</p>
+    <h1>冷凍循環分析器</h1>
+    <p class="intro">單級蒸氣壓縮循環，查看四個狀態點與運轉性能。</p>
+    <form id="cycle-form">
+      <fieldset id="cycle-inputs" disabled>
+        <legend>操作條件</legend>
+        <div class="fields">
+          <label>流體<select id="fluid" name="fluid"></select></label>
+          <label>蒸發溫度 (°C)<input id="evaporation" name="evaporation" type="number" step="any" value="-10" required><small>以露點定義</small></label>
+          <label>冷凝溫度 (°C)<input id="condensation" name="condensation" type="number" step="any" value="40" required><small>以泡點定義</small></label>
+          <label>過熱度 (K)<input id="superheat" name="superheat" type="number" step="any" min="0" value="5" required></label>
+          <label>過冷度 (K)<input id="subcooling" name="subcooling" type="number" step="any" min="0" value="5" required></label>
+          <label>壓縮機等熵效率 (%)<input id="efficiency" name="efficiency" type="number" step="any" min="0" max="100" value="80" required></label>
+          <label>冷凍能力 (kW)<input id="capacity" name="capacity" type="number" step="any" min="0" placeholder="選填"></label>
+        </div>
+        <button id="calculate" type="submit">分析循環</button>
+      </fieldset>
+    </form>
+    <p id="status" role="status" aria-live="polite" data-kind="loading">載入運算模組…</p>
+    <section id="results" hidden aria-label="循環分析結果">
+      <h2 id="result-title">分析結果</h2>
+      <div id="metrics" class="metrics"></div>
+      <h2>Ph 循環圖</h2>
+      <div id="chart" class="chart"></div>
+      <p class="hint">1→2 壓縮 · 2→3 冷凝 · 3→4 節流 · 4→1 蒸發。灰線為飽和邊界；壓縮連線僅示意，兩端為計算狀態。</p>
+      <h2>狀態點</h2>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="四個循環狀態點">
+        <table>
+          <thead><tr><th>狀態點</th><th>T (°C)</th><th>P (kPa，絕對)</th><th>h (kJ/kg)</th><th>s (kJ/kg·K)</th><th>ρ (kg/m³)</th><th>乾度 x</th></tr></thead>
+          <tbody id="states"></tbody>
+        </table>
+      </div>
+      <p class="hint">忽略管路壓降與對外熱損失；壓縮功為冷媒側比功，不含馬達及輔機損失。焓與熵採流體模型預設基準。</p>
+    </section>
+  </main>
+  <footer><a class="brand" href="index.html"><img src="assets/hvacr-learning-logo.svg?v=3" alt=""><span>能源與冷凍空調學習網</span></a><p>Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</p></footer>
+  <script type="module" src="assets/refrigeration-cycle-ui.js"></script>
+</body>
+</html>

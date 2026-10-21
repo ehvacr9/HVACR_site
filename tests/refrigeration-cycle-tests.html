@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Refrigeration cycle regression tests</title></head>
+<body>
+  <h1>Refrigeration cycle regression tests</h1>
+  <p>Serve the site over HTTP and open this page. Uses the bundled CoolProp module; no installation required.</p>
+  <p>Checks all 17 fluids, bubble/dew conventions, ideal and nonideal compression, energy balance, capacity scaling,
+    boundary rejection, real-page results and Ph diagrams, loading/error recovery, and responsive layouts.</p>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    import { runCycleTests } from "./refrigeration-cycle.test.js";
+    const results = document.querySelector("#results");
+    try {
+      results.textContent = JSON.stringify(await runCycleTests(), null, 2);
+      results.dataset.kind = "success";
+    } catch (error) {
+      results.dataset.kind = "error";
+      results.textContent = error.stack;
+      console.error(error);
+    }
+  </script>
+</body>
+</html>
