@@ -1,0 +1,94 @@
+import { calculateHumidAir, humidAirProperties } from "./humid-air.js";
+
+const form = document.querySelector("#humid-air-form");
+const inputs = document.querySelector("#humid-air-inputs");
+const status = document.querySelector("#status");
+const results = document.querySelector("#results");
+const metrics = document.querySelector("#metrics");
+const format = (value) => Number(value.toPrecision(6)).toString();
+let cp;
+let busy = false;
+
+for (const suffix of ["one", "two"]) {
+  const select = document.querySelector(`#property-${suffix}`);
+  for (const [key, spec] of Object.entries(humidAirProperties)) {
+    select.add(new Option(`${spec.label} (${spec.unit})`, key));
+  }
+  select.value = suffix === "one" ? "T" : "R";
+  const updateLabel = () => {
+    const spec = humidAirProperties[select.value];
+    document.querySelector(`#label-${suffix}`).textContent = `${spec.label} (${spec.unit})`;
+  };
+  select.addEventListener("change", () => {
+    document.querySelector(`#value-${suffix}`).value = "";
+    updateLabel();
+  });
+  updateLabel();
+}
+
+form.addEventListener("input", () => {
+  status.dataset.kind = "";
+  status.textContent = results.hidden ? "請輸入條件後計算。" : "條件已變更；目前顯示上次結果，請重新計算。";
+});
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!cp || busy) return;
+  busy = true;
+  inputs.disabled = true;
+  form.setAttribute("aria-busy", "true");
+  results.hidden = true;
+  metrics.replaceChildren();
+  status.dataset.kind = "loading";
+  status.textContent = "正在計算濕空氣狀態…";
+  try {
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const number = (selector) => {
+      const text = document.querySelector(selector).value.trim();
+      if (!text) throw new RangeError("請填寫總壓力與兩項性質數值。");
+      return Number(text);
+    };
+    const result = calculateHumidAir(cp, {
+      pressure: number("#pressure"), key1: document.querySelector("#property-one").value,
+      value1: number("#value-one"), key2: document.querySelector("#property-two").value,
+      value2: number("#value-two"),
+    });
+    for (const [key, spec] of Object.entries(humidAirProperties)) {
+      const card = document.createElement("div");
+      card.className = "metric";
+      card.dataset.property = key;
+      const title = document.createElement("span");
+      title.textContent = spec.label;
+      const value = document.createElement("strong");
+      if (result.values[key] === null) {
+        value.className = "metric-placeholder";
+        value.textContent = "—（乾空氣無露點）";
+      } else value.textContent = `${format(spec.fromSI(result.values[key]))} ${spec.unit}`;
+      card.append(title, value);
+      metrics.append(card);
+    }
+    document.querySelector("#pressure-summary").textContent = `總絕對壓力 ${format(result.pressure)} kPa`;
+    results.hidden = false;
+    status.dataset.kind = "success";
+    status.textContent = "狀態點計算完成。";
+  } catch (error) {
+    metrics.replaceChildren();
+    status.dataset.kind = "error";
+    status.textContent = `無法計算：${error instanceof Error ? error.message : String(error)}`;
+  } finally {
+    busy = false;
+    inputs.disabled = false;
+    form.removeAttribute("aria-busy");
+  }
+});
+
+try {
+  const { default: initCoolProp } = await import("./coolprop/coolprop.js");
+  cp = await initCoolProp();
+  if (typeof cp.HAPropsSI !== "function") throw new Error("運算模組未提供濕空氣功能。");
+  inputs.disabled = false;
+  status.dataset.kind = "success";
+  status.textContent = "輸入已知條件後，按「計算狀態點」。";
+} catch (error) {
+  status.dataset.kind = "error";
+  status.textContent = `運算模組載入失敗：${error instanceof Error ? error.message : String(error)}。請重新整理頁面。`;
+}

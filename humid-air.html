@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="給定總壓力與兩項已知性質，計算濕空氣的乾球、濕球、露點、相對濕度、含濕量、比焓及比容。">
+  <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
+  <link rel="stylesheet" href="assets/refrigeration-cycle.css">
+  <style>
+    #humid-air-inputs .fields {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: end;
+    }
+    .pressure-field { grid-column: 1 / -1; }
+    .pressure-field input { max-width: 360px; }
+    #humid-air-inputs input,
+    #humid-air-inputs select { height: 46px; }
+    @media (max-width: 520px) {
+      #humid-air-inputs .fields { grid-template-columns: minmax(0, 1fr); }
+      .pressure-field input { max-width: none; }
+      #humid-air-inputs button { width: 100%; }
+    }
+  </style>
+  <title>濕空氣熱物理性質 | 能源與冷凍空調學習網</title>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="回到能源與冷凍空調學習網首頁">
+      <img src="assets/hvacr-learning-logo.svg?v=3" alt=""><span>能源與冷凍空調學習網</span>
+    </a>
+    <nav aria-label="主選單">
+      <a href="index.html">首頁</a><a href="about.html">關於我們</a>
+      <a href="exam-years.html">技師考題</a><a href="terminology.html">術語辭典</a>
+      <a href="tools.html" aria-current="location">計算工具</a>
+    </nav>
+  </header>
+  <main class="wrap">
+    <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="tools.html">計算工具</a> ／ <span aria-current="page">濕空氣熱物理性質</span></p>
+    <p class="eyebrow">Humid Air Properties</p>
+    <h1>濕空氣熱物理性質</h1>
+    <p class="intro">指定總壓力與兩項已知性質，求解濕空氣狀態點。</p>
+    <form id="humid-air-form">
+      <fieldset id="humid-air-inputs" disabled>
+        <legend>已知條件</legend>
+        <div class="fields">
+          <label class="pressure-field" for="pressure">總絕對壓力 (kPa)<input id="pressure" type="number" step="any" value="101.325" required></label>
+          <label for="property-one">已知性質一<select id="property-one"></select></label>
+          <label for="value-one"><span id="label-one">數值一</span><input id="value-one" type="number" step="any" value="25" required></label>
+          <label for="property-two">已知性質二<select id="property-two"></select></label>
+          <label for="value-two"><span id="label-two">數值二</span><input id="value-two" type="number" step="any" value="50" required></label>
+        </div>
+        <button type="submit">計算狀態點</button>
+      </fieldset>
+    </form>
+    <p id="status" role="status" aria-live="polite" data-kind="loading">載入運算模組…</p>
+    <section id="results" hidden aria-labelledby="result-title">
+      <h2 id="result-title">狀態點性質</h2>
+      <p id="pressure-summary" class="hint"></p>
+      <div id="metrics" class="metrics"></div>
+      <p class="hint">含濕量、比焓與比容以每公斤乾空氣為基準。</p>
+    </section>
+  </main>
+  <footer>
+    <a class="brand" href="index.html"><img src="assets/hvacr-learning-logo.svg?v=3" alt=""><span>能源與冷凍空調學習網</span></a>
+    <p>Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</p>
+  </footer>
+  <script type="module" src="assets/humid-air-ui.js"></script>
+</body>
+</html>
