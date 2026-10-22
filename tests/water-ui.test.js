@@ -77,6 +77,14 @@ export async function runWaterUiTests() {
     categories.add("saturation input and boundaries");
     await pick("mode-category", "calculation");
     await pick("calculation-mode", "saturation");
+    assert(q("#calculator-form .actions").querySelectorAll("button").length === 1
+      && !q("#clear-button"), "Calculation actions contain only the calculate button");
+    assert(q("#pressure").readOnly && !q("#temperature").readOnly,
+      "Saturation defaults to temperature input with pressure read-only");
+    const visibleSaturationInputs = () => [...doc.querySelectorAll('#saturation-inputs input[type="number"]')]
+      .filter((input) => input.getClientRects().length > 0);
+    assert(visibleSaturationInputs().length === 1 && visibleSaturationInputs()[0] === q("#temperature"),
+      "Only the selected temperature input is displayed by default");
     for (const temperature of [273.16, 275, 300, 373.15, 450, 625, 647.095]) {
       value("#pressure", "");
       value("#temperature", temperature - 273.15);
@@ -92,23 +100,50 @@ export async function runWaterUiTests() {
         close(Number(q(`#${phase}-v`).textContent), 1 / props("D", "T", temperature, "Q", quality), "Saturation specific volume");
       }
     }
+    const previousSaturationResult = q("#liquid-h").textContent;
+    const previousSaturationSummary = q("#result-summary").textContent;
+    value("#temperature", 100);
+    q("#temperature").dispatchEvent(new frame.contentWindow.Event("input", { bubbles: true }));
+    const staleMessage = "條件已變更；目前顯示上次結果，請重新計算。";
+    assert(q("#status").dataset.kind === "warning" && q("#status").textContent === staleMessage
+      && q("#liquid-h").textContent === previousSaturationResult,
+    "Editing saturation input preserves results and warns that they are stale");
+    await pick("saturation-input", "P");
+    assert(q("#liquid-h").textContent === previousSaturationResult
+      && q("#result-summary").textContent === previousSaturationSummary
+      && q("#status").textContent === staleMessage,
+    "Switching saturation input preserves previous results and shows the stale warning");
+    assert(!q("#pressure").readOnly && q("#temperature").readOnly
+      && q("#pressure").value === "" && q("#temperature").value === "",
+    "Switching saturation input clears previous values and enables pressure only");
+    assert(visibleSaturationInputs().length === 1 && visibleSaturationInputs()[0] === q("#pressure")
+      && doc.activeElement === q("#pressure"),
+    "Selecting pressure displays and focuses only the pressure input");
     for (const pressure of [triplePressure, 101325, 22063000]) {
       value("#temperature", "");
       value("#pressure", pressure / 1000);
       await submit("#calculator-form");
       assert(q("#status").dataset.kind === "success", `Saturation pressure input ${pressure}`);
+      assert(q("#status").textContent !== staleMessage, "Recalculation removes the stale warning");
     }
     for (const [temperature, pressure] of [["", 0], ["", triplePressure / 1000 * 0.999],
       ["", 22064], [0, ""], [373.946, ""], ["", ""]]) {
+      await pick("saturation-input", temperature !== "" ? "T" : "P");
       value("#temperature", temperature);
       value("#pressure", pressure);
       await submit("#calculator-form");
       assert(q("#status").dataset.kind === "error" && q("#liquid-h").textContent === "—", "Reject invalid saturation and clear output");
     }
+    await pick("saturation-input", "T");
+    assert(visibleSaturationInputs().length === 1 && visibleSaturationInputs()[0] === q("#temperature")
+      && doc.activeElement === q("#temperature"),
+    "Selecting temperature displays and focuses only the temperature input");
     value("#temperature", 100);
     value("#pressure", 1000);
     await submit("#calculator-form");
-    assert(q("#status").dataset.kind === "warning", "Conflicting saturation inputs explicitly warned");
+    assert(q("#status").dataset.kind === "success", "Read-only pressure is ignored when temperature is selected");
+    close(Number(q("#pressure").value), props("P", "T", 373.15, "Q", 0) / 1000,
+      "Selected temperature determines saturation pressure despite stale output");
 
     categories.add("state properties, units and flash pairs");
     await pick("calculation-mode", "state");
@@ -394,6 +429,7 @@ export async function runWaterUiTests() {
       assert(q("#basic-refrigerant-number").textContent === blend, `Mixture basic information ${blend}`);
       assert(q("#basic-formula").textContent.includes(blend === "R407C" ? "23/25/52" : "50/50"),
         `Mixture composition ${blend}`);
+      await pick("saturation-input", "P");
       for (const pressure of [500000, 1000000, 2000000]) {
         value("#temperature", "");
         value("#pressure", pressure / 1000);
@@ -420,6 +456,7 @@ export async function runWaterUiTests() {
         }
         await pick("calculation-mode", "saturation");
       }
+      await pick("saturation-input", "T");
       value("#temperature", 10);
       value("#pressure", "");
       await submit("#calculator-form");

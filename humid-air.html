@@ -150,16 +150,15 @@
           <label class="pressure-field" for="pressure">總絕對壓力 (kPa)<input id="pressure" type="number" step="any" value="101.325" required></label>
           <div class="property-pair">
             <label for="property-one">已知性質 1</label><select id="property-one"></select>
-            <label class="value-label" for="value-one"><span id="label-one">數值一</span></label><input id="value-one" type="number" step="any" value="24" required>
+            <label class="value-label" for="value-one"><span id="label-one">數值一</span></label><input id="value-one" type="number" step="any" required>
           </div>
           <div class="property-pair">
             <label for="property-two">已知性質 2</label><select id="property-two"></select>
-            <label class="value-label" for="value-two"><span id="label-two">數值二</span></label><input id="value-two" type="number" step="any" value="50" required>
+            <label class="value-label" for="value-two"><span id="label-two">數值二</span></label><input id="value-two" type="number" step="any" required>
           </div>
         </div>
         <div class="calculation-actions">
           <button type="submit">計算</button>
-          <button id="clear-inputs" class="secondary" type="button">清除</button>
         </div>
       </fieldset>
       <p id="status" role="status" aria-live="polite" data-kind="loading">載入運算模組…</p>
@@ -167,8 +166,8 @@
     <div class="results-panel">
       <h2 id="result-title">狀態點性質</h2>
       <p id="results-placeholder" class="hint">指定總壓力與兩項已知性質，按「計算」後顯示結果。</p>
-    <section id="results" hidden aria-labelledby="result-title">
-      <p id="pressure-summary" class="hint"></p>
+    <section id="results" aria-labelledby="result-title">
+      <p id="pressure-summary" class="hint" hidden></p>
       <div id="metrics" class="metrics"></div>
       <p class="hint">濕度比、比焓與比容以每公斤乾空氣為基準。</p>
     </section>
@@ -193,6 +192,6 @@
     <a class="brand" href="index.html"><img src="assets/hvacr-learning-logo.svg?v=3" alt=""><span>能源與冷凍空調學習網</span></a>
     <p>Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</p>
   </footer>
-  <script type="module" src="assets/humid-air-ui.js?v=2"></script>
+  <script type="module" src="assets/humid-air-ui.js?v=3"></script>
 </body>
 </html>

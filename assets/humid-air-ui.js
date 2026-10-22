@@ -4,7 +4,6 @@ import { createPsychrometricChart } from "./humid-air-chart.js";
 const form = document.querySelector("#humid-air-form");
 const inputs = document.querySelector("#humid-air-inputs");
 const status = document.querySelector("#status");
-const results = document.querySelector("#results");
 const resultsPlaceholder = document.querySelector("#results-placeholder");
 const metrics = document.querySelector("#metrics");
 const chartSection = document.querySelector("#psychrometric-chart-section");
@@ -17,7 +16,30 @@ let psychrometricChart;
 let busy = false;
 let drawingBusy = false;
 let calculatedState = null;
+let hasCalculationResult = false;
 const drawingStatus = document.querySelector("#chart-drawing-status");
+
+function renderMetrics(result) {
+  metrics.replaceChildren();
+  for (const [key, spec] of Object.entries(humidAirProperties)) {
+    const card = document.createElement("div");
+    card.className = "metric";
+    card.dataset.property = key;
+    const title = document.createElement("span");
+    title.textContent = spec.label;
+    const value = document.createElement("strong");
+    if (!result) {
+      value.className = "metric-placeholder";
+      value.textContent = "—";
+    } else if (result.values[key] === null) {
+      value.className = "metric-placeholder";
+      value.textContent = "—（乾空氣無露點）";
+    } else value.textContent = `${format(spec.fromSI(result.values[key]))} ${spec.unit}`;
+    card.append(title, value);
+    metrics.append(card);
+  }
+}
+renderMetrics();
 
 function updateChartState() {
   if (!psychrometricChart) return;
@@ -130,24 +152,10 @@ for (const suffix of ["one", "two"]) {
   updateLabel();
 }
 
-document.querySelector("#clear-inputs").addEventListener("click", () => {
-  document.querySelector("#value-one").value = "";
-  document.querySelector("#value-two").value = "";
-  results.hidden = true;
-  resultsPlaceholder.hidden = false;
-  metrics.replaceChildren();
-  document.querySelector("#pressure-summary").textContent = "";
-  calculatedState = null;
-  psychrometricChart?.setState(null);
-  chartStateMessage.textContent = "";
-  status.dataset.kind = "";
-  status.textContent = "已清除輸入與計算結果。";
-});
-
 form.addEventListener("input", () => {
   status.dataset.kind = "";
-  status.textContent = results.hidden ? "請輸入條件後計算。" : "條件已變更；目前顯示上次結果，請重新計算。";
-  if (psychrometricChart && !results.hidden) chartStateMessage.textContent = "圖上仍標示上次計算的狀態點。";
+  status.textContent = hasCalculationResult ? "條件已變更；目前顯示上次結果，請重新計算。" : "請輸入條件後計算。";
+  if (psychrometricChart && hasCalculationResult) chartStateMessage.textContent = "圖上仍標示上次計算的狀態點。";
 });
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -155,9 +163,10 @@ form.addEventListener("submit", async (event) => {
   busy = true;
   inputs.disabled = true;
   form.setAttribute("aria-busy", "true");
-  results.hidden = true;
+  hasCalculationResult = false;
   resultsPlaceholder.hidden = false;
-  metrics.replaceChildren();
+  document.querySelector("#pressure-summary").hidden = true;
+  renderMetrics();
   status.dataset.kind = "loading";
   status.textContent = "正在計算濕空氣狀態…";
   calculatedState = null;
@@ -175,33 +184,21 @@ form.addEventListener("submit", async (event) => {
       value1: number("#value-one"), key2: document.querySelector("#property-two").value,
       value2: number("#value-two"),
     });
-    for (const [key, spec] of Object.entries(humidAirProperties)) {
-      const card = document.createElement("div");
-      card.className = "metric";
-      card.dataset.property = key;
-      const title = document.createElement("span");
-      title.textContent = spec.label;
-      const value = document.createElement("strong");
-      if (result.values[key] === null) {
-        value.className = "metric-placeholder";
-        value.textContent = "—（乾空氣無露點）";
-      } else value.textContent = `${format(spec.fromSI(result.values[key]))} ${spec.unit}`;
-      card.append(title, value);
-      metrics.append(card);
-    }
+    renderMetrics(result);
     document.querySelector("#pressure-summary").textContent = `總絕對壓力 ${format(result.pressure)} kPa`;
+    document.querySelector("#pressure-summary").hidden = false;
     calculatedState = {
       pressure: result.pressure,
       temperature: result.values.T - 273.15,
       humidityRatio: result.values.W,
     };
     updateChartState();
-    results.hidden = false;
+    hasCalculationResult = true;
     resultsPlaceholder.hidden = true;
     status.dataset.kind = "success";
     status.textContent = "狀態點計算完成。";
   } catch (error) {
-    metrics.replaceChildren();
+    renderMetrics();
     chartStateMessage.textContent = "此輸入條件無有效的圖表狀態點。";
     status.dataset.kind = "error";
     status.textContent = `無法計算：${error instanceof Error ? error.message : String(error)}`;

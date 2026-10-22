@@ -290,11 +290,15 @@ export async function runHumidAirTests() {
       await wait(() => !q("#humid-air-form").hasAttribute("aria-busy"));
     };
     assert(q("#pressure").value === "101.325", "Default pressure in kPa");
-    assert(q("#property-one").value === "T" && q("#value-one").value === "24"
-      && q("#property-two").value === "R" && q("#value-two").value === "50",
-    "Known-property defaults are 24 C dry bulb and 50% relative humidity");
-    assert(q("#value-one").checkValidity() && q("#value-two").checkValidity(),
-      "Default known-property values are valid");
+    assert(q("#property-one").value === "T" && q("#value-one").value === ""
+      && q("#property-two").value === "R" && q("#value-two").value === "",
+    "Known-property values start blank with dry bulb and relative humidity selected");
+    assert(!q("#value-one").checkValidity() && !q("#value-two").checkValidity(),
+      "Known-property values are required");
+    assert(!q("#clear-inputs"), "Calculation has no clear button");
+    const placeholderMetrics = () => !q("#results").hidden && q("#metrics").children.length === 7
+      && [...doc.querySelectorAll("#metrics strong")].every((value) => value.textContent === "—");
+    assert(placeholderMetrics(), "Initial results show seven property names with placeholder values");
     const style = (selector) => frame.contentWindow.getComputedStyle(q(selector));
     assert(style("#humid-air-form").backgroundColor === "rgb(237, 240, 233)"
       && style("#humid-air-inputs").borderTopWidth === "0px",
@@ -311,7 +315,7 @@ export async function runHumidAirTests() {
       && q("#psychrometric-chart-section").getClientRects().length === 0,
     "Calculation mode does not render or reserve layout space for the chart");
     assert(!q("#psychrometric-chart svg"), "Calculation is ready without constructing any chart curves");
-    assert(q("#results").hidden, "Reference marker does not require submitting a calculation");
+    assert(placeholderMetrics(), "Reference marker does not populate calculation results");
     mode("drawing");
     assert(q("#chart-drawing-status").dataset.kind === "loading"
       && q("#chart-drawing-status").textContent.includes("正在繪製"),
@@ -395,6 +399,8 @@ export async function runHumidAirTests() {
       "Wet-bulb curves are dashed and enthalpy curves are solid");
     assert(q("#property-one").options.length === 7 && q("#property-two").options.length === 7, "Both selectors offer all properties");
     mode("calculation");
+    q("#value-one").value = "24";
+    q("#value-two").value = "50";
     await submit();
     assert(q("#status").dataset.kind === "success" && !q("#results").hidden, "Default state solves");
     assert(style("#psychrometric-chart-section").display === "none",
@@ -457,7 +463,7 @@ export async function runHumidAirTests() {
     q("#value-two").value = ".01";
     await submit();
     assert(q("#status").dataset.kind === "error" && q("#status").textContent.includes("不是獨立性質")
-      && q("#results").hidden && q("#metrics").children.length === 0
+      && placeholderMetrics()
       && q(".psychrometric-state-marker").hasAttribute("hidden")
       && q("#chart-state-message").textContent.includes("無有效的圖表狀態點"),
     "Dependent pair warning clears invalid results and chart marker");
@@ -533,13 +539,6 @@ export async function runHumidAirTests() {
           `${key} label and control remain within viewport ${width}`);
       }
     }
-    const pressureBeforeClear = q("#pressure").value;
-    q("#clear-inputs").click();
-    assert(q("#value-one").value === "" && q("#value-two").value === ""
-      && q("#pressure").value === pressureBeforeClear && q("#results").hidden
-      && q("#metrics").children.length === 0 && !q("#results-placeholder").hidden
-      && q("#status").textContent === "已清除輸入與計算結果。",
-    "Clear removes property values and results while retaining pressure");
   } finally { frame.remove(); }
   return { status: "PASS", checks, supportedPairStates: supportedPairs, rejectedPairStates: rejectedPairs };
 }
