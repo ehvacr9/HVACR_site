@@ -78,10 +78,17 @@ function wetBulbCurve(cp, wetBulb) {
   if (!Number.isFinite(saturationHumidity)) return null;
   const points = [[wetBulb, saturationHumidity]];
   for (let temperature = Math.max(TEMPERATURE_MIN, Math.floor(wetBulb) + 1);
-    temperature <= TEMPERATURE_MAX; temperature += 1) {
+    temperature <= TEMPERATURE_MAX + 1; temperature += 1) {
+    const wetBulbHumidity = psychrometricValue(cp, "W", "T", temperature + 273.15, "B", wetBulbK);
+    const denominator = wetBulb < 0
+      ? 2830 + 1.86 * temperature - 2.1 * wetBulb
+      : 2501 + 1.86 * temperature - 4.186 * wetBulb;
+    const fallbackHumidity = wetBulb < 0
+      ? ((2830 - 0.24 * wetBulb) * saturationHumidity - 1.006 * (temperature - wetBulb)) / denominator
+      : ((2501 - 2.326 * wetBulb) * saturationHumidity - 1.006 * (temperature - wetBulb)) / denominator;
     points.push([
       temperature,
-      psychrometricValue(cp, "W", "T", temperature + 273.15, "B", wetBulbK),
+      Number.isFinite(wetBulbHumidity) ? wetBulbHumidity : fallbackHumidity,
     ]);
   }
   return points;
@@ -308,8 +315,16 @@ export function createPsychrometricChart(cp, onReadout = () => {}) {
     if (path) path.dataset.wetBulb = String(wetBulb);
     if (wetBulb % 5 === 0 || wetBulb === -6 || wetBulb === 34) {
       const labelIndex = points.findIndex((point, index) =>
-        index > 0 && Number.isFinite(point[1]) && point[1] >= HUMIDITY_MIN && point[1] <= HUMIDITY_MAX);
-      addCurveLabel(labels, points, `${wetBulb}°`, "psychrometric-wet-bulb-label", labelIndex + 3);
+        index > 0 && Number.isFinite(point[1]) && point[0] <= TEMPERATURE_MAX
+          && point[1] >= HUMIDITY_MIN && point[1] <= HUMIDITY_MAX);
+      if (labelIndex >= 0) {
+        addCurveLabel(labels, points, `${wetBulb}°`, "psychrometric-wet-bulb-label",
+          Math.min(labelIndex + 3, points.length - 1), {
+            anchor: "middle",
+            offsetX: 0,
+            offsetY: 0,
+          });
+      }
     }
   }
 

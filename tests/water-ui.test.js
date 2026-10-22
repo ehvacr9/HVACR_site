@@ -11,7 +11,7 @@ export async function runWaterUiTests() {
     && Math.abs(actual - expected) <= Math.max(1e-8, Math.abs(expected) * 1e-5), `${label}: ${actual} vs ${expected}`);
   const frame = document.createElement("iframe");
   frame.title = "Fluid properties integration test";
-  frame.src = new URL("../pycool.html", import.meta.url).href;
+  frame.src = new URL("../water-refrigerant.html", import.meta.url).href;
   frame.style.cssText = "position: fixed; left: -10000px; width: 1100px; height: 1000px; pointer-events: none;";
   frame.setAttribute("aria-hidden", "true");
   document.body.append(frame);

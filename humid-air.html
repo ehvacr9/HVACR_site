@@ -37,7 +37,7 @@
       stroke-linejoin: round;
     }
     .psychrometric-rh-label { fill: #9b4b4b; }
-    .psychrometric-wet-bulb-label { fill: #256a9b; }
+    .psychrometric-wet-bulb-label { fill: #256a9b; dominant-baseline: central; }
     .psychrometric-enthalpy-label { fill: #718b45; }
     .psychrometric-volume-label { fill: #8067a7; }
     .psychrometric-state-marker circle { fill: #e68b24; stroke: white; stroke-width: 2; }
@@ -86,9 +86,9 @@
     <section id="psychrometric-chart-section" hidden aria-labelledby="chart-title">
       <h2 id="chart-title">ASHRAE Psychrometric Chart No. 1</h2>
       <p class="chart-note">標準大氣壓 101.325 kPa；乾球溫度 0–50 °C，濕度比 0–30 g/kg 乾空氣。濕球溫度線為 −6–34 °C，每 1 °C 一條。計算狀態符合圖表範圍時會標示於圖上。</p>
+      <p id="chart-readout" class="chart-note" aria-live="polite">在圖框內移動滑鼠可讀取該位置的濕空氣性質。</p>
       <div id="psychrometric-chart"></div>
       <p id="chart-state-message" class="chart-note" aria-live="polite">計算狀態點後，符合圖表範圍者會顯示於圖中。</p>
-      <p id="chart-readout" class="chart-note" aria-live="polite">在圖框內移動滑鼠可讀取該位置的濕空氣性質。</p>
     </section>
     <section id="results" hidden aria-labelledby="result-title">
       <h2 id="result-title">狀態點性質</h2>

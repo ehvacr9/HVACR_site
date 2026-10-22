@@ -25,7 +25,7 @@ export async function runHumidAirTests() {
     if (difference > 90) difference = 180 - difference;
     return difference;
   };
-  const assertLabelsFollowCurves = (labels, curveSelector, keyForLabel, description) => {
+  const assertLabelsFollowCurves = (labels, curveSelector, keyForLabel, description, expectedDistance) => {
     for (const label of labels) {
       const curve = chart.svg.querySelector(curveSelector(label));
       const pivot = label.getAttribute("transform").match(/^rotate\((-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)\)$/);
@@ -54,6 +54,10 @@ export async function runHumidAirTests() {
       }
       assert((closestSegment || coordinates.length === 1) && closestDistance < 20,
         `${description} ${keyForLabel(label)}: positioned beside its line`);
+      if (expectedDistance !== undefined) {
+        assert(Math.abs(closestDistance - expectedDistance) < .02,
+          `${description} ${keyForLabel(label)}: distance from its line is ${expectedDistance}px`);
+      }
       if (closestSegment) {
         const curveAngle = Math.atan2(closestSegment[1], closestSegment[0]) * 180 / Math.PI;
         assert(angleDifference(labelAngle, curveAngle) < 8,
@@ -75,12 +79,20 @@ export async function runHumidAirTests() {
   "Wet-bulb curves span -6 to 34 C at 1 C intervals");
   for (const curve of wetBulbCurves) {
     const wetBulb = Number(curve.dataset.wetBulb);
-    const firstPoint = curve.getAttribute("d").match(/^M(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
-    assert(firstPoint, `Wet-bulb ${wetBulb}: continuous path begins at plot boundary`);
-    const [x, y] = firstPoint.slice(1).map(Number);
-    if (wetBulb < 0) close(x, 88, `Wet-bulb ${wetBulb}: clipped at left plot edge`);
-    else if (wetBulb <= 31) close(x, 88 + wetBulb / 50 * 850, `Wet-bulb ${wetBulb}: saturated start temperature`);
-    else close(y, 28, `Wet-bulb ${wetBulb}: clipped at saturation humidity limit`);
+    const coordinates = curve.getAttribute("d").match(/-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?/g)
+      ?.map((coordinate) => coordinate.split(",").map(Number));
+    assert(coordinates?.length >= 2, `Wet-bulb ${wetBulb}: visible continuous path`);
+    const [firstX, firstY] = coordinates[0];
+    const saturationHumidity = cp.HAPropsSI("W", "P", 101325, "T", wetBulb + 273.15, "R", 1);
+    const beginsAtSaturation = wetBulb >= 0 && wetBulb <= 50 && saturationHumidity <= .03
+      && Math.abs(firstX - (88 + wetBulb / 50 * 850)) < .02
+      && Math.abs(firstY - (28 + 520 - saturationHumidity / .03 * 520)) < .02;
+    assert(beginsAtSaturation || Math.abs(firstX - 88) < .02 || Math.abs(firstY - 28) < .02,
+      `Wet-bulb ${wetBulb}: begins at saturation or clipped plot boundary`);
+    const [lastX, lastY] = coordinates.at(-1);
+    assert(Math.abs(lastX - 88) < .02 || Math.abs(lastX - 938) < .02
+      || Math.abs(lastY - 28) < .02 || Math.abs(lastY - 548) < .02,
+    `Wet-bulb ${wetBulb}: extends to a plot boundary`);
   }
   const enthalpyCurves = [...chart.svg.querySelectorAll(".psychrometric-enthalpy")];
   assert(enthalpyCurves.length === 13
@@ -127,7 +139,10 @@ export async function runHumidAirTests() {
   const wetBulbLabels = [...chart.svg.querySelectorAll(".psychrometric-wet-bulb-label")];
   assertLabelsFollowCurves(wetBulbLabels,
     (label) => `.psychrometric-wet-bulb[data-wet-bulb="${Number.parseFloat(label.textContent)}"]`,
-    (label) => label.textContent, "Wet-bulb label");
+    (label) => label.textContent, "Wet-bulb label", 0);
+  assert(wetBulbLabels.length === 8
+    && wetBulbLabels.every((label) => label.getAttribute("text-anchor") === "middle"),
+  "All eight wet-bulb labels are horizontally centered on their lines");
   const enthalpyLabels = [...chart.svg.querySelectorAll(".psychrometric-enthalpy-label")];
   assertLabelsFollowCurves(enthalpyLabels,
     (label) => `.psychrometric-enthalpy[data-enthalpy="${label.textContent}"]`,
@@ -258,7 +273,13 @@ export async function runHumidAirTests() {
     assert(!q("#psychrometric-chart-section").hidden
       && q("#psychrometric-chart svg").querySelectorAll(".psychrometric-rh").length === 10,
     "ASHRAE chart renders with relative-humidity curves");
+    assert(q("#chart-readout").compareDocumentPosition(q("#psychrometric-chart"))
+      & frame.contentWindow.Node.DOCUMENT_POSITION_FOLLOWING,
+    "Pointer readout is displayed above the chart");
     const svg = q("#psychrometric-chart svg");
+    assert([...svg.querySelectorAll(".psychrometric-wet-bulb-label")].every((label) =>
+      frame.contentWindow.getComputedStyle(label).dominantBaseline === "central"),
+    "Wet-bulb label vertical centers align with their lines");
     const wetBulbDash = frame.contentWindow.getComputedStyle(svg.querySelector(".psychrometric-wet-bulb")).strokeDasharray;
     const enthalpyDash = frame.contentWindow.getComputedStyle(svg.querySelector(".psychrometric-enthalpy")).strokeDasharray;
     assert(wetBulbDash !== "none" && enthalpyDash === "none",
