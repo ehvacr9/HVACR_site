@@ -20,6 +20,7 @@ export async function runHumidAirTests() {
   };
   const reference = calculateHumidAir(cp, base);
   const chart = createPsychrometricChart(cp);
+  assert(!chart.svg.querySelector(".psychrometric-protractor"), "Chart has no protractor overlay");
   assert([...chart.svg.querySelectorAll(".psychrometric-legend text")].map((label) => label.textContent).join("|")
     === "相對濕度 (%)|濕球溫度 (°C)|比焓 (kJ/kg 乾空氣)|比容 (m³/kg 乾空氣)",
   "Legend includes units for all four curve families");

@@ -213,6 +213,9 @@ export async function runWaterUiTests() {
 
     categories.add("saturation, quality tables and CSV");
     await pick("calculation-mode", "table");
+    assert([...q("#table-range-fields").querySelectorAll("input")].every((input) =>
+      frame.contentWindow.getComputedStyle(input).backgroundColor === "rgb(237, 240, 233)"),
+    "Saturation table number inputs have a tinted background distinct from the panel");
     assert(doc.querySelectorAll('input[name="saturation-type"]').length === 1
       && q('input[name="saturation-type"][value="vle"]').checked, "Vapor-liquid type retained without solid-line options");
     assert(q(".pt-melting") && q(".pt-sublimation")

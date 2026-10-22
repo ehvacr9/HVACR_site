@@ -1,5 +1,5 @@
 import { calculateHumidAir, humidAirProperties } from "./humid-air.js";
-import { createPsychrometricChart } from "./humid-air-chart.js";
+import { createPsychrometricChart } from "./humid-air-chart.js?v=3";
 
 const form = document.querySelector("#humid-air-form");
 const inputs = document.querySelector("#humid-air-inputs");
