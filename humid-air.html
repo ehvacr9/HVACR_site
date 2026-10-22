@@ -4,10 +4,33 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="給定總壓力與兩項已知性質，計算濕空氣的乾球、濕球、露點、相對濕度、含濕量、比焓及比容。">
+  <meta name="description" content="給定總壓力與兩項已知性質，計算濕空氣的乾球、濕球、露點、相對濕度、濕度比、比焓及比容。">
   <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
   <link rel="stylesheet" href="assets/refrigeration-cycle.css">
   <style>
+    :root { --green-dark: #16483e; --serif: Georgia, "Noto Serif TC", "PMingLiU", serif; }
+    main.wrap { padding-block: 68px 88px; }
+    .breadcrumb { margin: 0 0 26px; }
+    .eyebrow { display: flex; align-items: center; gap: 10px; margin: 0 0 13px; }
+    .eyebrow::before { width: 24px; height: 1px; background: currentColor; content: ""; }
+    h1 { margin: 0 0 12px; font-family: var(--serif); font-size: clamp(42px, 6vw, 62px); font-weight: 500; letter-spacing: -.045em; line-height: 1.2; }
+    h2 { margin: 0 0 8px; font-family: var(--serif); font-size: 23px; font-weight: 600; line-height: 1.4; }
+    .intro { max-width: 760px; margin-bottom: 32px; font-size: 14px; }
+    .calculator { display: grid; grid-template-columns: minmax(260px, .75fr) minmax(0, 1.25fr); border: 1px solid var(--line); background: var(--surface); }
+    .input-panel, .results-panel { min-width: 0; padding: 28px; }
+    .input-panel { border-right: 1px solid var(--line); background: #edf0e9; }
+    #humid-air-inputs { padding: 0; border: 0; border-radius: 0; background: transparent; }
+    #humid-air-inputs legend { margin-bottom: 8px; padding: 0; font-family: var(--serif); font-size: 23px; font-weight: 600; }
+    #humid-air-inputs label { font-size: 13px; font-weight: 700; }
+    #humid-air-inputs input, #humid-air-inputs select { padding: 9px 12px; border-color: #bcc9bd; border-radius: 2px; background: var(--surface); font-size: 14px; }
+    #humid-air-inputs button { min-height: 44px; padding: 9px 17px; border: 1px solid var(--green); border-radius: 2px; font-size: 13px; }
+    #humid-air-inputs button:hover:not(:disabled) { background: var(--green-dark); }
+    .results-panel .hint { margin: 0 0 20px; padding: 12px 14px; border-left: 3px solid #a6bd70; background: #f4f6ee; color: #405650; }
+    #metrics { gap: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+    #metrics .metric { min-width: 0; padding: 12px 14px; border: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: 0; }
+    #metrics .metric strong { display: block; font-size: 14px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+    #metrics .metric .metric-placeholder { font-size: 13px; }
+    #psychrometric-chart-section { padding: 28px; border: 1px solid var(--line); background: var(--surface); }
     #humid-air-inputs .fields {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       align-items: end;
@@ -16,10 +39,28 @@
     .pressure-field input { max-width: 360px; }
     #humid-air-inputs input,
     #humid-air-inputs select { height: 46px; }
+    .property-pair { min-width: 0; grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; align-items: end; }
+    .property-pair label { display: block; margin-bottom: 6px; }
+    .property-pair > label:first-child { grid-column: 1 / -1; }
+    .property-pair .value-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    #humid-air-inputs .property-pair select,
+    #humid-air-inputs .property-pair input { border: 1px solid #bcc9bd; border-radius: 2px; }
+    .input-intro { margin: 0 0 21px; color: var(--muted); font-size: 13px; }
+    .calculation-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    #humid-air-inputs .secondary { background: transparent; color: var(--green); }
+    #humid-air-inputs .secondary:hover:not(:disabled) { background: rgba(29, 98, 82, .08); }
+    #status { margin: 17px 0 0; color: var(--muted); font-size: 13px; }
     #psychrometric-chart-section { margin-top: 36px; }
-    #psychrometric-chart { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .mode-options { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .mode-options label { position: relative; }
+    .mode-options input { position: absolute; width: 1px; height: 1px; min-height: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .mode-options span { display: block; padding: 9px 14px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: 13px; font-weight: 650; cursor: pointer; }
+    .mode-options input:checked + span { border-color: var(--green); background: var(--green); color: white; }
+    .mode-options input:focus-visible + span { outline: 3px solid #9ab952; outline-offset: 3px; }
+    #psychrometric-chart { overflow-x: auto; border: 1px solid var(--line); background: var(--surface); }
     #psychrometric-chart svg { display: block; width: 100%; min-width: 760px; height: auto; }
     .psychrometric-grid line { stroke: #e3e8e0; stroke-width: 1; }
+    .psychrometric-grid .psychrometric-axis-tick { stroke: #77847b; }
     .psychrometric-grid text, .psychrometric-axes text, .psychrometric-legend text {
       fill: var(--muted); font: 12px "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     }
@@ -40,12 +81,39 @@
     .psychrometric-wet-bulb-label { fill: #256a9b; dominant-baseline: central; }
     .psychrometric-enthalpy-label { fill: #718b45; }
     .psychrometric-volume-label { fill: #8067a7; }
-    .psychrometric-state-marker circle { fill: #e68b24; stroke: white; stroke-width: 2; }
-    .psychrometric-state-marker text { fill: #6c4211; font: 700 12px "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    .psychrometric-state-marker circle { fill: none; stroke: #c66a16; stroke-width: 2; }
     .psychrometric-crosshair line { stroke: #263b48; stroke-width: 1; stroke-dasharray: 3 3; pointer-events: none; }
     .psychrometric-crosshair circle { fill: #fff; stroke: #263b48; stroke-width: 2; pointer-events: none; }
     .chart-note { color: var(--muted); font-size: 13px; }
+    .chart-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .chart-actions button { min-height: 44px; padding: 9px 17px; border: 1px solid var(--green); border-radius: 2px; background: transparent; color: var(--green); font-size: 13px; }
+    #chart-download-status[data-kind="error"] { color: #a33024; }
+    #chart-drawing-status[data-kind="error"] { color: #a33024; }
+    #chart-drawing-status[data-kind="loading"] { display: flex; align-items: center; gap: 10px; }
+    #chart-drawing-status[data-kind="loading"]::before { content: ""; width: 20px; height: 20px; border: 3px solid var(--line); border-top-color: var(--green); border-radius: 50%; animation: cycle-spin .8s linear infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      #chart-drawing-status[data-kind="loading"]::before { animation: none; }
+    }
+    #chart-readout {
+      height: 5.4em;
+      margin: 10px 0;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      font-size: 14px;
+      line-height: 1.8;
+      overflow: auto;
+      overflow-wrap: anywhere;
+      font-variant-numeric: tabular-nums;
+    }
+    @media (max-width: 760px) {
+      main.wrap { padding-block: 46px 64px; }
+      .calculator { grid-template-columns: minmax(0, 1fr); }
+      .input-panel { border-right: 0; border-bottom: 1px solid var(--line); }
+      .input-panel, .results-panel, #psychrometric-chart-section { padding: 22px; }
+    }
     @media (max-width: 520px) {
+      .property-pair { grid-template-columns: minmax(0, 1fr); }
       #humid-air-inputs .fields { grid-template-columns: minmax(0, 1fr); }
       .pressure-field input { max-width: none; }
       #humid-air-inputs button { width: 100%; }
@@ -68,39 +136,63 @@
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="tools.html">計算工具</a> ／ <span aria-current="page">濕空氣性質</span></p>
     <p class="eyebrow">Humid Air Properties</p>
     <h1>濕空氣性質</h1>
-    <p class="intro">指定總壓力與兩項已知性質，求解濕空氣狀態點。</p>
-    <form id="humid-air-form">
+    <p class="intro">計算濕空氣狀態點，或使用濕空氣圖查讀性質。</p>
+    <div class="mode-options" role="radiogroup" aria-label="功能類別">
+      <label><input type="radio" name="mode-category" value="calculation" aria-controls="calculation-section" checked><span>計算</span></label>
+      <label><input type="radio" name="mode-category" value="drawing" aria-controls="psychrometric-chart-section"><span>繪製</span></label>
+    </div>
+    <section id="calculation-section" class="calculator" aria-label="計算">
+    <form id="humid-air-form" class="input-panel">
       <fieldset id="humid-air-inputs" disabled>
-        <legend>已知條件</legend>
+        <legend>指定任兩性質</legend>
+        <p class="input-intro">選擇兩種不同的已知性質並輸入數值。</p>
         <div class="fields">
           <label class="pressure-field" for="pressure">總絕對壓力 (kPa)<input id="pressure" type="number" step="any" value="101.325" required></label>
-          <label for="property-one">已知性質一<select id="property-one"></select></label>
-          <label for="value-one"><span id="label-one">數值一</span><input id="value-one" type="number" step="any" value="25" required></label>
-          <label for="property-two">已知性質二<select id="property-two"></select></label>
-          <label for="value-two"><span id="label-two">數值二</span><input id="value-two" type="number" step="any" value="50" required></label>
+          <div class="property-pair">
+            <label for="property-one">已知性質 1</label><select id="property-one"></select>
+            <label class="value-label" for="value-one"><span id="label-one">數值一</span></label><input id="value-one" type="number" step="any" value="24" required>
+          </div>
+          <div class="property-pair">
+            <label for="property-two">已知性質 2</label><select id="property-two"></select>
+            <label class="value-label" for="value-two"><span id="label-two">數值二</span></label><input id="value-two" type="number" step="any" value="50" required>
+          </div>
         </div>
-        <button type="submit">計算狀態點</button>
+        <div class="calculation-actions">
+          <button type="submit">計算</button>
+          <button id="clear-inputs" class="secondary" type="button">清除</button>
+        </div>
       </fieldset>
+      <p id="status" role="status" aria-live="polite" data-kind="loading">載入運算模組…</p>
     </form>
-    <p id="status" role="status" aria-live="polite" data-kind="loading">載入運算模組…</p>
-    <section id="psychrometric-chart-section" hidden aria-labelledby="chart-title">
-      <h2 id="chart-title">ASHRAE Psychrometric Chart No. 1</h2>
-      <p class="chart-note">標準大氣壓 101.325 kPa；乾球溫度 0–50 °C，濕度比 0–30 g/kg 乾空氣。濕球溫度線為 −6–34 °C，每 1 °C 一條。計算狀態符合圖表範圍時會標示於圖上。</p>
-      <p id="chart-readout" class="chart-note" aria-live="polite">在圖框內移動滑鼠可讀取該位置的濕空氣性質。</p>
-      <div id="psychrometric-chart"></div>
-      <p id="chart-state-message" class="chart-note" aria-live="polite">計算狀態點後，符合圖表範圍者會顯示於圖中。</p>
-    </section>
-    <section id="results" hidden aria-labelledby="result-title">
+    <div class="results-panel">
       <h2 id="result-title">狀態點性質</h2>
+      <p id="results-placeholder" class="hint">指定總壓力與兩項已知性質，按「計算」後顯示結果。</p>
+    <section id="results" hidden aria-labelledby="result-title">
       <p id="pressure-summary" class="hint"></p>
       <div id="metrics" class="metrics"></div>
-      <p class="hint">含濕量、比焓與比容以每公斤乾空氣為基準。</p>
+      <p class="hint">濕度比、比焓與比容以每公斤乾空氣為基準。</p>
+    </section>
+    </div>
+    </section>
+    <section id="psychrometric-chart-section" hidden aria-labelledby="chart-title">
+      <h2 id="chart-title">ASHRAE Psychrometric Chart No. 1</h2>
+      <p id="chart-drawing-status" class="chart-note" role="status" aria-live="polite"></p>
+      <p class="chart-note">標準大氣壓 101.325 kPa；乾球溫度 0–50 °C，濕度比 0–30 g/kg 乾空氣。濕球溫度線為 −6–34 °C，每 1 °C 一條。計算狀態符合圖表範圍時會標示於圖上。</p>
+      <p class="chart-note">在圖框內移動滑鼠可讀取該位置的濕空氣性質。</p>
+      <p id="chart-readout" aria-live="off">尚未選取狀態點。</p>
+      <div id="psychrometric-chart"></div>
+      <div class="chart-actions">
+        <button id="chart-download-color" type="button" disabled>下載彩色圖片 (PNG)</button>
+        <button id="chart-download-bw" type="button" disabled>下載黑白圖片 (PNG)</button>
+      </div>
+      <p id="chart-download-status" class="chart-note" role="status"></p>
+      <p id="chart-state-message" class="chart-note" aria-live="polite"></p>
     </section>
   </main>
   <footer>
     <a class="brand" href="index.html"><img src="assets/hvacr-learning-logo.svg?v=3" alt=""><span>能源與冷凍空調學習網</span></a>
     <p>Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</p>
   </footer>
-  <script type="module" src="assets/humid-air-ui.js"></script>
+  <script type="module" src="assets/humid-air-ui.js?v=2"></script>
 </body>
 </html>

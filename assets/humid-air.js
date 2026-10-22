@@ -3,7 +3,7 @@ export const humidAirProperties = Object.freeze({
   R: { label: "相對濕度", unit: "%", toSI: (v) => v / 100, fromSI: (v) => v * 100 },
   B: { label: "濕球溫度", unit: "°C", toSI: (v) => v + 273.15, fromSI: (v) => v - 273.15 },
   D: { label: "露點溫度", unit: "°C", toSI: (v) => v + 273.15, fromSI: (v) => v - 273.15 },
-  W: { label: "含濕量", unit: "kg/kg 乾空氣", toSI: (v) => v, fromSI: (v) => v },
+  W: { label: "濕度比", unit: "kg/kg 乾空氣", toSI: (v) => v, fromSI: (v) => v },
   H: { label: "比焓", unit: "kJ/kg 乾空氣", toSI: (v) => v * 1000, fromSI: (v) => v / 1000 },
   V: { label: "比容", unit: "m³/kg 乾空氣", toSI: (v) => v, fromSI: (v) => v },
 });
@@ -17,7 +17,7 @@ export function calculateHumidAir(cp, { pressure, key1, value1, key2, value2 }) 
   if (pressure < .01 || pressure > 10000) throw new RangeError("總絕對壓力須介於 0.01 至 10000 kPa。");
   const inputs = [[key1, value1], [key2, value2]].map(([key, value]) => {
     if (key === "R" && (value < 0 || value > 100)) throw new RangeError("相對濕度須介於 0 至 100%。");
-    if (key === "W" && (value < 0 || value > 10)) throw new RangeError("含濕量須介於 0 至 10 kg/kg 乾空氣。");
+    if (key === "W" && (value < 0 || value > 10)) throw new RangeError("濕度比須介於 0 至 10 kg/kg 乾空氣。");
     if (key === "V" && value <= 0) throw new RangeError("比容須大於 0。");
     if (["T", "B", "D"].includes(key) && (value < -143.15 || value > 350)) {
       throw new RangeError("溫度須介於 -143.15 至 350 °C。");
@@ -25,9 +25,9 @@ export function calculateHumidAir(cp, { pressure, key1, value1, key2, value2 }) 
     return [key, humidAirProperties[key].toSI(value)];
   });
   const pair = [key1, key2].sort().join("-");
-  if (pair === "D-W") throw new RangeError("露點與含濕量在固定壓力下不是獨立性質，無法唯一決定狀態；請更換一項性質。");
+  if (pair === "D-W") throw new RangeError("露點與濕度比在固定壓力下不是獨立性質，無法唯一決定狀態；請更換一項性質。");
   if (["B-H", "B-V", "H-V"].includes(pair)) {
-    throw new RangeError("目前運算模組不支援這組性質；請更換一項性質，例如乾球溫度或含濕量。");
+    throw new RangeError("目前運算模組不支援這組性質；請更換一項性質，例如乾球溫度或濕度比。");
   }
   const p = pressure * 1000;
   const query = (output, a, av, b, bv) => {

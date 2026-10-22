@@ -20,6 +20,9 @@ export async function runHumidAirTests() {
   };
   const reference = calculateHumidAir(cp, base);
   const chart = createPsychrometricChart(cp);
+  assert([...chart.svg.querySelectorAll(".psychrometric-legend text")].map((label) => label.textContent).join("|")
+    === "相對濕度 (%)|濕球溫度 (°C)|比焓 (kJ/kg 乾空氣)|比容 (m³/kg 乾空氣)",
+  "Legend includes units for all four curve families");
   const angleDifference = (first, second) => {
     let difference = Math.abs(first - second) % 180;
     if (difference > 90) difference = 180 - difference;
@@ -129,7 +132,23 @@ export async function runHumidAirTests() {
   "Specific-volume lines from 0.78 to 0.95 render with labels on even values only");
   assert(chart.svg.querySelector(".psychrometric-axes").textContent.includes("濕度比 (g/kg 乾空氣)"),
     "Vertical axis is named humidity ratio");
+  assert([...chart.svg.querySelectorAll(".psychrometric-axes text")]
+    .find((label) => label.textContent === "濕度比 (g/kg 乾空氣)")
+    ?.getAttribute("transform") === "rotate(-90 985 288)",
+  "Humidity-ratio axis title is flipped 180 degrees from its original orientation");
   const gridTicks = [...chart.svg.querySelectorAll(".psychrometric-grid text")];
+  for (const [axis, count] of [["x", 51], ["y", 31]]) {
+    const ticks = [...chart.svg.querySelectorAll(`.psychrometric-axis-tick[data-axis="${axis}"]`)];
+    assert(ticks.length === count && ticks.every((tick, index) => Number(tick.dataset.value) === index),
+      `${axis} axis has a tick at every unit including both endpoints`);
+    assert(ticks.every((tick, index) => {
+      const length = axis === "x"
+        ? Number(tick.getAttribute("y2")) - Number(tick.getAttribute("y1"))
+        : Number(tick.getAttribute("x2")) - Number(tick.getAttribute("x1"));
+      return length === (index % 5 === 0 ? 6 : 3);
+    }), `${axis} axis distinguishes major and minor tick lengths`);
+  }
+  assert(gridTicks.length === 18, "Axis numbers remain at five-unit intervals only");
   const humidityTicks = gridTicks.filter((tick) => Number(tick.getAttribute("x")) > 938);
   assert(humidityTicks.length === 7 && humidityTicks.every((tick) =>
     Number(tick.getAttribute("x")) > 938 && tick.getAttribute("text-anchor") === "start"),
@@ -264,19 +283,109 @@ export async function runHumidAirTests() {
     await wait(() => frame.contentDocument?.querySelector("#humid-air-inputs")?.disabled === false);
     const doc = frame.contentDocument;
     const q = (selector) => doc.querySelector(selector);
+    const mode = (value) => q(`input[name="mode-category"][value="${value}"]`).click();
     const submit = async () => {
       q("#humid-air-form").requestSubmit();
       assert(q("#status").dataset.kind === "loading", "Immediate loading spinner");
       await wait(() => !q("#humid-air-form").hasAttribute("aria-busy"));
     };
     assert(q("#pressure").value === "101.325", "Default pressure in kPa");
+    assert(q("#property-one").value === "T" && q("#value-one").value === "24"
+      && q("#property-two").value === "R" && q("#value-two").value === "50",
+    "Known-property defaults are 24 C dry bulb and 50% relative humidity");
+    assert(q("#value-one").checkValidity() && q("#value-two").checkValidity(),
+      "Default known-property values are valid");
+    const style = (selector) => frame.contentWindow.getComputedStyle(q(selector));
+    assert(style("#humid-air-form").backgroundColor === "rgb(237, 240, 233)"
+      && style("#humid-air-inputs").borderTopWidth === "0px",
+    "Calculation uses the fluid tool's tinted input panel without a nested fieldset border");
+    assert(style("#pressure").borderRadius === "2px"
+      && style('#humid-air-inputs button').borderRadius === "2px"
+      && style(".mode-options span").padding === "9px 14px",
+    "Inputs, buttons and mode switches follow the fluid tool styling");
+    assert(!q("#results-placeholder").hidden,
+      "Result panel provides guidance before the first calculation");
+    assert(!q("#calculation-section").hidden && q("#psychrometric-chart-section").hidden,
+      "Calculation is the default mode and chart is separate");
+    assert(style("#psychrometric-chart-section").display === "none"
+      && q("#psychrometric-chart-section").getClientRects().length === 0,
+    "Calculation mode does not render or reserve layout space for the chart");
+    assert(!q("#psychrometric-chart svg"), "Calculation is ready without constructing any chart curves");
+    assert(q("#results").hidden, "Reference marker does not require submitting a calculation");
+    mode("drawing");
+    assert(q("#chart-drawing-status").dataset.kind === "loading"
+      && q("#chart-drawing-status").textContent.includes("正在繪製"),
+    "First drawing request displays an explicit drawing progress state");
+    await wait(() => !q("#psychrometric-chart").hasAttribute("aria-busy"));
+    assert(q("#chart-drawing-status").dataset.kind === "success",
+      "Lazy drawing completes successfully");
+    assert(!q(".psychrometric-state-marker").hasAttribute("hidden")
+      && q(".psychrometric-state-marker circle").getAttribute("r") === "5",
+    "First drawing displays a small reference circle without a prior calculation");
+    const defaultReference = calculateHumidAir(cp, { ...base, value1: 24 });
+    const markerPosition = q(".psychrometric-state-marker").getAttribute("transform")
+      .match(/^translate\(([-\d.]+) ([-\d.]+)\)$/);
+    close(Number(markerPosition[1]), 88 + 24 / 50 * 850, "Initial reference marker is at 24 C dry bulb");
+    close(Number(markerPosition[2]), 548 - defaultReference.values.W / .03 * 520,
+      "Initial reference marker is at 50% relative humidity");
+    assert(q("#calculation-section").hidden && !q("#psychrometric-chart-section").hidden,
+      "Drawing mode shows chart independently of calculation inputs");
+    assert(q("#chart-title").textContent === "ASHRAE Psychrometric Chart No. 1"
+      && q("#psychrometric-chart-section").querySelectorAll("h2, h3").length === 1,
+    "Drawing has only the chart title without a redundant drawing heading");
+    assert(q("#status").getClientRects().length === 0
+      && q("#chart-state-message").textContent === "",
+    "Drawing hides calculation status and omits the successful state-marker message");
+    assert(q("#psychrometric-chart-section").getBoundingClientRect().height > 0,
+      "Drawing mode actually renders the chart panel");
     assert(!q("#psychrometric-chart-section").hidden
       && q("#psychrometric-chart svg").querySelectorAll(".psychrometric-rh").length === 10,
     "ASHRAE chart renders with relative-humidity curves");
     assert(q("#chart-readout").compareDocumentPosition(q("#psychrometric-chart"))
       & frame.contentWindow.Node.DOCUMENT_POSITION_FOLLOWING,
     "Pointer readout is displayed above the chart");
+    assert(q("#chart-readout").textContent === "尚未選取狀態點。",
+      "Readout panel initially shows no selected state");
+    const readoutStyle = frame.contentWindow.getComputedStyle(q("#chart-readout"));
+    assert(readoutStyle.borderTopStyle === "solid"
+      && Number.parseFloat(readoutStyle.borderTopWidth) > 0,
+    "Pointer readout is displayed in a bordered panel like the Ph diagram");
     const svg = q("#psychrometric-chart svg");
+    const originalClick = frame.contentWindow.HTMLAnchorElement.prototype.click;
+    try {
+      for (const suffix of ["", "-bw"]) {
+        let download;
+        frame.contentWindow.HTMLAnchorElement.prototype.click = function () {
+          download = { url: this.href, filename: this.download };
+        };
+        q(suffix ? "#chart-download-bw" : "#chart-download-color").click();
+        await wait(() => download || q("#chart-download-status").dataset.kind === "error");
+        assert(download, `Chart PNG export succeeds ${suffix}: ${q("#chart-download-status").textContent}`);
+        const blob = await (await fetch(download.url)).blob();
+        const image = await createImageBitmap(blob);
+        assert(blob.type === "image/png" && image.width === 2000 && image.height === 1340,
+          `Chart PNG dimensions and type ${suffix}`);
+        assert(download.filename === `psychrometric-chart-no-1${suffix}.png`, `Chart PNG filename ${suffix}`);
+        const canvas = document.createElement("canvas");
+        canvas.width = image.width;
+        canvas.height = image.height;
+        const context = canvas.getContext("2d");
+        context.drawImage(image, 0, 0);
+        const pixels = context.getImageData(0, 0, image.width, image.height).data;
+        let chromatic = 0;
+        let ink = 0;
+        for (let index = 0; index < pixels.length; index += 16) {
+          if (Math.max(pixels[index], pixels[index + 1], pixels[index + 2])
+            - Math.min(pixels[index], pixels[index + 1], pixels[index + 2]) > 15) chromatic += 1;
+          if (pixels[index] < 200) ink += 1;
+        }
+        assert(suffix ? chromatic === 0 : chromatic > 100, `Chart PNG color mode ${suffix}`);
+        assert(ink > 1000, `Chart PNG contains rendered curves and labels ${suffix}`);
+        image.close();
+      }
+    } finally {
+      frame.contentWindow.HTMLAnchorElement.prototype.click = originalClick;
+    }
     assert([...svg.querySelectorAll(".psychrometric-wet-bulb-label")].every((label) =>
       frame.contentWindow.getComputedStyle(label).dominantBaseline === "central"),
     "Wet-bulb label vertical centers align with their lines");
@@ -285,9 +394,23 @@ export async function runHumidAirTests() {
     assert(wetBulbDash !== "none" && enthalpyDash === "none",
       "Wet-bulb curves are dashed and enthalpy curves are solid");
     assert(q("#property-one").options.length === 7 && q("#property-two").options.length === 7, "Both selectors offer all properties");
+    mode("calculation");
     await submit();
     assert(q("#status").dataset.kind === "success" && !q("#results").hidden, "Default state solves");
+    assert(style("#psychrometric-chart-section").display === "none",
+      "Completing a calculation does not reveal the drawing panel");
+    assert(q("#results-placeholder").hidden, "Successful results replace the result-panel guidance");
     assert(!q(".psychrometric-state-marker").hasAttribute("hidden"), "Successful state is marked on chart");
+    assert(!q(".psychrometric-state-marker text")
+      && style(".psychrometric-state-marker circle").fill === "none"
+      && style(".psychrometric-state-marker circle").stroke === "rgb(198, 106, 22)",
+    "Reference point is an unfilled orange-outline circle without a text label");
+    mode("drawing");
+    assert(q("#psychrometric-chart svg") === svg
+      && !q("#psychrometric-chart").hasAttribute("aria-busy"),
+    "Returning to drawing reuses the chart without redrawing");
+    assert(!q(".psychrometric-state-marker").hasAttribute("hidden") && q("#calculation-section").hidden,
+      "Drawing mode preserves calculated state marker");
     const bounds = svg.getBoundingClientRect();
     const pointerX = bounds.left + (88 + 25 / 50 * 850) / 1000 * bounds.width;
     const pointerY = bounds.top + (28 + 520 - reference.values.W / .03 * 520) / 670 * bounds.height;
@@ -298,9 +421,19 @@ export async function runHumidAirTests() {
       && q("#chart-readout").textContent.includes("相對濕度 50"),
     "Moving pointer inside chart reports psychrometric properties");
     svg.dispatchEvent(new frame.contentWindow.PointerEvent("pointerleave", { bubbles: true }));
-    assert(q("#chart-readout").textContent.includes("移動滑鼠"), "Pointer leaving chart resets readout");
+    assert(q("#chart-readout").textContent === "尚未選取狀態點。", "Pointer leaving chart resets readout");
+    mode("calculation");
+    assert(!q("#results").hidden && q("#psychrometric-chart-section").hidden,
+      "Returning to calculation preserves results and hides drawing");
+    assert(q("#psychrometric-chart-section").getClientRects().length === 0,
+      "Returning from drawing fully removes the chart from calculation layout");
     assert(q("#metrics").children.length === 7, "Seven results displayed");
-    assert(q('[data-property="H"]').textContent.includes("50.4235 kJ/kg"), "Enthalpy SI conversion");
+    const defaultState = calculateHumidAir(cp, { ...base, value1: 24 });
+    close(Number.parseFloat(q('[data-property="H"] strong').textContent),
+      defaultState.values.H / 1000, "Default reference enthalpy SI conversion", 1e-5);
+    assert(q('[data-property="T"] strong').textContent === "24 °C"
+      && q('[data-property="R"] strong').textContent === "50 %",
+    "Default reference results show 24 C dry bulb and 50% RH");
     q("#pressure").value = "80";
     q("#pressure").dispatchEvent(new frame.contentWindow.Event("input", { bubbles: true }));
     assert(!q("#results").hidden && q("#status").textContent.includes("上次結果"), "Input edit preserves previous results with warning");
@@ -328,6 +461,7 @@ export async function runHumidAirTests() {
       && q(".psychrometric-state-marker").hasAttribute("hidden")
       && q("#chart-state-message").textContent.includes("無有效的圖表狀態點"),
     "Dependent pair warning clears invalid results and chart marker");
+    assert(!q("#results-placeholder").hidden, "Failed calculation restores result-panel guidance");
     select("#property-one", "T");
     select("#property-two", "R");
     q("#value-one").value = "25";
@@ -338,11 +472,41 @@ export async function runHumidAirTests() {
       frame.style.width = `${width}px`;
       await new Promise((resolve) => frame.contentWindow.requestAnimationFrame(resolve));
       assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth, `No page overflow ${width}`);
+      assert(style("#calculation-section").gridTemplateColumns.split(" ").length === (width <= 760 ? 1 : 2),
+        `Fluid-style calculation panels adapt to viewport ${width}`);
+      mode("drawing");
       const chartBounds = q("#psychrometric-chart").getBoundingClientRect();
       assert(chartBounds.left >= 0 && chartBounds.right <= doc.documentElement.clientWidth,
         `Chart container remains within viewport ${width}`);
       assert(q("#psychrometric-chart").scrollWidth >= q("#psychrometric-chart").clientWidth,
         `Chart remains horizontally scrollable ${width}`);
+      const readout = q("#chart-readout");
+      const readoutHeight = readout.getBoundingClientRect().height;
+      const chartTop = chartBounds.top;
+      for (const [temperature, humidityRatio] of [[.1, .0299], [25, .01], [.1, .0299], [49.9, .025], [25, .0000001]]) {
+        const svgBounds = svg.getBoundingClientRect();
+        svg.dispatchEvent(new frame.contentWindow.PointerEvent("pointermove", {
+          clientX: svgBounds.left + (88 + temperature / 50 * 850) / 1000 * svgBounds.width,
+          clientY: svgBounds.top + (28 + 520 - humidityRatio / .03 * 520) / 670 * svgBounds.height,
+          bubbles: true,
+        }));
+        assert(readout.textContent !== "尚未選取狀態點。", `Pointer updates readout at ${temperature}/${humidityRatio}, ${width}`);
+        assert(readout.textContent.includes("超出有效") === (temperature === .1),
+          `Pointer switches between invalid-region warning and full properties at ${temperature}/${humidityRatio}, ${width}`);
+        assert(Math.abs(q("#psychrometric-chart").getBoundingClientRect().top - chartTop) < .5
+          && Math.abs(readout.getBoundingClientRect().height - readoutHeight) < .5,
+        `Readout updates do not shift chart at ${temperature}/${humidityRatio}, ${width}`);
+        assert(readout.scrollWidth <= readout.clientWidth,
+          `Readout wraps within its width at ${temperature}/${humidityRatio}, ${width}`);
+      }
+      assert(frame.contentWindow.getComputedStyle(readout).overflowY === "auto"
+        && frame.contentWindow.getComputedStyle(readout).whiteSpace !== "nowrap",
+      `Readouts can wrap and scroll vertically without resizing ${width}`);
+      svg.dispatchEvent(new frame.contentWindow.PointerEvent("pointerleave", { bubbles: true }));
+      assert(readout.textContent === "尚未選取狀態點。"
+        && Math.abs(q("#psychrometric-chart").getBoundingClientRect().top - chartTop) < .5,
+      `Resetting readout does not shift chart ${width}`);
+      mode("calculation");
       const bounds = (selector) => q(selector).getBoundingClientRect();
       const pressure = bounds("#pressure");
       const one = bounds("#property-one");
@@ -355,9 +519,11 @@ export async function runHumidAirTests() {
         close(two.top, secondValue.top, `Second property and input aligned ${width}`);
         close(one.left, two.left, `Property column aligned ${width}`);
         close(firstValue.left, secondValue.left, `Value column aligned ${width}`);
+        assert(firstValue.left > one.right && secondValue.left > two.right,
+          `Value inputs are to the right of their selectors ${width}`);
         close(one.height, firstValue.height, `Control heights aligned ${width}`);
       } else {
-        assert(one.bottom < firstValue.top && firstValue.bottom < two.top && two.bottom < secondValue.top,
+        assert(one.bottom <= firstValue.top && firstValue.bottom < two.top && two.bottom <= secondValue.top,
           "Mobile preserves property/value reading order");
       }
       for (const key of Object.keys(humidAirProperties)) {
@@ -367,6 +533,13 @@ export async function runHumidAirTests() {
           `${key} label and control remain within viewport ${width}`);
       }
     }
+    const pressureBeforeClear = q("#pressure").value;
+    q("#clear-inputs").click();
+    assert(q("#value-one").value === "" && q("#value-two").value === ""
+      && q("#pressure").value === pressureBeforeClear && q("#results").hidden
+      && q("#metrics").children.length === 0 && !q("#results-placeholder").hidden
+      && q("#status").textContent === "已清除輸入與計算結果。",
+    "Clear removes property values and results while retaining pressure");
   } finally { frame.remove(); }
   return { status: "PASS", checks, supportedPairStates: supportedPairs, rejectedPairStates: rejectedPairs };
 }

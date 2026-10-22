@@ -242,7 +242,7 @@ function addCurveLabel(group, points, text, className, index, options = {}) {
 }
 
 function addLegendItem(legend, color, label, dash = "") {
-  const group = element("g", { transform: `translate(${legend.children.length * 185} 0)` });
+  const group = element("g", { transform: `translate(${legend.children.length * 215} 0)` });
   group.append(element("line", { x1: 0, y1: 8, x2: 30, y2: 8, stroke: color, "stroke-width": 2, "stroke-dasharray": dash }));
   group.append(element("text", { x: 38, y: 12 }, label));
   legend.append(group);
@@ -265,21 +265,33 @@ export function createPsychrometricChart(cp, onReadout = () => {}) {
   defs.append(clip);
   svg.append(defs);
   const grid = element("g", { class: "psychrometric-grid" });
-  for (let temperature = TEMPERATURE_MIN; temperature <= TEMPERATURE_MAX; temperature += 5) {
+  for (let temperature = TEMPERATURE_MIN; temperature <= TEMPERATURE_MAX; temperature += 1) {
     const x = chartX(temperature);
-    grid.append(
-      element("line", { x1: x, y1: PLOT.top, x2: x, y2: PLOT.top + PLOT.height }),
-      element("text", { x, y: PLOT.top + PLOT.height + 24, "text-anchor": "middle" }, String(temperature)),
-    );
+    const major = temperature % 5 === 0;
+    grid.append(element("line", {
+      x1: x, y1: PLOT.top + PLOT.height, x2: x, y2: PLOT.top + PLOT.height + (major ? 6 : 3),
+      class: "psychrometric-axis-tick", "data-axis": "x", "data-value": temperature,
+    }));
+    if (major) {
+      grid.append(
+        element("line", { x1: x, y1: PLOT.top, x2: x, y2: PLOT.top + PLOT.height }),
+        element("text", { x, y: PLOT.top + PLOT.height + 24, "text-anchor": "middle" }, String(temperature)),
+      );
+    }
   }
-  for (let humidity = HUMIDITY_MIN; humidity <= HUMIDITY_MAX + 1e-9; humidity += 0.005) {
-    const y = chartY(humidity);
-    grid.append(
-      element("line", { x1: PLOT.left, y1: y, x2: PLOT.left + PLOT.width, y2: y }),
-      element("line", { x1: PLOT.left + PLOT.width, y1: y, x2: PLOT.left + PLOT.width + 6, y2: y }),
-      element("text", { x: PLOT.left + PLOT.width + 12, y: y + 4, "text-anchor": "start" },
-        String(Math.round(humidity * 1000))),
-    );
+  for (let humidity = 0; humidity <= 30; humidity += 1) {
+    const y = chartY(humidity / 1000);
+    const major = humidity % 5 === 0;
+    grid.append(element("line", {
+      x1: PLOT.left + PLOT.width, y1: y, x2: PLOT.left + PLOT.width + (major ? 6 : 3), y2: y,
+      class: "psychrometric-axis-tick", "data-axis": "y", "data-value": humidity,
+    }));
+    if (major) {
+      grid.append(
+        element("line", { x1: PLOT.left, y1: y, x2: PLOT.left + PLOT.width, y2: y }),
+        element("text", { x: PLOT.left + PLOT.width + 12, y: y + 4, "text-anchor": "start" }, String(humidity)),
+      );
+    }
   }
   svg.append(grid);
   svg.append(element("rect", {
@@ -389,24 +401,21 @@ export function createPsychrometricChart(cp, onReadout = () => {}) {
     element("text", { x: PLOT.left + PLOT.width / 2, y: 600, "text-anchor": "middle" }, "乾球溫度 (°C)"),
     element("text", {
       x: 985, y: PLOT.top + PLOT.height / 2, "text-anchor": "middle",
-      transform: `rotate(90 985 ${PLOT.top + PLOT.height / 2})`,
+      transform: `rotate(-90 985 ${PLOT.top + PLOT.height / 2})`,
     }, "濕度比 (g/kg 乾空氣)"),
     element("text", { x: PLOT.left, y: 625 }, "標準大氣壓 101.325 kPa"),
   );
   svg.append(axes);
 
   const legend = element("g", { class: "psychrometric-legend", transform: "translate(90 645)" });
-  addLegendItem(legend, "#9b4b4b", "相對濕度");
-  addLegendItem(legend, "#256a9b", "濕球溫度", "5 3");
-  addLegendItem(legend, "#718b45", "比焓");
-  addLegendItem(legend, "#8067a7", "比容", "2 4");
+  addLegendItem(legend, "#9b4b4b", "相對濕度 (%)");
+  addLegendItem(legend, "#256a9b", "濕球溫度 (°C)", "5 3");
+  addLegendItem(legend, "#718b45", "比焓 (kJ/kg 乾空氣)");
+  addLegendItem(legend, "#8067a7", "比容 (m³/kg 乾空氣)", "2 4");
   svg.append(legend);
 
   const marker = element("g", { class: "psychrometric-state-marker", hidden: "" });
-  marker.append(
-    element("circle", { r: 7 }),
-    element("text", { x: 10, y: -10 }),
-  );
+  marker.append(element("circle", { r: 5 }));
   svg.append(marker);
 
   function readPoint(temperature, humidityRatio) {
@@ -477,7 +486,6 @@ export function createPsychrometricChart(cp, onReadout = () => {}) {
       }
       marker.removeAttribute("hidden");
       marker.setAttribute("transform", `translate(${chartX(state.temperature)} ${chartY(state.humidityRatio)})`);
-      marker.lastElementChild.textContent = `${state.temperature.toFixed(1)} °C, ${(state.humidityRatio * 1000).toFixed(1)} g/kg`;
       return true;
     },
   };
