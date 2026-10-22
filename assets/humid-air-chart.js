@@ -87,6 +87,73 @@ function wetBulbCurve(cp, wetBulb) {
   return points;
 }
 
+function saturatedEnthalpyTemperature(cp, enthalpy) {
+  let previous = null;
+  let bracket = null;
+  for (let temperature = -20; temperature <= TEMPERATURE_MAX; temperature += 1) {
+    const value = psychrometricValue(cp, "H", "T", temperature + 273.15, "R", 1);
+    if (!Number.isFinite(value)) {
+      previous = null;
+      continue;
+    }
+    if (previous && previous.value <= enthalpy * 1000 && value >= enthalpy * 1000) {
+      bracket = [previous.temperature, temperature];
+      break;
+    }
+    previous = { temperature, value };
+  }
+  if (!bracket) return null;
+
+  let [low, high] = bracket;
+  for (let iteration = 0; iteration < 40; iteration += 1) {
+    const middle = (low + high) / 2;
+    const value = psychrometricValue(cp, "H", "T", middle + 273.15, "R", 1);
+    if (!Number.isFinite(value)) return null;
+    if (value < enthalpy * 1000) low = middle;
+    else high = middle;
+  }
+  return (low + high) / 2;
+}
+
+function dryAirEnthalpyTemperature(cp, enthalpy) {
+  const enthalpyAtMinimum = psychrometricValue(cp, "H", "T", TEMPERATURE_MIN + 273.15, "W", 0);
+  const enthalpyAtMaximum = psychrometricValue(cp, "H", "T", TEMPERATURE_MAX + 273.15, "W", 0);
+  const target = enthalpy * 1000;
+  if (![enthalpyAtMinimum, enthalpyAtMaximum].every(Number.isFinite)
+    || target < enthalpyAtMinimum || target > enthalpyAtMaximum) return null;
+
+  let low = TEMPERATURE_MIN;
+  let high = TEMPERATURE_MAX;
+  for (let iteration = 0; iteration < 40; iteration += 1) {
+    const middle = (low + high) / 2;
+    const value = psychrometricValue(cp, "H", "T", middle + 273.15, "W", 0);
+    if (!Number.isFinite(value)) return null;
+    if (value < target) low = middle;
+    else high = middle;
+  }
+  return (low + high) / 2;
+}
+
+function enthalpyCurve(cp, enthalpy, saturationCache) {
+  const saturationTemperature = saturatedEnthalpyTemperature(cp, enthalpy);
+  if (!Number.isFinite(saturationTemperature)) return null;
+  const saturationHumidity = psychrometricValue(cp, "W", "T", saturationTemperature + 273.15, "R", 1);
+  if (!Number.isFinite(saturationHumidity)) return null;
+  const dryAirTemperature = dryAirEnthalpyTemperature(cp, enthalpy);
+  const endpointTemperature = Number.isFinite(dryAirTemperature) ? dryAirTemperature : TEMPERATURE_MAX;
+  const points = [[saturationTemperature, saturationHumidity]];
+  for (let temperature = saturationTemperature + 1;
+    temperature < endpointTemperature - 1e-9; temperature += 1) {
+    const humidityRatio = psychrometricValue(cp, "W", "T", temperature + 273.15, "H", enthalpy * 1000);
+    points.push([temperature, chartHumidity(cp, temperature, humidityRatio, saturationCache)]);
+  }
+  const endpointHumidity = Number.isFinite(dryAirTemperature) ? 0
+    : psychrometricValue(cp, "W", "T", TEMPERATURE_MAX + 273.15, "H", enthalpy * 1000);
+  points.push([endpointTemperature,
+    chartHumidity(cp, endpointTemperature, endpointHumidity, saturationCache)]);
+  return { points, saturationTemperature, saturationHumidity, endpointTemperature };
+}
+
 function addCurve(group, points, className, label) {
   let pathData = "";
   let lastEndpoint = null;
@@ -138,20 +205,30 @@ function addCurve(group, points, className, label) {
   return path;
 }
 
-function addCurveLabel(group, points, text, className, index) {
+function addCurveLabel(group, points, text, className, index, options = {}) {
   const point = points[index];
   if (!point || !Number.isFinite(point[1]) || point[1] < HUMIDITY_MIN || point[1] > HUMIDITY_MAX) return;
-  const previous = points[Math.max(0, index - 1)];
-  const next = points[Math.min(points.length - 1, index + 1)];
-  const angle = className === "psychrometric-volume-label"
-    && previous && next && Number.isFinite(previous[1]) && Number.isFinite(next[1])
-    ? Math.atan2(chartY(next[1]) - chartY(previous[1]), chartX(next[0]) - chartX(previous[0])) * 180 / Math.PI
+  let previousIndex = index - 1;
+  while (previousIndex >= 0 && (!points[previousIndex] || !Number.isFinite(points[previousIndex][1]))) previousIndex -= 1;
+  let nextIndex = index + 1;
+  while (nextIndex < points.length && (!points[nextIndex] || !Number.isFinite(points[nextIndex][1]))) nextIndex += 1;
+  const tangentStart = previousIndex >= 0 ? points[previousIndex] : point;
+  const tangentEnd = nextIndex < points.length ? points[nextIndex] : point;
+  let angle = tangentStart !== tangentEnd
+    ? Math.atan2(chartY(tangentEnd[1]) - chartY(tangentStart[1]),
+      chartX(tangentEnd[0]) - chartX(tangentStart[0])) * 180 / Math.PI
     : 0;
-  const x = chartX(point[0]) + 4;
-  const y = chartY(point[1]) - 4;
+  if (angle > 90) angle -= 180;
+  if (angle < -90) angle += 180;
+  const pointX = chartX(point[0]);
+  const pointY = chartY(point[1]);
+  const anchor = options.anchor ?? (pointX > PLOT.left + PLOT.width - 35 ? "end" : "start");
+  const x = pointX + (options.offsetX ?? (anchor === "end" ? -5 : 5));
+  const y = pointY + (options.offsetY ?? (pointY < PLOT.top + 16 ? 14 : -4));
   group.append(element("text", {
     x,
     y,
+    "text-anchor": anchor,
     transform: `rotate(${angle.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)})`,
     class: className,
   }, text));
@@ -192,7 +269,9 @@ export function createPsychrometricChart(cp, onReadout = () => {}) {
     const y = chartY(humidity);
     grid.append(
       element("line", { x1: PLOT.left, y1: y, x2: PLOT.left + PLOT.width, y2: y }),
-      element("text", { x: PLOT.left - 12, y: y + 4, "text-anchor": "end" }, String(Math.round(humidity * 1000))),
+      element("line", { x1: PLOT.left + PLOT.width, y1: y, x2: PLOT.left + PLOT.width + 6, y2: y }),
+      element("text", { x: PLOT.left + PLOT.width + 12, y: y + 4, "text-anchor": "start" },
+        String(Math.round(humidity * 1000))),
     );
   }
   svg.append(grid);
@@ -201,7 +280,7 @@ export function createPsychrometricChart(cp, onReadout = () => {}) {
   }));
 
   const curves = element("g", { "clip-path": "url(#psychrometric-chart-clip)" });
-  const labels = element("g", { class: "psychrometric-curve-labels", "clip-path": "url(#psychrometric-chart-clip)" });
+  const labels = element("g", { class: "psychrometric-curve-labels" });
   const saturationCache = new Map();
   for (let relativeHumidity = 0.1; relativeHumidity <= 1.0001; relativeHumidity += 0.1) {
     const points = [];
@@ -212,11 +291,14 @@ export function createPsychrometricChart(cp, onReadout = () => {}) {
           psychrometricValue(cp, "W", "T", temperature + 273.15, "R", relativeHumidity), saturationCache),
       ]);
     }
-    addCurve(curves, points, relativeHumidity === 1 ? "psychrometric-rh psychrometric-saturation" : "psychrometric-rh",
+    const relativeHumidityPath = addCurve(curves,
+      points, relativeHumidity === 1 ? "psychrometric-rh psychrometric-saturation" : "psychrometric-rh",
       `相對濕度 ${Math.round(relativeHumidity * 100)}%`);
-    const lastVisible = points.findLastIndex((point) => point && Number.isFinite(point[1])
-      && point[1] >= HUMIDITY_MIN && point[1] <= HUMIDITY_MAX);
-    addCurveLabel(labels, points, `${Math.round(relativeHumidity * 100)}%`, "psychrometric-rh-label", lastVisible);
+    if (relativeHumidityPath) {
+      relativeHumidityPath.dataset.relativeHumidity = String(Math.round(relativeHumidity * 100));
+    }
+    addCurveLabel(labels, points, `${Math.round(relativeHumidity * 100)}%`,
+      "psychrometric-rh-label", 30);
   }
 
   for (let wetBulb = -6; wetBulb <= 34; wetBulb += 1) {
@@ -231,19 +313,32 @@ export function createPsychrometricChart(cp, onReadout = () => {}) {
     }
   }
 
-  for (let enthalpy = 10; enthalpy <= 120; enthalpy += 10) {
-    const points = [];
-    for (let temperature = TEMPERATURE_MIN; temperature <= TEMPERATURE_MAX; temperature += 2) {
-      points.push([
-        temperature,
-        chartHumidity(cp, temperature,
-          psychrometricValue(cp, "W", "T", temperature + 273.15, "H", enthalpy * 1000), saturationCache),
-      ]);
+  for (let enthalpy = 0; enthalpy <= 120; enthalpy += 10) {
+    const curve = enthalpyCurve(cp, enthalpy, saturationCache);
+    if (!curve) continue;
+    const path = addCurve(curves, curve.points, "psychrometric-enthalpy",
+      `比焓 ${enthalpy} kJ/kg 乾空氣`);
+    if (!path) continue;
+    path.dataset.enthalpy = String(enthalpy);
+    path.dataset.saturationTemperatureC = curve.saturationTemperature.toPrecision(15);
+    path.dataset.saturationHumidity = curve.saturationHumidity.toPrecision(15);
+    path.dataset.endpointTemperatureC = curve.endpointTemperature.toPrecision(15);
+    let labelIndex = -1;
+    for (let index = 0; index < curve.points.length; index += 1) {
+      const point = curve.points[index];
+      if (point && Number.isFinite(point[1])
+        && point[0] >= TEMPERATURE_MIN && point[0] <= TEMPERATURE_MAX
+        && point[1] >= HUMIDITY_MIN && point[1] <= HUMIDITY_MAX) {
+        labelIndex = index;
+        break;
+      }
     }
-    addCurve(curves, points, "psychrometric-enthalpy", `比焓 ${enthalpy} kJ/kg 乾空氣`);
-    const lastVisible = points.findLastIndex((point) => point && Number.isFinite(point[1])
-      && point[1] >= HUMIDITY_MIN && point[1] <= HUMIDITY_MAX);
-    addCurveLabel(labels, points, String(enthalpy), "psychrometric-enthalpy-label", lastVisible);
+    const labelPoint = curve.points[labelIndex];
+    addCurveLabel(labels, curve.points, String(enthalpy), "psychrometric-enthalpy-label", labelIndex, {
+      anchor: "end",
+      offsetX: -8,
+      offsetY: labelPoint && labelPoint[1] >= HUMIDITY_MAX - 0.001 ? 12 : -8,
+    });
   }
 
   for (let hundredths = 78; hundredths <= 95; hundredths += 1) {
@@ -278,8 +373,8 @@ export function createPsychrometricChart(cp, onReadout = () => {}) {
   axes.append(
     element("text", { x: PLOT.left + PLOT.width / 2, y: 600, "text-anchor": "middle" }, "乾球溫度 (°C)"),
     element("text", {
-      x: 22, y: PLOT.top + PLOT.height / 2, "text-anchor": "middle",
-      transform: `rotate(-90 22 ${PLOT.top + PLOT.height / 2})`,
+      x: 985, y: PLOT.top + PLOT.height / 2, "text-anchor": "middle",
+      transform: `rotate(90 985 ${PLOT.top + PLOT.height / 2})`,
     }, "濕度比 (g/kg 乾空氣)"),
     element("text", { x: PLOT.left, y: 625 }, "標準大氣壓 101.325 kPa"),
   );

@@ -19,7 +19,7 @@
       "pycool.html", "humid-air.html", "refrigeration-cycle.html", "unit-converter.html",
     ];
     const tools = ["pycool.html", "humid-air.html", "refrigeration-cycle.html", "unit-converter.html"];
-    const names = ["流體熱物理性質", "濕空氣熱物理性質", "冷凍循環分析器", "單位換算"];
+    const names = ["水與冷媒性質", "濕空氣性質", "冷凍循環分析器", "單位換算"];
     const frame = document.createElement("iframe");
     frame.title = "Tool navigation layout tests";
     frame.style.cssText = "position:fixed;left:-10000px;width:1100px;height:1000px;";
@@ -47,7 +47,7 @@
           assert(cards.length === tools.length, `${path} all tool cards present`);
           cards.forEach((card, index) => {
             assert(card.getAttribute("href") === tools[index], `${path} tool destination ${index}`);
-            assert(card.querySelector("h3").textContent === names[index], `${path} tool name ${index}`);
+            assert(card.querySelector("h2, h3").textContent === names[index], `${path} tool name ${index}`);
           });
           if (path === "index.html") {
             assert(doc.querySelectorAll("#tools-link-title").length === 1
@@ -55,16 +55,18 @@
           }
           if (path === "tools.html") {
             const groups = [...doc.querySelectorAll(".tool-group")];
-            assert(groups.length === 2, "Tools has two categories");
+            assert(groups.length === 3, "Tools has properties, applications and standalone conversion");
             groups.forEach((group, index) => {
               const heading = group.querySelector("h2");
-              assert(heading.textContent === ["熱物性分析", "工程計算與輔助"][index],
+              assert(heading.textContent === ["物性查詢與計算", "工程應用", "單位換算"][index],
                 `Tools category heading ${index}`);
               assert(group.getAttribute("aria-labelledby") === heading.id,
                 `Tools category accessible label ${index}`);
               assert([...group.querySelectorAll(".tool-card")].map((card) => card.getAttribute("href")).join("|")
-                === tools.slice(index * 2, index * 2 + 2).join("|"), `Tools category destinations ${index}`);
+                === [tools.slice(0, 2), [tools[2]], [tools[3]]][index].join("|"), `Tools category destinations ${index}`);
             });
+            assert(groups[2].querySelectorAll("h2, h3").length === 1,
+              "Standalone conversion has no duplicate heading");
           }
         }
       }
@@ -83,7 +85,8 @@
           if (path === "tools.html") {
             for (const cards of doc.querySelectorAll(".tool-cards")) {
               assert(frame.contentWindow.getComputedStyle(cards).gridTemplateColumns.split(" ").length
-                === (width <= 760 ? 1 : 2), `Tools category column count ${width}`);
+                === (width <= 760 || cards.classList.contains("tool-cards-single") ? 1 : 2),
+                `Tools category column count ${width}`);
             }
           }
           assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth, `${path} no overflow ${width}`);

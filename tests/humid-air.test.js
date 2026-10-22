@@ -20,8 +20,54 @@ export async function runHumidAirTests() {
   };
   const reference = calculateHumidAir(cp, base);
   const chart = createPsychrometricChart(cp);
+  const angleDifference = (first, second) => {
+    let difference = Math.abs(first - second) % 180;
+    if (difference > 90) difference = 180 - difference;
+    return difference;
+  };
+  const assertLabelsFollowCurves = (labels, curveSelector, keyForLabel, description) => {
+    for (const label of labels) {
+      const curve = chart.svg.querySelector(curveSelector(label));
+      const pivot = label.getAttribute("transform").match(/^rotate\((-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)\)$/);
+      assert(curve && pivot, `${description} ${label.textContent}: matching line and rotation`);
+      const labelAngle = Number(pivot[1]);
+      const [labelX, labelY] = pivot.slice(2).map(Number);
+      const coordinates = curve.getAttribute("d").match(/-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?/g)
+        .map((coordinate) => coordinate.split(",").map(Number));
+      let closestSegment = null;
+      let closestDistance = Infinity;
+      if (coordinates.length === 1) {
+        closestDistance = Math.hypot(labelX - coordinates[0][0], labelY - coordinates[0][1]);
+      }
+      for (let index = 1; index < coordinates.length; index += 1) {
+        const [x1, y1] = coordinates[index - 1];
+        const [x2, y2] = coordinates[index];
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const fraction = Math.max(0, Math.min(1,
+          ((labelX - x1) * dx + (labelY - y1) * dy) / (dx * dx + dy * dy)));
+        const distance = Math.hypot(labelX - (x1 + fraction * dx), labelY - (y1 + fraction * dy));
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestSegment = [dx, dy];
+        }
+      }
+      assert((closestSegment || coordinates.length === 1) && closestDistance < 20,
+        `${description} ${keyForLabel(label)}: positioned beside its line`);
+      if (closestSegment) {
+        const curveAngle = Math.atan2(closestSegment[1], closestSegment[0]) * 180 / Math.PI;
+        assert(angleDifference(labelAngle, curveAngle) < 8,
+          `${description} ${keyForLabel(label)}: label is parallel to curve (${labelAngle} vs ${curveAngle})`);
+      }
+    }
+  };
   assert(chart.svg.getAttribute("viewBox") === "0 0 1000 670", "Psychrometric Chart No. 1 SVG bounds");
   assert(chart.svg.querySelectorAll(".psychrometric-rh").length === 10, "Ten relative-humidity curves");
+  const relativeHumidityLabels = [...chart.svg.querySelectorAll(".psychrometric-rh-label")];
+  assert(relativeHumidityLabels.length === 10, "Ten relative-humidity labels");
+  assertLabelsFollowCurves(relativeHumidityLabels,
+    (label) => `.psychrometric-rh[data-relative-humidity="${Number.parseFloat(label.textContent)}"]`,
+    (label) => label.textContent, "Relative-humidity label");
   const wetBulbCurves = [...chart.svg.querySelectorAll(".psychrometric-wet-bulb")];
   assert(wetBulbCurves.length === 41
     && wetBulbCurves.map((curve) => Number(curve.dataset.wetBulb)).join(",")
@@ -36,7 +82,31 @@ export async function runHumidAirTests() {
     else if (wetBulb <= 31) close(x, 88 + wetBulb / 50 * 850, `Wet-bulb ${wetBulb}: saturated start temperature`);
     else close(y, 28, `Wet-bulb ${wetBulb}: clipped at saturation humidity limit`);
   }
-  assert(chart.svg.querySelectorAll(".psychrometric-enthalpy").length > 0, "Enthalpy curves");
+  const enthalpyCurves = [...chart.svg.querySelectorAll(".psychrometric-enthalpy")];
+  assert(enthalpyCurves.length === 13
+    && enthalpyCurves.map((curve) => Number(curve.dataset.enthalpy)).join(",")
+      === Array.from({ length: 13 }, (_, index) => index * 10).join(","),
+  "Enthalpy curves span 0 to 120 kJ/kg at 10 kJ/kg intervals");
+  for (const curve of enthalpyCurves) {
+    const saturationTemperature = Number(curve.dataset.saturationTemperatureC);
+    const saturationHumidity = Number(curve.dataset.saturationHumidity);
+    const endpointTemperature = Number(curve.dataset.endpointTemperatureC);
+    const coordinates = curve.getAttribute("d").match(/-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?/g);
+    assert(coordinates?.length > 0, `Enthalpy ${curve.dataset.enthalpy}: visible curve`);
+    const [firstX, firstY] = coordinates[0].split(",").map(Number);
+    const beginsAtVisibleSaturation = saturationTemperature >= 0 && saturationTemperature <= 50
+      && saturationHumidity <= .03
+      && Math.abs(firstX - (88 + saturationTemperature / 50 * 850)) < .02
+      && Math.abs(firstY - (28 + 520 - saturationHumidity / .03 * 520)) < .02;
+    assert(beginsAtVisibleSaturation || Math.abs(firstX - 88) < .02 || Math.abs(firstY - 28) < .02,
+      `Enthalpy ${curve.dataset.enthalpy}: begins at saturation or clipped plot boundary`);
+    const [lastX, lastY] = coordinates.at(-1).split(",").map(Number);
+    if (endpointTemperature < 50) {
+      close(lastX, 88 + endpointTemperature / 50 * 850,
+        `Enthalpy ${curve.dataset.enthalpy}: reaches dry-air axis temperature`, 3e-5);
+      close(lastY, 548, `Enthalpy ${curve.dataset.enthalpy}: reaches zero-humidity boundary`);
+    } else close(lastX, 938, `Enthalpy ${curve.dataset.enthalpy}: reaches right plot boundary`);
+  }
   assert(chart.svg.querySelectorAll(".psychrometric-volume").length > 0
     && chart.svg.querySelectorAll(".psychrometric-volume-label").length > 0, "Specific-volume curves and labels");
   const volumeLabels = [...chart.svg.querySelectorAll(".psychrometric-volume-label")].map((label) => label.textContent);
@@ -47,6 +117,23 @@ export async function runHumidAirTests() {
   "Specific-volume lines from 0.78 to 0.95 render with labels on even values only");
   assert(chart.svg.querySelector(".psychrometric-axes").textContent.includes("濕度比 (g/kg 乾空氣)"),
     "Vertical axis is named humidity ratio");
+  const gridTicks = [...chart.svg.querySelectorAll(".psychrometric-grid text")];
+  const humidityTicks = gridTicks.filter((tick) => Number(tick.getAttribute("x")) > 938);
+  assert(humidityTicks.length === 7 && humidityTicks.every((tick) =>
+    Number(tick.getAttribute("x")) > 938 && tick.getAttribute("text-anchor") === "start"),
+  "Humidity-ratio ticks are positioned to the right of the plot");
+  assert(!gridTicks.some((tick) => Number(tick.getAttribute("x")) < 88),
+    "No humidity-ratio ticks remain on the left of the plot");
+  const wetBulbLabels = [...chart.svg.querySelectorAll(".psychrometric-wet-bulb-label")];
+  assertLabelsFollowCurves(wetBulbLabels,
+    (label) => `.psychrometric-wet-bulb[data-wet-bulb="${Number.parseFloat(label.textContent)}"]`,
+    (label) => label.textContent, "Wet-bulb label");
+  const enthalpyLabels = [...chart.svg.querySelectorAll(".psychrometric-enthalpy-label")];
+  assertLabelsFollowCurves(enthalpyLabels,
+    (label) => `.psychrometric-enthalpy[data-enthalpy="${label.textContent}"]`,
+    (label) => label.textContent, "Enthalpy label");
+  assert(enthalpyLabels.every((label) => label.getAttribute("text-anchor") === "end"),
+    "Enthalpy labels sit just outside the saturation-side start of each line");
   for (const curve of volumeCurves) {
     const specificVolume = Number(curve.dataset.specificVolume);
     const saturationTemperatureK = Number(curve.dataset.saturationTemperatureK);
@@ -82,9 +169,9 @@ export async function runHumidAirTests() {
     assert(first[1] < last[1], `Specific volume ${specificVolume}: line extends from saturation to dry-air axis`);
   }
   const rotatedVolumeLabels = [...chart.svg.querySelectorAll(".psychrometric-volume-label")];
-  assert(rotatedVolumeLabels.every((label) => /^rotate\(-?\d/.test(label.getAttribute("transform"))
-    && !/^rotate\(0(?:\.00)? /.test(label.getAttribute("transform"))),
-  "Specific-volume labels are rotated parallel to their curves");
+  assertLabelsFollowCurves(rotatedVolumeLabels,
+    (label) => `.psychrometric-volume[data-specific-volume="${label.textContent}"]`,
+    (label) => label.textContent, "Specific-volume label");
   assert(chart.setState({ pressure: 101.325, temperature: 25, humidityRatio: reference.values.W }),
     "Chart plots standard-pressure state point");
   const hoverState = chart.readPoint(25, reference.values.W);
