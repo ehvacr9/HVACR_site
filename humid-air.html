@@ -16,6 +16,35 @@
     .pressure-field input { max-width: 360px; }
     #humid-air-inputs input,
     #humid-air-inputs select { height: 46px; }
+    #psychrometric-chart-section { margin-top: 36px; }
+    #psychrometric-chart { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    #psychrometric-chart svg { display: block; width: 100%; min-width: 760px; height: auto; }
+    .psychrometric-grid line { stroke: #e3e8e0; stroke-width: 1; }
+    .psychrometric-grid text, .psychrometric-axes text, .psychrometric-legend text {
+      fill: var(--muted); font: 12px "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+    .psychrometric-plot-border { fill: none; stroke: #77847b; stroke-width: 1.2; }
+    .psychrometric-rh { fill: none; stroke: #b76868; stroke-width: 1.4; }
+    .psychrometric-saturation { stroke: #853e3e; stroke-width: 2.5; }
+    .psychrometric-wet-bulb { fill: none; stroke: #397eaa; stroke-width: 1.2; stroke-dasharray: 5 3; }
+    .psychrometric-enthalpy { fill: none; stroke: #849c58; stroke-width: 1.2; }
+    .psychrometric-volume { fill: none; stroke: #8067a7; stroke-width: 1; stroke-dasharray: 2 4; }
+    .psychrometric-curve-labels text {
+      font: 700 10px "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      paint-order: stroke;
+      stroke: var(--surface);
+      stroke-width: 3px;
+      stroke-linejoin: round;
+    }
+    .psychrometric-rh-label { fill: #9b4b4b; }
+    .psychrometric-wet-bulb-label { fill: #256a9b; }
+    .psychrometric-enthalpy-label { fill: #718b45; }
+    .psychrometric-volume-label { fill: #8067a7; }
+    .psychrometric-state-marker circle { fill: #e68b24; stroke: white; stroke-width: 2; }
+    .psychrometric-state-marker text { fill: #6c4211; font: 700 12px "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    .psychrometric-crosshair line { stroke: #263b48; stroke-width: 1; stroke-dasharray: 3 3; pointer-events: none; }
+    .psychrometric-crosshair circle { fill: #fff; stroke: #263b48; stroke-width: 2; pointer-events: none; }
+    .chart-note { color: var(--muted); font-size: 13px; }
     @media (max-width: 520px) {
       #humid-air-inputs .fields { grid-template-columns: minmax(0, 1fr); }
       .pressure-field input { max-width: none; }
@@ -54,6 +83,13 @@
       </fieldset>
     </form>
     <p id="status" role="status" aria-live="polite" data-kind="loading">載入運算模組…</p>
+    <section id="psychrometric-chart-section" hidden aria-labelledby="chart-title">
+      <h2 id="chart-title">ASHRAE Psychrometric Chart No. 1</h2>
+      <p class="chart-note">標準大氣壓 101.325 kPa；乾球溫度 0–50 °C，濕度比 0–30 g/kg 乾空氣。濕球溫度線為 −6–34 °C，每 1 °C 一條。計算狀態符合圖表範圍時會標示於圖上。</p>
+      <div id="psychrometric-chart"></div>
+      <p id="chart-state-message" class="chart-note" aria-live="polite">計算狀態點後，符合圖表範圍者會顯示於圖中。</p>
+      <p id="chart-readout" class="chart-note" aria-live="polite">在圖框內移動滑鼠可讀取該位置的濕空氣性質。</p>
+    </section>
     <section id="results" hidden aria-labelledby="result-title">
       <h2 id="result-title">狀態點性質</h2>
       <p id="pressure-summary" class="hint"></p>
