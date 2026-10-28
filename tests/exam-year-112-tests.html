@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>112 exam archive regression tests</title></head>
+<body>
+  <h1>112 exam archive regression tests</h1>
+  <p>Serve the site over HTTP. Verifies the year card, all six subject routes, PDF responses and the existing viewer.</p>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    const output = document.querySelector("#results");
+    const papers = [
+      ["electrical", "112190_0604_電工學（包括電機機械.pdf"],
+      ["thermodynamics", "112190_0607_熱力學與熱傳學.pdf"],
+      ["fluid", "112190_0609_流體力學與流體機械.pdf"],
+      ["refrigeration", "112190_0610_冷凍工程與設計.pdf"],
+      ["air-conditioning", "112190_0611_空調工程與設計.pdf"],
+      ["controls", "112190_0612_冷凍空調自動控制.pdf"],
+    ];
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+    const frame = document.createElement("iframe");
+    frame.title = "112 exam viewer test";
+    frame.style.cssText = "position:fixed;left:-10000px;width:1100px;height:900px;";
+    document.body.append(frame);
+    try {
+      const years = await fetch("../exam-years.html");
+      assert(years.ok, "Year archive responds");
+      const yearDocument = new DOMParser().parseFromString(await years.text(), "text/html");
+      assert(yearDocument.querySelector('.year-card[href="exam-year-112.html"] h2')?.textContent === "112 年",
+        "112 year is available in archive");
+      const year = await fetch("../exam-year-112.html");
+      assert(year.ok, "112 subject page responds");
+      const subjectDocument = new DOMParser().parseFromString(await year.text(), "text/html");
+      const cards = [...subjectDocument.querySelectorAll(".subject-card")];
+      assert(cards.length === papers.length, "Six subject cards");
+      for (const [subject, filename] of papers) {
+        const card = cards.find((item) =>
+          new URL(item.getAttribute("href"), new URL("../exam-year-112.html", location.href)).searchParams.get("subject") === subject);
+        assert(card && new URL(card.getAttribute("href"), new URL("../exam-year-112.html", location.href)).searchParams.get("year") === "112",
+          `${subject} subject link`);
+        const response = await fetch(`../assets/exam-questions/${encodeURIComponent(filename)}`);
+        assert(response.ok, `${subject} PDF responds`);
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        assert(bytes.length > 5 && new TextDecoder().decode(bytes.subarray(0, 5)) === "%PDF-",
+          `${subject} is a readable PDF`);
+        await new Promise((resolve, reject) => {
+          frame.onload = resolve;
+          frame.onerror = () => reject(new Error(`Unable to open ${subject} viewer`));
+          frame.src = `../exam-paper.html?year=112&subject=${encodeURIComponent(subject)}`;
+        });
+        const paperFrame = frame.contentDocument.querySelector(".pdf-frame");
+        assert(frame.contentDocument.querySelector("h1 [data-subject]")?.textContent === card.querySelector("h2").textContent,
+          `${subject} viewer title`);
+        assert(decodeURIComponent(paperFrame.src).includes(filename), `${subject} viewer selects correct PDF`);
+        assert(decodeURIComponent(frame.contentDocument.querySelector("[data-download]").href).includes(filename),
+          `${subject} download selects correct PDF`);
+      }
+      output.dataset.kind = "success";
+      output.textContent = JSON.stringify({ status: "PASS", checks, papers: papers.length }, null, 2);
+    } catch (error) {
+      output.dataset.kind = "error";
+      output.textContent = error.stack;
+      console.error(error);
+    } finally { frame.remove(); }
+  </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>90-111 exam archive regression tests</title></head>
+<body>
+  <h1>90-111 exam archive regression tests</h1>
+  <p>Serve the site over HTTP. Verifies official source data, every archived PDF, year navigation and sample preview routes for each exam session.</p>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+    const waitFor = async (condition, message) => {
+      const deadline = Date.now() + 10000;
+      while (Date.now() < deadline) {
+        if (condition()) return;
+        await new Promise((resolve) => setTimeout(resolve, 25));
+      }
+      throw new Error(message);
+    };
+    const frame = document.createElement("iframe");
+    frame.title = "Historical exam archive preview test";
+    frame.style.cssText = "position:fixed;left:-10000px;width:1100px;height:900px;";
+    const layoutFrame = document.createElement("iframe");
+    layoutFrame.title = "Exam card style comparison";
+    layoutFrame.style.cssText = "position:fixed;left:-10000px;width:1100px;height:900px;";
+    document.body.append(frame, layoutFrame);
+
+    try {
+      const yearsResponse = await fetch("../exam-years.html");
+      assert(yearsResponse.ok, "Year archive responds");
+      const yearsDocument = new DOMParser().parseFromString(await yearsResponse.text(), "text/html");
+      const archivePageResponse = await fetch("../exam-year-archive.html?year=90");
+      assert(archivePageResponse.ok, "Historical archive page responds");
+      const archivePage = new DOMParser().parseFromString(await archivePageResponse.text(), "text/html");
+      assert(!archivePage.querySelector(".source-link, [data-source]"),
+        "Historical archive page has no external source links");
+      assert(!archivePage.body.textContent.includes("依考選部公布的考試場次與科目整理"),
+        "Removed the historical archive introduction");
+      const archiveYears = [...Array(22)].map((_, index) => String(111 - index));
+      for (const year of archiveYears) {
+        const card = yearsDocument.querySelector(`.year-card[href="exam-year-archive.html?year=${year}"]`);
+        assert(card?.querySelector("h2")?.textContent === `${year} 年`, `${year} year card links to its archive`);
+      }
+
+      const archiveResponse = await fetch("../assets/exam-questions/exam-archive-90-111.json");
+      assert(archiveResponse.ok, "Historical archive metadata responds");
+      const archive = await archiveResponse.json();
+      assert(Object.keys(archive).length === 22, "Archive includes 22 years");
+
+      let sessions = 0;
+      let papers = 0;
+      for (const year of archiveYears) {
+        const yearData = archive[year];
+        assert(yearData && yearData.events.length > 0, `${year} has official exam sessions`);
+        sessions += yearData.events.length;
+        for (const event of yearData.events) {
+          assert(/^https:\/\/wwwq\.moex\.gov\.tw\/exam\/wFrmExamQandASearch\.aspx\?y=\d{4}&e=\d{6}$/.test(event.sourceUrl),
+            `${year} ${event.code} links to its official source`);
+          assert(event.code.startsWith(year.padStart(3, "0")), `${year} ${event.code} belongs to the selected year`);
+          assert(event.papers.length > 0, `${year} ${event.code} has papers`);
+          const firstPaper = event.papers[0];
+          const route = new URLSearchParams({ year, exam: event.code, subject: firstPaper.id });
+          await new Promise((resolve, reject) => {
+            frame.onload = resolve;
+            frame.onerror = () => reject(new Error(`Unable to open ${year} ${event.code} paper viewer`));
+            frame.src = `../exam-paper.html?${route}`;
+          });
+          await waitFor(
+            () => frame.contentDocument.querySelector(".pdf-frame")?.getAttribute("src")?.includes(firstPaper.filename),
+            `Viewer did not resolve ${year} ${event.code}`,
+          );
+          assert(frame.contentDocument.querySelector("[data-subject]")?.textContent === firstPaper.title,
+            `${year} ${event.code} viewer title`);
+          assert(!frame.contentDocument.querySelector("[data-source], .source-link"),
+            `${year} ${event.code} viewer has no external source link`);
+          assert(frame.contentDocument.querySelector("[data-download]")?.href.endsWith(firstPaper.filename),
+            `${year} ${event.code} download points to the correct paper`);
+
+          for (const paper of event.papers) {
+            papers += 1;
+            assert(paper.filename === `exam-${year}-${event.code}-${paper.id}.pdf`,
+              `${year} ${event.code} ${paper.id} has a unique archive filename`);
+            const pdfResponse = await fetch(`../assets/exam-questions/${paper.filename}`, { method: "HEAD" });
+            assert(pdfResponse.ok, `${paper.filename} responds`);
+            assert(pdfResponse.headers.get("content-type")?.includes("application/pdf"),
+              `${paper.filename} is served as a PDF`);
+            assert(Number(pdfResponse.headers.get("content-length")) > 0, `${paper.filename} is not empty`);
+          }
+        }
+      }
+      assert(sessions === 30, "Archive includes all 30 official exam sessions");
+      assert(papers === 172, "Archive includes all 172 technical question papers");
+      const highExam = archive["90"].events.find((event) => event.code === "090340");
+      assert(highExam.papers.some((paper) => paper.id === "c072" && paper.title === "電工學（包括電機機械）"),
+        "090340 includes electrical engineering");
+      assert(highExam.papers.some((paper) => paper.id === "c081" && paper.title === "流體力學與流體機械"),
+        "090340 includes fluid mechanics");
+      const missingTechnicalPapers = [
+        ["91", "091310", "c071", "電工學（包括電機機械）"],
+        ["91", "091310", "c081", "流體力學與流體機械"],
+        ["92", "092270", "c021", "流體力學與流體機械"],
+        ["92", "092270", "c031", "電工學（包括電機機械）"],
+        ["93", "093250", "c041", "流體力學與流體機械"],
+      ];
+      for (const [year, examCode, subjectId, title] of missingTechnicalPapers) {
+        const event = archive[year].events.find((item) => item.code === examCode);
+        assert(event.papers.some((paper) => paper.id === subjectId && paper.title === title),
+          `${year} ${examCode} includes previously omitted ${title}`);
+      }
+
+      const cardAppearance = async (url, width) => {
+        layoutFrame.style.width = `${width}px`;
+        await new Promise((resolve, reject) => {
+          layoutFrame.onload = resolve;
+          layoutFrame.onerror = () => reject(new Error(`Unable to open ${url}`));
+          layoutFrame.src = url;
+        });
+        await waitFor(
+          () => layoutFrame.contentDocument.querySelector(".subject-card"),
+          `No subject cards rendered at ${url}`,
+        );
+        return layoutFrame.contentWindow.eval(`(() => {
+          const card = document.querySelector(".subject-card");
+          const grid = card.parentElement;
+          const heading = card.querySelector("h2, h3");
+          const cardStyle = getComputedStyle(card);
+          const headingStyle = getComputedStyle(heading);
+          return {
+            card: [cardStyle.padding, cardStyle.borderRadius, cardStyle.backgroundColor, cardStyle.transitionProperty],
+            heading: [headingStyle.fontFamily, headingStyle.fontSize, headingStyle.fontWeight,
+              headingStyle.lineHeight, headingStyle.letterSpacing, headingStyle.margin],
+            columns: getComputedStyle(grid).gridTemplateColumns.split(" ").length,
+          };
+        })()`);
+      };
+      for (const width of [320, 1100]) {
+        const historicalAppearance = await cardAppearance("../exam-year-archive.html?year=90", width);
+        const currentAppearance = await cardAppearance("../exam-year-112.html", width);
+        assert(JSON.stringify(historicalAppearance) === JSON.stringify(currentAppearance),
+          `Historical subject cards match 112-year cards at ${width}px`);
+      }
+
+      const sample = archive["90"].events[0].papers[0];
+      const sampleResponse = await fetch(`../assets/exam-questions/${sample.filename}`);
+      const sampleBytes = new Uint8Array(await sampleResponse.arrayBuffer());
+      assert(sampleResponse.ok && new TextDecoder().decode(sampleBytes.subarray(0, 5)) === "%PDF-",
+        "Sample archive PDF has a valid signature");
+      output.dataset.kind = "success";
+      output.textContent = JSON.stringify({ status: "PASS", checks, years: 22, sessions, papers }, null, 2);
+    } catch (error) {
+      output.dataset.kind = "error";
+      output.textContent = error.stack;
+      console.error(error);
+    } finally {
+      frame.remove();
+      layoutFrame.remove();
+    }
+  </script>
+</body>
+</html>

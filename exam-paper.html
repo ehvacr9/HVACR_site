@@ -89,7 +89,7 @@
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="exam-years.html">技師考題</a> ／ <a data-year-link><span data-year></span> 年</a> ／ <span data-subject></span></p>
     <p class="eyebrow">Exam Paper · <span data-year></span></p>
     <h1><span data-subject></span></h1>
-    <p class="intro"><span data-year></span> 年專技高考｜冷凍空調工程技師</p>
+    <p class="intro"><span data-exam-description></span></p>
     <section class="pdf-preview" aria-labelledby="pdf-preview-title">
       <h2 id="pdf-preview-title">線上預覽</h2>
       <iframe class="pdf-frame" title="技師考題 PDF 預覽"></iframe>
@@ -111,6 +111,17 @@
   </footer>
   <script>
     const paperSets = {
+      "112": {
+        examName: "112年專門職業及技術人員高等考試冷凍空調工程技師考試",
+        papers: {
+          electrical: { title: "電工學（包括電機機械）", filename: "112190_0604_電工學（包括電機機械.pdf" },
+          thermodynamics: { title: "熱力學與熱傳學", filename: "112190_0607_熱力學與熱傳學.pdf" },
+          fluid: { title: "流體力學與流體機械", filename: "112190_0609_流體力學與流體機械.pdf" },
+          refrigeration: { title: "冷凍工程與設計", filename: "112190_0610_冷凍工程與設計.pdf" },
+          "air-conditioning": { title: "空調工程與設計", filename: "112190_0611_空調工程與設計.pdf" },
+          controls: { title: "冷凍空調自動控制", filename: "112190_0612_冷凍空調自動控制.pdf" }
+        }
+      },
       "113": {
         examName: "113年專門職業及技術人員高等考試建築師、32類科技師（含第二次食品技師）、大地工程技師考試分階段考試（第二階段考試）暨普通考試不動產經紀人、記帳士考試",
         papers: {
@@ -137,33 +148,65 @@
     const params = new URLSearchParams(location.search);
     const year = params.get("year");
     const subjectId = params.get("subject");
+    const eventId = params.get("exam");
+    const yearNumber = Number(year);
+    const isHistoricalYear = Number.isInteger(yearNumber) && yearNumber >= 90 && yearNumber <= 111;
     const yearData = Object.prototype.hasOwnProperty.call(paperSets, year)
       ? paperSets[year]
       : null;
-    const paper = yearData && Object.prototype.hasOwnProperty.call(yearData.papers, subjectId)
-      ? yearData.papers[subjectId]
-      : null;
-    if (!paper) {
-      location.replace(yearData ? `exam-year-${year}.html` : "exam-years.html");
-    } else {
+    const yearPageUrl = isHistoricalYear
+      ? `exam-year-archive.html?year=${yearNumber}`
+      : `exam-year-${year}.html`;
+
+    async function renderPaper() {
+      let paper = yearData && Object.prototype.hasOwnProperty.call(yearData.papers, subjectId)
+        ? yearData.papers[subjectId]
+        : null;
+      let eventData = null;
+
+      if (isHistoricalYear) {
+        try {
+          const response = await fetch("assets/exam-questions/exam-archive-90-111.json");
+          if (!response.ok) throw new Error(`Archive request failed (${response.status})`);
+          const archive = await response.json();
+          const events = archive[String(yearNumber)]?.events ?? [];
+          eventData = events.find((event) => event.code === eventId) ?? null;
+          paper = eventData?.papers.find((item) => item.id === subjectId) ?? null;
+        } catch (error) {
+          console.error("Unable to load the historical exam archive.", error);
+          document.querySelector("[data-exam-description]").textContent = "考題資料載入失敗，請稍後重試。";
+          return;
+        }
+      }
+
+      if (!paper) {
+        location.replace(isHistoricalYear ? yearPageUrl : yearData ? yearPageUrl : "exam-years.html");
+        return;
+      }
+
       const fileUrl = `assets/exam-questions/${paper.filename}`;
       document.querySelectorAll("[data-year]").forEach((element) => {
         element.textContent = year;
       });
       document.querySelectorAll("[data-year-link]").forEach((element) => {
-        element.href = `exam-year-${year}.html`;
+        element.href = yearPageUrl;
       });
       document.querySelectorAll("[data-subject]").forEach((element) => {
         element.textContent = paper.title;
       });
+      document.querySelector("[data-exam-description]").textContent = eventData
+        ? `${eventData.eventName}｜冷凍空調工程技師`
+        : `${year} 年專技高考｜冷凍空調工程技師`;
       document.title = `${year} 年${paper.title}｜冷凍空調工程技師考題`;
       document.querySelector(".pdf-frame").src = `${fileUrl}#view=FitH`;
       document.querySelector(".pdf-frame").title = `${year} 年${paper.title} PDF 預覽`;
       document.querySelector("[data-open]").href = fileUrl;
       const downloadLink = document.querySelector("[data-download]");
       downloadLink.href = fileUrl;
-      downloadLink.download = `${year}年${paper.title}考題.pdf`;
+      downloadLink.download = `${year}年${eventData ? `${eventData.code}_` : ""}${paper.title}考題.pdf`;
     }
+
+    renderPaper();
   </script>
 </body>
 </html>
