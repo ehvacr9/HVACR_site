@@ -1,0 +1,2074 @@
+{
+    "111":  {
+                "events":  [
+                               {
+                                   "code":  "111180",
+                                   "category":  "009",
+                                   "eventName":  "111年專門職業及技術人員高等考試建築師、31類科技師(含第二次食品技師)、大地工程技師考試分階段考試(第二階段考試)暨普通考試不動產經紀人、記帳士考試",
+                                   "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2022\u0026e=111180",
+                                   "papers":  [
+                                                  {
+                                                      "id":  "0504",
+                                                      "title":  "電工學（包括電機機械）",
+                                                      "filename":  "exam-111-111180-0504.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0509",
+                                                      "title":  "熱力學與熱傳學",
+                                                      "filename":  "exam-111-111180-0509.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0512",
+                                                      "title":  "流體力學與流體機械",
+                                                      "filename":  "exam-111-111180-0512.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0513",
+                                                      "title":  "冷凍工程與設計",
+                                                      "filename":  "exam-111-111180-0513.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0514",
+                                                      "title":  "空調工程與設計",
+                                                      "filename":  "exam-111-111180-0514.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0515",
+                                                      "title":  "冷凍空調自動控制",
+                                                      "filename":  "exam-111-111180-0515.pdf"
+                                                  }
+                                              ]
+                               }
+                           ]
+            },
+    "110":  {
+                "events":  [
+                               {
+                                   "code":  "110180",
+                                   "category":  "009",
+                                   "eventName":  "110年專門職業及技術人員高等考試建築師、24類科技師(含第二次食品技師)、大地工程技師考試分階段考試(第二階段考試)、公共衛生師考試暨普通考試不動產經紀人、記帳士考試",
+                                   "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2021\u0026e=110180",
+                                   "papers":  [
+                                                  {
+                                                      "id":  "0504",
+                                                      "title":  "電工學（包括電機機械）",
+                                                      "filename":  "exam-110-110180-0504.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0507",
+                                                      "title":  "熱力學與熱傳學",
+                                                      "filename":  "exam-110-110180-0507.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0509",
+                                                      "title":  "流體力學與流體機械",
+                                                      "filename":  "exam-110-110180-0509.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0510",
+                                                      "title":  "冷凍工程與設計",
+                                                      "filename":  "exam-110-110180-0510.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0511",
+                                                      "title":  "空調工程與設計",
+                                                      "filename":  "exam-110-110180-0511.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0512",
+                                                      "title":  "冷凍空調自動控制",
+                                                      "filename":  "exam-110-110180-0512.pdf"
+                                                  }
+                                              ]
+                               }
+                           ]
+            },
+    "109":  {
+                "events":  [
+                               {
+                                   "code":  "109180",
+                                   "category":  "009",
+                                   "eventName":  "109年專門職業及技術人員高等考試建築師、32類科技師(含第二次食品技師)、大地工程技師考試分階段考試(第二階段考試)暨普通考試不動產經紀人、記帳士考試、109年第二次專門職業及技術人員特種考試驗光人員考試",
+                                   "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2020\u0026e=109180",
+                                   "papers":  [
+                                                  {
+                                                      "id":  "0504",
+                                                      "title":  "電工學（包括電機機械）",
+                                                      "filename":  "exam-109-109180-0504.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0509",
+                                                      "title":  "熱力學與熱傳學",
+                                                      "filename":  "exam-109-109180-0509.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0512",
+                                                      "title":  "流體力學與流體機械",
+                                                      "filename":  "exam-109-109180-0512.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0513",
+                                                      "title":  "冷凍工程與設計",
+                                                      "filename":  "exam-109-109180-0513.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0514",
+                                                      "title":  "空調工程與設計",
+                                                      "filename":  "exam-109-109180-0514.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0515",
+                                                      "title":  "冷凍空調自動控制",
+                                                      "filename":  "exam-109-109180-0515.pdf"
+                                                  }
+                                              ]
+                               }
+                           ]
+            },
+    "108":  {
+                "events":  [
+                               {
+                                   "code":  "108180",
+                                   "category":  "009",
+                                   "eventName":  "108年專門職業及技術人員高等考試建築師、技師、第二次食品技師考試暨普通考試不動產經紀人、記帳士考試",
+                                   "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2019\u0026e=108180",
+                                   "papers":  [
+                                                  {
+                                                      "id":  "0504",
+                                                      "title":  "電工學（包括電機機械）",
+                                                      "filename":  "exam-108-108180-0504.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0507",
+                                                      "title":  "熱力學與熱傳學",
+                                                      "filename":  "exam-108-108180-0507.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0509",
+                                                      "title":  "流體力學與流體機械",
+                                                      "filename":  "exam-108-108180-0509.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0510",
+                                                      "title":  "冷凍工程與設計",
+                                                      "filename":  "exam-108-108180-0510.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0511",
+                                                      "title":  "空調工程與設計",
+                                                      "filename":  "exam-108-108180-0511.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0512",
+                                                      "title":  "冷凍空調自動控制",
+                                                      "filename":  "exam-108-108180-0512.pdf"
+                                                  }
+                                              ]
+                               }
+                           ]
+            },
+    "107":  {
+                "events":  [
+                               {
+                                   "code":  "107180",
+                                   "category":  "009",
+                                   "eventName":  "107年專門職業及技術人員高等考試建築師、技師、第二次食品技師考試暨普通考試不動產經紀人、記帳士考試",
+                                   "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2018\u0026e=107180",
+                                   "papers":  [
+                                                  {
+                                                      "id":  "0504",
+                                                      "title":  "電工學（包括電機機械）",
+                                                      "filename":  "exam-107-107180-0504.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0509",
+                                                      "title":  "熱力學與熱傳學",
+                                                      "filename":  "exam-107-107180-0509.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0512",
+                                                      "title":  "流體力學與流體機械",
+                                                      "filename":  "exam-107-107180-0512.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0513",
+                                                      "title":  "冷凍工程與設計",
+                                                      "filename":  "exam-107-107180-0513.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0514",
+                                                      "title":  "空調工程與設計",
+                                                      "filename":  "exam-107-107180-0514.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0515",
+                                                      "title":  "冷凍空調自動控制",
+                                                      "filename":  "exam-107-107180-0515.pdf"
+                                                  }
+                                              ]
+                               }
+                           ]
+            },
+    "106":  {
+                "events":  [
+                               {
+                                   "code":  "106180",
+                                   "category":  "009",
+                                   "eventName":  "106年專門職業及技術人員高等考試建築師、技師、第二次食品技師考試暨普通考試不動產經紀人、記帳士考試",
+                                   "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2017\u0026e=106180",
+                                   "papers":  [
+                                                  {
+                                                      "id":  "0505",
+                                                      "title":  "流體力學與流體機械",
+                                                      "filename":  "exam-106-106180-0505.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0506",
+                                                      "title":  "熱力學與熱傳學",
+                                                      "filename":  "exam-106-106180-0506.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0509",
+                                                      "title":  "電工學（包括電機機械）",
+                                                      "filename":  "exam-106-106180-0509.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0510",
+                                                      "title":  "冷凍工程與設計",
+                                                      "filename":  "exam-106-106180-0510.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0511",
+                                                      "title":  "空調工程與設計",
+                                                      "filename":  "exam-106-106180-0511.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0512",
+                                                      "title":  "冷凍空調自動控制",
+                                                      "filename":  "exam-106-106180-0512.pdf"
+                                                  }
+                                              ]
+                               }
+                           ]
+            },
+    "105":  {
+                "events":  [
+                               {
+                                   "code":  "105170",
+                                   "category":  "009",
+                                   "eventName":  "105年專門職業及技術人員高等考試建築師、技師、第二次食品技師考試暨普通考試不動產經紀人、記帳士考試",
+                                   "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2016\u0026e=105170",
+                                   "papers":  [
+                                                  {
+                                                      "id":  "0507",
+                                                      "title":  "流體力學與流體機械",
+                                                      "filename":  "exam-105-105170-0507.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0509",
+                                                      "title":  "熱力學與熱傳學",
+                                                      "filename":  "exam-105-105170-0509.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0511",
+                                                      "title":  "電工學（包括電機機械）",
+                                                      "filename":  "exam-105-105170-0511.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0513",
+                                                      "title":  "冷凍工程與設計",
+                                                      "filename":  "exam-105-105170-0513.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0514",
+                                                      "title":  "空調工程與設計",
+                                                      "filename":  "exam-105-105170-0514.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0515",
+                                                      "title":  "冷凍空調自動控制",
+                                                      "filename":  "exam-105-105170-0515.pdf"
+                                                  }
+                                              ]
+                               }
+                           ]
+            },
+    "104":  {
+                "events":  [
+                               {
+                                   "code":  "104170",
+                                   "category":  "009",
+                                   "eventName":  "104年專門職業及技術人員高等考試建築師、技師、第二次食品技師考試暨普通考試不動產經紀人、記帳士考試",
+                                   "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2015\u0026e=104170",
+                                   "papers":  [
+                                                  {
+                                                      "id":  "0505",
+                                                      "title":  "流體力學與流體機械",
+                                                      "filename":  "exam-104-104170-0505.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0507",
+                                                      "title":  "熱力學與熱傳學",
+                                                      "filename":  "exam-104-104170-0507.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0509",
+                                                      "title":  "電工學（包括電機機械）",
+                                                      "filename":  "exam-104-104170-0509.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0510",
+                                                      "title":  "冷凍工程與設計",
+                                                      "filename":  "exam-104-104170-0510.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0511",
+                                                      "title":  "空調工程與設計",
+                                                      "filename":  "exam-104-104170-0511.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0512",
+                                                      "title":  "冷凍空調自動控制",
+                                                      "filename":  "exam-104-104170-0512.pdf"
+                                                  }
+                                              ]
+                               }
+                           ]
+            },
+    "103":  {
+                "events":  [
+                               {
+                                   "code":  "103170",
+                                   "category":  "009",
+                                   "eventName":  "103年專門職業及技術人員高等考試建築師、技師、第二次食品技師考試暨普通考試不動產經紀人、記帳士考試",
+                                   "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2014\u0026e=103170",
+                                   "papers":  [
+                                                  {
+                                                      "id":  "0507",
+                                                      "title":  "流體力學與流體機械",
+                                                      "filename":  "exam-103-103170-0507.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0509",
+                                                      "title":  "熱力學與熱傳學",
+                                                      "filename":  "exam-103-103170-0509.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0511",
+                                                      "title":  "電工學（包括電機機械）",
+                                                      "filename":  "exam-103-103170-0511.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0513",
+                                                      "title":  "冷凍工程與設計",
+                                                      "filename":  "exam-103-103170-0513.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0514",
+                                                      "title":  "空調工程與設計",
+                                                      "filename":  "exam-103-103170-0514.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0515",
+                                                      "title":  "冷凍空調自動控制",
+                                                      "filename":  "exam-103-103170-0515.pdf"
+                                                  }
+                                              ]
+                               }
+                           ]
+            },
+    "102":  {
+                "events":  [
+                               {
+                                   "code":  "102180",
+                                   "category":  "009",
+                                   "eventName":  "102年專門職業及技術人員高等考試建築師、技師、第二次食品技師考試暨普通考試不動產經紀人、記帳士考試",
+                                   "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2013\u0026e=102180",
+                                   "papers":  [
+                                                  {
+                                                      "id":  "0505",
+                                                      "title":  "流體力學與流體機械",
+                                                      "filename":  "exam-102-102180-0505.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0507",
+                                                      "title":  "熱力學與熱傳學",
+                                                      "filename":  "exam-102-102180-0507.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0509",
+                                                      "title":  "電工學（包括電機機械）",
+                                                      "filename":  "exam-102-102180-0509.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0510",
+                                                      "title":  "冷凍工程與設計",
+                                                      "filename":  "exam-102-102180-0510.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0511",
+                                                      "title":  "空調工程與設計",
+                                                      "filename":  "exam-102-102180-0511.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0512",
+                                                      "title":  "冷凍空調自動控制",
+                                                      "filename":  "exam-102-102180-0512.pdf"
+                                                  }
+                                              ]
+                               }
+                           ]
+            },
+    "101":  {
+                "events":  [
+                               {
+                                   "code":  "101180",
+                                   "category":  "009",
+                                   "eventName":  "101年專門職業及技術人員高等考試建築師、技師、第二次食品技師考試暨普通考試不動產經紀人、記帳士考試",
+                                   "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2012\u0026e=101180",
+                                   "papers":  [
+                                                  {
+                                                      "id":  "0507",
+                                                      "title":  "流體力學與流體機械",
+                                                      "filename":  "exam-101-101180-0507.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0509",
+                                                      "title":  "熱力學與熱傳學",
+                                                      "filename":  "exam-101-101180-0509.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0511",
+                                                      "title":  "電工學（包括電機機械）",
+                                                      "filename":  "exam-101-101180-0511.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0513",
+                                                      "title":  "冷凍工程與設計",
+                                                      "filename":  "exam-101-101180-0513.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0514",
+                                                      "title":  "空調工程與設計",
+                                                      "filename":  "exam-101-101180-0514.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0515",
+                                                      "title":  "冷凍空調自動控制",
+                                                      "filename":  "exam-101-101180-0515.pdf"
+                                                  }
+                                              ]
+                               }
+                           ]
+            },
+    "100":  {
+                "events":  [
+                               {
+                                   "code":  "100230",
+                                   "category":  "009",
+                                   "eventName":  "100年專門職業及技術人員高等考試建築師、技師、第2次食品技師考試暨普通考試不動產經紀人、記帳士考試",
+                                   "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2011\u0026e=100230",
+                                   "papers":  [
+                                                  {
+                                                      "id":  "0405",
+                                                      "title":  "流體力學與流體機械",
+                                                      "filename":  "exam-100-100230-0405.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0407",
+                                                      "title":  "熱力學與熱傳學",
+                                                      "filename":  "exam-100-100230-0407.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0409",
+                                                      "title":  "電工學（包括電機機械）",
+                                                      "filename":  "exam-100-100230-0409.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0410",
+                                                      "title":  "冷凍工程與設計",
+                                                      "filename":  "exam-100-100230-0410.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0411",
+                                                      "title":  "空調工程與設計",
+                                                      "filename":  "exam-100-100230-0411.pdf"
+                                                  },
+                                                  {
+                                                      "id":  "0412",
+                                                      "title":  "冷凍空調自動控制",
+                                                      "filename":  "exam-100-100230-0412.pdf"
+                                                  }
+                                              ]
+                               }
+                           ]
+            },
+    "99":  {
+               "events":  [
+                              {
+                                  "code":  "099220",
+                                  "category":  "009",
+                                  "eventName":  "099年專門職業及技術人員高等考試建築師、技師考試暨普通考試不動產經紀人、記帳士考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2010\u0026e=099220",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "100",
+                                                     "title":  "冷凍工程與設計",
+                                                     "filename":  "exam-99-099220-100.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "200",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-99-099220-200.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "300",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-99-099220-300.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "400",
+                                                     "title":  "流體力學與流體機械",
+                                                     "filename":  "exam-99-099220-400.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "500",
+                                                     "title":  "熱力學與熱傳學",
+                                                     "filename":  "exam-99-099220-500.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "600",
+                                                     "title":  "電工學（包括電機機械）",
+                                                     "filename":  "exam-99-099220-600.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "98":  {
+               "events":  [
+                              {
+                                  "code":  "098220",
+                                  "category":  "009",
+                                  "eventName":  "098年專門職業及技術人員高等考試建築師、技師、消防設備師考試、普通考試不動產經紀人、記帳士、第二次消防設備士考試暨特種考試語言治療師考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2009\u0026e=098220",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍工程與設計",
+                                                     "filename":  "exam-98-098220-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-98-098220-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-98-098220-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "流體力學與流體機械",
+                                                     "filename":  "exam-98-098220-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "熱力學與熱傳學",
+                                                     "filename":  "exam-98-098220-5001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "6001",
+                                                     "title":  "電工學（包括電機機械）",
+                                                     "filename":  "exam-98-098220-6001.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "97":  {
+               "events":  [
+                              {
+                                  "code":  "097250",
+                                  "category":  "009",
+                                  "eventName":  "097年專門職業及技術人員高等考試建築師、技師考試暨普通考試記帳士考試、97年第二次高等暨普通考試消防設備人員考試、普通考試不動產經紀人考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2008\u0026e=097250",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍工程與設計",
+                                                     "filename":  "exam-97-097250-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-97-097250-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-97-097250-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "流體力學與流體機械",
+                                                     "filename":  "exam-97-097250-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "熱力學與熱傳學",
+                                                     "filename":  "exam-97-097250-5001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "6001",
+                                                     "title":  "電工學(包括電機機械)",
+                                                     "filename":  "exam-97-097250-6001.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "96":  {
+               "events":  [
+                              {
+                                  "code":  "096250",
+                                  "category":  "009",
+                                  "eventName":  "096年專門職業及技術人員高等考試建築師、技師、法醫師考試暨普通考試記帳士考試、96年第二次高等暨普通考試消防設備人員考試、普通考試不動產經紀人考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2007\u0026e=096250",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍工程與設計",
+                                                     "filename":  "exam-96-096250-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-96-096250-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-96-096250-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "流體力學與流體機械",
+                                                     "filename":  "exam-96-096250-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "熱力學與熱傳學",
+                                                     "filename":  "exam-96-096250-5001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "6001",
+                                                     "title":  "電工學（包括電機機械）",
+                                                     "filename":  "exam-96-096250-6001.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "95":  {
+               "events":  [
+                              {
+                                  "code":  "095240",
+                                  "category":  "009",
+                                  "eventName":  "095年專門職業及技術人員高等考試建築師、技師考試暨普通考試不動產經紀人、地政士考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2006\u0026e=095240",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍工程與設計",
+                                                     "filename":  "exam-95-095240-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-95-095240-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-95-095240-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "流體力學與流體機械",
+                                                     "filename":  "exam-95-095240-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "熱力學與熱傳學",
+                                                     "filename":  "exam-95-095240-5001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "6001",
+                                                     "title":  "電工學（包括電機機械）",
+                                                     "filename":  "exam-95-095240-6001.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "94":  {
+               "events":  [
+                              {
+                                  "code":  "094042",
+                                  "category":  "312",
+                                  "eventName":  "094年第一次專門職業及技術人員律師會計師建築師技師社會工作師醫事人員營養師獸醫人員中醫師土地登記專業代理人檢覈筆試暨醫師牙醫師檢覈筆試分階段考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2005\u0026e=094042",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-94-094042-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-94-094042-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-94-094042-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-94-094042-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-94-094042-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "094161",
+                                  "category":  "312",
+                                  "eventName":  "094年第二次專門職業及技術人員律師、會計師、建築師、技師、社會工作師、營養師、中醫師、土地登記專業代理人檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2005\u0026e=094161",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-94-094161-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-94-094161-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-94-094161-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-94-094161-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-94-094161-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "094260",
+                                  "category":  "009",
+                                  "eventName":  "094年專門職業及技術人員高等考試建築師、技師考試暨普通考試不動產經紀人、地政士、記帳士考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2005\u0026e=094260",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍工程與設計",
+                                                     "filename":  "exam-94-094260-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-94-094260-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-94-094260-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "流體力學與流體機械",
+                                                     "filename":  "exam-94-094260-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "熱力學與熱傳學",
+                                                     "filename":  "exam-94-094260-5001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "6001",
+                                                     "title":  "電工學（包括電機機械）",
+                                                     "filename":  "exam-94-094260-6001.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "93":  {
+               "events":  [
+                              {
+                                  "code":  "093141",
+                                  "category":  "312",
+                                  "eventName":  "093年專門職業及技術人員律師、會計師、技師、社會工作師、建築師、土地登記專業代理人檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2004\u0026e=093141",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-93-093141-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-93-093141-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-93-093141-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4011",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-93-093141-4011.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5011",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-93-093141-5011.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "093250",
+                                  "category":  "009",
+                                  "eventName":  "093年專門職業及技術人員建築師、技師、民間之公證人、不動產經紀人、地政士考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2004\u0026e=093250",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍工程與設計",
+                                                     "filename":  "exam-93-093250-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-93-093250-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-93-093250-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "熱力學與熱傳學",
+                                                     "filename":  "exam-93-093250-5001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "6001",
+                                                     "title":  "電工學（包括電機機械）",
+                                                     "filename":  "exam-93-093250-6001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "c041",
+                                                     "title":  "流體力學與流體機械",
+                                                     "filename":  "exam-93-093250-c041.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "92":  {
+               "events":  [
+                              {
+                                  "code":  "092150",
+                                  "category":  "712",
+                                  "eventName":  "092年專技律師、會計師、建築師、技師、社會工作師、土地登記專業代理人檢覈筆試、第二次專門職業及技術人員醫事人員、營養師、獸醫人員檢覈筆試暨醫師、牙醫師分階段考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2003\u0026e=092150",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-92-092150-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-92-092150-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-92-092150-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4011",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-92-092150-4011.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-92-092150-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "092270",
+                                  "category":  "010",
+                                  "eventName":  "092年專門職業及技術人員高等考試建築師、技師、不動產估價師暨普通考試不動產經紀人、地政士考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2003\u0026e=092270",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍工程與設計",
+                                                     "filename":  "exam-92-092270-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-92-092270-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-92-092270-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "熱力學與熱傳學",
+                                                     "filename":  "exam-92-092270-5001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "c021",
+                                                     "title":  "流體力學與流體機械",
+                                                     "filename":  "exam-92-092270-c021.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "c031",
+                                                     "title":  "電工學（包括電機機械）",
+                                                     "filename":  "exam-92-092270-c031.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "91":  {
+               "events":  [
+                              {
+                                  "code":  "091091",
+                                  "category":  "010",
+                                  "eventName":  "091年第一次專門職業及技術人員律師、會計師、建築師、技師、社會工作師、土地登記專業代理人檢覈筆試暨國軍轉任公務員考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2002\u0026e=091091",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1012",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-91-091091-1012.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-91-091091-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3011",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-91-091091-3011.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4002",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-91-091091-4002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-91-091091-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "091261",
+                                  "category":  "010",
+                                  "eventName":  "091年第二次專門職業及技術人員律師、會計師、建築師、技師、社會工作師、土地登記專業代理人檢覈筆試暨國軍轉任公務員考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2002\u0026e=091261",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-91-091261-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-91-091261-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-91-091261-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-91-091261-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-91-091261-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "091310",
+                                  "category":  "826",
+                                  "eventName":  "091年專門職業及技術人員高等考試建築師、技師、不動產估價師、呼吸治療師、心理師考試暨普通考試不動產經紀人考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2002\u0026e=091310",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍工程與設計",
+                                                     "filename":  "exam-91-091310-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-91-091310-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-91-091310-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "熱力學與熱傳學",
+                                                     "filename":  "exam-91-091310-5001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "c071",
+                                                     "title":  "電工學（包括電機機械）",
+                                                     "filename":  "exam-91-091310-c071.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "c081",
+                                                     "title":  "流體力學與流體機械",
+                                                     "filename":  "exam-91-091310-c081.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "90":  {
+               "events":  [
+                              {
+                                  "code":  "090080",
+                                  "category":  "109",
+                                  "eventName":  "090年第一次專技律師、社工、土登檢覈筆試、第一次國軍上校轉任覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2001\u0026e=090080",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1002",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-90-090080-1002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-90-090080-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-90-090080-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4002",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-90-090080-4002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-90-090080-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "090290",
+                                  "category":  "010",
+                                  "eventName":  "090年第二次律師、會計師、技師、土地登記、社會工作師、建築師暨第二次國軍上校軍官轉任檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2001\u0026e=090290",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-90-090290-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-90-090290-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3006",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-90-090290-3006.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-90-090290-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-90-090290-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "090340",
+                                  "category":  "010",
+                                  "eventName":  "090年專門職業及技術人員高等技師考試暨建築師、不動產估價師考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2001\u0026e=090340",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1002",
+                                                     "title":  "冷凍工程與設計",
+                                                     "filename":  "exam-90-090340-1002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2002",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-90-090340-2002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-90-090340-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "熱力學與熱傳學",
+                                                     "filename":  "exam-90-090340-5001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "c072",
+                                                     "title":  "電工學（包括電機機械）",
+                                                     "filename":  "exam-90-090340-c072.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "c081",
+                                                     "title":  "流體力學與流體機械",
+                                                     "filename":  "exam-90-090340-c081.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "89":  {
+               "events":  [
+                              {
+                                  "code":  "089100",
+                                  "category":  "110",
+                                  "eventName":  "089年第一次專技律師、社工、土登檢覈筆試、第一次國軍上校轉任覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2000\u0026e=089100",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-89-089100-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-89-089100-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3003",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-89-089100-3003.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-89-089100-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-89-089100-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "089250",
+                                  "category":  "010",
+                                  "eventName":  "089年第二次律師、會計師、技師、土地登記、社會工作師、建築師暨第二次國軍上校軍官轉任檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2000\u0026e=089250",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1002",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-89-089250-1002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-89-089250-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3002",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-89-089250-3002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4002",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-89-089250-4002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-89-089250-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "089290",
+                                  "category":  "016",
+                                  "eventName":  "089年專門職業及技術人員高等暨普通考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=2000\u0026e=089290",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調用熱力學與熱傳學",
+                                                     "filename":  "exam-89-089290-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-89-089290-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5002",
+                                                     "title":  "冷凍空調工程與設計",
+                                                     "filename":  "exam-89-089290-5002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "7002",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-89-089290-7002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "8001",
+                                                     "title":  "電工學",
+                                                     "filename":  "exam-89-089290-8001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "c081",
+                                                     "title":  "流體力學與流體機械",
+                                                     "filename":  "exam-89-089290-c081.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "88":  {
+               "events":  [
+                              {
+                                  "code":  "088060",
+                                  "category":  "110",
+                                  "eventName":  "088年第一次專技律師、社工、土登檢覈筆試、第一次國軍上校轉任覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1999\u0026e=088060",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1004",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-88-088060-1004.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-88-088060-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3002",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-88-088060-3002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-88-088060-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-88-088060-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "088230",
+                                  "category":  "010",
+                                  "eventName":  "088年第二次律師、會計師、建築師、技師、社工師、土地登記暨國軍上校轉任檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1999\u0026e=088230",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1004",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-88-088230-1004.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-88-088230-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3006",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-88-088230-3006.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4003",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-88-088230-4003.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-88-088230-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "088310",
+                                  "category":  "014",
+                                  "eventName":  "088年專門職業及技術人員高等暨普通考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1999\u0026e=088310",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1002",
+                                                     "title":  "冷凍空調用熱力學與熱傳學",
+                                                     "filename":  "exam-88-088310-1002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-88-088310-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5002",
+                                                     "title":  "冷凍空調工程與設計",
+                                                     "filename":  "exam-88-088310-5002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "7002",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-88-088310-7002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "8001",
+                                                     "title":  "電工學",
+                                                     "filename":  "exam-88-088310-8001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "c151",
+                                                     "title":  "流體力學與流體機械",
+                                                     "filename":  "exam-88-088310-c151.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "87":  {
+               "events":  [
+                              {
+                                  "code":  "087070",
+                                  "category":  "009",
+                                  "eventName":  "087年第一次專技人員律師、會計師、技師、土地登記暨第一次國軍上校轉任檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1998\u0026e=087070",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1002",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-87-087070-1002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-87-087070-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-87-087070-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-87-087070-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5002",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-87-087070-5002.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "087250",
+                                  "category":  "010",
+                                  "eventName":  "087年第二次國軍上校軍官轉任、律師、會計師、技師、建築師、土地登記、社工師檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1998\u0026e=087250",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-87-087250-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-87-087250-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3004",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-87-087250-3004.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-87-087250-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5002",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-87-087250-5002.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "087300",
+                                  "category":  "014",
+                                  "eventName":  "087年專門職業及技術人員高等暨普通考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1998\u0026e=087300",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1002",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-87-087300-1002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-87-087300-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "電工學",
+                                                     "filename":  "exam-87-087300-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "冷凍工程與設計",
+                                                     "filename":  "exam-87-087300-5001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "7001",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-87-087300-7001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "8001",
+                                                     "title":  "冷凍空調設備與系統修護",
+                                                     "filename":  "exam-87-087300-8001.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "86":  {
+               "events":  [
+                              {
+                                  "code":  "086060",
+                                  "category":  "009",
+                                  "eventName":  "086年第一次律師、會計師、建築師、技師、國軍上校轉任檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1997\u0026e=086060",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1002",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-86-086060-1002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-86-086060-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-86-086060-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4002",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-86-086060-4002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-86-086060-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "086200",
+                                  "category":  "110",
+                                  "eventName":  "086年第二次律師、會計師、建築師、技師、土地登記專業代理人檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1997\u0026e=086200",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1005",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-86-086200-1005.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-86-086200-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3004",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-86-086200-3004.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4002",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-86-086200-4002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-86-086200-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "086260",
+                                  "category":  "113",
+                                  "eventName":  "086年專門職業及技術人員高等、普通考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1997\u0026e=086260",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-86-086260-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-86-086260-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "電工學",
+                                                     "filename":  "exam-86-086260-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "冷凍工程與設計",
+                                                     "filename":  "exam-86-086260-5001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "7002",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-86-086260-7002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "8001",
+                                                     "title":  "冷凍空調設備與系統修護",
+                                                     "filename":  "exam-86-086260-8001.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "85":  {
+               "events":  [
+                              {
+                                  "code":  "085070",
+                                  "category":  "109",
+                                  "eventName":  "085年第一次律師、會計師、建築師、技師檢覈筆試、第一次國軍上校轉任檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1996\u0026e=085070",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1002",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-85-085070-1002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-85-085070-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-85-085070-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-85-085070-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-85-085070-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "085250",
+                                  "category":  "010",
+                                  "eventName":  "085年第二次律師、會計師、建築師、技師、土地登記專業代理人檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1996\u0026e=085250",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-85-085250-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-85-085250-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-85-085250-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-85-085250-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-85-085250-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "085340",
+                                  "category":  "114",
+                                  "eventName":  "085年專門職業及技術人員高等、普通考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1996\u0026e=085340",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1002",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-85-085340-1002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-85-085340-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "電工學",
+                                                     "filename":  "exam-85-085340-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5002",
+                                                     "title":  "冷凍工程與設計",
+                                                     "filename":  "exam-85-085340-5002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "7002",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-85-085340-7002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "8001",
+                                                     "title":  "冷凍空調設備與系統修護",
+                                                     "filename":  "exam-85-085340-8001.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "84":  {
+               "events":  [
+                              {
+                                  "code":  "084070",
+                                  "category":  "107",
+                                  "eventName":  "084年第一次專技建築師、技師、國軍上校以上軍官外職停役轉任公務人員檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1995\u0026e=084070",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-84-084070-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-84-084070-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-84-084070-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-84-084070-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5002",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-84-084070-5002.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "084250",
+                                  "category":  "010",
+                                  "eventName":  "084年第二次律師、會計師、建築師、技師、國軍上校轉任檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1995\u0026e=084250",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1002",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-84-084250-1002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-84-084250-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-84-084250-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4003",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-84-084250-4003.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-84-084250-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "084320",
+                                  "category":  "114",
+                                  "eventName":  "084年專門職業及技術人員高等暨普通考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1995\u0026e=084320",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-84-084320-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-84-084320-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "電工學",
+                                                     "filename":  "exam-84-084320-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5002",
+                                                     "title":  "冷凍工程與設計",
+                                                     "filename":  "exam-84-084320-5002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "7002",
+                                                     "title":  "空調工程與設計",
+                                                     "filename":  "exam-84-084320-7002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "8001",
+                                                     "title":  "冷凍空調設備與系統修護",
+                                                     "filename":  "exam-84-084320-8001.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "83":  {
+               "events":  [
+                              {
+                                  "code":  "083080",
+                                  "category":  "009",
+                                  "eventName":  "083年第一次建築師、技師、會計師、律師檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1994\u0026e=083080",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-83-083080-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-83-083080-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-83-083080-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4002",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-83-083080-4002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5002",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-83-083080-5002.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "083240",
+                                  "category":  "007",
+                                  "eventName":  "083年第二次專技建築師、技師、國軍上校以上軍官外職停役轉任公務人員檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1994\u0026e=083240",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-83-083240-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-83-083240-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3002",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-83-083240-3002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-83-083240-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-83-083240-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "083330",
+                                  "category":  "014",
+                                  "eventName":  "083年專門職業及技術人員高等暨普通考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1994\u0026e=083330",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1002",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-83-083330-1002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2011",
+                                                     "title":  "冷凍空調設備製造",
+                                                     "filename":  "exam-83-083330-2011.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2021",
+                                                     "title":  "電機機械",
+                                                     "filename":  "exam-83-083330-2021.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-83-083330-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5011",
+                                                     "title":  "電工學",
+                                                     "filename":  "exam-83-083330-5011.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5021",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-83-083330-5021.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "7004",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-83-083330-7004.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "8001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-83-083330-8001.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           },
+    "82":  {
+               "events":  [
+                              {
+                                  "code":  "082060",
+                                  "category":  "009",
+                                  "eventName":  "082年第一次建築師、技師、會計師、律師、土地登記代理人及國軍上校轉任檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1993\u0026e=082060",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-82-082060-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-82-082060-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3002",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-82-082060-3002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4001",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-82-082060-4001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-82-082060-5001.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "082190",
+                                  "category":  "010",
+                                  "eventName":  "082年第二次專技人員、國軍上校轉任檢覈筆試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1993\u0026e=082190",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-82-082190-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2001",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-82-082190-2001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-82-082190-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4002",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-82-082190-4002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5002",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-82-082190-5002.pdf"
+                                                 }
+                                             ]
+                              },
+                              {
+                                  "code":  "082280",
+                                  "category":  "019",
+                                  "eventName":  "082年專門職業及技術人員高等暨普通考試",
+                                  "sourceUrl":  "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx?y=1993\u0026e=082280",
+                                  "papers":  [
+                                                 {
+                                                     "id":  "1001",
+                                                     "title":  "冷凍空調原理",
+                                                     "filename":  "exam-82-082280-1001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2011",
+                                                     "title":  "冷凍空調設備製造",
+                                                     "filename":  "exam-82-082280-2011.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "2021",
+                                                     "title":  "電機機械",
+                                                     "filename":  "exam-82-082280-2021.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "3001",
+                                                     "title":  "冷凍空調設計",
+                                                     "filename":  "exam-82-082280-3001.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "4002",
+                                                     "title":  "冷凍工程",
+                                                     "filename":  "exam-82-082280-4002.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5012",
+                                                     "title":  "電工學",
+                                                     "filename":  "exam-82-082280-5012.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "5021",
+                                                     "title":  "冷凍空調自動控制",
+                                                     "filename":  "exam-82-082280-5021.pdf"
+                                                 },
+                                                 {
+                                                     "id":  "8001",
+                                                     "title":  "空調工程",
+                                                     "filename":  "exam-82-082280-8001.pdf"
+                                                 }
+                                             ]
+                              }
+                          ]
+           }
+}

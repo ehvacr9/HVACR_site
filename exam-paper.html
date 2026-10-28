@@ -150,7 +150,7 @@
     const subjectId = params.get("subject");
     const eventId = params.get("exam");
     const yearNumber = Number(year);
-    const isHistoricalYear = Number.isInteger(yearNumber) && yearNumber >= 90 && yearNumber <= 111;
+    const isHistoricalYear = Number.isInteger(yearNumber) && yearNumber >= 82 && yearNumber <= 111;
     const yearData = Object.prototype.hasOwnProperty.call(paperSets, year)
       ? paperSets[year]
       : null;
@@ -166,7 +166,7 @@
 
       if (isHistoricalYear) {
         try {
-          const response = await fetch("assets/exam-questions/exam-archive-90-111.json");
+          const response = await fetch("assets/exam-questions/exam-archive-82-111.json");
           if (!response.ok) throw new Error(`Archive request failed (${response.status})`);
           const archive = await response.json();
           const events = archive[String(yearNumber)]?.events ?? [];

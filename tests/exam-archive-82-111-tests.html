@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="zh-Hant">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>90-111 exam archive regression tests</title></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>82-111 exam archive regression tests</title></head>
 <body>
-  <h1>90-111 exam archive regression tests</h1>
+  <h1>82-111 exam archive regression tests</h1>
   <p>Serve the site over HTTP. Verifies official source data, every archived PDF, year navigation and sample preview routes for each exam session.</p>
   <pre id="results" role="status">Running...</pre>
   <script type="module">
@@ -39,16 +39,22 @@
         "Historical archive page has no external source links");
       assert(!archivePage.body.textContent.includes("依考選部公布的考試場次與科目整理"),
         "Removed the historical archive introduction");
-      const archiveYears = [...Array(22)].map((_, index) => String(111 - index));
+      const archiveYears = [...Array(30)].map((_, index) => String(111 - index));
       for (const year of archiveYears) {
         const card = yearsDocument.querySelector(`.year-card[href="exam-year-archive.html?year=${year}"]`);
         assert(card?.querySelector("h2")?.textContent === `${year} 年`, `${year} year card links to its archive`);
       }
 
-      const archiveResponse = await fetch("../assets/exam-questions/exam-archive-90-111.json");
+      const archiveResponse = await fetch("../assets/exam-questions/exam-archive-82-111.json");
       assert(archiveResponse.ok, "Historical archive metadata responds");
       const archive = await archiveResponse.json();
-      assert(Object.keys(archive).length === 22, "Archive includes 22 years");
+      assert(Object.keys(archive).length === 30, "Archive includes 30 years");
+      assert(archive["82"].events.length === 3, "82 includes all three official refrigeration engineering exam sessions");
+      assert(archive["82"].events.reduce((count, event) => count + event.papers.length, 0) === 18,
+        "82 includes all 18 technical question papers");
+      assert(archive["88"].events.some((event) => event.code === "088310" &&
+        event.eventName === "088年專門職業及技術人員高等暨普通考試"),
+      "88 general exam session uses the full official event name");
       const official2002Names = [
         "091年第一次專門職業及技術人員律師、會計師、建築師、技師、社會工作師、土地登記專業代理人檢覈筆試暨國軍轉任公務員考試",
         "091年第二次專門職業及技術人員律師、會計師、建築師、技師、社會工作師、土地登記專業代理人檢覈筆試暨國軍轉任公務員考試",
@@ -114,8 +120,8 @@
           }
         }
       }
-      assert(sessions === 30, "Archive includes all 30 official exam sessions");
-      assert(papers === 172, "Archive includes all 172 technical question papers");
+      assert(sessions === 54, "Archive includes all 54 official exam sessions");
+      assert(papers === 304, "Archive includes all 304 technical question papers");
       const highExam = archive["90"].events.find((event) => event.code === "090340");
       assert(highExam.papers.some((paper) => paper.id === "c072" && paper.title === "電工學（包括電機機械）"),
         "090340 includes electrical engineering");
@@ -172,7 +178,7 @@
       assert(sampleResponse.ok && new TextDecoder().decode(sampleBytes.subarray(0, 5)) === "%PDF-",
         "Sample archive PDF has a valid signature");
       output.dataset.kind = "success";
-      output.textContent = JSON.stringify({ status: "PASS", checks, years: 22, sessions, papers }, null, 2);
+      output.textContent = JSON.stringify({ status: "PASS", checks, years: 30, sessions, papers }, null, 2);
     } catch (error) {
       output.dataset.kind = "error";
       output.textContent = error.stack;

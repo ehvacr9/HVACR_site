@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="依考選部官方資料整理民國 90 至 111 年冷凍空調工程技師考題。">
+  <meta name="description" content="依考選部官方資料整理民國 82 至 111 年冷凍空調工程技師考題。">
   <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
   <title>歷年冷凍空調工程技師考題｜能源與冷凍空調學習網</title>
   <style>
@@ -112,7 +112,7 @@
     const groups = document.querySelector("#event-groups");
 
     async function renderArchive() {
-      if (!Number.isInteger(yearNumber) || yearNumber < 90 || yearNumber > 111) {
+      if (!Number.isInteger(yearNumber) || yearNumber < 82 || yearNumber > 111) {
         location.replace("exam-years.html");
         return;
       }
@@ -123,7 +123,7 @@
       document.title = `${yearNumber} 年冷凍空調工程技師考題｜能源與冷凍空調學習網`;
 
       try {
-        const response = await fetch("assets/exam-questions/exam-archive-90-111.json");
+        const response = await fetch("assets/exam-questions/exam-archive-82-111.json");
         if (!response.ok) throw new Error(`Archive request failed (${response.status})`);
         const archive = await response.json();
         const events = archive[String(yearNumber)]?.events ?? [];
