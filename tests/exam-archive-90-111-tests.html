@@ -49,6 +49,29 @@
       assert(archiveResponse.ok, "Historical archive metadata responds");
       const archive = await archiveResponse.json();
       assert(Object.keys(archive).length === 22, "Archive includes 22 years");
+      const official2002Names = [
+        "091年第一次專門職業及技術人員律師、會計師、建築師、技師、社會工作師、土地登記專業代理人檢覈筆試暨國軍轉任公務員考試",
+        "091年第二次專門職業及技術人員律師、會計師、建築師、技師、社會工作師、土地登記專業代理人檢覈筆試暨國軍轉任公務員考試",
+        "091年專門職業及技術人員高等考試建築師、技師、不動產估價師、呼吸治療師、心理師考試暨普通考試不動產經紀人考試",
+      ];
+      assert(JSON.stringify(archive["91"].events.map((event) => event.eventName)) === JSON.stringify(official2002Names),
+        "91 exam sessions use the official full names");
+      const year91Response = await fetch("../exam-year-archive.html?year=91");
+      assert(year91Response.ok, "91 archive page responds");
+      await new Promise((resolve, reject) => {
+        frame.onload = resolve;
+        frame.onerror = () => reject(new Error("Unable to open 91 archive page"));
+        frame.src = "../exam-year-archive.html?year=91";
+      });
+      await waitFor(
+        () => frame.contentDocument.querySelectorAll(".event-heading h2").length === 3,
+        "91 exam names did not render",
+      );
+      assert([...frame.contentDocument.querySelectorAll(".event-heading h2")]
+        .every((heading, index) => heading.textContent === official2002Names[index]),
+      "91 archive displays the official full names");
+      assert(!frame.contentDocument.querySelector(".track-name"),
+        "Historical archive omits the redundant exam category label");
 
       let sessions = 0;
       let papers = 0;

@@ -48,7 +48,6 @@
     .event-group + .event-group { margin-top: 40px; }
     .event-heading { margin: 0 0 14px; color: var(--muted); font-size: 15px; }
     .event-heading h2 { margin: 0; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; font-size: inherit; font-weight: 400; letter-spacing: 0; }
-    .track-name { margin: 0 0 32px; color: var(--green); font-size: 16px; font-weight: 700; }
     .subject-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: 920px; }
     .subject-card { display: block; padding: 21px 23px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); text-decoration: none; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
     .subject-card:hover { transform: translateY(-2px); border-color: #a9beb0; box-shadow: 0 12px 30px rgba(23, 43, 43, .08); }
@@ -146,10 +145,6 @@
           title.textContent = event.eventName;
           heading.append(title);
 
-          const track = document.createElement("p");
-          track.className = "track-name";
-          track.textContent = "專技高考｜冷凍空調工程技師";
-
           const grid = document.createElement("div");
           grid.className = "subject-grid";
           grid.setAttribute("aria-label", `${yearNumber} 年 ${event.code} 考科`);
@@ -169,7 +164,7 @@
             card.append(code, subject);
             grid.append(card);
           }
-          section.append(heading, track, grid);
+          section.append(heading, grid);
           groups.append(section);
         }
         status.hidden = true;

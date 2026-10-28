@@ -33,8 +33,16 @@
       const year = await fetch("../exam-year-112.html");
       assert(year.ok, "112 subject page responds");
       const subjectDocument = new DOMParser().parseFromString(await year.text(), "text/html");
+      assert(!subjectDocument.querySelector(".track-name"), "112 page omits the redundant exam category label");
       const cards = [...subjectDocument.querySelectorAll(".subject-card")];
       assert(cards.length === papers.length, "Six subject cards");
+      for (const yearNumber of [113, 114]) {
+        const response = await fetch(`../exam-year-${yearNumber}.html`, { cache: "no-store" });
+        assert(response.ok, `${yearNumber} subject page responds`);
+        const document = new DOMParser().parseFromString(await response.text(), "text/html");
+        assert(!document.querySelector(".track-name"),
+          `${yearNumber} page omits the redundant exam category label`);
+      }
       for (const [subject, filename] of papers) {
         const card = cards.find((item) =>
           new URL(item.getAttribute("href"), new URL("../exam-year-112.html", location.href)).searchParams.get("subject") === subject);
