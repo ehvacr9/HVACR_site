@@ -33,21 +33,18 @@
         frame.src = "../index.html?carousel-test=" + Date.now();
       });
       const getPosition = () => frame.contentDocument.querySelector(".gallery-position")?.textContent;
-      const toggle = () => frame.contentDocument.querySelector("[data-gallery-toggle]");
-      await waitFor(() => toggle() && getPosition() === "1 / 5", "Carousel controls did not initialize");
-      assert(toggle().getAttribute("aria-pressed") === "true", "Autoplay starts enabled");
+      await waitFor(() => getPosition() === "1 / 5", "Carousel controls did not initialize");
+      assert(!frame.contentDocument.querySelector("[data-gallery-toggle]"),
+        "Playback control is removed");
 
       await waitFor(() => getPosition() !== "1 / 5", "Carousel did not advance automatically", 9000);
-      const advancedPosition = getPosition();
-      toggle().click();
-      assert(toggle().getAttribute("aria-pressed") === "false", "Pause control disables autoplay");
-      await new Promise((resolve) => setTimeout(resolve, 6500));
-      assert(getPosition() === advancedPosition, "Paused carousel remains on the current photo");
-
-      toggle().click();
-      assert(toggle().getAttribute("aria-pressed") === "true", "Play control resumes autoplay");
-      await waitFor(() => getPosition() !== advancedPosition, "Resumed carousel did not advance", 9000);
-      output.textContent = "PASS: autoplay, pause, and resume";
+      const firstAdvancedPosition = getPosition();
+      await waitFor(
+        () => getPosition() !== firstAdvancedPosition,
+        "Carousel did not continue advancing automatically",
+        9000,
+      );
+      output.textContent = "PASS: autoplay continues without a playback control";
     } catch (error) {
       output.textContent = `Error: ${error.message}`;
       throw error;

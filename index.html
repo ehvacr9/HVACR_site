@@ -790,7 +790,6 @@
           <button class="gallery-button" type="button" data-gallery-direction="-1" aria-label="上一張照片">‹</button>
           <div class="gallery-pagination" aria-label="選擇照片"></div>
           <span class="gallery-position" aria-live="polite">1 / 5</span>
-          <button class="gallery-button" type="button" data-gallery-toggle aria-pressed="false" aria-label="開始照片自動切換">▶</button>
           <button class="gallery-button" type="button" data-gallery-direction="1" aria-label="下一張照片">›</button>
         </div>
       </div>
@@ -928,7 +927,6 @@
       const source = gallery.querySelector(".slide-source");
       const position = gallery.querySelector(".gallery-position");
       const pagination = gallery.querySelector(".gallery-pagination");
-      const autoplayToggle = gallery.querySelector("[data-gallery-toggle]");
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
       let activeSlideIndex = 0;
       let autoplayEnabled = !reducedMotion.matches;
@@ -948,15 +946,6 @@
         });
       };
 
-      const updateAutoplayToggle = () => {
-        autoplayToggle.setAttribute("aria-pressed", String(autoplayEnabled));
-        autoplayToggle.setAttribute(
-          "aria-label",
-          autoplayEnabled ? "暫停照片自動切換" : "開始照片自動切換",
-        );
-        autoplayToggle.textContent = autoplayEnabled ? "Ⅱ" : "▶";
-      };
-
       heroSlides.forEach((_, index) => {
         const dot = document.createElement("button");
         dot.className = "gallery-dot";
@@ -973,21 +962,8 @@
         });
       });
 
-      autoplayToggle.addEventListener("click", () => {
-        autoplayEnabled = !autoplayEnabled;
-        updateAutoplayToggle();
-      });
-      gallery.addEventListener("focusin", () => {
-        if (autoplayEnabled) {
-          autoplayEnabled = false;
-          updateAutoplayToggle();
-        }
-      });
       reducedMotion.addEventListener("change", (event) => {
-        if (event.matches && autoplayEnabled) {
-          autoplayEnabled = false;
-          updateAutoplayToggle();
-        }
+        autoplayEnabled = !event.matches;
       });
       window.setInterval(() => {
         if (!autoplayEnabled || document.hidden || gallery.matches(":hover")) return;
@@ -995,7 +971,6 @@
       }, 6000);
 
       showSlide(activeSlideIndex);
-      updateAutoplayToggle();
       gallery.classList.add("is-ready");
     }
 
