@@ -51,6 +51,7 @@
     .card-art { display: grid; min-height: 196px; place-items: center; overflow: hidden; border-radius: 7px; background: linear-gradient(145deg, #e5eee4, #cbded2); }
     .glycol-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 31px; letter-spacing: -.06em; }
     .chiller-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 24px; font-weight: 700; letter-spacing: -.04em; }
+    .mau-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 30px; font-weight: 700; letter-spacing: -.04em; }
     .card-copy { align-self: center; }
     .card-kicker { margin-bottom: 10px; color: var(--green); font-size: 12px; font-weight: 750; letter-spacing: .1em; }
     .card-copy h2 { margin-bottom: 12px; font-size: clamp(25px, 3vw, 34px); }
@@ -85,6 +86,7 @@
       .card-art { min-height: 145px; }
       .glycol-mark { width: 88px; height: 88px; font-size: 26px; }
       .chiller-mark { width: 88px; height: 88px; font-size: 21px; }
+      .mau-mark { width: 88px; height: 88px; font-size: 26px; }
       .scroll-top-button { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
@@ -126,6 +128,15 @@
           <p class="card-kicker">CENTRAL PLANT · 02</p>
           <h2>冰水主機 Chiller：從冷凍循環到現場運轉</h2>
           <p>用三個迴路看懂冰水主機，從流量估算、設備選型到試車、效率與故障排查。</p>
+          <span class="card-link">閱讀專欄 →</span>
+        </div>
+      </a>
+      <a class="column-card" href="mau.html">
+        <div class="card-art" aria-hidden="true"><span class="mau-mark">MAU</span></div>
+        <div class="card-copy">
+          <p class="card-kicker">VENTILATION · 03</p>
+          <h2>外氣空調箱 MAU：從外氣負荷到現場試車</h2>
+          <p>掌握外氣量與空氣平衡、濕空氣負荷估算、盤管與風機檢核、控制及試車排故。</p>
           <span class="card-link">閱讀專欄 →</span>
         </div>
       </a>
