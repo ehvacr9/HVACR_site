@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>書目專區回歸測試</title>
+  <title>全站導覽回歸測試</title>
 </head>
 <body>
-  <h1>書目專區回歸測試</h1>
-  <p>請以 HTTP 伺服器提供網站；測試書目頁、全站導覽與四本 ASHRAE PDF。</p>
+  <h1>全站導覽回歸測試</h1>
+  <p>請以 HTTP 伺服器提供網站；測試所有頁面的主導覽不顯示書目專區連結。</p>
   <pre id="results" role="status">Running...</pre>
   <script type="module">
     const output = document.querySelector("#results");
@@ -24,29 +24,12 @@
     ];
 
     try {
-      const response = await fetch("../references.html");
-      assert(response.ok, "Book bibliography page responds");
-      const page = new DOMParser().parseFromString(await response.text(), "text/html");
-      const books = [...page.querySelectorAll("[data-handbook]")];
-      assert(books.length === 4, "Bibliography lists all four ASHRAE handbooks");
-      assert(page.body.textContent.includes("依網站管理者取得之授權提供"),
-        "Bibliography identifies the authorized availability and copyright holder");
-
-      for (const link of books) {
-        const pdfResponse = await fetch(`../${link.getAttribute("href")}`, { method: "HEAD" });
-        assert(pdfResponse.ok, `${link.dataset.handbook} PDF responds`);
-        assert(pdfResponse.headers.get("content-type")?.includes("application/pdf"),
-          `${link.dataset.handbook} is served as a PDF`);
-        assert(Number(pdfResponse.headers.get("content-length")) > 0,
-          `${link.dataset.handbook} PDF is not empty`);
-      }
-
       for (const path of pages) {
-        const pageResponse = await fetch(`../${path}?bibliography-test=${Date.now()}`);
-        assert(pageResponse.ok, `${path} responds`);
-        const source = new DOMParser().parseFromString(await pageResponse.text(), "text/html");
-        assert(source.querySelector('nav a[href="references.html"]')?.textContent.trim() === "書目專區",
-          `${path} links to the bibliography in the site navigation`);
+        const response = await fetch(`../${path}?navigation-test=${Date.now()}`);
+        assert(response.ok, `${path} responds`);
+        const page = new DOMParser().parseFromString(await response.text(), "text/html");
+        assert(!page.querySelector('nav a[href="references.html"]'),
+          `${path} does not expose the bibliography in the site navigation`);
       }
 
       output.textContent = `PASS: ${checks} checks`;

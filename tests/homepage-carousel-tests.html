@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>首頁照片輪播回歸測試</title>
+</head>
+<body>
+  <h1>首頁照片輪播回歸測試</h1>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    const output = document.querySelector("#results");
+    const assert = (condition, label) => {
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+    const waitFor = async (condition, message, timeout = 10000) => {
+      const deadline = Date.now() + timeout;
+      while (Date.now() < deadline) {
+        if (condition()) return;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      throw new Error(message);
+    };
+    const frame = document.createElement("iframe");
+    frame.title = "Homepage photo carousel";
+    frame.style.cssText = "position:fixed;left:-10000px;width:1200px;height:900px;";
+    document.body.append(frame);
+
+    try {
+      await new Promise((resolve, reject) => {
+        frame.onload = resolve;
+        frame.onerror = () => reject(new Error("Unable to load homepage"));
+        frame.src = "../index.html?carousel-test=" + Date.now();
+      });
+      const getPosition = () => frame.contentDocument.querySelector(".gallery-position")?.textContent;
+      const toggle = () => frame.contentDocument.querySelector("[data-gallery-toggle]");
+      await waitFor(() => toggle() && getPosition() === "1 / 5", "Carousel controls did not initialize");
+      assert(toggle().getAttribute("aria-pressed") === "true", "Autoplay starts enabled");
+
+      await waitFor(() => getPosition() !== "1 / 5", "Carousel did not advance automatically", 9000);
+      const advancedPosition = getPosition();
+      toggle().click();
+      assert(toggle().getAttribute("aria-pressed") === "false", "Pause control disables autoplay");
+      await new Promise((resolve) => setTimeout(resolve, 6500));
+      assert(getPosition() === advancedPosition, "Paused carousel remains on the current photo");
+
+      toggle().click();
+      assert(toggle().getAttribute("aria-pressed") === "true", "Play control resumes autoplay");
+      await waitFor(() => getPosition() !== advancedPosition, "Resumed carousel did not advance", 9000);
+      output.textContent = "PASS: autoplay, pause, and resume";
+    } catch (error) {
+      output.textContent = `Error: ${error.message}`;
+      throw error;
+    } finally {
+      frame.remove();
+    }
+  </script>
+</body>
+</html>
