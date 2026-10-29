@@ -30,6 +30,12 @@
         const page = new DOMParser().parseFromString(await response.text(), "text/html");
         assert(page.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
           `${path} links to the technical columns`);
+        if (path === "columns.html") {
+          assert(page.querySelector("h1")?.textContent.trim() === "工程專欄",
+            "Engineering columns page has the matching page title");
+          assert(page.title.startsWith("工程專欄"),
+            "Engineering columns document title matches the page title");
+        }
         assert(!page.querySelector('nav a[href="references.html"]'),
           `${path} does not expose the bibliography in the site navigation`);
         if (["columns.html", "glycol.html", "chiller.html", "mau.html", "ahu.html"].includes(path)) {
