@@ -63,12 +63,23 @@
     .callout { margin: 20px 0; padding: 17px 19px; border-left: 3px solid var(--green); border-radius: 0 6px 6px 0; background: #edf1e7; color: #304542; }
     .callout strong { color: var(--ink); }
     .callout--warning { border-left-color: #9c5b22; background: #f7efe5; }
-    .airflow { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 20px 0 10px; }
-    .airflow-item { min-width: 102px; flex: 1 1 102px; padding: 12px 9px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); text-align: center; }
-    .airflow-item strong { display: block; color: var(--green); font-size: 12px; }
-    .airflow-item span { display: block; color: var(--muted); font-size: 11px; line-height: 1.5; }
-    .airflow-arrow { color: var(--green); font-size: 18px; font-weight: 750; }
-    .airflow-caption { margin-bottom: 0; color: var(--muted) !important; font-size: 12px; }
+    .system-figure { margin: 22px 0 10px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .diagram-scroll { overflow-x: auto; overscroll-behavior-inline: contain; }
+    .ahu-system-diagram { display: block; width: 100%; min-width: 760px; height: auto; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    .ahu-system-diagram text { fill: var(--ink); font-size: 14px; }
+    .ahu-system-diagram .small-label { fill: var(--muted); font-size: 12px; }
+    .ahu-system-diagram .section-label { font-size: 13px; font-weight: 700; }
+    .ahu-system-diagram .duct { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 4; }
+    .ahu-system-diagram .air-outdoor { stroke: #3978a8; }
+    .ahu-system-diagram .air-return { stroke: #ad7b2b; }
+    .ahu-system-diagram .air-exhaust { stroke: #74817e; }
+    .ahu-system-diagram .air-supply { stroke: var(--green); }
+    .ahu-system-diagram .water-supply { fill: none; stroke: #3978a8; stroke-width: 3; }
+    .ahu-system-diagram .water-return { fill: none; stroke: #ad7b2b; stroke-width: 3; }
+    .ahu-system-diagram .equipment { fill: #f3f5ef; stroke: #94a69a; stroke-width: 1.5; }
+    .ahu-system-diagram .zone { fill: #edf1e7; stroke: #94a69a; stroke-width: 1.5; }
+    .ahu-system-diagram .separator { stroke: #dce2d8; stroke-width: 1; }
+    .diagram-caption { margin: 10px 0 0; color: var(--muted) !important; font-size: 12px; }
     .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
     table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
     caption { padding: 13px 15px; color: var(--muted); font-size: 12px; text-align: left; }
@@ -150,18 +161,87 @@
           <h2>1. AHU 做什麼？它不等於整套空調系統</h2>
           <p>AHU 負責處理和輸送空氣；冷凍機、鍋爐、冷卻塔、風管、末端設備及控制系統則共同決定整體供冷、供熱與通風。AHU 可以是工廠組裝的套裝機，也可以依專案在現場組裝；服務一個區域或整棟建築，處理定風量或變風量空氣。選設備前要明確定義服務區、設計送風量與狀態、外氣需求、室內壓力、盤管負荷及風機能力。</p>
           <div class="callout"><strong>和 MAU 的差別：</strong>AHU 是較廣義的空氣處理機組，可混合外氣與回風；MAU 通常強調補入並處理室外新風。兩個名稱在不同廠商或專案上可能用法不同，不能單憑設備名稱推定回風比例、是否 100% 外氣或送風功能，應以系統圖、風量表和控制序列為準。</div>
-          <div class="airflow" role="img" aria-label="回風與外氣混合後經過過濾、盤管及送風機，再由風管送往空間">
-            <div class="airflow-item"><strong>回風</strong><span>空間返回空氣</span></div>
-            <span class="airflow-arrow" aria-hidden="true">＋</span>
-            <div class="airflow-item"><strong>外氣</strong><span>最低通風量／經濟器</span></div>
-            <span class="airflow-arrow" aria-hidden="true">→</span>
-            <div class="airflow-item"><strong>混風箱</strong><span>風門調節與混合</span></div>
-            <span class="airflow-arrow" aria-hidden="true">→</span>
-            <div class="airflow-item"><strong>濾網／盤管</strong><span>淨化與空氣處理</span></div>
-            <span class="airflow-arrow" aria-hidden="true">→</span>
-            <div class="airflow-item"><strong>風機／風管</strong><span>送往各服務區</span></div>
-          </div>
-          <p class="airflow-caption">原創概念流程。機組段落順序、回風／排風安排與是否設置熱回收，依系統設計而異。</p>
+          <figure class="system-figure">
+            <div class="diagram-scroll" tabindex="0" aria-label="可左右捲動查看 AHU 系統配置圖">
+              <svg class="ahu-system-diagram" viewBox="0 0 1040 550" role="img" aria-labelledby="ahu-diagram-title ahu-diagram-desc">
+                <title id="ahu-diagram-title">AHU 混風、處理與回風系統配置示意</title>
+                <desc id="ahu-diagram-desc">室外空氣經外氣風門進入混風箱，與空調區回風混合後通過濾網、加熱盤管、冷卻除濕盤管及送風機，再送入空調區。部分回風可依系統需求經排氣風門排至室外。冷卻盤管連接冰水供回水管並設冷凝水排水。</desc>
+                <defs>
+                  <marker id="arrow-outdoor" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#3978a8"/></marker>
+                  <marker id="arrow-return" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#ad7b2b"/></marker>
+                  <marker id="arrow-exhaust" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#74817e"/></marker>
+                  <marker id="arrow-supply" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#1d6252"/></marker>
+                </defs>
+
+                <rect class="zone" x="850" y="75" width="155" height="100" rx="8"/>
+                <text class="section-label" x="927" y="111" text-anchor="middle">空調服務區</text>
+                <text class="small-label" x="927" y="137" text-anchor="middle">室內負荷／人員</text>
+                <text class="small-label" x="927" y="157" text-anchor="middle">送風進入空間</text>
+
+                <text class="section-label" x="64" y="278">室外</text>
+                <text class="small-label" x="64" y="298">新鮮外氣</text>
+                <path class="duct air-outdoor" d="M80 325 H280" marker-end="url(#arrow-outdoor)"/>
+                <path d="M174 311 L190 325 L174 339 M190 311 L174 325 L190 339" fill="none" stroke="#3978a8" stroke-width="2"/>
+                <text class="small-label" x="181" y="366" text-anchor="middle">外氣風門</text>
+
+                <rect class="equipment" x="280" y="260" width="490" height="150" rx="5"/>
+                <text class="section-label" x="525" y="250" text-anchor="middle">空氣處理箱 AHU｜氣流方向 →</text>
+                <line class="separator" x1="405" y1="260" x2="405" y2="410"/>
+                <line class="separator" x1="470" y1="260" x2="470" y2="410"/>
+                <line class="separator" x1="530" y1="260" x2="530" y2="410"/>
+                <line class="separator" x1="630" y1="260" x2="630" y2="410"/>
+                <text class="section-label" x="342" y="290" text-anchor="middle">混風箱</text>
+                <text class="small-label" x="342" y="310" text-anchor="middle">外氣＋回風</text>
+                <text class="section-label" x="437" y="290" text-anchor="middle">濾網</text>
+                <text class="small-label" x="437" y="310" text-anchor="middle">過濾</text>
+                <text class="section-label" x="500" y="290" text-anchor="middle">加熱盤管</text>
+                <text class="section-label" x="580" y="290" text-anchor="middle">冷卻／除濕</text>
+                <text class="small-label" x="580" y="310" text-anchor="middle">盤管</text>
+                <text class="section-label" x="700" y="290" text-anchor="middle">送風機</text>
+
+                <path class="duct air-supply" d="M292 337 H395" marker-end="url(#arrow-supply)"/>
+                <path class="duct air-supply" d="M413 337 H460" marker-end="url(#arrow-supply)"/>
+                <path class="duct air-supply" d="M477 337 H520" marker-end="url(#arrow-supply)"/>
+                <path class="duct air-supply" d="M537 337 H620" marker-end="url(#arrow-supply)"/>
+                <circle cx="690" cy="345" r="29" fill="#fffefa" stroke="#1d6252" stroke-width="2"/>
+                <path d="M690 345 C671 337 679 324 690 345 C694 324 709 330 690 345 C710 347 707 362 690 345 C683 365 669 356 690 345" fill="#d9e7dd" stroke="#1d6252" stroke-width="1.5"/>
+                <path class="duct air-supply" d="M721 337 H755" marker-end="url(#arrow-supply)"/>
+
+                <path class="duct air-return" d="M950 175 V220 H360 V260" marker-end="url(#arrow-return)"/>
+                <path d="M350 244 L360 260 L370 244 M350 252 L360 268 L370 252" fill="none" stroke="#ad7b2b" stroke-width="2"/>
+                <text class="small-label" x="464" y="208" text-anchor="middle">回風（回風風門調節）</text>
+                <path class="duct air-return" d="M450 220 H400" marker-end="url(#arrow-return)"/>
+
+                <path class="duct air-exhaust" d="M650 220 V154" marker-end="url(#arrow-exhaust)"/>
+                <path d="M640 195 L650 205 L660 195 M640 203 L650 213 L660 203" fill="none" stroke="#74817e" stroke-width="2"/>
+                <text class="small-label" x="671" y="171">排氣／洩壓</text>
+                <text class="small-label" x="671" y="190">（依系統設計）</text>
+
+                <path class="duct air-supply" d="M770 337 H812 V145 H850" marker-end="url(#arrow-supply)"/>
+                <text class="small-label" x="817" y="370" text-anchor="middle">送風管</text>
+                <text class="small-label" x="854" y="195">送風</text>
+
+                <path d="M535 400 H625 V405 M535 400 V430" fill="none" stroke="#94a69a" stroke-width="2"/>
+                <path d="M535 430 V458" fill="none" stroke="#74817e" stroke-width="2" marker-end="url(#arrow-exhaust)"/>
+                <text class="small-label" x="446" y="454">集水盤／冷凝水排水</text>
+                <path class="water-supply" d="M555 482 V388" marker-end="url(#arrow-outdoor)"/>
+                <path class="water-return" d="M605 388 V482" marker-end="url(#arrow-return)"/>
+                <text class="small-label" x="540" y="504" text-anchor="middle">冰水供水 CHWS</text>
+                <text class="small-label" x="622" y="504">冰水回水 CHWR</text>
+
+                <line class="duct air-outdoor" x1="86" y1="526" x2="120" y2="526" marker-end="url(#arrow-outdoor)"/>
+                <text class="small-label" x="130" y="530">外氣</text>
+                <line class="duct air-return" x1="210" y1="526" x2="244" y2="526" marker-end="url(#arrow-return)"/>
+                <text class="small-label" x="254" y="530">回風</text>
+                <line class="duct air-exhaust" x1="324" y1="526" x2="358" y2="526" marker-end="url(#arrow-exhaust)"/>
+                <text class="small-label" x="368" y="530">排氣</text>
+                <line class="duct air-supply" x1="438" y1="526" x2="472" y2="526" marker-end="url(#arrow-supply)"/>
+                <text class="small-label" x="482" y="530">處理後送風</text>
+                <text class="small-label" x="620" y="530">實際風門、段落及熱回收配置依系統圖與控制序列確認。</text>
+              </svg>
+            </div>
+            <figcaption class="diagram-caption">AHU 系統配置概念圖：箭頭表示空氣流向；外氣與回風在混風箱匯合後依序經過濾、加熱／冷卻除濕及送風。部分回風作為排氣或洩壓，其比例與控制方式依設計決定。圖中送風管跨越回風管代表不同標高、彼此不連通。冷卻盤管另有冰水供回水及冷凝水排放；實際設備段落與順序依核定系統圖為準。手機可左右滑動查看完整圖面。</figcaption>
+          </figure>
         </section>
 
         <section id="layout">

@@ -52,8 +52,23 @@
       ]) {
         assert(text.includes(phrase), `AHU article includes ${phrase}`);
       }
-      assert(article.querySelectorAll(".airflow-item").length === 5,
-        "Article explains the main AHU air path");
+      const diagram = article.querySelector(".ahu-system-diagram");
+      assert(diagram?.getAttribute("role") === "img" && diagram.querySelector("title")
+        && diagram.querySelector("desc"),
+      "AHU system diagram has an accessible title and description");
+      for (const stream of ["air-outdoor", "air-return", "air-exhaust", "air-supply"]) {
+        assert(diagram.querySelector(`.${stream}`), `System diagram shows the ${stream} route`);
+      }
+      for (const component of [
+        "混風箱", "濾網", "加熱盤管", "冷卻／除濕", "送風機",
+        "空調服務區", "冰水供水 CHWS", "冰水回水 CHWR", "冷凝水排水",
+      ]) {
+        assert(diagram.textContent.includes(component), `System diagram labels ${component}`);
+      }
+      assert(article.querySelector(".diagram-caption")?.textContent.includes("回風")
+        && article.querySelector(".diagram-caption")?.textContent.includes("排氣")
+        && article.querySelector(".diagram-caption")?.textContent.includes("不連通"),
+      "System diagram caption explains airflow branches and the duct crossover");
       assert(article.querySelectorAll(".checklist li").length === 8,
         "Article includes an eight-step commissioning checklist");
       assert(article.querySelectorAll(".wide-table tbody tr").length === 22,
