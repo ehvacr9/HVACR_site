@@ -30,7 +30,7 @@
       const home = new DOMParser().parseFromString(await homeResponse.text(), "text/html");
       const columns = new DOMParser().parseFromString(await columnsResponse.text(), "text/html");
       const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
-      assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "專欄",
+      assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
         "Main navigation links to the column archive");
       assert(home.querySelector('a[href="columns.html"].button')?.textContent.includes("閱讀工程專欄"),
         "Homepage has a descriptive column link");

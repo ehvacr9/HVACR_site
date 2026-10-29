@@ -28,7 +28,7 @@
         const response = await fetch(`../${path}?navigation-test=${Date.now()}`);
         assert(response.ok, `${path} responds`);
         const page = new DOMParser().parseFromString(await response.text(), "text/html");
-        assert(page.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "專欄",
+        assert(page.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
           `${path} links to the technical columns`);
         assert(!page.querySelector('nav a[href="references.html"]'),
           `${path} does not expose the bibliography in the site navigation`);
