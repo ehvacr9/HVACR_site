@@ -61,7 +61,19 @@
     .answer-schematic figcaption, .answer-note, .answer-pending { color: var(--muted); font-size: 14px; }
     .answer-schematic .equipment { fill: var(--surface); stroke: var(--line); stroke-width: 2; }
     .answer-schematic .cycle-boundary { fill: none; stroke: var(--muted); stroke-dasharray: 8 6; stroke-width: 2; }
-    .answer-schematic .flow { fill: none; stroke: var(--green); stroke-width: 3; }
+    .answer-schematic .flow { fill: none; stroke-width: 3; }
+    .answer-schematic .refrigerant-flow { stroke: #287b9b; }
+    .answer-schematic .rich-solution-flow { stroke: #26836b; }
+    .answer-schematic .weak-solution-flow { stroke: #bd7628; }
+    .answer-schematic .reflux-flow { stroke: #756c9a; stroke-dasharray: 6 5; }
+    .answer-flow-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-bottom: 14px; color: var(--muted); font-size: 13px; }
+    .answer-flow-legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .answer-water-note { margin: 0 0 14px; padding: 12px 14px; border-left: 3px solid #756c9a; border-radius: 0 5px 5px 0; background: #f3f1f8; color: var(--ink); font-size: 14px; line-height: 1.8; }
+    .answer-flow-swatch { width: 23px; height: 0; border-top: 3px solid; }
+    .answer-flow-swatch.refrigerant-flow { border-color: #287b9b; }
+    .answer-flow-swatch.rich-solution-flow { border-color: #26836b; }
+    .answer-flow-swatch.weak-solution-flow { border-color: #bd7628; }
+    .answer-flow-swatch.reflux-flow { border-color: #756c9a; border-top-style: dashed; }
     .answer-schematic .work { fill: none; stroke: var(--ink); stroke-width: 3; }
     .answer-schematic .label { fill: var(--ink); font-size: 16px; }
     .answer-schematic .minor-label { fill: var(--muted); font-size: 14px; }
@@ -123,6 +135,7 @@
       <a href="about.html">關於我們</a>
       <a href="exam-years.html" aria-current="page">技師考題</a>
       <a href="terminology.html">術語辭典</a>
+      <a href="references.html">書目專區</a>
       <a href="tools.html">計算工具</a>
     </nav>
   </header>
@@ -141,7 +154,151 @@
       <details class="answer-item">
         <summary>第一題</summary>
         <div class="answer-content">
-          <p class="answer-pending">本題詳解尚在整理中。</p>
+          <div class="answer-step">
+            <h3>1. 已知（Known）</h3>
+            <ul class="answer-list">
+              <li>本題指定以氨（NH<sub>3</sub>）為冷媒的吸收式冷凍循環，要求說明循環與工作原理。</li>
+              <li>氨－水系統以氨為冷媒、水為吸收劑；題目未提供運轉狀態點或熱量數值。</li>
+              <li>題目另要求說明循環效率的表示方式。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>2. 求（Find）</h3>
+            <ul class="answer-list">
+              <li>畫出氨－水吸收式冷凍循環，標示主要設備、工質流向與熱量傳遞，並說明工作原理。</li>
+              <li>以性能係數（COP）表示冷凍循環效率，說明其計算式與物理意義。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>3. 示意圖（Schematic）</h3>
+            <figure class="answer-schematic">
+              <div class="answer-flow-legend" aria-label="循環管路圖例">
+                <span><i class="answer-flow-swatch refrigerant-flow" aria-hidden="true"></i>氨冷媒管路</span>
+                <span><i class="answer-flow-swatch rich-solution-flow" aria-hidden="true"></i>富氨溶液：吸收器 → 發生器</span>
+                <span><i class="answer-flow-swatch weak-solution-flow" aria-hidden="true"></i>稀氨（富水）溶液：發生器 → 吸收器</span>
+                <span><i class="answer-flow-swatch reflux-flow" aria-hidden="true"></i>精餾富水回流 → 發生器</span>
+              </div>
+              <svg viewBox="0 0 980 560" role="img" aria-labelledby="absorption-diagram-title absorption-diagram-desc">
+                <title id="absorption-diagram-title">氨－水吸收式冷凍循環示意圖</title>
+                <desc id="absorption-diagram-desc">圖中分別標示氨冷媒管路、氨較多的富氨溶液與水較多的稀氨溶液管路，以及精餾器分離出的水回流至發生器。富氨溶液經泵及溶液熱交換器送往發生器，稀氨溶液經溶液熱交換器及節流返回吸收器；精餾熱以Q_r表示。</desc>
+                <defs>
+                  <marker id="absorption-refrigerant-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 z" fill="#287b9b"></path>
+                  </marker>
+                  <marker id="absorption-rich-solution-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 z" fill="#26836b"></path>
+                  </marker>
+                  <marker id="absorption-weak-solution-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 z" fill="#bd7628"></path>
+                  </marker>
+                  <marker id="absorption-reflux-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 z" fill="#756c9a"></path>
+                  </marker>
+                  <marker id="absorption-heat-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"></path>
+                  </marker>
+                </defs>
+                <rect class="equipment" x="150" y="95" width="150" height="76" rx="5"></rect>
+                <text class="label" x="225" y="129" text-anchor="middle">發生器</text>
+                <text class="minor-label" x="225" y="153" text-anchor="middle">加熱使氨蒸出</text>
+                <rect class="equipment" x="400" y="80" width="145" height="68" rx="5"></rect>
+                <text class="label" x="472" y="110" text-anchor="middle">精餾器</text>
+                <text class="minor-label" x="472" y="132" text-anchor="middle">分離水蒸氣</text>
+                <rect class="equipment" x="720" y="95" width="150" height="76" rx="5"></rect>
+                <text class="label" x="795" y="129" text-anchor="middle">冷凝器</text>
+                <text class="minor-label" x="795" y="153" text-anchor="middle">放熱 Q̇<tspan baseline-shift="sub">c</tspan></text>
+                <rect class="equipment" x="720" y="370" width="150" height="76" rx="5"></rect>
+                <text class="label" x="795" y="404" text-anchor="middle">蒸發器</text>
+                <text class="minor-label" x="795" y="428" text-anchor="middle">吸熱 Q̇<tspan baseline-shift="sub">e</tspan></text>
+                <rect class="equipment" x="150" y="370" width="150" height="76" rx="5"></rect>
+                <text class="label" x="225" y="404" text-anchor="middle">吸收器</text>
+                <text class="minor-label" x="225" y="428" text-anchor="middle">放熱 Q̇<tspan baseline-shift="sub">a</tspan></text>
+                <path class="flow refrigerant-flow" d="M300 133 H400" marker-end="url(#absorption-refrigerant-arrow)"></path>
+                <text class="minor-label" x="350" y="121" text-anchor="middle">氨蒸氣</text>
+                <path class="flow refrigerant-flow" d="M545 114 H720" marker-end="url(#absorption-refrigerant-arrow)"></path>
+                <text class="minor-label" x="632" y="102" text-anchor="middle">氨冷媒蒸氣</text>
+                <path class="work" d="M545 88 H580" marker-end="url(#absorption-heat-arrow)"></path>
+                <text class="minor-label" x="615" y="82" text-anchor="middle">精餾排熱 Q̇<tspan baseline-shift="sub">r</tspan></text>
+                <path class="flow reflux-flow" d="M472 148 V195 H325 V150 H300" marker-end="url(#absorption-reflux-arrow)"></path>
+                <text class="minor-label" x="395" y="187" text-anchor="middle">富水回流液 → 發生器</text>
+                <path class="flow refrigerant-flow" d="M795 171 V260" marker-end="url(#absorption-refrigerant-arrow)"></path>
+                <path class="equipment" d="M783 207 L795 220 L807 207 Z"></path>
+                <text class="minor-label" x="820" y="228">氨節流閥</text>
+                <path class="flow refrigerant-flow" d="M795 260 V370" marker-end="url(#absorption-refrigerant-arrow)"></path>
+                <text class="minor-label" x="815" y="315">低壓液氨</text>
+                <path class="flow refrigerant-flow" d="M720 408 H300" marker-end="url(#absorption-refrigerant-arrow)"></path>
+                <text class="minor-label" x="510" y="396" text-anchor="middle">氨蒸氣返回吸收器</text>
+                <path class="flow rich-solution-flow" d="M150 408 H80 V465" marker-end="url(#absorption-rich-solution-arrow)"></path>
+                <circle class="equipment" cx="80" cy="465" r="20"></circle>
+                <text class="minor-label" x="80" y="470" text-anchor="middle">泵</text>
+                <text class="minor-label" x="130" y="497">富氨溶液（NH₃多）</text>
+                <path class="flow rich-solution-flow" d="M100 465 H520 M675 465 H700 V225 H320 V150 H300" marker-end="url(#absorption-rich-solution-arrow)"></path>
+                <rect class="equipment" x="520" y="420" width="155" height="70" rx="5"></rect>
+                <text class="label" x="597" y="443" text-anchor="middle">溶液熱交換器</text>
+                <text class="minor-label" x="597" y="482" text-anchor="middle">富液預熱、稀液冷卻</text>
+                <path class="flow rich-solution-flow" d="M520 465 H675" marker-end="url(#absorption-rich-solution-arrow)"></path>
+                <path class="flow weak-solution-flow" d="M225 171 V255 H600 V420" marker-end="url(#absorption-weak-solution-arrow)"></path>
+                <text class="minor-label" x="420" y="243" text-anchor="middle">稀氨（富水）溶液 →</text>
+                <path class="flow weak-solution-flow" d="M600 490 V520 H225 V446" marker-end="url(#absorption-weak-solution-arrow)"></path>
+                <path class="equipment" d="M345 508 L357 520 L345 532 Z"></path>
+                <text class="minor-label" x="350" y="550" text-anchor="middle">稀溶液節流閥</text>
+                <path class="work" d="M225 35 V89" marker-end="url(#absorption-heat-arrow)"></path>
+                <text class="label" x="240" y="61">供熱 Q̇<tspan baseline-shift="sub">g</tspan></text>
+                <path class="work" d="M875 133 H910" marker-end="url(#absorption-heat-arrow)"></path>
+                <text class="minor-label" x="940" y="125" text-anchor="middle">排熱</text>
+                <path class="work" d="M910 408 H875" marker-end="url(#absorption-heat-arrow)"></path>
+                <text class="minor-label" x="940" y="400" text-anchor="middle">冷凍空間</text>
+                <path class="work" d="M150 428 H115" marker-end="url(#absorption-heat-arrow)"></path>
+                <text class="minor-label" x="80" y="448" text-anchor="middle">排熱</text>
+                <path class="work" d="M12 465 H54" marker-end="url(#absorption-heat-arrow)"></path>
+                <text class="minor-label" x="33" y="443" text-anchor="middle">Ẇ<tspan baseline-shift="sub">p</tspan></text>
+              </svg>
+              <p class="answer-water-note"><strong>水的路徑：</strong>水不是獨立的冷媒迴路。發生器送出的稀氨（富水）溶液，經熱交換與節流回到吸收器；水在吸收器吸收氨後，成為富氨溶液，再由溶液泵送回發生器。精餾器另將夾帶的水蒸氣凝成富水回流液，送回發生器。</p>
+              <figcaption>依單效氨－水吸收循環重繪，非複製手冊插圖。藍線為氨冷媒管路，綠線為吸收器至發生器的富氨溶液，橙線為發生器回吸收器的稀氨（富水）溶液，紫色虛線為精餾富水回流。圖中採用氨含量標示溶液組成；基本圖未畫出可回收顯熱的冷媒熱交換器（RHX），實際設計亦可採溶液冷卻精餾器（SCR）。</figcaption>
+            </figure>
+          </div>
+          <div class="answer-step">
+            <h3>4. 假設（Assumptions）</h3>
+            <ul class="answer-list">
+              <li>循環達穩態運轉，各設備與管路無洩漏。</li>
+              <li>氨為冷媒、水為揮發性吸收劑；高壓側設精餾裝置，使氨蒸氣與水分離，水分凝結回流至發生器。</li>
+              <li>除泵功外，忽略各設備的動能與位能變化；對外熱損失及管路壓降忽略不計。</li>
+              <li>圖示採外部排熱的簡化精餾器，精餾排熱記為 Q̇<sub>r</sub>；若採內部溶液冷卻精餾器，熱量回收屬循環內部交換，整體能量平衡須依實際控制體調整。</li>
+              <li>題目未提供濃度及狀態點，因此只說明典型循環與性能係數，不假設數值或計算數值 COP。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>5. 性質與資料（Properties）</h3>
+            <ul class="answer-list">
+              <li>氨－水循環中氨為冷媒、水為吸收劑。水隨氨－水溶液在吸收器與發生器間循環：發生器產生稀氨（富水）溶液，吸收器吸收氨後使溶液轉為富氨，再由泵送回發生器。因水也會揮發，高壓側需以精餾／蒸餾裝置降低水分夾帶；溶液與冷媒熱交換可回收顯熱並改善循環性能。</li>
+              <li>本題未給定氨－水溶液濃度、壓力、溫度或物性資料，故不需查表，亦無法由題目求出數值 COP。</li>
+              <li>資料依據：ASHRAE, 2021 Handbook—Fundamentals（SI）, Chapter 2, p. 2.14（吸收循環理想 COP 定義）及 §3.8 “Ammonia/Water Absorption Cycles,” pp. 2.19–2.20, Fig. 22；ASHRAE, 2022 Handbook—Refrigeration（SI）, Chapter 18, §2.3 “Industrial Absorption Refrigeration Units,” pp. 18.15–18.16。圖依原理重繪，未複製手冊插圖。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>6. 分析（Analysis）</h3>
+            <p><strong>工作原理：</strong>氨－水吸收式冷凍以熱能取代大部分壓縮機功，利用「吸收－加熱解吸」完成冷媒循環：</p>
+            <ol class="answer-list">
+              <li>發生器送出的稀氨（富水）溶液進入吸收器，吸收蒸發器送來的低壓氨蒸氣而成為富氨溶液；吸收過程放出熱量 Q̇<sub>a</sub>。</li>
+              <li>溶液泵將富氨溶液升壓並送往發生器。供熱 Q̇<sub>g</sub> 使氨從溶液中解吸；氨蒸氣通過精餾器，水蒸氣凝結成富水回流液返回發生器。剩餘的稀氨（富水）溶液經溶液熱交換器回收熱量、節流降壓後返回吸收器，完成水隨溶液循環的路徑。</li>
+              <li>高壓氨蒸氣在冷凝器放熱 Q̇<sub>c</sub> 凝結成液氨；液氨經節流降壓後進入蒸發器。</li>
+              <li>低壓液氨在蒸發器吸收冷凍空間熱量 Q̇<sub>e</sub> 而汽化，氨蒸氣返回吸收器，完成冷媒迴路。實際機組可利用冷媒熱交換器（RHX）回收顯熱，並依設計設置溶液冷卻精餾器（SCR）。</li>
+            </ol>
+            <p><strong>循環效率的表示：</strong>吸收式冷凍的熱 COP 定義為冷凍效果除以驅動熱輸入；此為效能比，不是以百分比表示的熱效率：</p>
+            <math class="answer-equation-display" display="block" aria-label="吸收式冷凍熱性能係數等於蒸發器冷凍效果除以發生器驅動熱輸入">
+              <mrow><msub><mtext>COP</mtext><mi>R</mi></msub><mo>=</mo><mfrac><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>e</mi></msub><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>g</mi></msub></mfrac></mrow>
+            </math>
+            <p>本題採用的簡化循環穩態能量平衡為：</p>
+            <math class="answer-equation-display" display="block" aria-label="發生器供熱加蒸發器吸熱及泵功等於冷凝器吸收器與精餾器排熱總和">
+              <mrow><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>g</mi></msub><mo>+</mo><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>e</mi></msub><mo>+</mo><msub><mover><mi>W</mi><mo>˙</mo></mover><mi>p</mi></msub><mo>=</mo><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>c</mi></msub><mo>+</mo><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>a</mi></msub><mo>+</mo><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>r</mi></msub></mrow>
+            </math>
+            <p>Q̇<sub>e</sub> 為蒸發器冷凍效果，Q̇<sub>g</sub> 為發生器驅動熱，Ẇ<sub>p</sub> 為溶液泵功，Q̇<sub>r</sub> 為本簡化圖所示的精餾排熱。標準熱 COP 使用 Q̇<sub>e</sub>/Q̇<sub>g</sub>；泵的電力應另列，若計算整機總能耗指標，須清楚說明能量邊界與採用的定義。</p>
+          </div>
+          <div class="answer-step">
+            <h3>7. 討論（Comments）</h3>
+            <p>2021 ASHRAE《Fundamentals》第 2 章以冷卻效果與驅動熱量之比定義吸收循環 COP，並指出氨－水循環因水也會揮發，需在高壓側精餾；溶液冷卻精餾器回流及冷媒熱交換器可用於熱回收。這些配置會影響實際 COP，需依設備與狀態點評估。</p>
+            <p class="answer-note">本圖為溶液泵驅動的氨－水循環，不是 ASHRAE《Refrigeration》Chapter 18, §2.2, pp. 18.14–18.15 所述另含氫氣迴路與氣泡泵的家用擴散吸收式冰箱。若要計算本題數值 COP，尚需各設備熱量或氨－水溶液狀態點與濃度。</p>
+          </div>
         </div>
         <button class="answer-collapse" type="button">收起答案</button>
       </details>

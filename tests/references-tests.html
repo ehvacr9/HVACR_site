@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>書目專區回歸測試</title>
+</head>
+<body>
+  <h1>書目專區回歸測試</h1>
+  <p>請以 HTTP 伺服器提供網站；測試書目頁、全站導覽與四本 ASHRAE PDF。</p>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+    const pages = [
+      "index.html", "about.html", "founder.html", "terminology.html", "exam-years.html",
+      "exam-year-112.html", "exam-year-113.html", "exam-year-114.html", "exam-year-archive.html",
+      "exam-paper.html", "humid-air.html", "refrigeration-cycle.html", "tools.html",
+      "unit-converter.html", "water-refrigerant.html",
+    ];
+
+    try {
+      const response = await fetch("../references.html");
+      assert(response.ok, "Book bibliography page responds");
+      const page = new DOMParser().parseFromString(await response.text(), "text/html");
+      const books = [...page.querySelectorAll("[data-handbook]")];
+      assert(books.length === 4, "Bibliography lists all four ASHRAE handbooks");
+      assert(page.body.textContent.includes("依網站管理者取得之授權提供"),
+        "Bibliography identifies the authorized availability and copyright holder");
+
+      for (const link of books) {
+        const pdfResponse = await fetch(`../${link.getAttribute("href")}`, { method: "HEAD" });
+        assert(pdfResponse.ok, `${link.dataset.handbook} PDF responds`);
+        assert(pdfResponse.headers.get("content-type")?.includes("application/pdf"),
+          `${link.dataset.handbook} is served as a PDF`);
+        assert(Number(pdfResponse.headers.get("content-length")) > 0,
+          `${link.dataset.handbook} PDF is not empty`);
+      }
+
+      for (const path of pages) {
+        const pageResponse = await fetch(`../${path}?bibliography-test=${Date.now()}`);
+        assert(pageResponse.ok, `${path} responds`);
+        const source = new DOMParser().parseFromString(await pageResponse.text(), "text/html");
+        assert(source.querySelector('nav a[href="references.html"]')?.textContent.trim() === "書目專區",
+          `${path} links to the bibliography in the site navigation`);
+      }
+
+      output.textContent = `PASS: ${checks} checks`;
+    } catch (error) {
+      output.textContent = `Error: ${error.message}`;
+      throw error;
+    }
+  </script>
+</body>
+</html>

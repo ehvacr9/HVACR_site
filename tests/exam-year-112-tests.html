@@ -67,6 +67,47 @@
       assert([...answers.querySelectorAll(".answer-item summary")].map((summary) => summary.textContent.trim()).join("|")
         === "第一題|第二題|第三題|第四題",
       "114 refrigeration reference answers contain four clickable question items");
+      const firstAnswer = answers.querySelectorAll(".answer-item")[0];
+      assert(firstAnswer.querySelectorAll(".answer-step h3").length === 7,
+        "114 refrigeration first-question answer follows all seven requested steps");
+      assert(firstAnswer.textContent.includes("氨") && firstAnswer.textContent.includes("吸收器")
+        && firstAnswer.textContent.includes("精餾器") && firstAnswer.textContent.includes("COP"),
+      "114 refrigeration first-question answer explains the ammonia-water cycle and COP");
+      assert(firstAnswer.textContent.includes("2021 Handbook—Fundamentals")
+        && firstAnswer.textContent.includes("Fig. 22")
+        && firstAnswer.textContent.includes("2022 Handbook—Refrigeration")
+        && firstAnswer.textContent.includes("氣泡泵"),
+      "114 refrigeration first-question answer cites ASHRAE ammonia-water references and distinguishes the hydrogen diffusion refrigerator");
+      const absorptionDiagram = firstAnswer.querySelector("#absorption-diagram-title")?.closest("svg");
+      const absorptionFlowPaths = [...(absorptionDiagram?.querySelectorAll(".flow") ?? [])].map((path) => path.getAttribute("d"));
+      assert(absorptionDiagram?.getAttribute("viewBox") === "0 0 980 560"
+        && firstAnswer.textContent.includes("富氨溶液（NH₃多）")
+        && firstAnswer.textContent.includes("稀氨（富水）溶液")
+        && firstAnswer.textContent.includes("富水回流液 → 發生器")
+        && firstAnswer.textContent.includes("水不是獨立的冷媒迴路")
+        && firstAnswer.textContent.includes("RHX")
+        && firstAnswer.textContent.includes("SCR")
+        && absorptionFlowPaths.includes("M100 465 H520 M675 465 H700 V225 H320 V150 H300")
+        && absorptionFlowPaths.includes("M520 465 H675")
+        && absorptionFlowPaths.includes("M225 171 V255 H600 V420")
+        && absorptionFlowPaths.includes("M600 490 V520 H225 V446")
+        && absorptionFlowPaths.includes("M472 148 V195 H325 V150 H300"),
+      "114 refrigeration first-question diagram shows distinct ammonia-rich, ammonia-poor and water-reflux pipe loops");
+      const flowLegend = [...(firstAnswer.querySelectorAll(".answer-flow-legend .answer-flow-swatch") ?? [])]
+        .map((swatch) => swatch.classList[1]);
+      assert(flowLegend.join("|") === "refrigerant-flow|rich-solution-flow|weak-solution-flow|reflux-flow"
+        && [...absorptionDiagram.querySelectorAll(".flow")].every((path) =>
+          path.matches(".refrigerant-flow, .rich-solution-flow, .weak-solution-flow, .reflux-flow")),
+      "114 refrigeration first-question diagram uses a legend and distinct pipe colors for each fluid circuit");
+      const firstEquations = [...firstAnswer.querySelectorAll("math.answer-equation-display")];
+      const thermalCop = firstEquations.find((equation) =>
+        equation.getAttribute("aria-label").includes("冷凍效果除以發生器驅動熱輸入"));
+      const copFraction = thermalCop?.querySelector("mfrac");
+      assert(firstEquations.length === 2 && firstEquations.every((equation) => equation.getBoundingClientRect().height > 0)
+        && copFraction?.firstElementChild?.textContent === "Q˙e"
+        && copFraction.lastElementChild?.textContent === "Q˙g"
+        && firstEquations.some((equation) => equation.getAttribute("aria-label").includes("精餾器排熱")),
+      "114 refrigeration first-question thermal COP and full-cycle energy balance render as native MathML");
       const thirdAnswer = answers.querySelectorAll(".answer-item")[2];
       assert(thirdAnswer.querySelectorAll(".answer-step h3").length === 7,
         "114 refrigeration third-question answer follows all seven requested steps");
@@ -86,8 +127,8 @@
       thirdAnswer.open = true;
       thirdAnswer.querySelector(".answer-collapse").click();
       assert(!thirdAnswer.open, "Answer collapse button closes the expanded question");
-      assert([...answers.querySelectorAll(".answer-pending")].length === 3,
-        "unwritten questions are clearly marked as pending");
+      assert([...answers.querySelectorAll(".answer-pending")].length === 2,
+        "the two unwritten questions are clearly marked as pending");
       const scrollTopButton = frame.contentDocument.querySelector(".scroll-top-button");
       assert(scrollTopButton && scrollTopButton.hidden, "Scroll-to-top button starts hidden at page top");
       frame.contentWindow.scrollTo({ top: 500, behavior: "auto" });
