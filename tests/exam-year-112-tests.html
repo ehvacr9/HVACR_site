@@ -30,10 +30,12 @@
       const yearDocument = new DOMParser().parseFromString(await years.text(), "text/html");
       assert(yearDocument.querySelector('.year-card[href="exam-year-112.html"] h2')?.textContent === "112 年",
         "112 year is available in archive");
-      const year = await fetch("../exam-year-112.html");
+      const year = await fetch("../exam-year-112.html", { cache: "no-store" });
       assert(year.ok, "112 subject page responds");
       const subjectDocument = new DOMParser().parseFromString(await year.text(), "text/html");
       assert(!subjectDocument.querySelector(".track-name"), "112 page omits the redundant exam category label");
+      assert(subjectDocument.querySelector(".scroll-top-button"),
+        "112 subject page includes the scroll-to-top button");
       const cards = [...subjectDocument.querySelectorAll(".subject-card")];
       assert(cards.length === papers.length, "Six subject cards");
       for (const yearNumber of [113, 114]) {
@@ -42,7 +44,65 @@
         const document = new DOMParser().parseFromString(await response.text(), "text/html");
         assert(!document.querySelector(".track-name"),
           `${yearNumber} page omits the redundant exam category label`);
+        assert(document.querySelector(".scroll-top-button"),
+          `${yearNumber} subject page includes the scroll-to-top button`);
       }
+      const yearsResponse = await fetch("../exam-years.html", { cache: "no-store" });
+      assert(yearsResponse.ok, "Exam year index responds");
+      const yearsDocument = new DOMParser().parseFromString(await yearsResponse.text(), "text/html");
+      assert(yearsDocument.querySelector(".scroll-top-button"),
+        "Exam year index includes the scroll-to-top button");
+      const archiveTemplateResponse = await fetch("../exam-year-archive.html", { cache: "no-store" });
+      assert(archiveTemplateResponse.ok, "Historical subject-page template responds");
+      const archiveTemplate = new DOMParser().parseFromString(await archiveTemplateResponse.text(), "text/html");
+      assert(archiveTemplate.querySelector(".scroll-top-button"),
+        "Historical subject pages include the scroll-to-top button");
+      await new Promise((resolve, reject) => {
+        frame.onload = resolve;
+        frame.onerror = () => reject(new Error("Unable to open the 114 refrigeration paper viewer"));
+        frame.src = `../exam-paper.html?year=114&subject=refrigeration&test=${Date.now()}`;
+      });
+      const answers = frame.contentDocument.querySelector("[data-reference-answers]");
+      assert(answers && !answers.hidden, "114 refrigeration reference answers are shown");
+      assert([...answers.querySelectorAll(".answer-item summary")].map((summary) => summary.textContent.trim()).join("|")
+        === "第一題|第二題|第三題|第四題",
+      "114 refrigeration reference answers contain four clickable question items");
+      const thirdAnswer = answers.querySelectorAll(".answer-item")[2];
+      assert(thirdAnswer.querySelectorAll(".answer-step h3").length === 7,
+        "114 refrigeration third-question answer follows all seven requested steps");
+      assert(thirdAnswer.textContent.includes("62.63") && thirdAnswer.textContent.includes("31,315"),
+        "114 refrigeration third-question answer includes the calculated heat rejection and area");
+      const equations = [...thirdAnswer.querySelectorAll("math.answer-equation-display")];
+      assert(equations.length === 7 && equations.every((equation) => equation.getBoundingClientRect().height > 0)
+        && equations.some((equation) => equation.querySelector("mfrac")),
+      "114 refrigeration formulas are rendered as native MathML");
+      const collapseButton = thirdAnswer.querySelector(".answer-collapse");
+      const collapseChevron = getComputedStyle(collapseButton, "::after");
+      assert(collapseButton?.textContent.trim() === "收起答案"
+        && getComputedStyle(collapseButton).color === "rgb(112, 122, 118)"
+        && collapseChevron.content !== "none" && collapseChevron.borderTopWidth !== "0px"
+        && collapseChevron.transform === "matrix(0.707107, -0.707107, 0.707107, 0.707107, 0, 0)",
+      "114 refrigeration solution has a gray collapse button with an upward chevron");
+      thirdAnswer.open = true;
+      thirdAnswer.querySelector(".answer-collapse").click();
+      assert(!thirdAnswer.open, "Answer collapse button closes the expanded question");
+      assert([...answers.querySelectorAll(".answer-pending")].length === 3,
+        "unwritten questions are clearly marked as pending");
+      const scrollTopButton = frame.contentDocument.querySelector(".scroll-top-button");
+      assert(scrollTopButton && scrollTopButton.hidden, "Scroll-to-top button starts hidden at page top");
+      frame.contentWindow.scrollTo({ top: 500, behavior: "auto" });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      assert(!scrollTopButton.hidden, "Scroll-to-top button appears after scrolling");
+      scrollTopButton.click();
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      assert(frame.contentWindow.scrollY <= 1, "Scroll-to-top button returns the page to the top");
+      await new Promise((resolve, reject) => {
+        frame.onload = resolve;
+        frame.onerror = () => reject(new Error("Unable to open the 114 electrical paper viewer"));
+        frame.src = `../exam-paper.html?year=114&subject=electrical&test=${Date.now()}`;
+      });
+      assert(frame.contentDocument.querySelector("[data-reference-answers]")?.hidden,
+        "114 refrigeration reference answers are hidden for other subjects");
       for (const [subject, filename] of papers) {
         const card = cards.find((item) =>
           new URL(item.getAttribute("href"), new URL("../exam-year-112.html", location.href)).searchParams.get("subject") === subject);

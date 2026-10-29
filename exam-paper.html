@@ -48,6 +48,41 @@
     .pdf-preview h2 { margin-bottom: 12px; font-size: 23px; }
     .pdf-frame { display: block; width: 100%; height: min(78vh, 980px); min-height: 520px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
     .pdf-fallback { margin: 12px 0 0; color: var(--muted); font-size: 14px; }
+    .reference-answers { margin-top: 40px; }
+    .reference-answers > h2 { margin-bottom: 16px; font-size: 28px; }
+    .answer-item { margin-block: 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+    .answer-item summary { padding: 15px 18px; color: var(--ink); cursor: pointer; font-weight: 700; }
+    .answer-item summary::marker { color: var(--green); }
+    .answer-content { padding: 0 20px 20px; }
+    .answer-step { margin-top: 24px; }
+    .answer-step h3 { margin-bottom: 10px; font-size: 19px; }
+    .answer-schematic { margin: 16px 0; padding: 16px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+    .answer-schematic svg { display: block; width: 100%; height: auto; font-family: inherit; }
+    .answer-schematic figcaption, .answer-note, .answer-pending { color: var(--muted); font-size: 14px; }
+    .answer-schematic .equipment { fill: var(--surface); stroke: var(--line); stroke-width: 2; }
+    .answer-schematic .cycle-boundary { fill: none; stroke: var(--muted); stroke-dasharray: 8 6; stroke-width: 2; }
+    .answer-schematic .flow { fill: none; stroke: var(--green); stroke-width: 3; }
+    .answer-schematic .work { fill: none; stroke: var(--ink); stroke-width: 3; }
+    .answer-schematic .label { fill: var(--ink); font-size: 16px; }
+    .answer-schematic .minor-label { fill: var(--muted); font-size: 14px; }
+    .answer-list { padding-left: 22px; }
+    .answer-list li + li { margin-top: 6px; }
+    .answer-equation-display { display: block; overflow-x: auto; max-width: 100%; margin-block: 12px; padding: 14px 16px; border-left: 3px solid var(--green); background: var(--surface); font-size: 1.08em; }
+    .answer-collapse { display: flex; align-items: center; justify-content: center; gap: 9px; margin: 20px auto 0; padding: 8px 14px; border: 0; border-radius: 5px; background: transparent; color: #707a76; cursor: pointer; font: inherit; font-size: 14px; transition: background-color .18s ease, color .18s ease; }
+    .answer-collapse::after { width: 8px; height: 8px; margin-top: 4px; border-top: 1.5px solid currentColor; border-right: 1.5px solid currentColor; content: ""; transform: rotate(-45deg); }
+    .answer-collapse:hover { background: #f0f1ee; color: #46534e; }
+    .answer-collapse:focus-visible { outline: 3px solid #9ab952; outline-offset: 3px; }
+    .scroll-top-button {
+      position: fixed; right: max(24px, env(safe-area-inset-right)); bottom: max(24px, env(safe-area-inset-bottom));
+      z-index: 110; display: grid; width: 44px; height: 44px; place-items: center; padding: 0;
+      border: 1px solid var(--green); border-radius: 50%; background: var(--green); color: #fffefa;
+      cursor: pointer; box-shadow: 0 6px 18px rgba(23, 43, 43, .18);
+      transition: background-color .18s ease, transform .18s ease;
+    }
+    .scroll-top-button[hidden] { display: none; }
+    .scroll-top-icon { width: 11px; height: 11px; margin-top: 5px; transform: rotate(45deg); border-top: 2px solid currentColor; border-left: 2px solid currentColor; }
+    .scroll-top-button:hover { transform: translateY(-2px); background: #174f43; }
+    .scroll-top-button:focus-visible { outline: 3px solid #9ab952; outline-offset: 4px; }
     .back { display: inline-block; margin: 24px 24px 0 0; color: var(--green); font-size: 14px; text-underline-offset: 3px; }
     footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
     .footer-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding-block: 24px; text-align: center; }
@@ -67,6 +102,12 @@
       .page { padding-block: 40px 58px; }
       .pdf-frame { height: 72vh; min-height: 420px; }
       .footer-inner { flex-direction: column; gap: 4px; }
+      .answer-content { padding-inline: 14px; }
+      .answer-schematic { padding: 8px; }
+      .answer-schematic .label { font-size: 18px; }
+      .answer-schematic .minor-label { font-size: 16px; }
+      .answer-equation-display { font-size: 1em; }
+      .scroll-top-button { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
   </style>
@@ -95,6 +136,135 @@
       <iframe class="pdf-frame" title="技師考題 PDF 預覽"></iframe>
       <p class="pdf-fallback">若此瀏覽器無法顯示內嵌 PDF，請<a data-open target="_blank" rel="noopener">在新分頁開啟考題 PDF</a>，或<a data-download>下載 PDF</a>。</p>
     </section>
+    <section class="reference-answers" data-reference-answers hidden aria-labelledby="reference-answers-title">
+      <h2 id="reference-answers-title">參考答案</h2>
+      <details class="answer-item">
+        <summary>第一題</summary>
+        <div class="answer-content">
+          <p class="answer-pending">本題詳解尚在整理中。</p>
+        </div>
+        <button class="answer-collapse" type="button">收起答案</button>
+      </details>
+      <details class="answer-item">
+        <summary>第二題</summary>
+        <div class="answer-content">
+          <p class="answer-pending">本題詳解尚在整理中。</p>
+        </div>
+        <button class="answer-collapse" type="button">收起答案</button>
+      </details>
+      <details class="answer-item">
+        <summary>第三題</summary>
+        <div class="answer-content">
+          <div class="answer-step">
+            <h3>1. 已知（Known）</h3>
+            <ul class="answer-list">
+              <li>冷凍空間溫度：T<sub>L</sub> = 15°C。</li>
+              <li>冷凍循環高溫端溫度：T<sub>H</sub> = 40°C。</li>
+              <li>輸入功率：Ẇ<sub>in</sub> = 2.5 kW。</li>
+              <li>周遭空氣溫度：T<sub>∞</sub> = 30°C；熱傳係數：U = 50 W/(m²·K)。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>2. 求（Find）</h3>
+            <p>求高溫端熱交換器所需的最小熱傳面積 A<sub>min</sub>。</p>
+          </div>
+          <div class="answer-step">
+            <h3>3. 示意圖（Schematic）</h3>
+            <figure class="answer-schematic">
+              <svg viewBox="0 0 820 280" role="img" aria-labelledby="answer-diagram-title answer-diagram-desc">
+                <title id="answer-diagram-title">冷凍循環與排熱器示意圖</title>
+                <desc id="answer-diagram-desc">冷凍循環從15度冷凍空間吸熱並輸入功，在40度高溫端將熱量排至30度周遭空氣。</desc>
+                <defs>
+                  <marker id="answer-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 z" fill="var(--green)"></path>
+                  </marker>
+                  <marker id="answer-work-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"></path>
+                  </marker>
+                </defs>
+                <rect class="equipment" x="18" y="98" width="172" height="88" rx="5"></rect>
+                <text class="label" x="104" y="134" text-anchor="middle">冷凍空間</text>
+                <text class="minor-label" x="104" y="160" text-anchor="middle">T<tspan baseline-shift="sub">L</tspan> = 15°C</text>
+                <rect class="cycle-boundary" x="252" y="64" width="248" height="158" rx="8"></rect>
+                <text class="label" x="376" y="124" text-anchor="middle">冷凍循環</text>
+                <text class="minor-label" x="376" y="152" text-anchor="middle">高溫端 40°C</text>
+                <text class="minor-label" x="376" y="179" text-anchor="middle">控制體邊界</text>
+                <line class="flow" x1="194" y1="142" x2="246" y2="142" marker-end="url(#answer-arrow)"></line>
+                <text class="label" x="220" y="128" text-anchor="middle">Q̇<tspan baseline-shift="sub">L</tspan></text>
+                <line class="work" x1="376" y1="18" x2="376" y2="57" marker-end="url(#answer-work-arrow)"></line>
+                <text class="label" x="392" y="40">Ẇ<tspan baseline-shift="sub">in</tspan></text>
+                <rect class="equipment" x="540" y="98" width="130" height="88" rx="5"></rect>
+                <text class="label" x="605" y="134" text-anchor="middle">熱交換器</text>
+                <text class="minor-label" x="605" y="160" text-anchor="middle">U = 50 W/(m²·K)</text>
+                <line class="flow" x1="502" y1="142" x2="534" y2="142" marker-end="url(#answer-arrow)"></line>
+                <text class="label" x="518" y="128" text-anchor="middle">Q̇<tspan baseline-shift="sub">H</tspan></text>
+                <line class="flow" x1="672" y1="142" x2="736" y2="142" marker-end="url(#answer-arrow)"></line>
+                <text class="minor-label" x="765" y="130" text-anchor="middle">周遭空氣</text>
+                <text class="minor-label" x="765" y="157" text-anchor="middle">30°C</text>
+              </svg>
+              <figcaption>虛線為冷凍循環控制體；熱交換器將高溫端排熱傳給周遭空氣。</figcaption>
+            </figure>
+          </div>
+          <div class="answer-step">
+            <h3>4. 假設（Assumptions）</h3>
+            <ul class="answer-list">
+              <li>題目未提供實際冷凍循環 COP，採可逆卡諾冷凍循環在 15°C 與 40°C 間運轉，作為理想化計算基準。</li>
+              <li>循環達穩態，忽略動能與位能變化；輸入功與冷凍、排熱符合能量平衡。</li>
+              <li>高溫端冷媒以 40°C 等溫放熱；周遭空氣視為維持 30°C 的熱庫，故熱交換溫差固定為 10 K。</li>
+              <li>U 為均勻且固定的總熱傳係數，忽略污垢、接觸熱阻及熱損失。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>5. 性質與資料（Properties）</h3>
+            <ul class="answer-list">
+              <li>溫度、功率與 U 值取自本題官方試題 PDF；溫度以 273.15 換算為絕對溫度。</li>
+              <li>T<sub>L</sub> = 288.15 K，T<sub>H</sub> = 313.15 K；溫差 10 K。</li>
+              <li>本題不需冷媒物性表；卡諾 COP 由熱力學溫度關係求得。U 為題目給定的熱傳係數。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>6. 分析（Analysis）</h3>
+            <p>先列出性能係數、能量平衡與熱傳方程式，再代入數值計算：</p>
+            <math class="answer-equation-display" display="block" aria-label="卡諾冷凍機性能係數等於低溫端熱量除以輸入功，亦等於低溫絕對溫度除以兩端溫差">
+              <mrow><msub><mtext>COP</mtext><mrow><mi>R</mi><mo>,</mo><mtext>Carnot</mtext></mrow></msub><mo>=</mo><mfrac><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>L</mi></msub><msub><mover><mi>W</mi><mo>˙</mo></mover><mtext>in</mtext></msub></mfrac><mo>=</mo><mfrac><msub><mi>T</mi><mi>L</mi></msub><mrow><msub><mi>T</mi><mi>H</mi></msub><mo>−</mo><msub><mi>T</mi><mi>L</mi></msub></mrow></mfrac></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="高溫端排熱等於低溫端吸熱加輸入功，並等於熱傳係數乘面積乘溫差">
+              <mrow><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>H</mi></msub><mo>=</mo><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>L</mi></msub><mo>+</mo><msub><mover><mi>W</mi><mo>˙</mo></mover><mtext>in</mtext></msub><mo>;</mo><mspace width="1em"/><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>H</mi></msub><mo>=</mo><mi>U</mi><mi>A</mi><mi>Δ</mi><mi>T</mi></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="低溫端絕對溫度為288.15 K，高溫端絕對溫度為313.15 K">
+              <mrow><msub><mi>T</mi><mi>L</mi></msub><mo>=</mo><mn>15</mn><mo>+</mo><mn>273.15</mn><mo>=</mo><mn>288.15</mn><mspace width=".3em"/><mi mathvariant="normal">K</mi><mo>;</mo><mspace width="1em"/><msub><mi>T</mi><mi>H</mi></msub><mo>=</mo><mn>40</mn><mo>+</mo><mn>273.15</mn><mo>=</mo><mn>313.15</mn><mspace width=".3em"/><mi mathvariant="normal">K</mi></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="卡諾冷凍機性能係數等於288.15除以313.15減288.15，等於11.526">
+              <mrow><msub><mtext>COP</mtext><mrow><mi>R</mi><mo>,</mo><mtext>Carnot</mtext></mrow></msub><mo>=</mo><mfrac><mn>288.15</mn><mrow><mn>313.15</mn><mo>−</mo><mn>288.15</mn></mrow></mfrac><mo>=</mo><mn>11.526</mn></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="冷凍能力等於11.526乘以2.5千瓦，等於28.815千瓦">
+              <mrow><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>L</mi></msub><mo>=</mo><msub><mtext>COP</mtext><mi>R</mi></msub><msub><mover><mi>W</mi><mo>˙</mo></mover><mtext>in</mtext></msub><mo>=</mo><mn>11.526</mn><mo>×</mo><mn>2.5</mn><mo>=</mo><mn>28.815</mn><mspace width=".3em"/><mi mathvariant="normal">kW</mi></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="高溫端排熱等於28.815加2.5千瓦，等於31.315千瓦或31315瓦">
+              <mrow><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>H</mi></msub><mo>=</mo><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>L</mi></msub><mo>+</mo><msub><mover><mi>W</mi><mo>˙</mo></mover><mtext>in</mtext></msub><mo>=</mo><mn>28.815</mn><mo>+</mo><mn>2.5</mn><mo>=</mo><mn>31.315</mn><mspace width=".3em"/><mi mathvariant="normal">kW</mi><mo>=</mo><mn>31,315</mn><mspace width=".3em"/><mi mathvariant="normal">W</mi></mrow>
+            </math>
+            <p>冷媒與周遭空氣溫差為 <math aria-label="溫差等於40減30等於10開爾文"><mrow><mi>Δ</mi><mi>T</mi><mo>=</mo><mn>40</mn><mo>−</mo><mn>30</mn><mo>=</mo><mn>10</mn><mspace width=".2em"/><mi mathvariant="normal">K</mi></mrow></math>，因此：</p>
+            <math class="answer-equation-display" display="block" aria-label="最小面積等於31315瓦除以50瓦每平方米開爾文乘10開爾文，等於62.63平方米">
+              <mrow><msub><mi>A</mi><mi>min</mi></msub><mo>=</mo><mfrac><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>H</mi></msub><mrow><mi>U</mi><mi>Δ</mi><mi>T</mi></mrow></mfrac><mo>=</mo><mfrac><mn>31,315</mn><mrow><mn>50</mn><mo>×</mo><mn>10</mn></mrow></mfrac><mo>=</mo><mn>62.63</mn><mspace width=".3em"/><msup><mi mathvariant="normal">m</mi><mn>2</mn></msup></mrow>
+            </math>
+            <p><strong>依上述理想循環與恆溫環境假設，計算面積約為 62.6 m²。</strong></p>
+          </div>
+          <div class="answer-step">
+            <h3>7. 討論（Comments）</h3>
+            <p>結果受理想卡諾 COP 與固定 10 K 溫差假設影響。卡諾 COP 是此兩個溫度間的理論上限；實際設備 COP 較低時，在相同輸入功率下排熱量也會較低。故 62.6 m² 是按理想循環計得的面積，不宜解讀為任何實際設備都必須達到的嚴格最小值。</p>
+            <p class="answer-note">若周遭空氣流經熱交換器後有明顯升溫，需再知道空氣出口溫度或質量流率，才能用對數平均溫差重新估算面積。實際設備面積亦需依其 COP、污垢與設計裕度調整。</p>
+          </div>
+        </div>
+        <button class="answer-collapse" type="button">收起答案</button>
+      </details>
+      <details class="answer-item">
+        <summary>第四題</summary>
+        <div class="answer-content">
+          <p class="answer-pending">本題詳解尚在整理中。</p>
+        </div>
+        <button class="answer-collapse" type="button">收起答案</button>
+      </details>
+    </section>
     <a class="back" data-year-link>← 返回 <span data-year></span> 年考科</a>
     <a class="back" href="exam-years.html">返回年度選單</a>
   </main>
@@ -109,7 +279,30 @@
       <span>Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</span>
     </div>
   </footer>
+  <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
   <script>
+    const scrollTopButton = document.querySelector(".scroll-top-button");
+
+    function updateScrollTopButton() {
+      scrollTopButton.hidden = window.scrollY <= 0;
+    }
+
+    window.addEventListener("scroll", updateScrollTopButton, { passive: true });
+    scrollTopButton.addEventListener("click", () => {
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      window.scrollTo({ top: 0, behavior });
+      updateScrollTopButton();
+    });
+    document.querySelector("[data-reference-answers]").addEventListener("click", (event) => {
+      const collapseButton = event.target.closest(".answer-collapse");
+      if (collapseButton) {
+        const answerItem = collapseButton.closest(".answer-item");
+        answerItem.open = false;
+        answerItem.querySelector("summary").focus({ preventScroll: true });
+      }
+    });
+    updateScrollTopButton();
+
     const paperSets = {
       "112": {
         examName: "112年專門職業及技術人員高等考試冷凍空調工程技師考試",
@@ -204,6 +397,7 @@
       const downloadLink = document.querySelector("[data-download]");
       downloadLink.href = fileUrl;
       downloadLink.download = `${year}年${eventData ? `${eventData.code}_` : ""}${paper.title}考題.pdf`;
+      document.querySelector("[data-reference-answers]").hidden = !(year === "114" && subjectId === "refrigeration");
     }
 
     renderPaper();

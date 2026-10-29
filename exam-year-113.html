@@ -57,6 +57,17 @@
     .footer-brand-link { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-size: 13px; font-weight: 750; text-decoration: none; white-space: nowrap; }
     .footer-brand-link:hover { color: var(--green); }
     .footer-brand-logo { width: 32px; height: 32px; flex: 0 0 32px; object-fit: contain; }
+    .scroll-top-button {
+      position: fixed; right: max(24px, env(safe-area-inset-right)); bottom: max(24px, env(safe-area-inset-bottom));
+      z-index: 110; display: grid; width: 44px; height: 44px; place-items: center; padding: 0;
+      border: 1px solid var(--green); border-radius: 50%; background: var(--green); color: #fffefa;
+      cursor: pointer; box-shadow: 0 6px 18px rgba(23, 43, 43, .18);
+      transition: background-color .18s ease, transform .18s ease;
+    }
+    .scroll-top-button[hidden] { display: none; }
+    .scroll-top-icon { width: 11px; height: 11px; margin-top: 5px; transform: rotate(45deg); border-top: 2px solid currentColor; border-left: 2px solid currentColor; }
+    .scroll-top-button:hover { transform: translateY(-2px); background: #174f43; }
+    .scroll-top-button:focus-visible { outline: 3px solid #9ab952; outline-offset: 4px; }
     @media (max-width: 900px) {
       .topbar { flex-wrap: wrap; gap: 10px; padding-block: 12px; }
       nav { flex-wrap: wrap; gap: 8px 20px; }
@@ -70,6 +81,7 @@
       .subject-grid { grid-template-columns: 1fr; }
       .subject-card { padding: 18px; }
       .footer-inner { flex-direction: column; gap: 4px; }
+      .scroll-top-button { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
   </style>
@@ -126,5 +138,21 @@
       <span>Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</span>
     </div>
   </footer>
+  <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
+  <script>
+    const scrollTopButton = document.querySelector(".scroll-top-button");
+
+    function updateScrollTopButton() {
+      scrollTopButton.hidden = window.scrollY <= 0;
+    }
+
+    window.addEventListener("scroll", updateScrollTopButton, { passive: true });
+    scrollTopButton.addEventListener("click", () => {
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      window.scrollTo({ top: 0, behavior });
+      updateScrollTopButton();
+    });
+    updateScrollTopButton();
+  </script>
 </body>
 </html>
