@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>冰水主機專欄回歸測試</title>
+</head>
+<body>
+  <h1>冰水主機專欄回歸測試</h1>
+  <p>請以 HTTP 伺服器提供網站；測試首頁專欄入口、文章路由、ASHRAE 引用與核心工程內容。</p>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+
+    try {
+      const [homeResponse, columnsResponse, articleResponse] = await Promise.all([
+        fetch("../index.html?chiller-test=" + Date.now()),
+        fetch("../columns.html?chiller-test=" + Date.now()),
+        fetch("../chiller.html?chiller-test=" + Date.now()),
+      ]);
+      assert(homeResponse.ok, "Homepage responds");
+      assert(columnsResponse.ok, "Column archive responds");
+      assert(articleResponse.ok, "Chiller article responds");
+
+      const home = new DOMParser().parseFromString(await homeResponse.text(), "text/html");
+      const columns = new DOMParser().parseFromString(await columnsResponse.text(), "text/html");
+      const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
+      assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
+        "Main navigation links to the engineering columns");
+      assert(columns.querySelector('a[href="chiller.html"] h2')?.textContent.includes("冰水主機 Chiller"),
+        "Column archive links to the chiller article");
+
+      const text = article.body.textContent;
+      for (const phrase of [
+        "ASHRAE Handbook—HVAC Systems and Equipment",
+        "Chapter 43",
+        "冰水迴路",
+        "冷媒迴路",
+        "冷卻水迴路",
+        "1,000 kW",
+        "172 m³/h",
+        "AHRI Standard 550/590",
+        "kW/RT",
+        "喘振",
+        "凍結風險",
+      ]) {
+        assert(text.includes(phrase), `Chiller article includes ${phrase}`);
+      }
+      assert(article.querySelectorAll(".loop-card").length === 3,
+        "Article explains the chilled-water, refrigerant, and condenser-water loops");
+      assert(article.querySelectorAll(".diagnostic-table tbody tr").length === 6,
+        "Article includes six symptom-based troubleshooting checks");
+      assert(article.querySelectorAll(".checklist li").length === 7,
+        "Article includes a seven-step commissioning checklist");
+      assert(article.querySelectorAll("article section[id]").length === 9,
+        "Article has nine navigable technical sections");
+      assert([...article.querySelectorAll(".toc a")].every((link) =>
+        article.querySelector(link.getAttribute("href"))),
+      "Table-of-contents links resolve to article sections");
+      assert(!article.querySelector('a[href*="reference/ASHRAE"], a[href$=".pdf"]'),
+        "Article does not link to handbook PDF files");
+
+      output.textContent = `PASS: ${checks} checks`;
+    } catch (error) {
+      output.textContent = `Error: ${error.message}`;
+      throw error;
+    }
+  </script>
+</body>
+</html>

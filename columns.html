@@ -50,6 +50,7 @@
     .column-card:hover { transform: translateY(-2px); border-color: #a9beb0; box-shadow: 0 12px 30px rgba(23, 43, 43, .08); }
     .card-art { display: grid; min-height: 196px; place-items: center; overflow: hidden; border-radius: 7px; background: linear-gradient(145deg, #e5eee4, #cbded2); }
     .glycol-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 31px; letter-spacing: -.06em; }
+    .chiller-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 24px; font-weight: 700; letter-spacing: -.04em; }
     .card-copy { align-self: center; }
     .card-kicker { margin-bottom: 10px; color: var(--green); font-size: 12px; font-weight: 750; letter-spacing: .1em; }
     .card-copy h2 { margin-bottom: 12px; font-size: clamp(25px, 3vw, 34px); }
@@ -72,6 +73,7 @@
       .column-card { grid-template-columns: 1fr; gap: 19px; padding: 18px; }
       .card-art { min-height: 145px; }
       .glycol-mark { width: 88px; height: 88px; font-size: 26px; }
+      .chiller-mark { width: 88px; height: 88px; font-size: 21px; }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
   </style>
@@ -103,6 +105,15 @@
           <p class="card-kicker">SECONDARY COOLANTS · 01</p>
           <h2>乙二醇水系統：從選濃度到試運轉</h2>
           <p>用 ASHRAE 物性資料做濃度初選與流量估算，並掌握泵浦檢核、充填試運轉、維護和故障排查。</p>
+          <span class="card-link">閱讀專欄 →</span>
+        </div>
+      </a>
+      <a class="column-card" href="chiller.html">
+        <div class="card-art" aria-hidden="true"><span class="chiller-mark">CHILLER</span></div>
+        <div class="card-copy">
+          <p class="card-kicker">CENTRAL PLANT · 02</p>
+          <h2>冰水主機 Chiller：從冷凍循環到現場運轉</h2>
+          <p>用三個迴路看懂冰水主機，從流量估算、設備選型到試車、效率與故障排查。</p>
           <span class="card-link">閱讀專欄 →</span>
         </div>
       </a>

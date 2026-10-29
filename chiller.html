@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="依 ASHRAE Handbook 說明冰水主機的冷凍循環、冰水與冷卻水迴路、流量計算、選型、試運轉及故障排查。">
+  <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
+  <title>冰水主機 Chiller：從冷凍循環到現場運轉｜工程專欄</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172b2b;
+      --muted: #5b6c68;
+      --paper: #f6f5ef;
+      --surface: #fffefa;
+      --green: #1d6252;
+      --line: #dce2d8;
+      --serif: Georgia, "Noto Serif TC", "PMingLiU", serif;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); line-height: 1.8; }
+    a { color: inherit; }
+    a:focus-visible { outline: 3px solid #9ab952; outline-offset: 4px; }
+    .wrap { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 100; display: flex; width: 100%; max-width: none;
+      min-height: 82px; align-items: center; justify-content: space-between; gap: 20px;
+      margin-inline: 0; padding-inline: max(24px, calc((100% - 1120px) / 2));
+      border-bottom: 1px solid var(--line); background: var(--paper);
+    }
+    .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); font-size: 15px; font-weight: 750; letter-spacing: .04em; text-decoration: none; }
+    .brand-mark { width: 34px; height: 34px; flex: 0 0 34px; object-fit: contain; }
+    nav { display: flex; gap: 24px; font-size: 13px; }
+    nav a { color: var(--muted); text-decoration: none; }
+    nav a:hover, nav a[aria-current="page"] { color: var(--green); }
+    .page { padding-block: 54px 84px; }
+    .breadcrumb { margin: 0 0 27px; color: var(--muted); font-size: 13px; }
+    .eyebrow { display: flex; align-items: center; gap: 10px; margin: 0 0 13px; color: var(--green); font-size: 12px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+    .eyebrow::before { width: 24px; height: 1px; background: currentColor; content: ""; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -.025em; }
+    h1 { max-width: 900px; margin-bottom: 20px; font-size: clamp(38px, 5.2vw, 62px); line-height: 1.22; }
+    h2 { margin-bottom: 16px; font-size: clamp(27px, 3vw, 36px); line-height: 1.35; }
+    h3 { margin-bottom: 10px; font-size: 23px; }
+    .dek { max-width: 820px; margin-bottom: 22px; color: var(--muted); font-size: 18px; line-height: 1.8; }
+    .byline { margin-bottom: 38px; color: var(--muted); font-size: 13px; }
+    .article-layout { display: grid; grid-template-columns: minmax(0, 1fr) 250px; align-items: start; gap: 48px; }
+    .article-body { min-width: 0; }
+    .article-body section { margin-bottom: 38px; scroll-margin-top: 105px; }
+    .article-body p, .article-body li { color: #304542; }
+    .article-body ul, .article-body ol { padding-left: 1.35em; }
+    .article-body li + li { margin-top: 8px; }
+    .toc { position: sticky; top: 108px; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .toc h2 { margin-bottom: 12px; font-family: inherit; font-size: 14px; font-weight: 750; letter-spacing: 0; }
+    .toc ol { margin: 0; padding-left: 1.25em; color: var(--muted); font-size: 13px; }
+    .toc li + li { margin-top: 6px; }
+    .toc a { text-decoration-color: #b7c5b9; text-underline-offset: 3px; }
+    .callout { margin: 20px 0; padding: 17px 19px; border-left: 3px solid var(--green); border-radius: 0 6px 6px 0; background: #edf1e7; color: #304542; }
+    .callout strong { color: var(--ink); }
+    .callout--warning { border-left-color: #9c5b22; background: #f7efe5; }
+    .loop-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
+    .loop-card { min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
+    .loop-card h3 { margin-bottom: 8px; color: var(--green); font-family: inherit; font-size: 14px; font-weight: 750; letter-spacing: 0; }
+    .loop-card p { margin-bottom: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .loop-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 12px 0; color: var(--ink); font-size: 12px; font-weight: 700; }
+    .loop-flow span { padding: 5px 8px; border: 1px solid var(--line); border-radius: 5px; background: #f6f5ef; }
+    .loop-flow b { color: var(--green); }
+    .loop-card--refrigerant { border-color: #b5c8df; background: #f3f7fc; }
+    .loop-card--refrigerant h3 { color: #305a87; }
+    .loop-card--tower { border-color: #d7c8aa; background: #fcf8ef; }
+    .loop-card--tower h3 { color: #8c5a20; }
+    .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
+    caption { padding: 13px 15px; color: var(--muted); font-size: 12px; text-align: left; }
+    th, td { padding: 11px 15px; border-top: 1px solid var(--line); white-space: nowrap; }
+    th { background: #edf1e7; font-weight: 700; }
+    .table-note { margin: 10px 0; color: var(--muted) !important; font-size: 12px; }
+    .diagnostic-table td:first-child { min-width: 170px; font-weight: 700; }
+    .diagnostic-table td { white-space: normal; vertical-align: top; }
+    .diagnostic-table th { white-space: nowrap; }
+    .calc-box { margin: 18px 0; padding: 20px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
+    .calc-line { overflow-wrap: anywhere; margin: 8px 0; font-family: Consolas, "Courier New", monospace; font-size: 14px; font-variant-numeric: tabular-nums; }
+    .result-line { margin: 13px 0 0; padding-top: 12px; border-top: 1px solid var(--line); color: var(--green) !important; font-weight: 750; }
+    .checklist { counter-reset: startup; list-style: none; padding: 0 !important; }
+    .checklist li { position: relative; min-height: 42px; padding: 8px 0 8px 46px; border-bottom: 1px solid var(--line); }
+    .checklist li::before { position: absolute; top: 8px; left: 0; display: grid; width: 28px; height: 28px; place-items: center; border: 1px solid #b7c9b8; border-radius: 50%; color: var(--green); font-size: 12px; font-weight: 750; counter-increment: startup; content: counter(startup); }
+    .references { padding-top: 22px; border-top: 1px solid var(--line); }
+    .references h2 { font-size: 25px; }
+    .references li { font-size: 14px; }
+    .back-link { display: inline-block; margin-top: 8px; color: var(--green); font-size: 14px; text-underline-offset: 4px; }
+    footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .footer-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding-block: 24px; text-align: center; }
+    .footer-brand-link { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-size: 13px; font-weight: 750; text-decoration: none; }
+    .footer-brand-logo { width: 32px; height: 32px; flex: 0 0 32px; object-fit: contain; }
+    @media (max-width: 900px) {
+      .topbar { flex-wrap: wrap; gap: 10px; padding-block: 12px; }
+      nav { flex-wrap: wrap; gap: 8px 18px; }
+      .article-layout { grid-template-columns: 1fr; gap: 27px; }
+      .toc { position: static; grid-row: 1; }
+      .loop-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .wrap { width: calc(100% - 32px); }
+      .topbar { padding-inline: 16px; }
+      .brand { gap: 8px; font-size: 13px; }
+      nav { width: 100%; justify-content: space-between; gap: 6px; font-size: 12px; }
+      .page { padding-block: 38px 58px; }
+      .dek { font-size: 16px; }
+      .calc-box { padding: 16px; }
+      th, td { padding: 10px 12px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="wrap topbar">
+    <a class="brand" href="index.html" aria-label="回到能源與冷凍空調學習網首頁">
+      <img class="brand-mark" src="assets/hvacr-learning-logo.svg?v=3" alt="">
+      <span>能源與冷凍空調學習網</span>
+    </a>
+    <nav aria-label="主選單">
+      <a href="index.html">首頁</a>
+      <a href="about.html">關於我們</a>
+      <a href="exam-years.html">技師考題</a>
+      <a href="terminology.html">術語辭典</a>
+      <a href="columns.html" aria-current="page">工程專欄</a>
+      <a href="tools.html">計算工具</a>
+    </nav>
+  </header>
+  <main class="wrap page">
+    <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="columns.html">工程專欄</a> ／ 冰水主機</p>
+    <p class="eyebrow">Chillers · Central Plant Engineering</p>
+    <h1>冰水主機 Chiller：從冷凍循環到現場運轉</h1>
+    <p class="dek">冰水主機不是只看「幾冷凍噸」的單一設備，而是把冷媒循環、冰水輸送、冷凝散熱與控制串在一起的系統。用三個迴路看懂它，再由負荷估流量、依工況選機，最後用量測趨勢驗證整個冷凍站。</p>
+    <p class="byline">工程實務專題｜依 ASHRAE Handbook—HVAC Systems and Equipment 技術資料整理｜閱讀約 12 分鐘</p>
+
+    <div class="article-layout">
+      <article class="article-body">
+        <section id="principle">
+          <h2>1. 先把三個迴路分清楚</h2>
+          <p>Chiller 以冷媒循環把熱從冰水側搬到散熱側。讀系統圖時，先分開看<strong>冰水迴路、主機內部冷媒迴路</strong>，以及水冷式主機才有的<strong>冷卻水迴路</strong>。三者在蒸發器與冷凝器交換熱量，但正常情況下各自封閉、不互相混水。</p>
+          <div class="loop-grid" aria-label="冰水主機的三個熱交換迴路">
+            <div class="loop-card">
+              <h3>① 冰水迴路｜把負載熱量帶回來</h3>
+              <div class="loop-flow"><span>主機蒸發器</span><b>→</b><span>冰水泵</span><b>→</b><span>空調盤管／製程</span><b>→</b><span>回水</span></div>
+              <p>冰水在蒸發器被冷卻，送往末端吸收室內或製程熱量，再以較高回水溫度返回。負載側水通常不與冷媒混合。</p>
+            </div>
+            <div class="loop-card loop-card--refrigerant">
+              <h3>② 冷媒迴路｜主機內部的熱泵</h3>
+              <div class="loop-flow"><span>蒸發器</span><b>→</b><span>壓縮機</span><b>→</b><span>冷凝器</span><b>→</b><span>膨脹裝置</span></div>
+              <p>冷媒在蒸發器吸熱蒸發，壓縮後在冷凝器放熱冷凝，再經節流降壓返回蒸發器。冷媒種類與運轉壓力依主機設計。</p>
+            </div>
+            <div class="loop-card loop-card--tower">
+              <h3>③ 冷卻水迴路｜僅水冷式主機</h3>
+              <div class="loop-flow"><span>冷凝器</span><b>→</b><span>冷卻水泵</span><b>→</b><span>冷卻塔</span><b>→</b><span>回水</span></div>
+              <p>冷卻水帶走主機冷凝熱，在冷卻塔排至室外空氣。風冷式主機改由冷凝器風扇直接向室外空氣排熱，沒有冷卻水塔迴路。</p>
+            </div>
+          </div>
+          <div class="callout"><strong>熱量帳（電動蒸氣壓縮式主機）：</strong>冷凝器排熱量約等於蒸發器冷量加上壓縮機輸入功（Q̇<sub>cond</sub> ≈ Q̇<sub>evap</sub> + Ẇ<sub>comp</sub>）。因此冷卻塔與冷卻水系統處理的熱量比「冷房冷量」更多，不能按冷噸直接當成相同散熱量；吸收式主機須另按熱源輸入作能量平衡。</div>
+        </section>
+
+        <section id="types">
+          <h2>2. 風冷、水冷與壓縮機型式怎麼看？</h2>
+          <div class="table-wrap">
+            <table>
+              <caption>冰水主機初選比較——實際表現應以指定工況的製造商資料為準</caption>
+              <thead><tr><th scope="col">類型</th><th scope="col">散熱方式／設備</th><th scope="col">適合優先評估</th><th scope="col">設計與維護檢核</th></tr></thead>
+              <tbody>
+                <tr><td>風冷式</td><td>冷凝器盤管與風扇直接對室外空氣散熱</td><td>沒有冷卻塔用水條件、空間或水處理人力的案場</td><td>夏季室外乾球溫度、進排風短路、噪音、盤管清潔及高環境溫度下的容量修正。</td></tr>
+                <tr><td>水冷式</td><td>冷凝器水側接冷卻水泵與冷卻塔</td><td>有條件建置並維護冷卻水系統的中央冷凍站</td><td>濕球氣候、塔與泵能耗、補排水、水處理、換熱器結垢和最低冷卻水溫度限制。</td></tr>
+                <tr><td>吸收式</td><td>以熱能驅動吸收循環，仍須排出冷凝及吸收熱</td><td>有穩定且合適的廢熱、蒸汽或熱水來源時評估</td><td>比較整體熱源成本、用水、設備空間與維護需求，不能只比較主機電力。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>常見電動壓縮機包含離心式、螺旋式、渦卷式與往復式。離心式常見於較大冷量，容量由導葉、轉速等方式調節；螺旋式與多壓縮機渦卷／往復機組可用滑閥、變速或分段啟停。這些是一般型式，不構成容量分界或效率保證；以廠商在專案實際冰水、冷卻水／室外空氣工況下的性能曲線選型。</p>
+        </section>
+
+        <section id="load">
+          <h2>3. 由冷量算冰水流量：一個可重算的例子</h2>
+          <p>冰水側顯熱能量平衡可先用以下公式估算。水的比熱與密度會隨溫度變化；初估可用接近常溫的工程近似值，正式選泵及主機選型仍要依實際水質、溫度與設備資料。</p>
+          <div class="calc-box">
+            <div class="calc-line">Q̇ = ṁ × c<sub>p</sub> × ΔT</div>
+            <div class="calc-line">V̇ = ṁ / ρ</div>
+            <p class="table-note">Q̇：冷量（kW）；ṁ：水質量流率（kg/s）；c<sub>p</sub>：比熱（kJ/[kg·K]）；ΔT：冰水回水與供水溫差（K）；V̇：體積流率（m³/s）；ρ：密度（kg/m³）。</p>
+          </div>
+          <h3>算例｜冷量 1,000 kW，冰水 12°C 回水、7°C 供水</h3>
+          <p>假設負載為顯熱、供回水溫差 5 K，並以 c<sub>p</sub> = 4.186 kJ/(kg·K)、ρ = 1,000 kg/m³ 作初步估算：</p>
+          <div class="calc-box">
+            <div class="calc-line">ṁ = 1,000 ÷ (4.186 × 5) = 47.8 kg/s</div>
+            <div class="calc-line">V̇ = 47.8 ÷ 1,000 × 3,600 ≈ 172 m³/h</div>
+            <p class="result-line">初估冰水流量約 47.8 kg/s（172 m³/h）。7°C／12°C 是本算例條件，不是所有空調系統的固定設定。</p>
+          </div>
+          <p>若負載含潛熱、低溫製程用乙二醇，或設計供回水溫差不同，就要改用相應流體物性與完整負荷資料。流量估算不等於泵浦選型：還需計算最不利回路管路、閥件、濾網、盤管與主機蒸發器壓降。</p>
+        </section>
+
+        <section id="selection">
+          <h2>4. 選機不是「負荷加兩成」：把實際工況交給性能曲線</h2>
+          <p>ASHRAE 指出，冷量負荷大小是冰水主機總持有成本的重要因素；若負荷估算方法已可靠，例行地在估值上再加 10～20% 並非必要，設備過大會增加採購成本，也可能帶來低負載頻繁啟停或離心機喘振等操作問題。應按專案的逐時負荷、冗餘需求、可接受末端溫度及業主條件決定容量。</p>
+          <div class="table-wrap">
+            <table>
+              <caption>詢價及製造商選型資料表：要求各投標者使用相同工況回覆</caption>
+              <thead><tr><th scope="col">輸入／確認項</th><th scope="col">應提供的專案資料</th><th scope="col">選型回覆檢核</th></tr></thead>
+              <tbody>
+                <tr><td>冷量與負載</td><td>設計冷量、逐時／分段負載、部分負載時數、備援策略</td><td>額定點與部分負載點容量、輸入功率及允許卸載範圍。</td></tr>
+                <tr><td>蒸發器側</td><td>冰水進出水溫、流量範圍、水側壓降、水質與可能添加劑</td><td>最低流量、允許流量變化速率、最大壓降及防凍保護條件。</td></tr>
+                <tr><td>散熱側</td><td>風冷：室外設計乾球；水冷：冷卻水進出水溫、設計流量及塔工況</td><td>工況容量、輸入功率、最低／最高水溫限制及控制方法。</td></tr>
+                <tr><td>現場限制</td><td>電壓、啟動方式、可用空間、噪音、運送與法規要求</td><td>啟動電流／需量、維修空間、聲學資料、冷媒及安全要求。</td></tr>
+                <tr><td>生命週期</td><td>電價與需量費率、用水及水處理成本、維護資源、預估運轉時數</td><td>以同一系統邊界比較購置、安裝、能源、水費及維護成本。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="table-note">性能應核對適用的額定與測試標準、選型軟體版本和投標條件；例如 AHRI 550/590 用於液體冷卻機組的額定及測試要求。標準數值不是現場保證，實際效率取決於專案溫度、流量、控制與安裝。</p>
+        </section>
+
+        <section id="efficiency">
+          <h2>5. 看整座冷凍站能耗，不只看主機 COP</h2>
+          <p>主機 COP 是冷量除以主機輸入功率；比較主機時，須確認容量與功率邊界、供回冰水溫度、冷卻水或室外氣象條件和部分負載工況一致。冷凍站實際用電還包括冰水泵、冷卻水泵、冷卻塔風扇及相關設備。主機某一工況的最高效率，不必然代表整年冷凍站耗能最低。</p>
+          <div class="calc-box">
+            <div class="calc-line">冷凍站總輸入 ≈ 主機 + 冰水泵 +（水冷式）冷卻水泵 + 冷卻塔風扇 + 輔機</div>
+            <div class="calc-line">站房 kW/RT = 冷凍站總輸入功率（kW）÷ 實際冷量（RT）</div>
+            <p class="table-note">1 RT = 3.517 kW 冷量。只有在比較的系統邊界和負載條件相同時，kW/RT 才有意義。</p>
+          </div>
+          <ul>
+            <li><strong>比較部分負載：</strong>以全年負荷曲線評估主機台數與容量分級，不要僅以滿載銘牌效率決策。</li>
+            <li><strong>合理台數控制：</strong>並聯機組通常方便分級與備援；串聯機組會共同承受全系統流量，須檢核兩台蒸發器的合併壓降及各自溫差。兩種配置都需妥善設計控制與水力平衡。</li>
+            <li><strong>變流量須符合主機限制：</strong>變速泵可降低輸送能耗，但每台主機的最低蒸發器流量、流量變化速率和可接受控制範圍，應以原廠資料與系統控制序列為準。</li>
+            <li><strong>冷卻塔一起最佳化：</strong>水冷站要把主機、塔風扇、冷卻水泵和冰水泵的總功率一起看；冷卻水溫度和流量變動須落在主機與塔的允許條件內。</li>
+          </ul>
+          <div class="callout callout--warning"><strong>低 ΔT 的警訊：</strong>若在實際負載下冰水回供溫差遠低於設計，可能代表末端盤管流量過大、控制閥或盤管控制不當、旁通混水或量測問題。不要先提高泵速；先用供回水溫度、總流量及末端閥位確認原因，否則過量流量可能增加泵耗並讓系統失去設計溫差。</div>
+        </section>
+
+        <section id="commissioning">
+          <h2>6. 試車與交付：要記錄能解釋性能的數據</h2>
+          <ol class="checklist">
+            <li><strong>核對文件與安裝：</strong>確認選型工況、控制邏輯、管路圖、電氣圖、冷媒及安全資料；檢查維修空間、基礎、隔振、管路支撐和水流方向。</li>
+            <li><strong>清洗水側：</strong>依機組廠商程序沖洗管路，確認濾網、排氣、補水及水處理方案；不要讓施工碎屑進入蒸發器、冷凝器或控制閥。</li>
+            <li><strong>確認流量與聯鎖：</strong>逐一測試冰水流量證明、必要的冷卻水流量證明，以及水流不足停機與低出水溫度保護。ASHRAE 指出冰水流量聯鎖和低溫切斷用於降低蒸發器凍結風險；遵循機組原廠接線與測試程序。</li>
+            <li><strong>驗證啟停順序：</strong>由控制系統按核准順序啟動泵與主機，驗證閥位、泵浦狀態、流量證明、最小停機時間和故障復歸；不得為了測試而旁路安全保護。</li>
+            <li><strong>穩定後帶載：</strong>在不同負載點記錄冰水進出水溫與流量、冷卻水進出水溫與流量（適用時）、主機功率、泵塔功率、壓力／警報及室外條件。</li>
+            <li><strong>和選型資料比對：</strong>確認測試點與原廠性能曲線條件一致；檢查容量、功率、水側壓降、最小流量及控制穩定性，記錄偏差與調整結果。</li>
+            <li><strong>建立基線趨勢：</strong>保存校正後感測器讀值、閥與泵控制命令、機組負載、啟停次數、警報及水質資料，供日後同工況比較。</li>
+          </ol>
+        </section>
+
+        <section id="troubleshooting">
+          <h2>7. 常見症狀排查：先看趨勢，再動設定</h2>
+          <div class="table-wrap">
+            <table class="diagnostic-table">
+              <caption>冰水主機第一輪診斷：以下是排查方向，不是單一故障的確診</caption>
+              <thead><tr><th scope="col">症狀</th><th scope="col">先檢查的讀值／現場項</th><th scope="col">處理方向</th></tr></thead>
+              <tbody>
+                <tr><td>主機容量不足、冰水出水偏高</td><td>實際負載、蒸發器流量與壓差、供回水溫度、冷凝器散熱條件及警報限制。</td><td>確認感測器、流量及選型工況，再依原廠資料查容量限制；不要先降低設定點掩蓋流量或換熱問題。</td></tr>
+                <tr><td>水冷主機冷凝壓力偏高</td><td>冷卻塔進風／水溫、冷卻水流量、塔風扇狀態、冷凝器水側壓差與水質。</td><td>檢查塔與泵運轉、水側結垢及非凝結氣體等可能性；清洗與冷媒系統診斷應依廠商程序由合格人員處理。</td></tr>
+                <tr><td>蒸發器出水溫度急降或凍結警報</td><td>實際流量證明、流量計／開關、閥位、感測器校正和主機負載變化。</td><td>優先確認水流和聯鎖有效；不可以旁路低溫保護來維持運轉。</td></tr>
+                <tr><td>主機頻繁啟停</td><td>實際負載與主機最小容量、台數控制差動、系統水容量、感測器位置及最小停機時間。</td><td>重新核對負載分級與控制設定；頻繁啟動會影響運轉穩定與維護，勿只用加大死區掩蓋設備過大或控制錯誤。</td></tr>
+                <tr><td>離心式主機喘振或運轉不穩</td><td>負載、冷凝器進水溫與流量、水側污垢、蒸發器工況及原廠喘振／穩定運轉資料。</td><td>降低不利溫升條件並依性能圖核查當前工況；交由製造商或合格冷凍空調技術人員判斷，不反覆強制重啟。</td></tr>
+                <tr><td>冷凍站 kW/RT 變差</td><td>相同負載下各設備功率、實際流量、供回水溫差、塔與泵控制及感測器偏差。</td><td>分開比較主機與輔機能耗，按趨勢找出增加來源；避免以單一主機效率值推斷全站性能。</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="maintenance">
+          <h2>8. 維護紀錄，讓效率惡化有跡可循</h2>
+          <p>ASHRAE 建議按應用及製造商要求規劃維護；持續記錄運轉條件有助辨識性能劣化。水冷機組另要管理冷卻水水質與換熱器清潔，加入防凍液的系統要追蹤濃度及腐蝕抑制劑狀態。</p>
+          <div class="table-wrap">
+            <table>
+              <caption>建議的冷凍站運轉紀錄欄位</caption>
+              <thead><tr><th scope="col">分類</th><th scope="col">需記錄的關鍵資料</th><th scope="col">比較用途</th></tr></thead>
+              <tbody>
+                <tr><td>負荷與效率</td><td>冷量、主機 kW、站房總 kW、運轉台數、負載率</td><td>比對同負載及相近氣象條件下的主機與系統效率趨勢。</td></tr>
+                <tr><td>冰水側</td><td>供回水溫、流量、蒸發器壓差、泵頻率、末端代表點溫度</td><td>辨識低 ΔT、流量異常、濾網堵塞或末端控制問題。</td></tr>
+                <tr><td>散熱側</td><td>冷卻水進出水溫、流量、冷卻塔風扇／泵功率、補水與水處理紀錄</td><td>檢查塔及冷凝器散熱能力、水耗及泵塔控制。</td></tr>
+                <tr><td>主機狀態</td><td>啟停次數、警報、控制限制、冷媒／潤滑油檢查（依機型）</td><td>辨識短循環、頻繁故障、泄漏或需要原廠檢修的趨勢。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="table-note">檢查週期、清洗方式、冷媒操作與壓力容器安全，遵循設備製造商手冊、適用法規及合格人員程序。記錄冷卻水的補排水與水處理；只有水冷式或相應系統需要記錄冷卻水項目。</p>
+        </section>
+
+        <section class="references" id="sources">
+          <h2>ASHRAE 來源與使用限制</h2>
+          <ol>
+            <li>ASHRAE, <cite>2024 ASHRAE Handbook—HVAC Systems and Equipment (SI)</cite>, Chapter 43, “Liquid-Chilling Systems,” pp. 43.1–43.16：系統原理、多主機配置、選型、控制、聯鎖、保養、離心式冷水機組及性能選擇。</li>
+            <li>AHRI Standard 550/590, <cite>Performance Rating of Water-Chilling and Heat Pump Water-Heating Packages Using the Vapor Compression Cycle</cite>：液體冷卻機組的額定及測試標準；實際適用版本與法規依專案確認。</li>
+          </ol>
+          <p class="table-note">流量例題採近似水物性，只用於初估；標準工況、容量、功率、流量上下限與安全保護均應依選定機組原廠資料、設計文件及所在地規範核實。本文為原創工程摘要，未重製 ASHRAE 圖表或長段原文，不取代合格專業人員的設計、操作與維修程序。</p>
+          <a class="back-link" href="columns.html">← 返回工程專欄</a>
+        </section>
+      </article>
+      <aside class="toc" aria-label="本文目錄">
+        <h2>本文目錄</h2>
+        <ol>
+          <li><a href="#principle">三個迴路</a></li>
+          <li><a href="#types">主機型式</a></li>
+          <li><a href="#load">負荷與流量算例</a></li>
+          <li><a href="#selection">選型檢核</a></li>
+          <li><a href="#efficiency">整站能效</a></li>
+          <li><a href="#commissioning">試車與交付</a></li>
+          <li><a href="#troubleshooting">故障排查</a></li>
+          <li><a href="#maintenance">維護趨勢</a></li>
+          <li><a href="#sources">來源與限制</a></li>
+        </ol>
+      </aside>
+    </div>
+  </main>
+  <footer>
+    <div class="wrap footer-inner">
+      <a class="footer-brand-link" href="index.html" aria-label="能源與冷凍空調學習網首頁">
+        <img class="footer-brand-logo" src="assets/hvacr-learning-logo.svg?v=3" alt="">
+        <span>能源與冷凍空調學習網</span>
+      </a>
+      <span>以學習、交流與實務應用為目的</span>
+    </div>
+  </footer>
+</body>
+</html>
