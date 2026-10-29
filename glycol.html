@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="乙二醇水溶液作為冷凍空調二次冷媒的冰點、濃度、腐蝕抑制、黏度與維護重點。">
+  <meta name="description" content="依 ASHRAE Handbook 說明乙二醇水系統的濃度選擇、熱負荷流量算例、泵浦檢核、充填試運轉與故障排查。">
   <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
-  <title>乙二醇：低溫水系統的防凍與選用｜冷凍空調專欄</title>
+  <title>乙二醇水系統：從選濃度到試運轉｜冷凍空調專欄</title>
   <style>
     :root {
       color-scheme: light;
@@ -55,6 +55,7 @@
     .article-body p, .article-body li { color: #304542; }
     .article-body ul, .article-body ol { padding-left: 1.35em; }
     .article-body li + li { margin-top: 8px; }
+    .article-body ul ul { margin-top: 8px; }
     .toc { position: sticky; top: 108px; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
     .toc h2 { margin-bottom: 12px; font-family: inherit; font-size: 14px; font-weight: 750; letter-spacing: 0; }
     .toc ol { margin: 0; padding-left: 1.25em; color: var(--muted); font-size: 13px; }
@@ -62,6 +63,7 @@
     .toc a { text-decoration-color: #b7c5b9; text-underline-offset: 3px; }
     .callout { margin: 20px 0; padding: 17px 19px; border-left: 3px solid var(--green); border-radius: 0 6px 6px 0; background: #edf1e7; color: #304542; }
     .callout strong { color: var(--ink); }
+    .callout--warning { border-left-color: #9c5b22; background: #f7efe5; }
     .flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 22px 0 10px; }
     .flow-step { position: relative; min-height: 112px; padding: 15px 13px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
     .flow-step:not(:last-child)::after { position: absolute; top: 43%; right: -11px; z-index: 1; color: var(--green); content: "›"; font-size: 20px; font-weight: 700; }
@@ -74,6 +76,20 @@
     th, td { padding: 11px 15px; border-top: 1px solid var(--line); white-space: nowrap; }
     th { background: #edf1e7; font-weight: 700; }
     .table-note { margin: 10px 0; color: var(--muted) !important; font-size: 12px; }
+    .data-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+    .data-card { padding: 16px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
+    .data-card strong { display: block; margin-bottom: 5px; color: var(--green-dark, #16483e); font-size: 14px; }
+    .data-card span { display: block; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .calc-box { margin: 18px 0; padding: 20px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
+    .calc-box h3 { margin-bottom: 10px; }
+    .calc-line { overflow-wrap: anywhere; margin: 8px 0; font-family: Consolas, "Courier New", monospace; font-size: 14px; font-variant-numeric: tabular-nums; }
+    .result-line { margin: 13px 0 0; padding-top: 12px; border-top: 1px solid var(--line); color: var(--green-dark, #16483e) !important; font-weight: 750; }
+    .checklist { counter-reset: commissioning; list-style: none; padding: 0 !important; }
+    .checklist li { position: relative; min-height: 42px; padding: 8px 0 8px 46px; border-bottom: 1px solid var(--line); }
+    .checklist li::before { position: absolute; top: 8px; left: 0; display: grid; width: 28px; height: 28px; place-items: center; border: 1px solid #b7c9b8; border-radius: 50%; color: var(--green); font-size: 12px; font-weight: 750; counter-increment: commissioning; content: counter(commissioning); }
+    .diagnostic-table td:first-child { min-width: 180px; font-weight: 700; }
+    .diagnostic-table td { white-space: normal; vertical-align: top; }
+    .diagnostic-table th { white-space: nowrap; }
     .references { padding-top: 22px; border-top: 1px solid var(--line); }
     .references h2 { font-size: 25px; }
     .references li { font-size: 14px; }
@@ -98,6 +114,8 @@
       .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
       .flow-step { min-height: 95px; }
       .flow-step:nth-child(2)::after { display: none; }
+      .data-grid { grid-template-columns: 1fr; gap: 9px; }
+      .calc-box { padding: 16px; }
       th, td { padding: 10px 12px; }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
@@ -120,16 +138,22 @@
   </header>
   <main class="wrap page">
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="columns.html">專欄</a> ／ 乙二醇</p>
-    <p class="eyebrow">Secondary Coolants · Engineering Guide</p>
-    <h1>乙二醇：低溫水系統的防凍與選用</h1>
-    <p class="dek">乙二醇不是冷媒，而是冷凍空調系統常見的二次冷媒。它與水混合後能降低冰點，讓冷量在設備與負載之間安全傳遞；但濃度、腐蝕抑制與流體性質必須一起考量。</p>
-    <p class="byline">依 ASHRAE Handbook 技術資料整理｜閱讀約 8 分鐘</p>
+    <p class="eyebrow">Secondary Coolants · Field Engineering</p>
+    <h1>乙二醇水系統：從選濃度到試運轉的工程做法</h1>
+    <p class="dek">乙二醇不是「加了就不會結冰」的添加物，而是一種會改變冰點、比熱、黏度、壓降與腐蝕風險的二次冷媒。本文把 ASHRAE Handbook 的物性和應用原則整理成設計初選、流量核算、泵浦檢核、充填驗收與故障排查流程。</p>
+    <p class="byline">工程實務專題｜以 ASHRAE Handbook 原始章節為依據｜閱讀約 12 分鐘</p>
 
     <div class="article-layout">
       <article class="article-body">
-        <section id="role">
-          <h2>1. 乙二醇在系統裡做什麼？</h2>
-          <p>直接膨脹系統以冷媒在蒸發器吸熱；使用乙二醇水溶液的系統則先由冷凍機把溶液冷卻，再由泵送到遠端盤管、製程設備或其他負載，吸熱後回到冷凍機。乙二醇溶液在這裡是循環的<strong>二次冷媒／熱傳介質</strong>，並非取代冷媒在蒸發器內相變的工作流體。</p>
+        <section id="job">
+          <h2>1. 先定義設計任務，不要先猜濃度</h2>
+          <p>乙二醇水溶液在系統中是循環的<strong>二次冷媒／熱傳介質</strong>：冷凍機先把溶液降溫，泵送至盤管或製程負載吸熱，再送回冷凍機。它不會取代蒸發器內相變的冷媒。ASHRAE《Fundamentals》第 31 章指出，乙二醇適合用來降低水溶液冰點並傳熱；但工程選用同時要看需要的防凍型式和濃度對物性的影響。</p>
+          <div class="data-grid" aria-label="選用乙二醇前需要確定的設計資料">
+            <div class="data-card"><strong>溫度邊界</strong><span>最低運轉溫度、最低停機／室外溫度、可能的冷表面溫度，以及停泵後哪些管段仍會受冷。</span></div>
+            <div class="data-card"><strong>保護目標</strong><span>只需防止停機凍裂、允許形成冰漿，或運轉時仍要求全液態？三者不能使用同一個濃度判斷。</span></div>
+            <div class="data-card"><strong>負荷與水力</strong><span>設計冷量 Q̇、供回液溫差 ΔT、最不利回路壓降、泵浦曲線及換熱器允許流體。</span></div>
+            <div class="data-card"><strong>材料與風險</strong><span>金屬、密封件、既有殘液、是否接近食品／飲用水，以及當地化學品管理要求。</span></div>
+          </div>
           <div class="flow" role="img" aria-label="乙二醇水溶液由冷凍機冷卻後送到負載吸熱，再回流冷凍機">
             <div class="flow-step"><span>01 · 冷卻</span><strong>冷凍機<br>降低溶液溫度</strong></div>
             <div class="flow-step"><span>02 · 輸送</span><strong>循環泵<br>送往遠端負載</strong></div>
@@ -137,88 +161,139 @@
             <div class="flow-step"><span>04 · 回流</span><strong>回水管<br>返回冷凍機</strong></div>
           </div>
           <p class="diagram-caption">原創概念圖：封閉式乙二醇水溶液循環。實際設備配置依系統設計而異。</p>
-          <p>乙二醇與丙二醇（propylene glycol）都是 ASHRAE 列舉的水溶性防凍與傳熱介質。乙二醇溶液通常有較佳的熱物性，尤其在低溫時；丙二醇則毒性較低，若有人體接觸可能或法規要求，應評估使用符合用途規格的丙二醇產品。</p>
-        </section>
-
-        <section id="concentration">
-          <h2>2. 濃度怎麼選？先決定「要防到哪裡」</h2>
-          <p>濃度不是越高越安全。先釐清系統需要的是停機期間避免設備凍損，還是運轉時溶液必須全程保持液態，接著依最低可能流體溫度及產品資料選定配比。ASHRAE 指出，若要求溶液保持全液態，冰點應低於預期最低溫度約 3 K；過高濃度會增加成本，並使物性變差。</p>
-          <div class="callout"><strong>兩種保護不能混為一談：</strong>若只是寒冷停機時避免設備損壞，ASHRAE 提到約 30% 體積濃度的乙二醇可形成冰漿，仍需有膨脹空間；運轉中要求不結冰，則須依最低溫度留出冰點裕度，不能把「冰漿保護」當作全液態防凍。</div>
-          <div class="table-wrap">
-            <table>
-              <caption>乙二醇水溶液的參考冰點（摘列 ASHRAE 表列數值）</caption>
-              <thead><tr><th scope="col">乙二醇質量濃度</th><th scope="col">約當體積濃度</th><th scope="col">冰點</th></tr></thead>
-              <tbody>
-                <tr><td>20%</td><td>18.1%</td><td>−7.8 °C</td></tr>
-                <tr><td>30%</td><td>27.7%</td><td>−14.1 °C</td></tr>
-                <tr><td>40%</td><td>37.5%</td><td>−22.3 °C</td></tr>
-                <tr><td>50%</td><td>47.6%</td><td>−33.8 °C</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p class="table-note">以上為 ASHRAE 2021《Fundamentals》表列的水溶液參考值；質量百分比與體積百分比不同。商用抑制型產品、量測溫度與配製方法可能造成差異，設計與驗收請採用該產品的技術資料。</p>
-        </section>
-
-        <section id="performance">
-          <h2>3. 防凍之外，還要重新核對熱交換與泵送</h2>
-          <p>乙二醇溶液的密度、比熱、熱傳導率與黏度會隨濃度和溫度改變。相較於水，加入乙二醇後通常會降低比熱與熱傳能力，並增加黏度；溫度越低，黏度影響越值得留意。若仍沿用純水系統的流量、管徑或泵浦選型，可能無法達到原設計的熱負荷或流量。</p>
-          <p>因此，選定濃度後應用相同產品的物性資料檢核負載側流量、盤管與熱交換器能力、管路壓降及泵浦工作點。顯熱負載可先用下式作能量估算：</p>
-          <div class="callout" aria-label="顯熱傳輸率公式">
-            <strong>Q̇ = ṁ × c<sub>p</sub> × ΔT</strong>
-            <span>；其中 Q̇ 為熱傳率、ṁ 為質量流率、c<sub>p</sub> 為該濃度與溫度下的比熱、ΔT 為進回液溫差。</span>
-          </div>
-          <p>這是顯熱估算式，不是泵浦選型或完整系統性能計算的替代品。實際設計應使用廠商提供的濃度－溫度物性，而不是把純水的比熱或壓降直接套用。</p>
-        </section>
-
-        <section id="corrosion">
-          <h2>4. 為什麼「加水稀釋」還不夠？</h2>
-          <p>乙二醇與水形成溶液後，長期使用可能因熱與氧化產生酸性降解物；金屬種類、溫度及曝氣情況都會影響劣化。ASHRAE 因此說明，水系乙二醇需使用與系統材料相容的腐蝕抑制劑及緩衝添加劑，且抑制效果與溶液 pH 有關。選用時應以<strong>工業用、含適用抑制劑的傳熱液</strong>為主，依製造商規範管理，不應任意混用不同產品或添加劑。</p>
-          <p>新系統投入運轉前，應先按化學品供應商建議清洗與沖洗，再用合適處理液充填；避免系統長時間留有未處理、含氧的靜止水。ASHRAE 的 HVAC Applications 也提醒，封閉水系統仍需依金屬材質、運轉條件與補水情形設計腐蝕控制。</p>
-          <ul>
-            <li>記錄產品名稱、配比、充填日期與補液量，並保存安全資料表。</li>
-            <li>依產品商建議定期檢查濃度、pH、抑制劑狀態及外觀；補液或更換時採相容的預混液。</li>
-            <li>找出漏點再補充。未經評估就加水可能把濃度稀釋到防凍不足。</li>
-            <li>乙二醇不可飲用；管理洩漏、廢液與可能接觸的區域，依當地規範及產品 SDS 處理。</li>
-          </ul>
         </section>
 
         <section id="selection">
-          <h2>5. 乙二醇、丙二醇與飲用水隔離</h2>
-          <p>乙二醇的低溫熱物性較有利，但具毒性；若系統存在食品接觸、飲用水或人體暴露風險，應進行風險評估並確認適用法規。可評估較低毒性的丙二醇，但要使用符合指定用途純度與規格的產品，而且仍須計入其較高黏度對換熱與泵送的影響。</p>
-          <p>任何防凍液都不是飲用水。間接加熱等可能與生活用水交換熱量的系統，應依規範採取適當隔離措施與熱交換器配置；ASHRAE 的應用手冊也指出，乙二醇／丙二醇溶液可能有毒，不可讓其直接與可飲用水混合。</p>
+          <h2>2. 濃度選擇：先分清冰點保護與爆管保護</h2>
+          <p>ASHRAE 給的設計原則很實用：若要求溶液在最低預期溫度仍<strong>全液態</strong>，選擇冰點至少低於最低預期溫度 3 K 的濃度。若只是防止設備在停機期間凍裂，約 30% 體積濃度的乙二醇可形成可流動的冰漿，但體積膨脹須有容納空間；這不是維持運轉液態的規格。</p>
+          <div class="callout callout--warning"><strong>先決定保護目標，再查表：</strong>把「Freeze protection（保持液態）」和「Burst protection（容許結冰但避免破裂）」寫進設計基準。若線圈、閥體或死角可能封閉，不能假設冰漿一定能自由膨脹。</div>
+          <div class="table-wrap">
+            <table>
+              <caption>乙二醇水溶液冰點參考值（ASHRAE 2021《Fundamentals》Table 4）</caption>
+              <thead><tr><th scope="col">質量濃度</th><th scope="col">體積濃度</th><th scope="col">初始結冰點</th><th scope="col">可作為全液態設計的例子</th></tr></thead>
+              <tbody>
+                <tr><td>30%</td><td>27.7%</td><td>−14.1 °C</td><td>最低液溫 −11 °C 時裕度約 3.1 K</td></tr>
+                <tr><td>40%</td><td>37.5%</td><td>−22.3 °C</td><td>最低液溫 −19 °C 時裕度約 3.3 K</td></tr>
+                <tr><td>50%</td><td>47.6%</td><td>−33.8 °C</td><td>僅於實際最低溫與產品條件需要時評估</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="table-note">此處「冰點」是 ASHRAE Table 4 的初始結冰參考；ASHRAE 原文的 3 K 裕度是選擇全液態防凍濃度的原則。手冊表列的是一般水溶液，正式設計、採購及驗收以指定<strong>抑制型產品</strong>製造商的濃度－冰點曲線為準。質量百分比（kg/kg）與體積百分比（L/L）不可混寫。</p>
+          <h3>配液工作單：配方以質量為準，除非產品另有規定</h3>
+          <p>若規格採質量百分比，理論配料質量可直接核算：乙二醇質量＝目標質量分率 × 總配液質量。例：100 kg、30 mass% 的<strong>純乙二醇－水二元混合物</strong>，理論上為 30 kg 乙二醇加 70 kg 水。這不是 30 L 加 70 L；溶液混合後體積不一定等於兩者體積相加。此例是質量平衡示意，並非商用抑制型產品的配製指令；現場優先採用相容預混液，自行稀釋時依產品指示、濃度基準和水質配製，並量測成品。</p>
+        </section>
+
+        <section id="sizing">
+          <h2>3. 從負荷算出設計流量，再檢核水力與設備</h2>
+          <p>乙二醇加入後，比熱和熱傳導率通常下降、黏度上升；濃度越高、溫度越低，影響越顯著。ASHRAE 的物性表按濃度與溫度分列密度、比熱、熱傳導率與黏度，因此不得把純水資料直接套在乙二醇迴路。先以能量平衡算質量流量，再按密度換成體積流量：</p>
+          <div class="calc-box">
+            <div class="calc-line">Q̇ = ṁ × c<sub>p</sub> × ΔT</div>
+            <div class="calc-line">V̇ = ṁ / ρ</div>
+            <p class="table-note">Q̇：熱負荷（kW）；ṁ：質量流率（kg/s）；c<sub>p</sub>：比熱（kJ/[kg·K]）；ΔT：供回液溫差（K）；V̇：體積流率（m³/s）；ρ：密度（kg/m³）。</p>
+          </div>
+          <h3>算例｜100 kW 負荷、5 K 溫差、30 vol% 水溶液</h3>
+          <p>以下只示範<strong>初步流量估算</strong>。採 ASHRAE 2021《Fundamentals》第 31 章 30 vol% 欄位、0 °C 的表列參考值：c<sub>p</sub> = 3.589 kJ/(kg·K)、ρ = 1051.78 kg/m³。實際商用品需以其自身資料替換。</p>
+          <div class="calc-box">
+            <div class="calc-line">ṁ = 100 kW ÷ [3.589 kJ/(kg·K) × 5 K] = 5.57 kg/s</div>
+            <div class="calc-line">V̇ = 5.57 kg/s ÷ 1051.78 kg/m³ × 3600 = 19.1 m³/h</div>
+            <p class="result-line">初選設計流量：約 5.57 kg/s，或 19.1 m³/h。</p>
+          </div>
+          <p>這個數字不能直接當泵浦型號。下一步應依實際迴路逐項取得設備壓降：</p>
+          <div class="table-wrap">
+            <table>
+              <caption>水力與設備選型檢核單</caption>
+              <thead><tr><th scope="col">檢核項目</th><th scope="col">實務操作</th><th scope="col">常見漏項</th></tr></thead>
+              <tbody>
+                <tr><td>管路與配件</td><td>按實際管徑、長度、流量及溶液黏度計算直管與局部損失。</td><td>拿清水壓降代替低溫乙二醇壓降。</td></tr>
+                <tr><td>盤管／換熱器</td><td>向製造商索取指定濃度、溫度和流量下的壓降與容量。</td><td>只檢查 kW，漏掉黏度造成的壓降與容量變化。</td></tr>
+                <tr><td>泵浦工作點</td><td>將設計流量對應到「該溶液」系統總壓降，再與泵浦曲線及馬達功率核對。</td><td>只按清水額定流量選泵，未確認黏度修正和 NPSH。</td></tr>
+                <tr><td>冷凍機與控制</td><td>確認冷凍機允許的流體種類、最低出液溫度、流量範圍與容量修正。</td><td>預設原有純水冷凍機在相同設定下仍有相同能力。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>閉式迴路的循環泵揚程主要用來克服迴路阻力；以壓力損失換算水頭時，可用 H = Δp/(ρg)，並依設計流量下所有元件壓損加總。建築高度通常不等於閉式滿液迴路的循環揚程，但系統充填壓力、膨脹槽預充及高點防汽蝕仍須另行設計。泵浦最終選型由設計者按實際管網、設備曲線與廠商修正資料完成。</p>
+        </section>
+
+        <section id="commissioning">
+          <h2>4. 充填與試運轉：把「濃度合格」變成可驗收紀錄</h2>
+          <p>新系統先清除施工殘渣、油脂與氧化皮，再按化學品供應商程序清洗、沖洗和充填；ASHRAE《HVAC Applications》指出，封閉水系統的材質、運轉條件和補水量都會影響處理方案，新系統長時間停留未處理水會增加腐蝕風險。</p>
+          <ol class="checklist">
+            <li><strong>確認介質：</strong>記下產品全名、乙二醇類型、抑制劑系統、相容材料、批號及安全資料表。</li>
+            <li><strong>建立基線：</strong>記錄系統有效容積、配液基準（質量或體積）、目標濃度、目標冰點和供應液 pH／抑制劑狀態。</li>
+            <li><strong>沖洗與排氣：</strong>按產品商指定的清洗液與水質沖洗；低點排污、高點排氣，逐支路確認流量，不能只看泵浦有運轉。</li>
+            <li><strong>配液與充填：</strong>採相容預混液或精確配製液；依程序慢速充填並排氣，檢查泵浦密封、法蘭、盤管及閥件洩漏。</li>
+            <li><strong>穩定後取樣：</strong>充分循環並確認混合均勻後，從代表性回水點取樣；用適合乙二醇且校正過的儀器及產品曲線判讀，不以未校正折射計讀值驗收。</li>
+            <li><strong>帶負荷測試：</strong>記錄流量、供回液溫度、冷凍機進出液壓差、泵浦電流和最不利末端狀態，與設計值及設備允許範圍比對。</li>
+            <li><strong>交付趨勢：</strong>建立濃度、冰點、pH、抑制劑、補液和洩漏紀錄，並依產品商建議安排複測。</li>
+          </ol>
+          <div class="callout callout--warning"><strong>不要用自動補水掩蓋漏液：</strong>ASHRAE 在防凍傳熱液應用中提醒，明顯洩漏後自動補入水可能使混合液冰點升高，造成室外管線或集熱器凍結。閉式 glycol 系統應先找漏點、量測實際濃度，再依維護程序補入相容液體。</div>
+        </section>
+
+        <section id="troubleshooting">
+          <h2>5. 現場故障排查：先量測，再調濃度</h2>
+          <div class="table-wrap">
+            <table class="diagnostic-table">
+              <caption>乙二醇閉式迴路常見症狀與第一輪檢查</caption>
+              <thead><tr><th scope="col">現場症狀</th><th scope="col">優先查證</th><th scope="col">處置方向</th></tr></thead>
+              <tbody>
+                <tr><td>末端冷量不足、ΔT 偏大</td><td>實際流量、支路平衡、濾網／盤管髒堵、溶液溫度與負荷。</td><td>先確認流量及換熱面，再用該濃度物性重算容量；不要先提高泵速而忽略設備限制。</td></tr>
+                <tr><td>泵浦流量不足或電流偏高</td><td>溶液濃度與最低溫度黏度、系統壓差、閥位、濾網及泵浦曲線。</td><td>核對設計壓降和泵浦工況；濃度超標時依產品程序調整，勿用任意加水稀釋。</td></tr>
+                <tr><td>冰點檢測高於設計值</td><td>取樣點是否混合均勻、量測儀器是否適用乙二醇、校正與溫度補償。</td><td>重取代表性樣品，與產品曲線或實驗室結果比對；先追查補水、補液和洩漏紀錄。</td></tr>
+                <tr><td>液體變色、沉積或腐蝕跡象</td><td>pH、抑制劑殘量、金屬腐蝕產物、氧氣進入及熱劣化。</td><td>送樣依產品商檢測方案分析；確認污染來源後再決定換液與清洗，避免只補抑制劑掩蓋原因。</td></tr>
+                <tr><td>冬季局部凍堵</td><td>死角與停滯支路、冷表面最低溫、實際濃度和停機循環策略。</td><td>核對保護目標是否要求全液態；改善排空／伴熱／循環控制或按設計重新選濃度。</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="material-safety">
+          <h2>6. 材料、安全及替代液：不能只比冰點</h2>
+          <p>ASHRAE 指出，抑制型乙二醇通常具有較佳低溫熱物性；丙二醇毒性較低，可能較適合有接觸風險或法規要求的應用，但同濃度下黏度較高，低溫泵送和傳熱差異需重新計算。丙二醇若涉及偶發食品接觸，應確認產品符合指定食品級規格；一般工業級不可自行視為食品級。兩種液體都不是飲用水，也都要檢查材料相容性和廢液規範。</p>
+          <ul>
+            <li><strong>選工業抑制型產品：</strong>純乙二醇加水不是完整的長期傳熱液；需有與系統金屬相容的腐蝕抑制及酸性降解緩衝方案。</li>
+            <li><strong>避免混牌混配：</strong>不同產品的抑制劑化學可能不相容；更換品牌或類型前先向供應商確認清洗、沖洗及相容性。</li>
+            <li><strong>控制氧與溫度：</strong>ASHRAE 指出，熱、曝氣與接觸金屬會影響氧化劣化；降低不必要的高溫、漏氣與頻繁補液。</li>
+            <li><strong>設計隔離與應變：</strong>飲用水、食品或人員可能暴露的區域，依所在地規範配置隔離、二次圍堵、洩漏處理與合適液體。</li>
+          </ul>
         </section>
 
         <section id="checklist">
-          <h2>6. 設計與維護快速檢查表</h2>
-          <ol>
-            <li>列出最低運轉溫度、最低停機環境溫度及是否允許形成冰漿。</li>
-            <li>明確標示配比是質量百分比或體積百分比，按產品資料核對冰點與混配方式。</li>
-            <li>用實際溶液物性重新檢核熱負荷、流量、壓降、泵浦與熱交換器。</li>
-            <li>確認抑制劑與管材、密封件及系統金屬相容，建立採樣和維護週期。</li>
-            <li>評估毒性、飲用水隔離、洩漏應變、廢液處理與適用法規。</li>
+          <h2>7. 設計交付時，至少留下這 10 項</h2>
+          <ol class="checklist">
+            <li>系統目的，以及採用「保持液態」或「防爆管」哪一種保護目標。</li>
+            <li>最低運轉／停機溫度、設計冰點及選用的溫度裕度。</li>
+            <li>產品名稱、抑制劑類型、SDS、相容性確認和產品物性表版本。</li>
+            <li>濃度數值與基準單位（mass% 或 vol%），不得只寫「30% glycol」。</li>
+            <li>系統有效容積、配製與充填量、取樣位置及驗收方法。</li>
+            <li>設計冷量、供回液溫度、比熱來源、質量流量與體積流量。</li>
+            <li>最不利迴路壓損、泵浦工況、馬達功率與設備允許流量。</li>
+            <li>冷凍機、盤管、閥件、密封材料與膨脹槽的適用性。</li>
+            <li>試運轉量測紀錄，以及濃度、冰點、pH／抑制劑的後續管理週期。</li>
+            <li>洩漏補液程序、責任人、廢液處理方式與緊急聯絡資訊。</li>
           </ol>
         </section>
 
         <section class="references" id="sources">
-          <h2>參考資料與本文範圍</h2>
+          <h2>ASHRAE 來源與使用限制</h2>
           <ol>
-            <li>ASHRAE, <cite>2021 ASHRAE Handbook—Fundamentals (SI)</cite>, Chapter 31, “Physical Properties of Secondary Coolants (Brines),” §2 “Inhibited Glycols,” pp. 31.4–31.11；物性與水溶液冰點參考 Tables 3–13。</li>
-            <li>ASHRAE, <cite>2015 ASHRAE Handbook—HVAC Applications (SI)</cite>, Chapter 35, “Solar Energy Use,” pp. 35.14–35.15；間接水加熱系統之防凍傳熱液與飲用水隔離。</li>
-            <li>ASHRAE, <cite>2015 ASHRAE Handbook—HVAC Applications (SI)</cite>, Chapter 49, “Water Treatment,” §“Closed Systems,” p. 49.19；封閉水系統之清洗、充填與腐蝕控制原則。</li>
+            <li>ASHRAE, <cite>2021 ASHRAE Handbook—Fundamentals (SI)</cite>, Chapter 31, “Physical Properties of Secondary Coolants (Brines),” §2 “Inhibited Glycols,” pp. 31.4–31.5；Tables 3–13, pp. 31.5–31.11：選濃度原則、腐蝕抑制、密度、比熱、熱傳導率、黏度及溶液冰點。</li>
+            <li>ASHRAE, <cite>2015 ASHRAE Handbook—HVAC Applications (SI)</cite>, Chapter 35, “Solar Energy Use,” pp. 35.14–35.15：防凍傳熱液、飲用水隔離、閉式迴路及不可任由自動補水稀釋的應用提醒。</li>
+            <li>ASHRAE, <cite>2015 ASHRAE Handbook—HVAC Applications (SI)</cite>, Chapter 49, “Water Treatment,” §“Closed Systems,” p. 49.19：系統清洗、沖洗、充填與封閉水系統腐蝕控制。</li>
           </ol>
-          <p class="table-note">本文為依上述來源整理的工程教育摘要，未重製 ASHRAE 圖表或大段原文。配比、材料相容性及維護要求應以設計條件、當地規範和所選產品資料為準。</p>
+          <p class="table-note">本文為工程初選與維護工作流程，不取代設備製造商的選型資料、化學品產品曲線、法規審查或合格設計者計算。濃度範例是 ASHRAE 表列水溶液參考值；商用抑制型產品的規格可能不同，現場量測與維護應遵循產品供應商程序。本文僅摘要與轉述技術原則，未重製手冊圖表或長段原文。</p>
           <a class="back-link" href="columns.html">← 返回冷凍空調專欄</a>
         </section>
       </article>
       <aside class="toc" aria-label="本文目錄">
         <h2>本文目錄</h2>
         <ol>
-          <li><a href="#role">乙二醇的角色</a></li>
-          <li><a href="#concentration">濃度與冰點</a></li>
-          <li><a href="#performance">換熱與泵送</a></li>
-          <li><a href="#corrosion">腐蝕與維護</a></li>
-          <li><a href="#selection">安全與選用</a></li>
-          <li><a href="#checklist">設計檢查表</a></li>
+          <li><a href="#job">先定義設計任務</a></li>
+          <li><a href="#selection">濃度與保護目標</a></li>
+          <li><a href="#sizing">負荷、流量與泵浦</a></li>
+          <li><a href="#commissioning">充填與試運轉</a></li>
+          <li><a href="#troubleshooting">故障排查</a></li>
+          <li><a href="#material-safety">材料與安全</a></li>
+          <li><a href="#checklist">設計交付清單</a></li>
           <li><a href="#sources">參考資料</a></li>
         </ol>
       </aside>

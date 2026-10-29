@@ -41,18 +41,35 @@
       for (const phrase of [
         "ASHRAE Handbook—Fundamentals",
         "31.4–31.11",
-        "質量濃度",
+        "質量百分比",
         "−14.1 °C",
         "二次冷媒",
         "抑制劑",
         "丙二醇",
+        "100 kW",
+        "3.589 kJ/(kg·K)",
+        "1051.78 kg/m³",
+        "19.1 m³/h",
+        "全液態",
+        "試運轉",
+        "自動補水",
+        "故障排查",
       ]) {
         assert(text.includes(phrase), `Glycol article includes ${phrase}`);
       }
       assert(article.querySelectorAll(".flow-step").length === 4,
         "Article explains the secondary-coolant loop");
-      assert(article.querySelectorAll("table tbody tr").length === 4,
-        "Article provides four source-based concentration examples");
+      assert(article.querySelectorAll("#selection table tbody tr").length === 3,
+        "Article provides three source-based concentration references");
+      assert(article.querySelectorAll(".checklist li").length === 17,
+        "Article provides commissioning and handover checklists");
+      assert(article.querySelectorAll(".diagnostic-table tbody tr").length === 5,
+        "Article provides five symptom-based troubleshooting checks");
+      assert(article.querySelectorAll("article section[id]").length === 8,
+        "Article has eight navigable technical sections");
+      assert([...article.querySelectorAll(".toc a")].every((link) =>
+        article.querySelector(link.getAttribute("href"))),
+      "Table-of-contents links resolve to article sections");
       assert(!article.querySelector('a[href*="reference/ASHRAE"], a[href$=".pdf"]'),
         "Article does not link to handbook PDF files");
 
