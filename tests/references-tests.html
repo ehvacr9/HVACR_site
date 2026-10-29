@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>全站導覽回歸測試</title>
+  <title>全站導覽與專欄回歸測試</title>
 </head>
 <body>
-  <h1>全站導覽回歸測試</h1>
-  <p>請以 HTTP 伺服器提供網站；測試所有頁面的主導覽不顯示書目專區連結。</p>
+  <h1>全站導覽與專欄回歸測試</h1>
+  <p>請以 HTTP 伺服器提供網站；測試所有頁面的專欄入口及乙二醇專欄路由。</p>
   <pre id="results" role="status">Running...</pre>
   <script type="module">
     const output = document.querySelector("#results");
@@ -20,7 +20,7 @@
       "index.html", "about.html", "founder.html", "terminology.html", "exam-years.html",
       "exam-year-112.html", "exam-year-113.html", "exam-year-114.html", "exam-year-archive.html",
       "exam-paper.html", "humid-air.html", "refrigeration-cycle.html", "tools.html",
-      "unit-converter.html", "water-refrigerant.html",
+      "unit-converter.html", "water-refrigerant.html", "columns.html", "glycol.html",
     ];
 
     try {
@@ -28,6 +28,8 @@
         const response = await fetch(`../${path}?navigation-test=${Date.now()}`);
         assert(response.ok, `${path} responds`);
         const page = new DOMParser().parseFromString(await response.text(), "text/html");
+        assert(page.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "專欄",
+          `${path} links to the technical columns`);
         assert(!page.querySelector('nav a[href="references.html"]'),
           `${path} does not expose the bibliography in the site navigation`);
       }

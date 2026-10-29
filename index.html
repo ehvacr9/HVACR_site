@@ -766,6 +766,7 @@
       <a href="about.html">關於我們</a>
       <a href="exam-years.html">技師考題</a>
       <a href="terminology.html">術語辭典</a>
+      <a href="columns.html">專欄</a>
       <a href="tools.html">計算工具</a>
     </nav>
   </header>
@@ -831,6 +832,19 @@
           <p class="section-intro">查閱冷凍空調常用英文術語、中日文名稱與專業定義。</p>
         </div>
         <a class="button" href="terminology.html">前往術語辭典 <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
+    <section class="topics" aria-labelledby="columns-link-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">HVACR Technical Columns</p>
+            <h2 id="columns-link-title">冷凍空調專欄</h2>
+          </div>
+          <p class="section-intro">以 ASHRAE Handbook 等工程資料為基礎，深入整理材料、設備與系統實務。</p>
+        </div>
+        <a class="button" href="columns.html">閱讀工程專欄 <span aria-hidden="true">→</span></a>
       </div>
     </section>
 
@@ -962,6 +976,9 @@
         });
       });
 
+      gallery.addEventListener("focusin", () => {
+        autoplayEnabled = false;
+      });
       reducedMotion.addEventListener("change", (event) => {
         autoplayEnabled = !event.matches;
       });

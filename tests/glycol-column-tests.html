@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>乙二醇專欄回歸測試</title>
+</head>
+<body>
+  <h1>乙二醇專欄回歸測試</h1>
+  <p>請以 HTTP 伺服器提供網站；測試首頁專欄入口、文章路由、ASHRAE 引用與核心技術內容。</p>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+
+    try {
+      const [homeResponse, columnsResponse, articleResponse] = await Promise.all([
+        fetch("../index.html?glycol-test=" + Date.now()),
+        fetch("../columns.html?glycol-test=" + Date.now()),
+        fetch("../glycol.html?glycol-test=" + Date.now()),
+      ]);
+      assert(homeResponse.ok, "Homepage responds");
+      assert(columnsResponse.ok, "Column archive responds");
+      assert(articleResponse.ok, "Glycol article responds");
+
+      const home = new DOMParser().parseFromString(await homeResponse.text(), "text/html");
+      const columns = new DOMParser().parseFromString(await columnsResponse.text(), "text/html");
+      const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
+      assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "專欄",
+        "Main navigation links to the column archive");
+      assert(home.querySelector('a[href="columns.html"].button')?.textContent.includes("閱讀工程專欄"),
+        "Homepage has a descriptive column link");
+      assert(columns.querySelector('a[href="glycol.html"]')?.textContent.includes("閱讀專欄"),
+        "Column archive links to the glycol article");
+
+      const text = article.body.textContent;
+      for (const phrase of [
+        "ASHRAE Handbook—Fundamentals",
+        "31.4–31.11",
+        "質量濃度",
+        "−14.1 °C",
+        "二次冷媒",
+        "抑制劑",
+        "丙二醇",
+      ]) {
+        assert(text.includes(phrase), `Glycol article includes ${phrase}`);
+      }
+      assert(article.querySelectorAll(".flow-step").length === 4,
+        "Article explains the secondary-coolant loop");
+      assert(article.querySelectorAll("table tbody tr").length === 4,
+        "Article provides four source-based concentration examples");
+      assert(!article.querySelector('a[href*="reference/ASHRAE"], a[href$=".pdf"]'),
+        "Article does not link to handbook PDF files");
+
+      output.textContent = `PASS: ${checks} checks`;
+    } catch (error) {
+      output.textContent = `Error: ${error.message}`;
+      throw error;
+    }
+  </script>
+</body>
+</html>
