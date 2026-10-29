@@ -69,6 +69,18 @@
     .flow-step:not(:last-child)::after { position: absolute; top: 43%; right: -11px; z-index: 1; color: var(--green); content: "›"; font-size: 20px; font-weight: 700; }
     .flow-step span { display: block; margin-bottom: 7px; color: var(--green); font-size: 11px; font-weight: 750; letter-spacing: .08em; }
     .flow-step strong { font-size: 13px; line-height: 1.55; }
+    .system-figure { margin: 22px 0 10px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .diagram-scroll { overflow-x: auto; overscroll-behavior-inline: contain; }
+    .system-diagram { display: block; width: 100%; min-width: 760px; height: auto; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    .system-diagram text { fill: var(--ink); font-size: 14px; }
+    .system-diagram .small-label { fill: var(--muted); font-size: 12px; }
+    .system-diagram .section-label { font-size: 13px; font-weight: 700; }
+    .system-diagram .pipe { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 4; }
+    .system-diagram .cold-solution { stroke: #3978a8; }
+    .system-diagram .warm-solution { stroke: #ad7b2b; }
+    .system-diagram .equipment { fill: #f3f5ef; stroke: #94a69a; stroke-width: 1.5; }
+    .system-diagram .tank { fill: #f6f1e7; stroke: #b7a178; stroke-width: 1.5; }
+    .diagram-caption { margin: 10px 0 0; color: var(--muted) !important; font-size: 12px; }
     .diagram-caption { margin-bottom: 0; color: var(--muted) !important; font-size: 12px; }
     .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
     table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
@@ -166,13 +178,70 @@
             <div class="data-card"><strong>負荷與水力</strong><span>設計冷量 Q̇、供回液溫差 ΔT、最不利回路壓降、泵浦曲線及換熱器允許流體。</span></div>
             <div class="data-card"><strong>材料與風險</strong><span>金屬、密封件、既有殘液、是否接近食品／飲用水，以及當地化學品管理要求。</span></div>
           </div>
-          <div class="flow" role="img" aria-label="乙二醇水溶液由冷凍機冷卻後送到負載吸熱，再回流冷凍機">
-            <div class="flow-step"><span>01 · 冷卻</span><strong>冷凍機<br>降低溶液溫度</strong></div>
-            <div class="flow-step"><span>02 · 輸送</span><strong>循環泵<br>送往遠端負載</strong></div>
-            <div class="flow-step"><span>03 · 吸熱</span><strong>盤管／製程<br>溶液帶走熱量</strong></div>
-            <div class="flow-step"><span>04 · 回流</span><strong>回水管<br>返回冷凍機</strong></div>
-          </div>
-          <p class="diagram-caption">原創概念圖：封閉式乙二醇水溶液循環。實際設備配置依系統設計而異。</p>
+          <figure class="system-figure">
+            <div class="diagram-scroll" tabindex="0" aria-label="可左右捲動查看乙二醇閉式循環系統圖">
+              <svg class="system-diagram glycol-system-diagram" viewBox="0 0 1040 520" role="img" aria-labelledby="glycol-diagram-title glycol-diagram-desc">
+                <title id="glycol-diagram-title">乙二醇水溶液閉式冷凍循環系統配置示意</title>
+                <desc id="glycol-diagram-desc">冷凍機冷卻乙二醇水溶液後，循環泵將低溫溶液送經隔離閥、過濾器與盤管負載。溶液吸熱後由回液管返回冷凍機。膨脹槽接在泵浦吸入口附近的系統定壓點，並示意空氣分離器、補液和取樣接點；所有元件均屬同一封閉二次冷媒迴路。</desc>
+                <defs>
+                  <marker id="glycol-arrow-cold" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#3978a8"/></marker>
+                  <marker id="glycol-arrow-warm" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#ad7b2b"/></marker>
+                </defs>
+                <text class="section-label" x="520" y="52" text-anchor="middle">封閉式乙二醇水溶液二次冷媒迴路｜介質只在本迴路循環</text>
+
+                <rect class="equipment" x="90" y="180" width="180" height="100" rx="8"/>
+                <text class="section-label" x="180" y="215" text-anchor="middle">冷凍機／冷卻器</text>
+                <text class="small-label" x="180" y="240" text-anchor="middle">降低乙二醇溶液溫度</text>
+                <text class="small-label" x="180" y="260" text-anchor="middle">確認允許濃度與流量</text>
+
+                <circle cx="390" cy="230" r="31" fill="#fffefa" stroke="#3978a8" stroke-width="2"/>
+                <path d="M390 230 C369 221 376 207 390 230 C395 208 412 214 390 230 C414 232 408 249 390 230 C382 253 366 245 390 230" fill="#dceaf2" stroke="#3978a8" stroke-width="1.5"/>
+                <text class="section-label" x="390" y="285" text-anchor="middle">循環泵</text>
+                <text class="small-label" x="390" y="305" text-anchor="middle">按溶液物性核對工作點</text>
+
+                <rect class="equipment" x="520" y="180" width="100" height="100" rx="6"/>
+                <text class="section-label" x="570" y="215" text-anchor="middle">過濾器</text>
+                <text class="small-label" x="570" y="240" text-anchor="middle">與隔離閥</text>
+                <rect class="equipment" x="760" y="165" width="190" height="130" rx="8"/>
+                <text class="section-label" x="855" y="205" text-anchor="middle">盤管／製程負載</text>
+                <text class="small-label" x="855" y="231" text-anchor="middle">溶液吸收熱量</text>
+                <text class="small-label" x="855" y="253" text-anchor="middle">量測供回液溫與流量</text>
+
+                <path class="pipe cold-solution" d="M270 205 H359" marker-end="url(#glycol-arrow-cold)"/>
+                <path class="pipe cold-solution" d="M421 205 H520" marker-end="url(#glycol-arrow-cold)"/>
+                <path class="pipe cold-solution" d="M620 205 H760" marker-end="url(#glycol-arrow-cold)"/>
+                <text class="small-label" x="520" y="190" text-anchor="middle">低溫供液（乙二醇＋水）</text>
+
+                <path class="pipe warm-solution" d="M855 295 V385 H180 V280" marker-end="url(#glycol-arrow-warm)"/>
+                <text class="small-label" x="520" y="410" text-anchor="middle">吸熱後較暖回液｜返回冷凍機</text>
+
+                <path d="M305 205 V250" fill="none" stroke="#ad7b2b" stroke-width="3"/>
+                <rect class="tank" x="270" y="250" width="70" height="55" rx="25"/>
+                <path d="M305 250 V235 M297 235 H313" fill="none" stroke="#ad7b2b" stroke-width="2"/>
+                <text class="small-label" x="305" y="326" text-anchor="middle">膨脹槽</text>
+                <text class="small-label" x="305" y="344" text-anchor="middle">泵浦吸入口附近</text>
+
+                <rect class="equipment" x="660" y="345" width="125" height="58" rx="6"/>
+                <text class="small-label" x="722" y="369" text-anchor="middle">空氣分離器</text>
+                <text class="small-label" x="722" y="389" text-anchor="middle">（依設計設置）</text>
+                <path d="M722 345 V205" fill="none" stroke="#94a69a" stroke-width="2" stroke-dasharray="5 5"/>
+
+                <path d="M462 205 V223 M462 367 V385" fill="none" stroke="#94a69a" stroke-width="2"/>
+                <circle cx="462" cy="232" r="5" fill="#fffefa" stroke="#1d6252" stroke-width="2"/>
+                <circle cx="462" cy="359" r="5" fill="#fffefa" stroke="#1d6252" stroke-width="2"/>
+                <text class="small-label" x="475" y="232">供液取樣／測點</text>
+                <text class="small-label" x="475" y="365">回液取樣／測點</text>
+
+                <rect class="tank" x="80" y="430" width="185" height="55" rx="6"/>
+                <text class="small-label" x="172" y="453" text-anchor="middle">預混液充填／補液接點</text>
+                <text class="small-label" x="172" y="472" text-anchor="middle">只按維護程序補相容溶液</text>
+                <path d="M172 430 V385" fill="none" stroke="#b7a178" stroke-width="2" stroke-dasharray="5 5"/>
+                <text class="small-label" x="530" y="470">供液（藍）與回液（褐）是同一封閉迴路的不同溫度區段。</text>
+                <text class="small-label" x="530" y="490">設備配置與定壓點依水力設計及製造商要求確認。</text>
+              </svg>
+            </div>
+            <figcaption class="diagram-caption">乙二醇系統配置概念圖：低溫供液由泵送至盤管／製程負載吸熱，再以較暖回液返回冷凍機；膨脹槽接於系統定壓點，圖中另示過濾、空氣分離、補液與取樣位置。供回液為同一封閉二次冷媒迴路，不與主機內部冷媒混合。若主機不允許乙二醇直接進入蒸發器，需依設計採用隔離式換熱器。實際接管點依泵浦配置、系統水力與原廠要求核定；手機可左右滑動查看完整圖面。</figcaption>
+          </figure>
         </section>
 
         <section id="selection">

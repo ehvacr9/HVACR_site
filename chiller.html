@@ -74,6 +74,22 @@
     .loop-card--refrigerant h3 { color: #305a87; }
     .loop-card--tower { border-color: #d7c8aa; background: #fcf8ef; }
     .loop-card--tower h3 { color: #8c5a20; }
+    .system-figure { margin: 22px 0 18px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .diagram-scroll { overflow-x: auto; overscroll-behavior-inline: contain; }
+    .system-diagram { display: block; width: 100%; min-width: 760px; height: auto; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    .system-diagram text { fill: var(--ink); font-size: 14px; }
+    .system-diagram .small-label { fill: var(--muted); font-size: 12px; }
+    .system-diagram .section-label { font-size: 13px; font-weight: 700; }
+    .system-diagram .pipe { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 4; }
+    .system-diagram .chilled-water { stroke: #3978a8; }
+    .system-diagram .chilled-return { stroke: #70a3c4; }
+    .system-diagram .refrigerant { stroke: #785ca6; }
+    .system-diagram .condenser-water { stroke: #ad7b2b; }
+    .system-diagram .condenser-return { stroke: #d18a4a; }
+    .system-diagram .equipment { fill: #f3f5ef; stroke: #94a69a; stroke-width: 1.5; }
+    .system-diagram .refrigerant-equipment { fill: #f3f5fc; stroke: #a7b6ce; stroke-width: 1.5; }
+    .system-diagram .separator { stroke: #dce2d8; stroke-width: 1; }
+    .diagram-caption { margin: 10px 0 0; color: var(--muted) !important; font-size: 12px; }
     .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
     table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
     caption { padding: 13px 15px; color: var(--muted); font-size: 12px; text-align: left; }
@@ -173,6 +189,82 @@
               <p>冷卻水帶走主機冷凝熱，在冷卻塔排至室外空氣。風冷式主機改由冷凝器風扇直接向室外空氣排熱，沒有冷卻水塔迴路。</p>
             </div>
           </div>
+          <figure class="system-figure">
+            <div class="diagram-scroll" tabindex="0" aria-label="可左右捲動查看冰水主機三個獨立迴路配置圖">
+              <svg class="system-diagram chiller-system-diagram" viewBox="0 0 1040 650" role="img" aria-labelledby="chiller-diagram-title chiller-diagram-desc">
+                <title id="chiller-diagram-title">冰水主機冰水、冷媒與冷卻水三個迴路系統圖</title>
+                <desc id="chiller-diagram-desc">上方冰水迴路由蒸發器、冰水泵及空調負載構成；中間冷媒迴路在蒸發器、壓縮機、冷凝器及膨脹裝置間循環；下方水冷式冷卻水迴路由冷凝器、冷卻水泵及冷卻塔構成。各迴路封閉，僅透過蒸發器和冷凝器交換熱量，不互相混水。</desc>
+                <defs>
+                  <marker id="chiller-arrow-chw" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#3978a8"/></marker>
+                  <marker id="chiller-arrow-return" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#70a3c4"/></marker>
+                  <marker id="chiller-arrow-ref" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#785ca6"/></marker>
+                  <marker id="chiller-arrow-cw" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#ad7b2b"/></marker>
+                  <marker id="chiller-arrow-cwr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#d18a4a"/></marker>
+                </defs>
+                <rect class="equipment" x="30" y="35" width="980" height="170" rx="8"/>
+                <rect class="refrigerant-equipment" x="30" y="235" width="980" height="190" rx="8"/>
+                <rect class="equipment" x="30" y="455" width="980" height="165" rx="8"/>
+                <text class="section-label" x="52" y="62">① 冰水迴路｜負載熱量 → 蒸發器</text>
+                <text class="section-label" x="52" y="262">② 冷媒迴路｜主機內部熱泵循環</text>
+                <text class="section-label" x="52" y="482">③ 冷卻水迴路｜水冷式主機（風冷式無此水迴路）</text>
+
+                <rect class="equipment" x="100" y="90" width="170" height="75" rx="6"/>
+                <text class="section-label" x="185" y="119" text-anchor="middle">蒸發器</text>
+                <text class="small-label" x="185" y="142" text-anchor="middle">冰水降溫／吸收熱量</text>
+                <circle cx="385" cy="127" r="25" fill="#fffefa" stroke="#3978a8" stroke-width="2"/>
+                <path d="M385 127 C369 120 375 109 385 127 C389 111 402 115 385 127 C403 129 399 142 385 127 C379 144 367 138 385 127" fill="#dceaf2" stroke="#3978a8" stroke-width="1.5"/>
+                <text class="small-label" x="385" y="171" text-anchor="middle">冰水泵</text>
+                <rect class="equipment" x="700" y="90" width="220" height="75" rx="6"/>
+                <text class="section-label" x="810" y="119" text-anchor="middle">空調盤管／製程負載</text>
+                <text class="small-label" x="810" y="142" text-anchor="middle">吸收空間或製程熱量</text>
+                <path class="pipe chilled-water" d="M270 108 H350" marker-end="url(#chiller-arrow-chw)"/>
+                <path class="pipe chilled-water" d="M411 108 H700" marker-end="url(#chiller-arrow-chw)"/>
+                <path class="pipe chilled-return" d="M810 165 V185 H185 V165" marker-end="url(#chiller-arrow-return)"/>
+                <text class="small-label" x="520" y="99" text-anchor="middle">冰水供水 CHWS</text>
+                <text class="small-label" x="500" y="200" text-anchor="middle">較暖回水 CHWR</text>
+
+                <rect class="refrigerant-equipment" x="100" y="300" width="165" height="72" rx="6"/>
+                <text class="section-label" x="182" y="329" text-anchor="middle">蒸發器</text>
+                <text class="small-label" x="182" y="352" text-anchor="middle">冷媒吸熱蒸發</text>
+                <rect class="refrigerant-equipment" x="370" y="300" width="155" height="72" rx="6"/>
+                <text class="section-label" x="447" y="329" text-anchor="middle">壓縮機</text>
+                <text class="small-label" x="447" y="352" text-anchor="middle">提高冷媒壓力</text>
+                <rect class="refrigerant-equipment" x="635" y="300" width="165" height="72" rx="6"/>
+                <text class="section-label" x="717" y="329" text-anchor="middle">冷凝器</text>
+                <text class="small-label" x="717" y="352" text-anchor="middle">冷媒放熱冷凝</text>
+                <rect class="refrigerant-equipment" x="370" y="385" width="155" height="30" rx="5"/>
+                <text class="small-label" x="447" y="405" text-anchor="middle">膨脹裝置（節流降壓）</text>
+                <path class="pipe refrigerant" d="M265 318 H370" marker-end="url(#chiller-arrow-ref)"/>
+                <path class="pipe refrigerant" d="M525 318 H635" marker-end="url(#chiller-arrow-ref)"/>
+                <path class="pipe refrigerant" d="M717 372 V400 H525" marker-end="url(#chiller-arrow-ref)"/>
+                <path class="pipe refrigerant" d="M370 400 H182 V372" marker-end="url(#chiller-arrow-ref)"/>
+                <text class="small-label" x="318" y="304" text-anchor="middle">低壓蒸氣</text>
+                <text class="small-label" x="580" y="304" text-anchor="middle">高壓蒸氣</text>
+                <text class="small-label" x="587" y="419" text-anchor="middle">高壓液體</text>
+                <text class="small-label" x="272" y="419">低壓兩相冷媒</text>
+
+                <rect class="equipment" x="635" y="515" width="165" height="72" rx="6"/>
+                <text class="section-label" x="717" y="544" text-anchor="middle">冷凝器</text>
+                <text class="small-label" x="717" y="567" text-anchor="middle">吸收冷媒排熱</text>
+                <circle cx="460" cy="551" r="24" fill="#fffefa" stroke="#ad7b2b" stroke-width="2"/>
+                <path d="M460 551 C444 544 450 533 460 551 C464 535 477 539 460 551 C478 553 474 566 460 551 C454 568 442 562 460 551" fill="#f3e7d0" stroke="#ad7b2b" stroke-width="1.5"/>
+                <text class="small-label" x="460" y="591" text-anchor="middle">冷卻水泵</text>
+                <rect class="equipment" x="100" y="515" width="180" height="72" rx="6"/>
+                <text class="section-label" x="190" y="544" text-anchor="middle">冷卻塔</text>
+                <text class="small-label" x="190" y="567" text-anchor="middle">向室外空氣排熱</text>
+                <path class="pipe condenser-water" d="M280 551 H433" marker-end="url(#chiller-arrow-cw)"/>
+                <path class="pipe condenser-water" d="M487 551 H635" marker-end="url(#chiller-arrow-cw)"/>
+                <path class="pipe condenser-return" d="M717 587 V605 H190 V587" marker-end="url(#chiller-arrow-cwr)"/>
+                <text class="small-label" x="350" y="540" text-anchor="middle">較冷冷卻水供水</text>
+                <text class="small-label" x="390" y="617" text-anchor="middle">吸熱後較暖冷卻水回塔</text>
+
+                <path d="M270 125 H295 V335 H265" fill="none" stroke="#a8b2ae" stroke-width="2" stroke-dasharray="5 5"/>
+                <path d="M800 335 H830 V515" fill="none" stroke="#a8b2ae" stroke-width="2" stroke-dasharray="5 5"/>
+                <text class="small-label" x="54" y="642">不同迴路只經蒸發器／冷凝器傳熱，不混水、不互通；箭頭表示各迴路流向。</text>
+              </svg>
+            </div>
+            <figcaption class="diagram-caption">水冷式 Chiller 系統配置概念圖：藍色為冰水、紫色為冷媒、褐色為冷卻水；三個迴路彼此隔離，只透過主機蒸發器與冷凝器交換熱量。虛線表示設備間的熱交換關係，不是流體管線。風冷式主機以室外空氣直接冷卻冷媒，沒有圖示的冷卻水泵與冷卻塔；實際管路、泵浦位置及設備配置依專案系統圖為準。手機可左右滑動查看完整圖面。</figcaption>
+          </figure>
           <div class="callout"><strong>熱量帳（電動蒸氣壓縮式主機）：</strong>冷凝器排熱量約等於蒸發器冷量加上壓縮機輸入功（Q̇<sub>cond</sub> ≈ Q̇<sub>evap</sub> + Ẇ<sub>comp</sub>）。因此冷卻塔與冷卻水系統處理的熱量比「冷房冷量」更多，不能按冷噸直接當成相同散熱量；吸收式主機須另按熱源輸入作能量平衡。</div>
         </section>
 

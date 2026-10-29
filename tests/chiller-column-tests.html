@@ -55,6 +55,22 @@
       }
       assert(article.querySelectorAll(".loop-card").length === 3,
         "Article explains the chilled-water, refrigerant, and condenser-water loops");
+      const diagram = article.querySelector(".chiller-system-diagram");
+      assert(diagram?.getAttribute("role") === "img" && diagram.querySelector("title")
+        && diagram.querySelector("desc"),
+      "Chiller system diagram has an accessible title and description");
+      for (const loopClass of ["chilled-water", "refrigerant", "condenser-water"]) {
+        assert(diagram.querySelector(`.${loopClass}`), `System diagram shows the ${loopClass} loop`);
+      }
+      for (const component of [
+        "冰水供水 CHWS", "較暖回水 CHWR", "蒸發器", "壓縮機",
+        "冷凝器", "膨脹裝置", "冷卻水泵", "冷卻塔",
+      ]) {
+        assert(diagram.textContent.includes(component), `System diagram labels ${component}`);
+      }
+      assert(article.querySelector(".diagram-caption")?.textContent.includes("彼此隔離")
+        && article.querySelector(".diagram-caption")?.textContent.includes("風冷式"),
+      "Chiller caption explains isolated loops and air-cooled alternative");
       assert(article.querySelectorAll(".diagnostic-table tbody tr").length === 6,
         "Article includes six symptom-based troubleshooting checks");
       assert(article.querySelectorAll(".checklist li").length === 7,

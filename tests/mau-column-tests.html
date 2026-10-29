@@ -51,12 +51,26 @@
         "風量量測",
         "心理濕",
         "防凍",
-        "故障排查",
+        "現場常見症狀",
       ]) {
         assert(text.includes(phrase), `MAU article includes ${phrase}`);
       }
-      assert(article.querySelectorAll(".process-step").length === 5,
-        "Article explains the five-stage outdoor-air process");
+      const diagram = article.querySelector(".mau-system-diagram");
+      assert(diagram?.getAttribute("role") === "img" && diagram.querySelector("title")
+        && diagram.querySelector("desc"),
+      "MAU system diagram has an accessible title and description");
+      for (const stream of ["outdoor-air", "exhaust-air", "supply-air"]) {
+        assert(diagram.querySelector(`.${stream}`), `MAU diagram shows the ${stream} route`);
+      }
+      for (const component of [
+        "外氣空調箱 MAU", "外氣風門", "過濾器", "熱回收",
+        "除濕盤管", "送風機", "服務區", "排風機", "冷凝水排水",
+      ]) {
+        assert(diagram.textContent.includes(component), `MAU diagram labels ${component}`);
+      }
+      assert(article.querySelector(".diagram-caption")?.textContent.includes("不應混合")
+        && article.querySelector(".diagram-caption")?.textContent.includes("排風"),
+      "MAU caption explains separate supply and exhaust airflow");
       assert(article.querySelectorAll(".checklist li").length === 8,
         "Article includes an eight-step commissioning checklist");
       assert(article.querySelectorAll(".wide-table tbody tr").length === 17,

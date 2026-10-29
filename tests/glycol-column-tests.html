@@ -42,7 +42,7 @@
       const text = article.body.textContent;
       for (const phrase of [
         "ASHRAE Handbook—Fundamentals",
-        "31.4–31.11",
+        "31.4–31.5",
         "質量百分比",
         "−14.1 °C",
         "二次冷媒",
@@ -59,8 +59,22 @@
       ]) {
         assert(text.includes(phrase), `Glycol article includes ${phrase}`);
       }
-      assert(article.querySelectorAll(".flow-step").length === 4,
-        "Article explains the secondary-coolant loop");
+      const diagram = article.querySelector(".glycol-system-diagram");
+      assert(diagram?.getAttribute("role") === "img" && diagram.querySelector("title")
+        && diagram.querySelector("desc"),
+      "Glycol system diagram has an accessible title and description");
+      for (const loopClass of ["cold-solution", "warm-solution"]) {
+        assert(diagram.querySelector(`.${loopClass}`), `System diagram shows the ${loopClass} flow`);
+      }
+      for (const component of [
+        "冷凍機／冷卻器", "循環泵", "盤管／製程負載", "膨脹槽",
+        "空氣分離器", "供液取樣／測點", "回液取樣／測點",
+      ]) {
+        assert(diagram.textContent.includes(component), `System diagram labels ${component}`);
+      }
+      assert(article.querySelector(".diagram-caption")?.textContent.includes("封閉二次冷媒迴路")
+        && article.querySelector(".diagram-caption")?.textContent.includes("不與主機內部冷媒混合"),
+      "Glycol caption explains the closed secondary-fluid circuit");
       assert(article.querySelectorAll("#selection table tbody tr").length === 3,
         "Article provides three source-based concentration references");
       assert(article.querySelectorAll(".checklist li").length === 17,

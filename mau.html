@@ -68,6 +68,21 @@
     .process-step:not(:last-child)::after { position: absolute; top: 42%; right: -9px; z-index: 1; color: var(--green); content: "›"; font-size: 18px; font-weight: 750; }
     .process-step span { display: block; margin-bottom: 6px; color: var(--green); font-size: 10px; font-weight: 750; letter-spacing: .08em; }
     .process-step strong { font-size: 12px; line-height: 1.55; }
+    .system-figure { margin: 22px 0 10px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .diagram-scroll { overflow-x: auto; overscroll-behavior-inline: contain; }
+    .system-diagram { display: block; width: 100%; min-width: 760px; height: auto; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    .system-diagram text { fill: var(--ink); font-size: 14px; }
+    .system-diagram .small-label { fill: var(--muted); font-size: 12px; }
+    .system-diagram .section-label { font-size: 13px; font-weight: 700; }
+    .system-diagram .duct { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 4; }
+    .system-diagram .outdoor-air { stroke: #3978a8; }
+    .system-diagram .exhaust-air { stroke: #74817e; }
+    .system-diagram .supply-air { stroke: var(--green); }
+    .system-diagram .water-supply { fill: none; stroke: #3978a8; stroke-width: 3; }
+    .system-diagram .water-return { fill: none; stroke: #ad7b2b; stroke-width: 3; }
+    .system-diagram .equipment { fill: #f3f5ef; stroke: #94a69a; stroke-width: 1.5; }
+    .system-diagram .zone { fill: #edf1e7; stroke: #94a69a; stroke-width: 1.5; }
+    .system-diagram .separator { stroke: #dce2d8; stroke-width: 1; }
     .diagram-caption { margin-bottom: 0; color: var(--muted) !important; font-size: 12px; }
     .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
     table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
@@ -155,14 +170,79 @@
           <h2>1. MAU 是什麼？先定義它負責的空氣</h2>
           <p>MAU（Make-Up Air Unit，補風／外氣空調箱）在工程現場通常指把室外空氣處理後送進建築或製程區的設備。若設計成專門處理 100% 外氣以承擔通風與除濕負荷，常與 DOAS（Dedicated Outdoor Air System，專用外氣系統）概念重疊；但「MAU」這個名稱本身不保證箱內沒有回風，也不保證送風已達室內舒適狀態。要以系統圖、風量表和控制序列界定。</p>
           <div class="callout"><strong>兩個不同任務：</strong>MAU／DOAS 把必要的新風與補風送到位置；室內顯熱負荷可能由循環空調箱、末端盤管或製程設備另外處理。若把外氣箱當成可自行承擔全部室內冷房而未核算，容量與送風狀態都可能錯誤。</div>
-          <div class="process" role="img" aria-label="外氣從進風口經過風門、過濾、熱回收與盤管處理後由風機送到服務區">
-            <div class="process-step"><span>01 · 取氣</span><strong>防雨百葉<br>室外進風口</strong></div>
-            <div class="process-step"><span>02 · 調節</span><strong>外氣風門<br>流量量測</strong></div>
-            <div class="process-step"><span>03 · 淨化</span><strong>過濾器<br>依用途選級</strong></div>
-            <div class="process-step"><span>04 · 處理</span><strong>熱回收／盤管<br>除濕與再熱</strong></div>
-            <div class="process-step"><span>05 · 送風</span><strong>風機與風管<br>送至指定區域</strong></div>
-          </div>
-          <p class="diagram-caption">原創概念流程。機組段落次序與是否設置熱回收、預熱、加濕或再熱，依氣候、污染風險和設計需求確定。</p>
+          <figure class="system-figure">
+            <div class="diagram-scroll" tabindex="0" aria-label="可左右捲動查看 MAU 系統配置圖">
+              <svg class="system-diagram mau-system-diagram" viewBox="0 0 1040 550" role="img" aria-labelledby="mau-diagram-title mau-diagram-desc">
+                <title id="mau-diagram-title">MAU 外氣處理、送風與排風熱回收系統配置示意</title>
+                <desc id="mau-diagram-desc">室外空氣經進風風門、過濾器及熱回收裝置後進入加熱或冷卻除濕盤管，再由送風機送至服務區。服務區排風可經獨立排風管通過熱回收裝置後排至室外，兩股氣流只交換熱量、不混合。盤管有冷熱水管及冷凝水排水。</desc>
+                <defs>
+                  <marker id="mau-arrow-outdoor" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#3978a8"/></marker>
+                  <marker id="mau-arrow-exhaust" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#74817e"/></marker>
+                  <marker id="mau-arrow-supply" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#1d6252"/></marker>
+                  <marker id="mau-arrow-water-supply" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#3978a8"/></marker>
+                  <marker id="mau-arrow-water-return" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#ad7b2b"/></marker>
+                </defs>
+                <rect class="zone" x="855" y="115" width="145" height="110" rx="8"/>
+                <text class="section-label" x="927" y="151" text-anchor="middle">服務區</text>
+                <text class="small-label" x="927" y="177" text-anchor="middle">通風／製程補風</text>
+                <text class="small-label" x="927" y="198" text-anchor="middle">排風由獨立系統抽出</text>
+                <text class="section-label" x="45" y="275">室外</text>
+                <text class="small-label" x="45" y="297">新鮮外氣</text>
+                <path class="duct outdoor-air" d="M75 328 H270" marker-end="url(#mau-arrow-outdoor)"/>
+                <path d="M164 314 L180 328 L164 342 M180 314 L164 328 L180 342" fill="none" stroke="#3978a8" stroke-width="2"/>
+                <text class="small-label" x="170" y="365" text-anchor="middle">外氣風門／量測</text>
+
+                <rect class="equipment" x="270" y="245" width="500" height="145" rx="5"/>
+                <text class="section-label" x="520" y="235" text-anchor="middle">外氣空調箱 MAU｜送風路徑 →</text>
+                <line class="separator" x1="370" y1="245" x2="370" y2="390"/>
+                <line class="separator" x1="430" y1="245" x2="430" y2="390"/>
+                <line class="separator" x1="520" y1="245" x2="520" y2="390"/>
+                <line class="separator" x1="650" y1="245" x2="650" y2="390"/>
+                <text class="section-label" x="320" y="278" text-anchor="middle">過濾器</text>
+                <text class="small-label" x="320" y="299" text-anchor="middle">按用途選級</text>
+                <text class="section-label" x="475" y="278" text-anchor="middle">熱回收</text>
+                <text class="small-label" x="475" y="299" text-anchor="middle">排風側選配</text>
+                <text class="section-label" x="585" y="278" text-anchor="middle">加熱／冷卻</text>
+                <text class="small-label" x="585" y="299" text-anchor="middle">除濕盤管</text>
+                <text class="section-label" x="710" y="278" text-anchor="middle">送風機</text>
+                <path class="duct supply-air" d="M280 337 H360" marker-end="url(#mau-arrow-supply)"/>
+                <path class="duct supply-air" d="M378 337 H420" marker-end="url(#mau-arrow-supply)"/>
+                <path class="duct supply-air" d="M438 337 H510" marker-end="url(#mau-arrow-supply)"/>
+                <path class="duct supply-air" d="M528 337 H642" marker-end="url(#mau-arrow-supply)"/>
+                <circle cx="698" cy="337" r="25" fill="#fffefa" stroke="#1d6252" stroke-width="2"/>
+                <path d="M698 337 C681 330 687 319 698 337 C702 320 715 325 698 337 C716 339 712 351 698 337 C691 354 679 348 698 337" fill="#d9e7dd" stroke="#1d6252" stroke-width="1.5"/>
+                <path class="duct supply-air" d="M724 337 H770 V170 H855" marker-end="url(#mau-arrow-supply)"/>
+                <text class="small-label" x="801" y="363" text-anchor="middle">送風管</text>
+
+                <path class="duct exhaust-air" d="M900 225 V453 H480" marker-end="url(#mau-arrow-exhaust)"/>
+                <path class="duct exhaust-air" d="M460 453 H85" marker-end="url(#mau-arrow-exhaust)"/>
+                <rect class="equipment" x="425" y="416" width="72" height="75" rx="5"/>
+                <text class="small-label" x="461" y="440" text-anchor="middle">排風側</text>
+                <text class="small-label" x="461" y="460" text-anchor="middle">熱回收</text>
+                <text class="small-label" x="461" y="480" text-anchor="middle">（選配）</text>
+                <circle cx="310" cy="453" r="19" fill="#fffefa" stroke="#74817e" stroke-width="2"/>
+                <path d="M310 453 C297 447 302 438 310 453 C313 440 324 444 310 453 C323 455 320 464 310 453 C305 466 296 461 310 453" fill="#e1e6e3" stroke="#74817e" stroke-width="1.3"/>
+                <text class="small-label" x="310" y="493" text-anchor="middle">排風機</text>
+                <text class="small-label" x="80" y="430">排至室外</text>
+
+                <path class="water-supply" d="M570 505 V380" marker-end="url(#mau-arrow-water-supply)"/>
+                <path class="water-return" d="M610 380 V505" marker-end="url(#mau-arrow-water-return)"/>
+                <text class="small-label" x="548" y="526" text-anchor="middle">冷／熱水供水</text>
+                <text class="small-label" x="644" y="526">回水</text>
+                <path d="M640 386 V409 H650" fill="none" stroke="#94a69a" stroke-width="2"/>
+                <path d="M640 409 V430" fill="none" stroke="#74817e" stroke-width="2" marker-end="url(#mau-arrow-exhaust)"/>
+                <text class="small-label" x="655" y="428">冷凝水排水</text>
+
+                <line class="duct outdoor-air" x1="80" y1="525" x2="110" y2="525" marker-end="url(#mau-arrow-outdoor)"/>
+                <text class="small-label" x="118" y="529">外氣</text>
+                <line class="duct supply-air" x1="175" y1="525" x2="205" y2="525" marker-end="url(#mau-arrow-supply)"/>
+                <text class="small-label" x="213" y="529">處理後送風</text>
+                <line class="duct exhaust-air" x1="340" y1="525" x2="370" y2="525" marker-end="url(#mau-arrow-exhaust)"/>
+                <text class="small-label" x="378" y="529">排風（與外氣不混合）</text>
+              </svg>
+            </div>
+            <figcaption class="diagram-caption">MAU 系統配置概念圖：外氣經風門、過濾及盤管處理後送至服務區；排風由獨立路徑抽出，可選擇經熱回收裝置與外氣交換熱量，兩股空氣不應混合。實際段落、排風補氣平衡、盤管形式及熱回收配置依系統圖與控制序列確認；手機可左右滑動查看完整圖面。</figcaption>
+          </figure>
         </section>
 
         <section id="air-balance">
