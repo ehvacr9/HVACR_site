@@ -34,6 +34,8 @@
         "Main navigation links to engineering columns");
       assert(columns.querySelector('a[href="mau.html"] h2')?.textContent.includes("外氣空調箱 MAU"),
         "Engineering columns archive links to the MAU article");
+      assert(columns.querySelector('a[href="mau.html"] h2')?.textContent.includes("動態控制"),
+        "Engineering columns archive uses the updated MAU headline");
       assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
         "MAU article includes the scroll-to-top button");
 
@@ -46,9 +48,14 @@
         "100% 外氣",
         "10,000 m³/h",
         "35°C",
-        "148 kW",
+        "149 kW",
         "120 kg/h",
         "風量量測",
+        "ṁda",
+        "Q̇coil,total",
+        "旁通因子",
+        "何時可以忽略空氣密度變化",
+        "逐時模擬",
         "心理濕",
         "防凍",
         "故障排查",
@@ -63,10 +70,10 @@
         "Article includes practical design and troubleshooting tables");
       const sections = [
         "definition", "air-balance", "psychrometrics", "components", "controls",
-        "selection", "commissioning", "troubleshooting", "maintenance", "sources",
+        "selection", "commissioning", "troubleshooting", "outlook", "maintenance", "sources",
       ];
       assert(article.querySelectorAll("article section[id]").length === sections.length,
-        "Article has ten navigable technical sections");
+        "Article has eleven navigable technical sections");
       assert(sections.every((id) => article.querySelector(`.toc a[href="#${id}"]`)
         && article.querySelector(`#${id}`)),
       "Every table-of-contents link resolves to its article section");

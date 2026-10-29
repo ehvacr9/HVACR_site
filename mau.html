@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="依 ASHRAE Handbook 說明外氣空調箱 MAU 的氣流流程、濕空氣負荷估算、盤管與風機選型、控制、試車和排故。">
+  <meta name="description" content="從 AI 機房與極端濕熱氣候切入，依 ASHRAE Handbook 拆解 MAU 外氣焓差、盤管旁通因子、密度修正、熱回收折衷、動態模擬與現場試車。">
   <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
-  <title>外氣空調箱 MAU：從外氣負荷到現場試車｜工程專欄</title>
+  <title>外氣空調箱 MAU：從外氣焓差到動態控制｜工程專欄</title>
   <style>
     :root {
       color-scheme: light;
@@ -79,6 +79,7 @@
     .wide-table td:first-child { min-width: 150px; font-weight: 700; }
     .calc-box { margin: 18px 0; padding: 20px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
     .calc-line { overflow-wrap: anywhere; margin: 8px 0; font-family: Consolas, "Courier New", monospace; font-size: 14px; font-variant-numeric: tabular-nums; }
+    .equation-line { overflow-wrap: anywhere; margin: 9px 0; color: var(--ink); font-family: var(--serif); font-size: clamp(15px, 1.8vw, 19px); font-variant-numeric: tabular-nums; line-height: 1.6; text-align: center; }
     .result-line { margin: 13px 0 0; padding-top: 12px; border-top: 1px solid var(--line); color: var(--green) !important; font-weight: 750; }
     .checklist { counter-reset: commissioning; list-style: none; padding: 0 !important; }
     .checklist li { position: relative; min-height: 42px; padding: 8px 0 8px 46px; border-bottom: 1px solid var(--line); }
@@ -145,16 +146,17 @@
   <main class="wrap page">
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="columns.html">工程專欄</a> ／ 外氣空調箱（MAU）</p>
     <p class="eyebrow">Outdoor Air · Ventilation Engineering</p>
-    <h1>外氣空調箱 MAU：從外氣負荷到現場試車</h1>
-    <p class="dek">外氣空調箱不只是「加一台風機把新鮮空氣送進來」。外氣的溫度與含濕量隨天候大幅變化，必須把通風量、潛熱除濕、盤管排水、風管壓力與排風補氣一起設計。本文以 ASHRAE 空氣處理及濕空氣原理，整理成可核算、可調試的工作流程。</p>
-    <p class="byline">工程實務專題｜依 ASHRAE Handbook—HVAC Systems and Equipment 與 Fundamentals 技術資料整理｜閱讀約 12 分鐘</p>
+    <h1>外氣空調箱 MAU：從外氣焓差到動態控制</h1>
+    <p class="dek">AI 機房的冷卻需求快速攀升，淨零目標則要求每一度外氣都先回答「帶進多少熱與水氣」。MAU 看似是一只風箱，實際上是建築與氣候之間的熱濕閘門：風量失準，通風與壓差先失守；焓差算錯，盤管和冷源便從設計點開始偏航。</p>
+    <p class="byline">工程深度專題｜依 ASHRAE Handbook—HVAC Systems and Equipment 與 Fundamentals 原理轉述｜閱讀約 12 分鐘</p>
 
     <div class="article-layout">
       <article class="article-body">
         <section id="definition">
-          <h2>1. MAU 是什麼？先定義它負責的空氣</h2>
-          <p>MAU（Make-Up Air Unit，補風／外氣空調箱）在工程現場通常指把室外空氣處理後送進建築或製程區的設備。若設計成專門處理 100% 外氣以承擔通風與除濕負荷，常與 DOAS（Dedicated Outdoor Air System，專用外氣系統）概念重疊；但「MAU」這個名稱本身不保證箱內沒有回風，也不保證送風已達室內舒適狀態。要以系統圖、風量表和控制序列界定。</p>
-          <div class="callout"><strong>兩個不同任務：</strong>MAU／DOAS 把必要的新風與補風送到位置；室內顯熱負荷可能由循環空調箱、末端盤管或製程設備另外處理。若把外氣箱當成可自行承擔全部室內冷房而未核算，容量與送風狀態都可能錯誤。</div>
+          <h2>1. 先看任務：它送進來的，不只是空氣</h2>
+          <p>想像一座滿載的 AI 機房：伺服器排熱由冷卻系統接手，但機房、電池間和支援空間仍需要符合用途的通風、排風補氣與壓差控制。另一頭，夏季高溫高濕的室外空氣帶著大量水氣進場；冬季外氣則可能把盤管推向結冰邊界。MAU 必須同時處理空氣的<strong>質量、焓、含濕量和壓力路徑</strong>，這才是它真正的工程工作。</p>
+          <p>MAU（Make-Up Air Unit，補風／外氣空調箱）是業界慣稱，不是固定的機組構造。設計成專責處理 100% 外氣的系統，功能上可能接近 DOAS（Dedicated Outdoor Air System，專用外氣系統）；但名稱不能代替圖面。先確認外氣是全量直送、與回風混合，還是只補排風；再界定室內顯熱是否由其他空調箱、末端盤管或製程設備承擔。</p>
+          <div class="callout"><strong>把責任切清楚：</strong>MAU 可能負責通風、排風補氣、區域壓差與部分除濕，卻未必負責全室冷房。若設計者把「補風」默認成「承擔全部室內負荷」，或把 MAU 默認成 100% 外氣，容量和控制都可能在起點就錯位。</div>
           <div class="process" role="img" aria-label="外氣從進風口經過風門、過濾、熱回收與盤管處理後由風機送到服務區">
             <div class="process-step"><span>01 · 取氣</span><strong>防雨百葉<br>室外進風口</strong></div>
             <div class="process-step"><span>02 · 調節</span><strong>外氣風門<br>流量量測</strong></div>
@@ -162,12 +164,12 @@
             <div class="process-step"><span>04 · 處理</span><strong>熱回收／盤管<br>除濕與再熱</strong></div>
             <div class="process-step"><span>05 · 送風</span><strong>風機與風管<br>送至指定區域</strong></div>
           </div>
-          <p class="diagram-caption">原創概念流程。機組段落次序與是否設置熱回收、預熱、加濕或再熱，依氣候、污染風險和設計需求確定。</p>
+          <p class="diagram-caption">原創概念流程。實際段落位置與是否設置熱回收、預熱、加濕或再熱，須依氣候、污染風險和設計需求決定。</p>
         </section>
 
         <section id="air-balance">
-          <h2>2. 外氣量不是風門開度：先做整體空氣平衡</h2>
-          <p>先列出各區域的最低通風需求、排風量、製程抽風、回風／轉移風以及希望的建築壓力關係，再決定 MAU 設計風量和送風位置。送入空氣通常須補足排風並滿足通風需求；建築正壓或負壓還受門窗滲漏、轉移風、排風控制和外牆氣密性影響，不可單用「送風量減排風量」代替壓力設計。</p>
+          <h2>2. 風門開度不是風量：先畫出建築的空氣帳</h2>
+          <p>在模擬裡，外氣量是輸入欄位；在現場，它是會被風壓、濾網阻力、風機轉速與門窗狀態推著跑的實際流量。先列出各區通風需求、製程排風、轉移風與運轉時段，建立送風、排風及滲漏的空氣平衡，再定義要維持的壓力關係。正壓或負壓是整個圍護結構和風路的結果，不是把 MAU 風量減掉排風量就能保證的單一數字。</p>
           <div class="table-wrap">
             <table class="wide-table">
               <caption>MAU 設計輸入與驗收指標</caption>
@@ -180,29 +182,49 @@
               </tbody>
             </table>
           </div>
-          <p>ASHRAE《HVAC Systems and Equipment》指出，外氣量控制應能在負載或風量改變時維持所需通風量；外氣風門角度可能受風壓、濾網阻塞、風機轉速與管道靜壓影響。要求通風量有下限時，採用直接風量量測或已驗證的風量控制方式，並在平衡測試中記錄。</p>
+          <p>ASHRAE《HVAC Systems and Equipment》第 4 章特別提醒：VAV 系統的送風量降低時，若只讓外氣風門跟著縮小，外氣量也可能低於需求。解法不是指定一個固定風門角度，而是採用直接風量量測或經現場驗證的控制方法，並在不同送風負載下確認最低外氣量。這是法規通風需求與日常控制之間最容易被靜態圖面掩蓋的落差。</p>
+          <p>若系統確實將室外氣與回風混合，混合點要用<strong>乾空氣質量</strong>加權，而不是任意平均兩個溫度。絕熱混合可寫成：</p>
+          <div class="calc-box">
+            <div class="equation-line">W<sub>mix</sub> = (ṁ<sub>oa</sub> W<sub>oa</sub> + ṁ<sub>ra</sub> W<sub>ra</sub>) / (ṁ<sub>oa</sub> + ṁ<sub>ra</sub>)</div>
+            <div class="equation-line">h<sub>mix</sub> = (ṁ<sub>oa</sub> h<sub>oa</sub> + ṁ<sub>ra</sub> h<sub>ra</sub>) / (ṁ<sub>oa</sub> + ṁ<sub>ra</sub>)</div>
+            <p class="table-note">oa：外氣；ra：回風；mix：混合空氣。求得 W 與 h 後再反算混合乾球溫度；只有特定近似條件下，才可把溫度當作流量加權平均。</p>
+          </div>
         </section>
 
         <section id="psychrometrics">
-          <h2>3. 外氣負荷的關鍵是含濕量，不只看乾球溫度</h2>
-          <p>室外空氣的乾球溫度描述顯熱狀態，但除濕負荷取決於空氣含濕量。冷卻盤管表面低於進風露點時，水蒸氣會凝結，空氣焓值下降；只用「風量 × 溫差」估冷量會漏掉潛熱，也可能造成冷卻盤管選型不足。採用心理濕圖或經驗證的濕空氣計算工具，至少確定室外設計乾球／濕球或相對濕度、進風焓與含濕量，以及盤管出風目標。</p>
+          <h2>3. 盤管接到的是一條心理濕線，不是單一溫度</h2>
+          <p>冷卻盤管表面低於進風露點時，水蒸氣開始凝結；空氣同時降溫、減少含濕量，顯熱與潛熱一起交給冷凍水或冷媒。於是，「風量乘溫差」只能估顯熱，不能回答外氣除濕需要多少冷量。ASHRAE《Fundamentals》第 1 章以乾空氣質量為基準定義濕空氣比焓與比容，這是把心理濕圖上的狀態點轉成工程負荷的關鍵。</p>
           <div class="calc-box">
-            <div class="calc-line">Q̇<sub>coil,total</sub> ≈ ṁ<sub>da</sub> × (h<sub>entering</sub> − h<sub>leaving</sub>)</div>
-            <div class="calc-line">ṁ<sub>condensate</sub> ≈ ṁ<sub>da</sub> × (W<sub>entering</sub> − W<sub>leaving</sub>)</div>
-            <p class="table-note">ṁ<sub>da</sub>：乾空氣質量流率；h：濕空氣比焓（kJ/kg 乾空氣）；W：含濕量（kg 水/kg 乾空氣）。總盤管負荷含顯熱與潛熱；此估算尚未包含風機熱、外殼得熱、熱回收、結霜或控制裕度。</p>
+            <div class="equation-line">h ≈ 1.006 t + W (2501 + 1.86 t)</div>
+            <div class="equation-line">v = R<sub>da</sub> T / p × (1 + 1.6078 W)</div>
+            <div class="equation-line">ṁ<sub>da</sub> = V̇ / v；　Q̇<sub>coil,total</sub> = ṁ<sub>da</sub> (h<sub>in</sub> − h<sub>out</sub>)</div>
+            <div class="equation-line">ṁ<sub>condensate</sub> = ṁ<sub>da</sub> (W<sub>in</sub> − W<sub>out</sub>)</div>
+            <p class="table-note">h：濕空氣比焓（kJ/kg 乾空氣）；t：乾球溫度（°C）；W：含濕量（kg 水/kg 乾空氣）；v：每 kg 乾空氣所占比容（m³/kg 乾空氣）；T：絕對溫度（K）；p：總壓（kPa）；R<sub>da</sub> = 0.287 kPa·m³/(kg·K)。公式為常見工程近似，完整屬性與精度依 ASHRAE 模型、氣壓及應用需求選用。</p>
           </div>
-          <h3>初估算例｜10,000 m³/h 外氣，35°C／60% RH 降至 15°C 飽和</h3>
-          <p>這是展示算法的<strong>假設點</strong>，不是建議送風設定。假設大氣壓 101.325 kPa、機組入口外氣流量 10,000 m³/h、入口狀態 35°C／60% RH，盤管離開狀態暫假設為 15°C 飽和。以 ASHRAE 濕空氣性質關係初估，入口焓約 90.2 kJ/kg 乾空氣、出口焓約 42.0 kJ/kg 乾空氣，乾空氣質量流率約 3.08 kg/s。</p>
+          <h3>設計算例｜10,000 m³/h 的 35°C／60% RH 外氣</h3>
+          <p>先從風量走到質量流率，再從狀態差走到冷量。假設海平面氣壓 101.325 kPa、入口 35°C／60% RH，盤管出口暫以 15°C 飽和做示範。用 ASHRAE 濕空氣性質關係估算：入口含濕量約 0.02155 kg/kg 乾空氣、焓 h<sub>in</sub> 約 90.5 kJ/kg 乾空氣、比容 v<sub>in</sub> 約 0.903 m³/kg 乾空氣；出口焓約 42.1 kJ/kg 乾空氣、含濕量約 0.01069 kg/kg 乾空氣。</p>
           <div class="calc-box">
-            <div class="calc-line">Q̇<sub>coil,total</sub> ≈ 3.08 × (90.2 − 42.0) ≈ 148 kW</div>
-            <div class="calc-line">排水量 ≈ 3.08 × (0.02144 − 0.01065) × 3600 ≈ 120 kg/h</div>
-            <p class="result-line">初估盤管總冷量約 148 kW，冷凝水約 120 kg/h。需另計風機熱、熱回收效能、盤管旁通因子與實際選型裕度。</p>
+            <div class="calc-line">Q̇<sub>coil,total</sub> ≈ 3.08 × (90.5 − 42.1) ≈ 149 kW</div>
+            <div class="calc-line">排水量 ≈ 3.08 × (0.02155 − 0.01069) × 3600 ≈ 120 kg/h</div>
+            <p class="result-line">初估盤管總冷量約 149 kW，冷凝水約 120 kg/h。出口 15°C 飽和是假設狀態，不是可直接採用的送風設定。</p>
           </div>
+          <h3>移項後，公式告訴工程師什麼？</h3>
+          <p>把焓差負荷式中的質量流率換成體積流量除以比容，可得 <strong>Q̇<sub>coil,total</sub> = V̇ × Δh / v</strong>。這個形式把常被混在一起的三件事攤開：風量 V̇、每 kg 乾空氣要移除的焓差 Δh，以及每單位體積裡實際帶著多少乾空氣（1/v）。同一台 MAU 若海拔升高、入口空氣升溫或含濕量改變，v 就會變；即使風量表上仍顯示 10,000 m³/h，對應的乾空氣質量和可處理負荷也可能不同。</p>
+          <p>冷凝水式同理，移項後為 <strong>ṁ<sub>condensate</sub> = V̇ × ΔW / v</strong>。它不只估排水管負荷，也提供現場交叉驗證：若心理濕狀態推算應有明顯凝結，排水量卻接近零，應回頭檢查盤管進水溫、風量、狀態感測器或排水盤，而不是直接把問題歸咎於控制設定。</p>
+          <div class="callout"><strong>何時可以忽略空氣密度變化？</strong>在同一地點、相近溫濕度和氣壓下比較短距離風道，且誤差小於設計允差時，可沿用近似密度做初步估算。跨海拔、室外極端溫度、熱回收前後狀態差很大，或以標準風量換算現場風量時，就應按實際位置的溫度、含濕量與壓力求 v／ρ。風機的空氣功率為 V̇ × Δp；密度會影響風機壓升、軸功率與實際工作點，所以比較風機曲線或馬達功率時，不要把標準空氣條件直接當成現場空氣條件。</div>
           <div class="callout callout--warning"><strong>不要把 15°C 飽和當通用設定：</strong>實際出風露點要由室內濕度目標、末端系統、區域露點安全、管道保溫與再熱需求決定。盤管容量由廠商依進出風狀態、風量、冷凍水／冷媒條件和面風速選取。</div>
         </section>
 
         <section id="components">
-          <h2>4. 機組段落怎麼排：先看氣候與污染，再談設備</h2>
+          <h2>4. 盤管不是理想平面：面風速、旁通與氣流分布</h2>
+          <p>在選型軟體裡，盤管是一組性能資料；在機箱裡，它是有厚度、翅片間距、列數和迎風面的幾何體。不是每一團空氣都與翅片充分接觸：部分氣流沿低阻路徑穿過，形成旁通。ASHRAE 以盤管旁通因子描述這個效果，簡化冷卻盤管模型可寫成：</p>
+          <div class="calc-box">
+            <div class="equation-line">BF ≈ (t<sub>leaving</sub> − t<sub>ADP</sub>) / (t<sub>entering</sub> − t<sub>ADP</sub>)</div>
+            <p class="table-note">BF：旁通因子；t<sub>ADP</sub>：將盤管過程線延伸至飽和曲線所得的裝置露點（Apparatus Dew Point）。這是以乾球溫度表示的近似關係；正式心理濕計算應同時核對含濕量、焓與廠商盤管選型結果。</p>
+          </div>
+          <p>移項可得 <strong>t<sub>leaving</sub> = t<sub>ADP</sub> + BF × (t<sub>entering</sub> − t<sub>ADP</sub>)</strong>：出風溫度等於理想盤管表面狀態，加上未被盤管「拉到」表面狀態的那一段。BF 越低，代表接觸效果越完整；增加盤管列數或降低迎面風速通常能改善接觸，但也會增加尺寸、成本或壓降，最後必須由製造商的盤管資料驗證，而非只靠口訣判斷。</p>
+          <p>幾何也會決定負荷是否均勻分攤。ASHRAE 指出，外氣與回風在混合段混合不充分，會造成濾網載塵不均和盤管迎風面分布不均；風門宜依混合箱配置，避免氣流短路。純外氣 MAU 雖沒有回風混合問題，仍需檢查百葉、風門、濾網與盤管面的速度分布，並確保過濾器位於第一組盤管上游的適當位置，防止盤管過早髒污。</p>
+          <h3>機組段落怎麼排：從氣流路徑讀取失效模式</h3>
           <div class="table-wrap">
             <table class="wide-table">
               <caption>常見 MAU 機組段落及設計檢核</caption>
@@ -217,11 +239,13 @@
               </tbody>
             </table>
           </div>
-          <p>ASHRAE 提醒，外氣與回風混合不良會造成過濾器載塵不均及盤管前氣流分布不均。純外氣機組沒有回風混合段，但同樣要確認風門、過濾器、盤管面與風機入口的氣流分布，並按指定機組配置和廠商要求設計。</p>
+          <p>送風機放在盤管前（吹出式）或盤管後（吸入式），會改變盤管進風狀態、風機熱進入的位置、機箱正負壓及冷凝水排放條件；風機入口若緊接急彎或截面突變，也可能因系統效應而偏離額定曲線。故機組段落順序不是美觀問題：它會改變熱量帳、風量分布和維修可及性。</p>
         </section>
 
         <section id="controls">
-          <h2>5. 控制序列：讓需求風量、除濕與防凍互相配合</h2>
+          <h2>5. 熱回收與控制：效率不是全年固定的加分項</h2>
+          <p>外氣比例高時，熱回收可以降低盤管負荷；但淨零方案不能只看回收器銘牌效率。板式熱交換器、熱管、轉輪或循環液系統各有壓降、交叉洩漏、污染相容性、結霜和維護風險。ASHRAE 提醒，溫和天候下熱回收甚至可能把本來已接近送風目標的外氣重新加熱，迫使冷卻盤管再把熱排掉；因此要有旁通或停用策略，並評估設備故障時是否仍須滿足關鍵空間的供風需求。</p>
+          <div class="callout"><strong>真正要最佳化的是全年功率：</strong>回收器節省的盤管冷熱量，必須扣除新增風阻造成的風機功率，並放進每小時天候和運轉時程重新比較。高回收率不必然等於低年耗能，尤其在低外氣需求、溫和時段或濾材／熱交換器髒污後。</div>
           <ol>
             <li><strong>啟動許可：</strong>先確認風門位置、濾網／風機狀態及必要的盤管水流；依核准順序啟動風機、建立風量證明，再允許冷熱源運轉。</li>
             <li><strong>最低外氣量：</strong>以實際風量或驗證過的控制訊號維持設計下限；依空間需求調整時，不能低於法規與設計要求。</li>
@@ -233,7 +257,17 @@
         </section>
 
         <section id="selection">
-          <h2>6. 選型資料表：把最不利設計條件交給廠商</h2>
+          <h2>6. 從靜態設計點走向動態模擬</h2>
+          <p>單一「夏季設計日」能決定設備容量，卻回答不了 8,760 小時裡風門、熱回收、盤管和排風如何互相牽動。現代工程可把心理濕計算、設備曲線與建築逐時負荷放進同一個動態模型，並以敏感度分析比較不同控制策略。重點不在工具品牌，而在模型是否把真正的物理約束放進去：</p>
+          <ul>
+            <li><strong>天候與空氣狀態：</strong>逐時乾球、含濕量／焓與大氣壓；避免只用乾球溫度代表除濕需求。</li>
+            <li><strong>風量與排風：</strong>最低外氣、排風追蹤、建築壓差、非使用時段及風量感測器的校正誤差。</li>
+            <li><strong>機組性能：</strong>盤管在不同水溫與風量下的容量、旁通因子、風機曲線、髒濾網阻力和熱回收旁通。</li>
+            <li><strong>控制邏輯：</strong>除濕優先與再熱、低溫防凍、風量證明、設備切換、故障降級及復歸條件。</li>
+            <li><strong>不確定性：</strong>極端濕熱、設計外氣量變動、熱回收失效、感測器漂移與濾網逐漸堵塞等情境。</li>
+          </ul>
+          <p>模擬結果仍需回到試車量測校正：若現場風量、盤管出風含濕量或風機功率和模型不一致，先追查量測位置、風路漏風、控制閥與設備曲線，再更新模型。經校正的模型才適合用於季節重設、最佳化控制或後續擴容；未經校正的「數位孿生」只是把錯誤假設畫得更精緻。</p>
+          <h3>選型資料表：把最不利設計條件交給廠商</h3>
           <p>詢價時提供完整進風與出風心理狀態，不要只寫「MAU 10,000 CMH」。乾球溫度、相對濕度／濕球、海拔或大氣壓、盤管出風露點、外部靜壓及濾網終阻力，會共同決定盤管、風機與馬達。冷卻盤管的水溫／流量或 DX 冷媒工況也必須一致。</p>
           <ul>
             <li>外氣設計狀態：夏季乾球與含濕量／濕球、冬季最低乾球、設計地點與氣壓。</li>
@@ -246,7 +280,7 @@
         </section>
 
         <section id="commissioning">
-          <h2>7. 試車清單：量到真正送進房間的空氣</h2>
+          <h2>7. 試車：量到真正送進房間的空氣</h2>
           <ol class="checklist">
             <li><strong>核對安裝：</strong>確認進風口位置與污染源距離、風門方向、檢修空間、機組基礎、風管密封和保溫。</li>
             <li><strong>檢查水側／冷媒側：</strong>確認盤管流體、閥件、排氣、洩漏、冷凝水盤及存水彎配置；依原廠程序清潔與充填。</li>
@@ -260,7 +294,7 @@
         </section>
 
         <section id="troubleshooting">
-          <h2>8. 現場常見症狀：逐項排除，不要只調風門</h2>
+          <h2>8. 故障排查：先比對空氣狀態，再動設定</h2>
           <div class="table-wrap">
             <table class="wide-table">
               <caption>MAU 第一輪排查表</caption>
@@ -278,8 +312,14 @@
           </div>
         </section>
 
+        <section id="outlook">
+          <h2>9. 結語：把 MAU 從風箱管成一個動態系統</h2>
+          <p>AI 機房、高密度製程與更嚴格的能源目標，讓 MAU 的重要性不再只是「補足新風」。真正的挑戰是：在變動的室外焓值、區域排風和盤管能力之間，持續交付正確的空氣量與空氣狀態，同時不讓風機功率和冷熱源能耗失控。</p>
+          <p>設計端應以質量平衡和濕空氣焓差建立負荷；選型端按實際密度、盤管幾何、風機曲線與熱回收失效情境核對；操作端以風量、焓、壓差、功率和冷凝水趨勢校正模型。未來的 MAU 不只是更高效率的箱體，而是可量測、可預測、故障可降級的空氣處理節點。</p>
+        </section>
+
         <section id="maintenance">
-          <h2>9. 維護基線：保留可比較的運轉資料</h2>
+          <h2>10. 維護基線：保留可比較的運轉資料</h2>
           <ul>
             <li>記錄室外乾球與濕度、送風量、送風溫濕度／露點、盤管進出水條件及風機功率。</li>
             <li>定期查看濾網壓差與密封，按髒污狀況和終阻力更換，不只按日曆或外觀判斷。</li>
@@ -293,8 +333,7 @@
         <section class="references" id="sources">
           <h2>ASHRAE 來源與使用限制</h2>
           <ol>
-            <li>ASHRAE, <cite>2024 ASHRAE Handbook—HVAC Systems and Equipment (SI)</cite>, Chapter 4, “Air Handling and Distribution,” pp. 4.4–4.10：空氣處理機組心理濕過程、風機、盤管、外氣進風、過濾、除濕及熱回收。</li>
-            <li>ASHRAE, <cite>2024 ASHRAE Handbook—HVAC Systems and Equipment (SI)</cite>, Chapter 4, “Air Handling and Distribution,” p. 4.19：外氣量控制與直接風量量測等方法。</li>
+            <li>ASHRAE, <cite>2024 ASHRAE Handbook—HVAC Systems and Equipment (SI)</cite>, Chapter 4, “Air Handling and Distribution,” pp. 4.4–4.10, 4.19：空氣處理機組心理濕過程、盤管旁通、風機、外氣風量控制、過濾、除濕及熱回收。</li>
             <li>ASHRAE, <cite>2021 ASHRAE Handbook—Fundamentals (SI)</cite>, Chapter 1, “Psychrometrics,” pp. 1.1–1.10：濕空氣性質、含濕量、焓、心理濕圖與空氣處理計算。</li>
           </ol>
           <p class="table-note">MAU／DOAS 的設備命名與配置因業界和專案而異，本文採功能描述；例題採海平面大氣壓及假設空氣狀態做初步能量估算。實際外氣量、盤管、風機、濾材、壓差與安全設定須依所在地法規、使用需求、ASHRAE 適用章節及設備製造商資料由合格專業人員核定。本文為原創工程摘要，未重製 ASHRAE 圖表或長段原文。</p>
@@ -304,14 +343,15 @@
       <aside class="toc" aria-label="本文目錄">
         <h2>本文目錄</h2>
         <ol>
-          <li><a href="#definition">MAU 的任務</a></li>
-          <li><a href="#air-balance">外氣量與空氣平衡</a></li>
-          <li><a href="#psychrometrics">心理濕與負荷算例</a></li>
-          <li><a href="#components">機組段落選擇</a></li>
-          <li><a href="#controls">控制與防凍</a></li>
-          <li><a href="#selection">選型資料表</a></li>
-          <li><a href="#commissioning">試車驗收</a></li>
-          <li><a href="#troubleshooting">現場排故</a></li>
+          <li><a href="#definition">MAU 的系統任務</a></li>
+          <li><a href="#air-balance">風量與建築空氣帳</a></li>
+          <li><a href="#psychrometrics">心理濕、焓差與密度</a></li>
+          <li><a href="#components">盤管幾何與機組排列</a></li>
+          <li><a href="#controls">熱回收與控制折衷</a></li>
+          <li><a href="#selection">逐時模擬與選型</a></li>
+          <li><a href="#commissioning">現場試車</a></li>
+          <li><a href="#troubleshooting">故障排查</a></li>
+          <li><a href="#outlook">結語與未來洞察</a></li>
           <li><a href="#maintenance">維護基線</a></li>
           <li><a href="#sources">來源與限制</a></li>
         </ol>
