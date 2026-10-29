@@ -32,6 +32,10 @@
           `${path} links to the technical columns`);
         assert(!page.querySelector('nav a[href="references.html"]'),
           `${path} does not expose the bibliography in the site navigation`);
+        if (["columns.html", "glycol.html", "chiller.html"].includes(path)) {
+          assert(page.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
+            `${path} includes the scroll-to-top button`);
+        }
       }
 
       output.textContent = `PASS: ${checks} checks`;

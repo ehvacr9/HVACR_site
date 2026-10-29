@@ -30,6 +30,8 @@
       const home = new DOMParser().parseFromString(await homeResponse.text(), "text/html");
       const columns = new DOMParser().parseFromString(await columnsResponse.text(), "text/html");
       const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
+      assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
+        "Glycol article includes the scroll-to-top button");
       assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
         "Main navigation links to the column archive");
       assert(home.querySelector('a[href="columns.html"].button')?.textContent.includes("閱讀工程專欄"),
