@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="依 ASHRAE Handbook 說明空氣處理箱 AHU 的氣流路徑、混風、過濾、盤管、風機選型、控制、試運轉與故障排查。">
+  <meta name="description" content="深入說明 AHU 的空氣處理流程、心理濕圖、外氣混合、顯熱與潛熱、冷卻除濕盤管、風機壓力及控制原理。">
   <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
-  <title>空氣處理箱 AHU：從氣流路徑到現場調試｜工程專欄</title>
+  <title>空氣處理箱 AHU：空氣狀態、盤管與風機原理｜工程專欄</title>
   <style>
     :root {
       color-scheme: light;
@@ -91,9 +91,6 @@
     .calc-box { margin: 18px 0; padding: 20px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
     .calc-line { overflow-wrap: anywhere; margin: 8px 0; font-family: Consolas, "Courier New", monospace; font-size: 14px; font-variant-numeric: tabular-nums; }
     .result-line { margin: 13px 0 0; padding-top: 12px; border-top: 1px solid var(--line); color: var(--green) !important; font-weight: 750; }
-    .checklist { counter-reset: commissioning; list-style: none; padding: 0 !important; }
-    .checklist li { position: relative; min-height: 42px; padding: 8px 0 8px 46px; border-bottom: 1px solid var(--line); }
-    .checklist li::before { position: absolute; top: 8px; left: 0; display: grid; width: 28px; height: 28px; place-items: center; border: 1px solid #b7c9b8; border-radius: 50%; color: var(--green); font-size: 12px; font-weight: 750; counter-increment: commissioning; content: counter(commissioning); }
     .references { padding-top: 22px; border-top: 1px solid var(--line); }
     .references h2 { font-size: 25px; }
     .references li { font-size: 14px; }
@@ -151,16 +148,17 @@
   <main class="wrap page">
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="columns.html">工程專欄</a> ／ 空氣處理箱（AHU）</p>
     <p class="eyebrow">Air Handling · System Engineering</p>
-    <h1>空氣處理箱 AHU：從氣流路徑到現場調試</h1>
-    <p class="dek">AHU（Air-Handling Unit，空氣處理箱）是空氣側系統的核心：它把回風與外氣按需求混合、過濾、加熱或冷卻除濕，再由風機送往各區域。真正決定表現的，不只是箱內零件，而是設計工況、風量、盤管、風機、風管及控制之間的配合。</p>
-    <p class="byline">工程實務專題｜依 ASHRAE Handbook—HVAC Systems and Equipment 技術資料整理｜閱讀約 12 分鐘</p>
+    <h1>空氣處理箱 AHU：空氣狀態、盤管與風機原理</h1>
+    <p class="dek">AHU 不只是把空氣「吹冷」。它依序改變空氣的溫度、含濕量、潔淨度與壓力，再把所需狀態送到空間。理解 AHU 的關鍵，是追蹤空氣在每一段設備前後的狀態，以及空氣側、冰水側和控制系統如何互相制約。</p>
+    <p class="byline">原理專題｜依 ASHRAE Handbook—Fundamentals 與 HVAC Systems and Equipment 技術資料整理</p>
 
     <div class="article-layout">
       <article class="article-body">
         <section id="purpose">
-          <h2>1. AHU 做什麼？它不等於整套空調系統</h2>
-          <p>AHU 負責處理和輸送空氣；冷凍機、鍋爐、冷卻塔、風管、末端設備及控制系統則共同決定整體供冷、供熱與通風。AHU 可以是工廠組裝的套裝機，也可以依專案在現場組裝；服務一個區域或整棟建築，處理定風量或變風量空氣。選設備前要明確定義服務區、設計送風量與狀態、外氣需求、室內壓力、盤管負荷及風機能力。</p>
-          <div class="callout"><strong>和 MAU 的差別：</strong>AHU 是較廣義的空氣處理機組，可混合外氣與回風；MAU 通常強調補入並處理室外新風。兩個名稱在不同廠商或專案上可能用法不同，不能單憑設備名稱推定回風比例、是否 100% 外氣或送風功能，應以系統圖、風量表和控制序列為準。</div>
+          <h2>1. AHU 的系統邊界：空氣被處理，冷熱源在另一側供能</h2>
+          <p>AHU（Air-Handling Unit，空氣處理箱）是空氣側設備。典型混風 AHU 把室外新風與空調區回風混合，過濾後通過冷卻／除濕或加熱盤管，再由風機克服設備與風管阻力，送到空間。盤管內流動的冰水或熱水與空氣隔著管壁交換熱量；除濕時，水蒸氣凝結成液態水進入集水盤，排水管把冷凝水帶離機組。空氣與水不是混在一起的流體迴路。</p>
+          <p>因此，AHU 的結果不能只由「機組容量」決定：冷凍機提供的冰水狀態、泵浦流量、風管與末端壓損、室外空氣條件、室內負荷及控制邏輯都在系統邊界之內。MAU 通常指以處理外氣／補風為主的機組；AHU 則可能混合外氣與回風，名稱本身不代表固定外氣比例，需看系統圖與控制序列。</p>
+          <div class="callout"><strong>先認清五個空氣狀態點：</strong>①外氣 OA；②回風 RA；③混合風 MA；④盤管後送風 SA；⑤空調區室內空氣。若要判斷某個盤管或風門是否正常，必須知道量測點在哪一段；把室內溫度當成回風狀態，或把盤管後的風溫當成末端送風狀態，都可能造成錯誤判斷。</div>
           <figure class="system-figure">
             <div class="diagram-scroll" tabindex="0" aria-label="可左右捲動查看 AHU 系統配置圖">
               <svg class="ahu-system-diagram" viewBox="0 0 1040 550" role="img" aria-labelledby="ahu-diagram-title ahu-diagram-desc">
@@ -245,142 +243,115 @@
         </section>
 
         <section id="layout">
-          <h2>2. 箱體配置與送風機位置，會改變盤管實際工況</h2>
-          <p>常見的 draw-through（吸入式）配置把送風機放在盤管下游，風機從盤管抽氣；blow-through（吹出式）配置則把風機放在盤管上游。兩種方案都能用，但風機馬達熱、盤管面風速分布、風機出口直管距離、箱體壓力及維修空間都要納入考量。不能只依設備外型或單一優點下結論。</p>
+          <h2>2. 心理濕圖是 AHU 的狀態圖：看懂溫度以外的水分變化</h2>
+          <p>空氣是乾空氣與水蒸氣的混合物。乾球溫度（DB）描述一般溫度計量到的溫度；含濕量 \(W\) 表示每公斤乾空氣含有多少公斤水蒸氣；相對濕度 RH 是目前水蒸氣分壓相對於同溫度飽和水蒸氣壓的比例；焓 \(h\) 則用來記錄濕空氣攜帶的總能量。只量 DB 不能知道空氣裡有多少水，也不能判斷除濕負荷。</p>
+          <p>在心理濕圖上，狀態點由 DB 與 RH、濕球溫度或含濕量等兩個獨立性質定位。沿水平線改變 DB、含濕量近似不變，代表純顯熱加熱或冷卻；冷卻至露點後繼續降溫，狀態沿飽和邊界附近移動並析出水分，是顯熱與潛熱同時移除；加濕則提高含濕量，路徑取決於蒸汽、噴水或其他加濕方式。</p>
           <div class="table-wrap">
             <table class="wide-table">
-              <caption>AHU 配置初選要點</caption>
-              <thead><tr><th scope="col">配置選項</th><th scope="col">設計考量</th><th scope="col">圖面／現場核對</th></tr></thead>
+              <caption>常見空氣處理過程與狀態變化</caption>
+              <thead><tr><th scope="col">處理過程</th><th scope="col">心理濕圖上的主要變化</th><th scope="col">AHU 對應設備／目的</th></tr></thead>
               <tbody>
-                <tr><td>吸入式風機</td><td>盤管氣流通常較易均勻；若風機馬達位於送風路徑，馬達熱可能增加盤管後的送風溫度。</td><td>確認盤管實際進出風狀態是否計入風機熱，檢視風機入口與出口系統效應。</td></tr>
-                <tr><td>吹出式風機</td><td>風機位於盤管前，可能讓盤管前氣流分布不均；風機熱進入下游盤管後，其去向和控制會改變。</td><td>檢視風機與盤管間距、導流／均流設計，以及盤管選型工況。</td></tr>
-                <tr><td>單風機／風機陣列</td><td>陣列可配合大型機組與部分負載運轉；多風機也會增加控制、維護和故障模式。</td><td>核對單台失效時的能力、各風機控制順序、隔振、噪音和備品策略。</td></tr>
-                <tr><td>集中／分散機房</td><td>集中式便於管理大系統與熱回收；分散配置可縮短部分風管，但增加機組數及維護點。</td><td>比對機房空間、風管路徑、能源、維修可及性及故障對服務範圍的影響。</td></tr>
+                <tr><td>顯熱加熱</td><td>DB 上升，含濕量 \(W\) 近似不變，RH 通常下降。</td><td>熱水、蒸汽或電熱盤管補充熱量。</td></tr>
+                <tr><td>顯熱冷卻（盤管表面高於露點）</td><td>DB 下降，\(W\) 近似不變，RH 上升。</td><td>盤管降低空氣溫度，但沒有明顯凝結除濕。</td></tr>
+                <tr><td>冷卻除濕（盤管表面低於露點）</td><td>DB 與 \(W\) 皆下降，空氣中的水蒸氣凝結。</td><td>冰水或直接膨脹盤管同時移除顯熱與潛熱；集水盤需可靠排水。</td></tr>
+                <tr><td>外氣與回風混合</td><td>混合狀態位於兩入口狀態連線上，位置按乾空氣質量流率決定。</td><td>混風箱與風門改變 AHU 的盤管入口狀態及外氣負荷。</td></tr>
               </tbody>
             </table>
           </div>
-          <p>風機出口若緊接彎頭、縮擴管或分歧，流場可能尚未恢復，產生系統效應與額外壓損。依風機廠商要求預留直管、採用合適導流件並以完整風路計算靜壓；不可把風機額定自由送風量當成裝機風量。</p>
+          <div class="callout callout--warning"><strong>除濕不是「把室溫調低」：</strong>若房間濕度高，單純降低送風 DB 不保證除濕足夠；盤管必須低於進風露點並有足夠接觸能力，之後還要檢查送風露點、再熱需求及冷凝水排放。</div>
         </section>
 
         <section id="components">
-          <h2>3. 從混風到送風：每個段落都有設計條件</h2>
+          <h2>3. 空氣處理箱的段落：每個零件都在改變狀態或壓力</h2>
           <div class="table-wrap">
             <table class="wide-table">
-              <caption>AHU 常見段落及實務檢核</caption>
-              <thead><tr><th scope="col">段落</th><th scope="col">功能</th><th scope="col">設計與維護檢核</th></tr></thead>
+              <caption>常見 AHU 段落對空氣的作用</caption>
+              <thead><tr><th scope="col">段落</th><th scope="col">作用機制</th><th scope="col">對下游的影響</th></tr></thead>
               <tbody>
-                <tr><td>外氣／回風／排風風門</td><td>混合外氣與回風、排出多餘空氣，或實現經濟器模式。</td><td>核對風門漏風、連桿方向、混風短路、排風平衡及外氣量量測；以實際風量而非風門角度驗收。</td></tr>
-                <tr><td>過濾器</td><td>降低顆粒物負荷，保護盤管及服務空間。</td><td>依用途與規範選濾材；留意濾材旁通、安裝密封、終阻力、壓差測點及抽換空間。</td></tr>
-                <tr><td>預熱盤管</td><td>寒冷工況下預熱外氣，或供暖啟動。</td><td>檢查防凍策略、閥門與水流、感測器位置及可維修性；熱水盤管凍結會造成漏水和設備損害。</td></tr>
-                <tr><td>冷卻／除濕盤管</td><td>降低空氣乾球溫度，表面低於露點時凝結水蒸氣。</td><td>按進出風濕空氣狀態、冷媒／冷水工況、面風速、旁通因子及壓降選型；確認集水盤和排水。</td></tr>
-                <tr><td>再熱盤管／加濕器</td><td>除濕後回熱或在特定用途提高空氣含濕量。</td><td>避免不必要的冷卻再加熱；核對能源回收、加濕吸收距離、水質、凝露及衛生維護。</td></tr>
-                <tr><td>送風機與箱體</td><td>克服濾網、盤管、風管、風閥及末端總壓損。</td><td>使用包含髒濾網終阻力的系統壓損選風機；檢查門板密封、檢修門、隔振、噪音及馬達負載。</td></tr>
+                <tr><td>外氣／回風／排氣風門</td><td>調整各股氣流比例；排氣與補氣共同維持建築壓力平衡。</td><td>混風狀態決定盤管入口；風門開度與實際風量不是線性等比例。</td></tr>
+                <tr><td>過濾器</td><td>纖維攔截、慣性碰撞及擴散等機制捕集顆粒物。</td><td>過濾器增加風路壓降；積塵會改變風機工作點與送風量。</td></tr>
+                <tr><td>加熱盤管</td><td>熱水、蒸汽或電熱把熱量傳給空氣。</td><td>主要提高 DB；濕空氣含濕量通常近似不變。</td></tr>
+                <tr><td>冷卻盤管</td><td>空氣與冷媒/冰水經翅片、管壁進行對流與導熱；低於露點時凝結水分。</td><td>出口狀態受盤管表面溫度、排數、面風速、水量及旁通影響。</td></tr>
+                <tr><td>集水盤與存水彎</td><td>收集凝結水並阻止負壓/正壓機殼吸入或噴出空氣。</td><td>水封高度須按機殼靜壓設計；水封失效會造成漏氣、排水不良或溢水。</td></tr>
+                <tr><td>送風機</td><td>向空氣輸入機械能，建立克服整條風路阻力所需的壓力。</td><td>決定整個風路的工作流量，不是單獨決定某一個末端風量。</td></tr>
               </tbody>
             </table>
           </div>
-          <p>過濾器若未及時維護，阻力會上升並影響風量及風機能耗；外氣與回風在濾網和盤管前混合不均，則可能導致濾材局部負載不均、盤管利用不充分。濾材等級須依污染源、室內用途、規範與系統壓損一起決定，不能只追求最高標示效率。</p>
+          <p>箱體段落順序不是固定模板：例如預濾網、熱回收、加濕或再熱，需依系統用途與控制目標決定。設計上要看空氣流向、維修抽出空間、盤管均勻迎風、凝結水排放和各段壓降；某一段的選型會改變後續設備工作點。</p>
         </section>
 
         <section id="airflow">
-          <h2>4. 先確定設計風量，再算盤管負荷和風機靜壓</h2>
-          <p>設計風量由各區域的顯熱／潛熱負荷、送風狀態、通風需求與空氣分布共同決定。冷卻盤管負荷不能只看室內顯熱；外氣、除濕及回風狀態也會左右總負荷。先以濕空氣狀態和能量平衡算盤管負荷，再核對盤管及冷熱源在該工況的性能。</p>
-          <div class="calc-box">
-            <div class="calc-line">Q̇<sub>sensible</sub> ≈ ρ × V̇ × c<sub>p</sub> × ΔT</div>
-            <div class="calc-line">Q̇<sub>total</sub> ≈ ṁ<sub>da</sub> × (h<sub>entering</sub> − h<sub>leaving</sub>)</div>
-            <p class="table-note">第一式是近似顯熱估算；第二式用濕空氣焓差評估總冷卻／除濕負荷。ρ、c<sub>p</sub>、風量和焓值須依空氣狀態及單位一致取用；盤管選型還須納入旁通、風機熱與廠商性能資料。</p>
+          <h2>4. 混風計算：為什麼要用乾空氣質量，而不是風門百分比</h2>
+          <p>ASHRAE《Fundamentals》心理濕圖章節的混風 Example 4，給定外氣 2 m³/s、4°C 乾球／2°C 熱力濕球，與回風 6.25 m³/s、25°C 乾球／50% RH，在 101.325 kPa 下求混合狀態。這個例題說明：兩股空氣先依各自狀態換算乾空氣質量流率，再做濕空氣混合平衡。</p>
+          <div class="table-wrap">
+            <table class="wide-table">
+              <caption>ASHRAE Example 4 輸入條件與圖表比體積</caption>
+              <thead><tr><th scope="col">氣流</th><th scope="col">體積流率</th><th scope="col">入口狀態</th><th scope="col">比體積 v</th></tr></thead>
+              <tbody>
+                <tr><td>外氣 OA</td><td>2.00 m³/s</td><td>4°C DB／2°C thermodynamic WB</td><td>0.789 m³/kg<sub>da</sub></td></tr>
+                <tr><td>回風 RA</td><td>6.25 m³/s</td><td>25°C DB／50% RH</td><td>0.858 m³/kg<sub>da</sub></td></tr>
+              </tbody>
+            </table>
           </div>
-          <h3>顯熱算例｜風量 10,000 m³/h，空氣升溫 15 K</h3>
-          <p>以近常溫空氣作快速初估，取密度 1.2 kg/m³、比熱 1.006 kJ/(kg·K)。這個例題只估加熱顯熱，不含外殼散熱、風管損失、預熱控制策略或安全裕度。</p>
           <div class="calc-box">
-            <div class="calc-line">V̇ = 10,000 ÷ 3,600 = 2.78 m³/s</div>
-            <div class="calc-line">Q̇ ≈ 1.2 × 2.78 × 1.006 × 15 ≈ 50.3 kW</div>
-            <p class="result-line">初估顯熱約 50 kW。正式盤管選型依設計空氣狀態、介質溫度與流量、盤管壓降及製造商資料核算。</p>
+            <div class="calc-line">外氣乾空氣質量流率：ṁ<sub>OA</sub> = V̇<sub>OA</sub>/v<sub>OA</sub> = 2/0.789 = 2.535 kg<sub>da</sub>/s</div>
+            <div class="calc-line">回風乾空氣質量流率：ṁ<sub>RA</sub> = V̇<sub>RA</sub>/v<sub>RA</sub> = 6.25/0.858 = 7.284 kg<sub>da</sub>/s</div>
+            <div class="calc-line">外氣質量比：x<sub>OA</sub> = 2.535/(2.535 + 7.284) = 0.258 = 25.8%</div>
+            <div class="calc-line">混合點分割比例：ṁ<sub>RA</sub>/(ṁ<sub>OA</sub> + ṁ<sub>RA</sub>) = 0.742</div>
+            <div class="calc-line">混合含濕量：W<sub>MA</sub> = (ṁ<sub>OA</sub>W<sub>OA</sub> + ṁ<sub>RA</sub>W<sub>RA</sub>)/(ṁ<sub>OA</sub> + ṁ<sub>RA</sub>)</div>
+            <div class="calc-line">混合焓：h<sub>MA</sub> = (ṁ<sub>OA</sub>h<sub>OA</sub> + ṁ<sub>RA</sub>h<sub>RA</sub>)/(ṁ<sub>OA</sub> + ṁ<sub>RA</sub>)</div>
+            <div class="calc-line">心理濕圖讀值：混合風約 19.5°C DB／14.6°C thermodynamic WB</div>
+            <p class="result-line">混合狀態落在 OA 與 RA 狀態點連線上，按乾空氣質量比定位。體積流量比不是質量流量比；風門開度也不等於外氣百分比。</p>
           </div>
-          <p>風機選型則由設計風量及整條風路的壓損決定。將濾網在終阻力時、盤管、風閥、消音器、風管及末端設備壓降納入系統曲線，並按風機廠商的密度、轉速、效率及馬達條件核對。不能為了補償濾網堵塞而把日常風機設定長期調到過高轉速。</p>
+          <p>同一組數字若直接對乾球溫度做體積加權平均，會得到約 19.9°C，而不是圖解的約 19.5°C。差異來自入口空氣密度與含濕狀態不同。真實 AHU 的混風箱若混合不均，單一感測器也可能讀到局部氣流而非平均狀態；因此計算用於建立預期值，現場還要確認風量及混風段溫濕度分布。</p>
+          <p class="table-note">範例數值是心理濕圖教學條件，不是法定新風量，也不代表任何實際設備容量。來源：ASHRAE, 2021 Handbook—Fundamentals (SI), Chapter 1, Example 4, p. 1.14。</p>
+        </section>
+
+        <section id="coil">
+          <h2>5. 冷卻盤管如何降溫與除濕：露點、旁通與能量平衡</h2>
+          <p>混合風進入冷卻盤管後，盤管管壁與翅片把熱量傳給冰水或冷媒。當盤管表面溫度高於進風露點時，空氣只降顯熱；低於露點時，水蒸氣在翅片表面凝結，空氣的乾球溫度與含濕量同時下降。這時出口狀態不是由「設定送風溫度」單獨決定，而是由進風狀態、盤管表面溫度、排數／面積、面風速、冷水流量及空氣分布共同決定。</p>
+          <div class="calc-box">
+            <div class="calc-line">盤管總冷量：Q̇<sub>total</sub> = ṁ<sub>da</sub> × (h<sub>in</sub> − h<sub>out</sub>)　[kW]</div>
+            <div class="calc-line">凝結水量：ṁ<sub>cond</sub> = ṁ<sub>da</sub> × (W<sub>in</sub> − W<sub>out</sub>)　[kg/s]</div>
+            <div class="calc-line">顯熱比：SHR = Q̇<sub>sensible</sub>/Q̇<sub>total</sub></div>
+            <p class="table-note">ṁ<sub>da</sub> 為乾空氣質量流率 [kg<sub>da</sub>/s]；h 為濕空氣比焓 [kJ/kg<sub>da</sub>]；W 為含濕量 [kg<sub>water</sub>/kg<sub>da</sub>]。焓差乘乾空氣質量流率即得 kW；計算時進、出口狀態與單位必須一致。</p>
+          </div>
+          <p>盤管並非每一部分空氣都與翅片達到相同的熱濕平衡，部分氣流會有不同程度的「旁通」效果。工程上常用旁通因子（Bypass Factor, BF）或盤管性能程式描述出口狀態，但濕盤管應以焓、含濕量及製造商選型資料核對，不能只套乾球溫差比例。盤管後若為滿足室內顯熱需求而再熱，需同時評估除濕所需冷量與再熱能耗，避免不必要的冷熱抵消。</p>
+          <div class="callout"><strong>判斷除濕看含濕量／露點：</strong>同一乾球溫度可能對應不同含濕量。除濕不足時，依序比對盤管前後 DB、RH／露點、冷水供回水溫度與流量，以及冷凝水排放；單看送風溫度不足以判定盤管除濕性能。</div>
+        </section>
+
+        <section id="fan">
+          <h2>6. 風機不是「定風量源」：風機曲線與風路阻力的交點</h2>
+          <p>風機把軸功率轉為氣流的壓力與速度能，實際風量由風機性能曲線和整條風路的阻力共同決定。濾網、盤管、風門、彎頭、風管、末端及出口條件都消耗壓力；系統阻力提高時，工作點會沿風機曲線移動，風量可能下降。髒濾網不是只影響維護成本，也會改變整台 AHU 的運轉點。</p>
+          <div class="calc-box">
+            <div class="calc-line">風路壓損：Δp<sub>system</sub> = ΣΔp<sub>components</sub></div>
+            <div class="calc-line">風機輸入功率近似：P<sub>in</sub> = V̇ × Δp<sub>fan</sub>/η<sub>total</sub></div>
+            <div class="calc-line">相似風路、近似固定密度時：V̇ ∝ N，Δp ∝ N²，P ∝ N³</div>
+            <p class="table-note">V̇ 為體積流率 [m³/s]；Δp 為壓力 [Pa]；η<sub>total</sub> 為風機、傳動與馬達等綜合效率；功率單位為 W。風機相似律是相同風機及相似系統條件下的近似關係，不應當作所有變頻工況的保證值。</p>
+          </div>
+          <p>風機曲線與系統曲線的交點才是工作風量。VAV 末端關小會改變系統阻力，因此變頻風機通常以管網靜壓或末端需求調速；若靜壓設定過高，末端風門會長期節流、風機仍耗用不必要功率。靜壓重置應依代表性末端的風門需求逐步降低設定，並同時確保最不利區仍有足夠風量。</p>
+          <p>風機放在盤管前（blow-through）或盤管後（draw-through）會影響機組內部壓力分布、風機熱進入盤管前後的位置、凝結水與風量均勻性。兩種配置都可成立，應依盤管性能、機殼漏風方向、下游風管需求及設備廠商設計判斷，不存在只憑名稱即可決定優劣的固定答案。</p>
         </section>
 
         <section id="control">
-          <h2>5. 控制要聯動：風量、溫度、濕度和經濟器</h2>
+          <h2>7. 控制是在不同時間尺度調整狀態點與風量</h2>
           <ul>
-            <li><strong>定風量：</strong>風機維持近似固定送風量，依負載調整供風溫度或其他末端控制；風門和盤管仍要確保最小通風需求。</li>
-            <li><strong>變風量：</strong>末端風門隨區域需求改變，風機以靜壓／風量控制調速；最低風量及外氣量須按系統設計維持，不能因末端關小便讓通風量不合格。</li>
-            <li><strong>混風與經濟器：</strong>依室外條件及室內需求調節外氣、回風與排風風門；使用室外空氣作免費冷卻時，仍須控制外氣上限、排風能力、濕度與低溫保護。</li>
-            <li><strong>盤管與除濕：</strong>以送風溫度或區域需求調節冷熱水閥；需要除濕時同時檢查露點及再熱需求，避免不必要的同時加熱與冷卻。</li>
-            <li><strong>防凍與故障安全：</strong>依機組要求配置低溫／凍結保護、必要的水流聯鎖及安全停機動作；感測器或通訊故障時，控制器要進入核准的安全狀態。</li>
+            <li><strong>空間溫度迴路：</strong>區域溫度與設定值的偏差形成冷房需求，再由送風溫度、風量或末端閥門回應；不同系統架構的控制變數不同。</li>
+            <li><strong>送風溫度迴路：</strong>送風溫度感測器調節冷／熱水閥或壓縮機容量。感測器位置、混合均勻度與閥門特性會影響穩定性。</li>
+            <li><strong>外氣與排氣：</strong>外氣量應按通風需求和系統壓力平衡控制，不能以風門開度代替實際風量。經濟器利用室外空氣冷卻時，須一併評估含濕量、排氣能力與室內濕度。</li>
+            <li><strong>VAV 風機：</strong>末端風門改變風路需求，變頻風機依靜壓或需求訊號調速；設置靜壓重置可減少不必要節流，但須保留最不利末端的供風能力。</li>
+            <li><strong>保護與聯鎖：</strong>低溫防凍、風機運轉證明、消防停機及冷凝水管理是安全／設備保護層，不應被一般舒適度控制覆蓋。</li>
           </ul>
-          <div class="callout callout--warning"><strong>經濟器不等於全開外氣：</strong>室外空氣可能比回風冷，卻同時含濕量更高；單以乾球溫度判斷會增加除濕負荷或造成室內濕度超標。經濟器策略按氣候、系統設計與適用規範確定，並驗證外氣量、排風及防凍控制。</div>
-        </section>
-
-        <section id="selection">
-          <h2>6. 詢價／選型資料表：要求同一工況比較</h2>
-          <div class="table-wrap">
-            <table class="wide-table">
-              <caption>送給 AHU 廠商或設計團隊的基本輸入</caption>
-              <thead><tr><th scope="col">類別</th><th scope="col">應提供的條件</th><th scope="col">選型回覆檢核</th></tr></thead>
-              <tbody>
-                <tr><td>空氣側</td><td>設計風量、定風量／變風量、外氣比例、回風與排風配置</td><td>各工況風量、風機靜壓及空氣側壓降。</td></tr>
-                <tr><td>進風與送風</td><td>室外設計乾球／濕球或相對濕度、混合風狀態、送風溫度與濕度目標</td><td>盤管容量、旁通因子與實際出風狀態。</td></tr>
-                <tr><td>冷熱源</td><td>冷／熱水供回水溫度與流量，或 DX／蒸汽條件及允許壓降</td><td>盤管水側／冷媒側壓降、容量及控制範圍。</td></tr>
-                <tr><td>過濾與聲學</td><td>濾材等級、初阻力與終阻力、環境污染及噪音限制</td><td>濾網面積、壓差監測、風機聲功率和檢修空間。</td></tr>
-                <tr><td>外殼與維護</td><td>室內／室外安裝、尺寸、風管接口、檢修方向、環境腐蝕條件</td><td>箱體漏風／熱傳性能、排水、隔振、吊裝與保養可及性。</td></tr>
-                <tr><td>控制與電力</td><td>電源、VFD、感測器、控制點表、聯鎖及 BMS 通訊需求</td><td>控制序列、馬達功率、調速範圍、警報及安全狀態。</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p>把夏季除濕、冬季預熱、部分負載及髒濾網工況分開列出，避免不同投標者用不同的進風狀態或壓損假設比較。對 VAV 系統，也要將機組最低風量、最低外氣量與末端可調範圍一併確認。</p>
-        </section>
-
-        <section id="commissioning">
-          <h2>7. 試車清單：確認設計值真的到達末端</h2>
-          <ol class="checklist">
-            <li><strong>圖面與安裝：</strong>核對機組標籤、送回風方向、風門、濾網、盤管、檢修門、箱體密封與風管連接。</li>
-            <li><strong>濾網與盤管：</strong>確認濾材型號及密封、初始壓差、盤管乾淨、集水盤坡度、存水彎和排水通暢。</li>
-            <li><strong>風機與電氣：</strong>檢查旋向、皮帶張力（若適用）、變頻器參數、馬達電流、振動、噪音及保護設定。</li>
-            <li><strong>感測器與風門：</strong>校對溫濕度、壓差與風量訊號；逐一確認命令方向、開度回授、風門密封與失效位置。</li>
-            <li><strong>風量平衡：</strong>按設計工況測量機組總風量、各支路風量及代表末端；VAV 系統應按平衡程序測試最大、最小及轉換工況。</li>
-            <li><strong>盤管性能：</strong>記錄進出風狀態、冷熱水溫度與流量、閥門命令、盤管壓差與冷凝水；和設計及廠商選型資料比對。</li>
-            <li><strong>聯鎖與序列：</strong>測試風機啟停、風量證明、低溫保護、濾網壓差警報、消防／停機訊號及經濟器模式；不得旁路安全保護。</li>
-            <li><strong>趨勢與交付：</strong>保存各工況風量、溫濕度、壓差、功率、閥位／風門命令及警報，列出偏差與負責改善項目。</li>
-          </ol>
-        </section>
-
-        <section id="troubleshooting">
-          <h2>8. 現場症狀排查：先確認風量和測點</h2>
-          <div class="table-wrap">
-            <table class="wide-table">
-              <caption>AHU 常見問題的第一輪檢查</caption>
-              <thead><tr><th scope="col">症狀</th><th scope="col">先檢查</th><th scope="col">處理方向</th></tr></thead>
-              <tbody>
-                <tr><td>末端風量不足</td><td>風機轉速與旋向、濾網壓差、風門、風管漏風、系統靜壓與末端阻力。</td><td>按風路實測並對照系統曲線，查阻力來源及風機系統效應，不先任意提高轉速。</td></tr>
-                <tr><td>空間溫度到不了設定值</td><td>設計負荷、實際風量、送風狀態、冷熱源溫度／流量、盤管閥位及感測器校正。</td><td>先定位是空氣量不足、盤管容量不足、冷熱源問題或控制偏差，再按測試結果調整。</td></tr>
-                <tr><td>濕度偏高或除濕不足</td><td>室外含濕量、盤管表面條件、冷水溫度與流量、盤管污堵、旁通風及送風露點。</td><td>依實際濕空氣狀態重新檢核盤管總冷量與控制序列，確認再熱需求和冷凝水排放。</td></tr>
-                <tr><td>濾網很快堵塞或局部髒污</td><td>室外／回風污染源、濾材密封與旁通、混風均勻度、濾網面積及壓差測點。</td><td>檢查取氣品質與濾網安裝，確認混風分布並按終阻力程序管理，不只延長更換週期。</td></tr>
-                <tr><td>風機噪音、震動或馬達過載</td><td>風機工況、皮帶／軸承、對心、隔振、風輪積塵、風管應力與風機出口條件。</td><td>按製造商安全程序檢查機械與系統曲線，設備運轉中勿接觸風輪、皮帶等運動部件。</td></tr>
-                <tr><td>盤管結冰或集水盤溢水</td><td>防凍保護、冷水流量、感測器、盤管翅片、排水坡度、水封及堵塞。</td><td>按原廠程序安全停機檢查；消除低溫或排水原因後復機，勿旁路聯鎖。</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section id="maintenance">
-          <h2>9. 留下能比較的運轉基線</h2>
-          <ul>
-            <li>記錄風量、供回風溫濕度、外氣狀態、靜壓／差壓、風機功率及運轉頻率。</li>
-            <li>依壓差、污染條件與廠商建議維護濾網；更換後記下新濾網初始壓差。</li>
-            <li>檢查盤管、翅片、冷凝水盤與水封、風門連桿、門板密封及感測器校正。</li>
-            <li>按維護程序清潔風機，檢視軸承、皮帶、隔振件及緊固件；鎖定能源後再進行內部維修。</li>
-            <li>季節轉換時重新驗證外氣量、經濟器、供風溫度、最小風量和防凍控制。</li>
-          </ul>
-          <div class="callout"><strong>有效的趨勢比較：</strong>把濾網壓差、總風量、風機功率、供回風狀態放在同一時間序列。若風量下降而壓差增加，檢查濾網及盤管阻力；若功率增加但風量未達標，再查風機工況、風管阻力和控制設定。</div>
         </section>
 
         <section class="references" id="sources">
           <h2>ASHRAE 來源與使用限制</h2>
           <ol>
+            <li>ASHRAE, <cite>2021 ASHRAE Handbook—Fundamentals (SI)</cite>, Chapter 1, “Psychrometrics,” Example 4, p. 1.14：外氣與回風混合狀態及乾空氣質量流率計算。</li>
             <li>ASHRAE, <cite>2024 ASHRAE Handbook—HVAC Systems and Equipment (SI)</cite>, Chapter 4, “Air Handling and Distribution,” pp. 4.4–4.10：AHU 系統配置、心理濕處理、風機、風門、外氣與回風混合、濾網、盤管、加濕及除濕。</li>
             <li>ASHRAE, <cite>2024 ASHRAE Handbook—HVAC Systems and Equipment (SI)</cite>, Chapter 21, “Fans,”：風機性能與選型；現場壓損及系統效應應依實際風路和設備資料核算。</li>
           </ol>
-          <p class="table-note">流量與負荷範例均為近似初估，不是通用設備規格。機組容量、控制、風量、濾材、盤管與防凍設定，應依專案條件、適用法規、製造商性能資料及合格專業人員核定。本文為原創工程摘要，未重製 ASHRAE 圖表或長段原文。</p>
+          <p class="table-note">混風圖表讀值為近似值，供說明心理濕圖與質量平衡，不是法定新風量或設備選型資料。實際 AHU 容量、風量、盤管與控制設定，須依專案條件、適用法規、製造商性能資料及合格專業人員核定。本文為原創工程摘要，未重製 ASHRAE 圖表或長段原文。</p>
           <a class="back-link" href="columns.html">← 返回工程專欄</a>
         </section>
       </article>
@@ -388,14 +359,12 @@
         <h2>本文目錄</h2>
         <ol>
           <li><a href="#purpose">AHU 的任務</a></li>
-          <li><a href="#layout">配置與風機位置</a></li>
+          <li><a href="#layout">心理濕圖與空氣狀態</a></li>
           <li><a href="#components">各段落設計</a></li>
-          <li><a href="#airflow">風量與熱負荷</a></li>
-          <li><a href="#control">控制聯動</a></li>
-          <li><a href="#selection">選型輸入</a></li>
-          <li><a href="#commissioning">試車驗收</a></li>
-          <li><a href="#troubleshooting">故障排查</a></li>
-          <li><a href="#maintenance">維護趨勢</a></li>
+          <li><a href="#airflow">混風計算例題</a></li>
+          <li><a href="#coil">冷卻與除濕盤管</a></li>
+          <li><a href="#fan">風機與系統阻力</a></li>
+          <li><a href="#control">控制原理</a></li>
           <li><a href="#sources">來源與限制</a></li>
         </ol>
       </aside>

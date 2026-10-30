@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="以 ASHRAE Handbook 等資料為基礎，整理冷凍空調原理與工程實務專欄。">
+  <meta name="description" content="以 ASHRAE 技術資料為基礎，深入說明 AHU 空氣處理、心理濕圖、盤管與風機原理。">
   <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
-  <title>工程專欄｜能源與冷凍空調學習網</title>
+  <title>空氣處理箱（AHU）原理｜工程專欄</title>
   <style>
     :root {
       color-scheme: light;
@@ -49,11 +49,7 @@
     .column-card { display: grid; max-width: 1000px; grid-template-columns: minmax(180px, .7fr) 1.3fr; gap: 26px; padding: 28px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); text-decoration: none; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
     .column-card:hover { transform: translateY(-2px); border-color: #a9beb0; box-shadow: 0 12px 30px rgba(23, 43, 43, .08); }
     .card-art { display: grid; min-height: 196px; place-items: center; overflow: hidden; border-radius: 7px; background: linear-gradient(145deg, #e5eee4, #cbded2); }
-    .glycol-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 31px; letter-spacing: -.06em; }
-    .chiller-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 24px; font-weight: 700; letter-spacing: -.04em; }
-    .mau-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 30px; font-weight: 700; letter-spacing: -.04em; }
     .ahu-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 30px; font-weight: 700; letter-spacing: -.04em; }
-    .vrf-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 30px; font-weight: 700; letter-spacing: -.04em; }
     .card-copy { align-self: center; }
     .card-kicker { margin-bottom: 10px; color: var(--green); font-size: 12px; font-weight: 750; letter-spacing: .1em; }
     .card-copy h2 { margin-bottom: 12px; font-size: clamp(25px, 3vw, 34px); }
@@ -86,11 +82,7 @@
       .page { padding-block: 42px 60px; }
       .column-card { grid-template-columns: 1fr; gap: 19px; padding: 18px; }
       .card-art { min-height: 145px; }
-      .glycol-mark { width: 88px; height: 88px; font-size: 26px; }
-      .chiller-mark { width: 88px; height: 88px; font-size: 21px; }
-      .mau-mark { width: 88px; height: 88px; font-size: 26px; }
       .ahu-mark { width: 88px; height: 88px; font-size: 26px; }
-      .vrf-mark { width: 88px; height: 88px; font-size: 26px; }
       .scroll-top-button { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
@@ -113,52 +105,16 @@
   </header>
   <main class="wrap page">
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ 專欄</p>
-    <p class="eyebrow">HVACR · Technical Columns</p>
-    <h1>工程專欄</h1>
-    <p class="intro">以工程手冊與技術資料為基礎，將冷凍空調常見材料、設備與系統原理整理成容易查閱的專題。</p>
+    <p class="eyebrow">AIR HANDLING · FUNDAMENTALS</p>
+    <h1>空氣處理箱（AHU）原理</h1>
+    <p class="intro">本專區暫時聚焦 AHU：從空氣狀態、混風與除濕，到盤管、風機及控制，逐步說清楚每個設備段落如何影響系統結果。</p>
     <section aria-label="專欄文章">
-      <a class="column-card" href="glycol.html">
-        <div class="card-art" aria-hidden="true"><span class="glycol-mark">EG</span></div>
-        <div class="card-copy">
-          <p class="card-kicker">SECONDARY COOLANTS · 01</p>
-          <h2>乙二醇水系統：從選濃度到試運轉</h2>
-          <p>用 ASHRAE 物性資料做濃度初選與流量估算，並掌握泵浦檢核、充填試運轉、維護和故障排查。</p>
-          <span class="card-link">閱讀專欄 →</span>
-        </div>
-      </a>
-      <a class="column-card" href="chiller.html">
-        <div class="card-art" aria-hidden="true"><span class="chiller-mark">CHILLER</span></div>
-        <div class="card-copy">
-          <p class="card-kicker">CENTRAL PLANT · 02</p>
-          <h2>冰水主機 Chiller：從冷凍循環到現場運轉</h2>
-          <p>用三個迴路看懂冰水主機，從流量估算、設備選型到試車、效率與故障排查。</p>
-          <span class="card-link">閱讀專欄 →</span>
-        </div>
-      </a>
-      <a class="column-card" href="mau.html">
-        <div class="card-art" aria-hidden="true"><span class="mau-mark">MAU</span></div>
-        <div class="card-copy">
-          <p class="card-kicker">VENTILATION · 03</p>
-          <h2>外氣空調箱 MAU：從外氣負荷到現場試車</h2>
-          <p>掌握外氣量與空氣平衡、濕空氣負荷估算、盤管與風機檢核、控制及試車排故。</p>
-          <span class="card-link">閱讀專欄 →</span>
-        </div>
-      </a>
       <a class="column-card" href="ahu.html">
         <div class="card-art" aria-hidden="true"><span class="ahu-mark">AHU</span></div>
         <div class="card-copy">
-          <p class="card-kicker">AIR HANDLING · 04</p>
-          <h2>空氣處理箱 AHU：從氣流路徑到現場調試</h2>
-          <p>看懂混風、過濾、盤管與風機的配合，並掌握熱負荷估算、選型、控制及試車排故。</p>
-          <span class="card-link">閱讀專欄 →</span>
-        </div>
-      </a>
-      <a class="column-card" href="vrf.html">
-        <div class="card-art" aria-hidden="true"><span class="vrf-mark">VRF</span></div>
-        <div class="card-copy">
-          <p class="card-kicker">VARIABLE REFRIGERANT FLOW · 05</p>
-          <h2>變頻多聯式空調 VRF：從熱泵原理到系統選型</h2>
-          <p>深入理解冷媒循環、系統配管、外氣邊界與冷媒安全，並用完整算例估算風量、外氣盤管與室外機容量。</p>
+          <p class="card-kicker">AIR HANDLING · SYSTEM PRINCIPLES</p>
+          <h2>空氣處理箱 AHU：空氣狀態、盤管與風機原理</h2>
+          <p>說明外氣與回風混合、顯熱與潛熱變化、冷卻除濕、風機壓力及控制序列，並以 ASHRAE 心理濕圖例題逐步解讀。</p>
           <span class="card-link">閱讀專欄 →</span>
         </div>
       </a>

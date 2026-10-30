@@ -18,34 +18,58 @@
     };
 
     try {
-      const [homeResponse, columnsResponse, articleResponse] = await Promise.all([
+      const [homeResponse, columnsResponse, articleResponse, caseResponse] = await Promise.all([
         fetch("../index.html?ahu-test=" + Date.now()),
         fetch("../columns.html?ahu-test=" + Date.now()),
         fetch("../ahu.html?ahu-test=" + Date.now()),
+        fetch("../ahu-project-case.html?ahu-test=" + Date.now()),
       ]);
       assert(homeResponse.ok, "Homepage responds");
       assert(columnsResponse.ok, "Engineering columns archive responds");
       assert(articleResponse.ok, "AHU article responds");
+      assert(caseResponse.ok, "AHU project case responds");
 
       const home = new DOMParser().parseFromString(await homeResponse.text(), "text/html");
       const columns = new DOMParser().parseFromString(await columnsResponse.text(), "text/html");
       const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
+      const projectCase = new DOMParser().parseFromString(await caseResponse.text(), "text/html");
       assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
         "Main navigation links to engineering columns");
-      assert(columns.querySelector('a[href="ahu.html"] h2')?.textContent.includes("空氣處理箱 AHU"),
-        "Engineering columns archive links to the AHU article");
+      assert(columns.querySelector("h1")?.textContent.trim() === "空氣處理箱（AHU）原理"
+        && columns.querySelectorAll("a.column-card").length === 1
+        && columns.querySelector('a.column-card[href="ahu.html"] h2')?.textContent.includes("空氣處理箱 AHU"),
+      "Engineering columns archive exposes only the AHU principles article");
+      assert(!columns.querySelector('a[href="glycol.html"], a[href="chiller.html"], a[href="mau.html"], a[href="vrf.html"], a[href="low-flow-chiller.html"], a[href="ahu-project-case.html"]'),
+        "Other archived articles remain unlinked from the public columns index");
+      assert(home.querySelector("#columns-link-title")?.textContent.trim() === "AHU 原理專題"
+        && home.querySelector('a.button[href="columns.html"]')?.textContent.includes("閱讀 AHU 原理專題"),
+      "Homepage describes the current AHU principles focus");
       assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
         "AHU article includes the scroll-to-top button");
+      assert(projectCase.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
+        "AHU project case includes the scroll-to-top button");
+      assert(!article.querySelector('a[href="ahu-project-case.html"]'),
+        "AHU theory article does not link to the archived project case");
 
       const text = article.body.textContent;
       for (const phrase of [
+        "2021 ASHRAE Handbook—Fundamentals (SI)",
+        "Chapter 1",
+        "Example 4",
+        "2.535 kg",
+        "7.284 kg",
+        "25.8%",
+        "19.5°C DB",
+        "14.6°C",
+        "混合焓",
+        "凝結水量",
+        "SHR",
+        "風機曲線",
+        "系統曲線",
+        "風機輸入功率",
         "2024 ASHRAE Handbook—HVAC Systems and Equipment",
-        "Chapter 4",
-        "Air Handling and Distribution",
         "draw-through",
         "blow-through",
-        "10,000 m³/h",
-        "50.3 kW",
         "VAV",
         "經濟器",
         "防凍",
@@ -69,19 +93,16 @@
         && article.querySelector(".diagram-caption")?.textContent.includes("排氣")
         && article.querySelector(".diagram-caption")?.textContent.includes("不連通"),
       "System diagram caption explains airflow branches and the duct crossover");
-      assert(article.querySelectorAll(".checklist li").length === 8,
-        "Article includes an eight-step commissioning checklist");
-      assert(article.querySelectorAll(".wide-table tbody tr").length === 22,
-        "Article includes practical equipment, selection, and diagnostic tables");
       const sections = [
-        "purpose", "layout", "components", "airflow", "control",
-        "selection", "commissioning", "troubleshooting", "maintenance", "sources",
+        "purpose", "layout", "components", "airflow", "coil", "fan", "control", "sources",
       ];
       assert(article.querySelectorAll("article section[id]").length === sections.length,
-        "Article has ten navigable technical sections");
+        "Article has eight navigable principles sections");
       assert(sections.every((id) => article.querySelector(`.toc a[href="#${id}"]`)
         && article.querySelector(`#${id}`)),
       "Every table-of-contents link resolves to its article section");
+      assert(!article.querySelector("#selection, #commissioning, #troubleshooting, #maintenance"),
+        "Article focuses on AHU principles instead of generic field checklists");
       assert(!article.querySelector('a[href*="reference/ASHRAE"], a[href$=".pdf"]'),
         "Article does not link to handbook PDF files");
 

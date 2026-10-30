@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AHU 工程實戰案例回歸測試</title>
+</head>
+<body>
+  <h1>AHU 工程實戰案例回歸測試</h1>
+  <p>請以 HTTP 伺服器提供網站；測試案例索引、工程流程、計算與驗收內容。</p>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+
+    try {
+      const [columnsResponse, articleResponse] = await Promise.all([
+        fetch("../columns.html?ahu-project-test=" + Date.now()),
+        fetch("../ahu-project-case.html?ahu-project-test=" + Date.now()),
+      ]);
+      assert(columnsResponse.ok, "Engineering columns archive responds");
+      assert(articleResponse.ok, "AHU project case responds");
+
+      const columns = new DOMParser().parseFromString(await columnsResponse.text(), "text/html");
+      const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
+      assert(columns.querySelectorAll("a.column-card").length === 1
+        && !columns.querySelector('a[href="ahu-project-case.html"]'),
+      "AHU project case remains available by route but is no longer listed publicly");
+      assert(article.title.includes("ASHRAE 混風範例"), "Case article title identifies the handbook-based AHU case");
+      assert([...article.querySelectorAll('a[href="ahu.html"]')]
+        .some((link) => link.textContent.includes("系統原理版")),
+        "Case article retains access to the original AHU theory article");
+      assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
+        "Case article includes the scroll-to-top button");
+
+      const text = article.body.textContent;
+      for (const phrase of [
+        "模擬案場",
+        "2021 ASHRAE Handbook—Fundamentals (SI)",
+        "Chapter 1",
+        "Example 4",
+        "p. 1.14",
+        "4°C DB／2°C thermodynamic WB",
+        "25°C DB／50% RH",
+        "2.535 kg",
+        "7.284 kg",
+        "9.819 kg",
+        "25.8%",
+        "0.742",
+        "19.5°C DB",
+        "14.6°C",
+        "19.91°C",
+        "2.00 m³/s",
+        "6.25 m³/s",
+        "RACI",
+        "TAB",
+        "RFI",
+        "LOTO",
+        "BMS",
+        "消防停機",
+        "punch list",
+        "節能成果",
+        "ASHRAE",
+      ]) {
+        assert(text.includes(phrase), `Case article includes ${phrase}`);
+      }
+
+      const sections = [
+        "brief", "survey", "coordination", "design", "submittal",
+        "construction", "controls", "acceptance", "handover", "workflow", "sources",
+      ];
+      assert(article.querySelectorAll("article section[id]").length === sections.length,
+        "Case article has eleven navigable project phases");
+      assert(sections.every((id) => article.querySelector(`.toc a[href="#${id}"]`)
+        && article.querySelector(`#${id}`)),
+      "Every table-of-contents link resolves to a case section");
+      assert(article.querySelectorAll(".project-log tbody tr").length >= 45,
+        "Case includes detailed project, coordination, procurement, and acceptance tables");
+      assert(article.querySelectorAll(".checklist li").length === 6,
+        "Case includes an actionable commissioning checklist");
+      assert(!article.querySelector('a[href*="reference/ASHRAE"], a[href$=".pdf"]'),
+        "Article does not link to handbook PDF files");
+
+      output.textContent = `PASS: ${checks} checks`;
+    } catch (error) {
+      output.textContent = `Error: ${error.message}`;
+      throw error;
+    }
+  </script>
+</body>
+</html>

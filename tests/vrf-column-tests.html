@@ -32,8 +32,9 @@
       const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
       assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
         "Main navigation links to engineering columns");
-      assert(columns.querySelector('a[href="vrf.html"] h2')?.textContent.includes("變頻多聯式空調 VRF"),
-        "Engineering columns archive links to the VRF article");
+      assert(columns.querySelectorAll("a.column-card").length === 1
+        && !columns.querySelector('a[href="vrf.html"]'),
+      "VRF article remains available by route but is no longer listed publicly");
       assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
         "VRF article includes the scroll-to-top button");
 

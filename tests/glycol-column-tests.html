@@ -34,10 +34,12 @@
         "Glycol article includes the scroll-to-top button");
       assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
         "Main navigation links to the column archive");
-      assert(home.querySelector('a[href="columns.html"].button')?.textContent.includes("閱讀工程專欄"),
-        "Homepage has a descriptive column link");
-      assert(columns.querySelector('a[href="glycol.html"]')?.textContent.includes("閱讀專欄"),
-        "Column archive links to the glycol article");
+      assert(home.querySelector("#columns-link-title")?.textContent.trim() === "AHU 原理專題"
+        && home.querySelector('a[href="columns.html"].button')?.textContent.includes("閱讀 AHU 原理專題"),
+      "Homepage identifies the current AHU principles focus");
+      assert(columns.querySelectorAll("a.column-card").length === 1
+        && !columns.querySelector('a[href="glycol.html"]'),
+      "Glycol article remains available by route but is no longer listed publicly");
 
       const text = article.body.textContent;
       for (const phrase of [

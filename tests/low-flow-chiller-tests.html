@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大溫差低流量冰水主機專欄回歸測試</title>
+</head>
+<body>
+  <h1>大溫差低流量冰水主機專欄回歸測試</h1>
+  <p>請以 HTTP 伺服器提供網站；測試冷凍站專欄路由、ASHRAE 來源、計算案例、系統圖與工程檢核。</p>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+
+    try {
+      const [columnsResponse, articleResponse] = await Promise.all([
+        fetch("../columns.html?low-flow-test=" + Date.now()),
+        fetch("../low-flow-chiller.html?low-flow-test=" + Date.now()),
+      ]);
+      assert(columnsResponse.ok, "Engineering columns archive responds");
+      assert(articleResponse.ok, "Low-flow chiller article responds");
+
+      const columns = new DOMParser().parseFromString(await columnsResponse.text(), "text/html");
+      const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
+      assert(columns.querySelectorAll("a.column-card").length === 1
+        && !columns.querySelector('a[href="low-flow-chiller.html"]'),
+      "Low-flow chiller article remains available by route but is no longer listed publicly");
+      assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
+        "Article includes the scroll-to-top button");
+
+      const text = article.body.textContent;
+      for (const phrase of [
+        "2024 ASHRAE Handbook—HVAC Systems and Equipment",
+        "Chapter 43",
+        "Chapter 44",
+        "水冷離心式冰水機組",
+        "低 ΔT",
+        "一次變流量",
+        "26°C DB／19°C WB",
+        "35°C DB／28°C WB",
+        "1,000 kW",
+        "SHF = 0.80",
+        "107.5 m³/h",
+        "172.0 m³/h",
+        "37.5%",
+        "97.7 kPa",
+        "187.6 m³/h",
+        "N+1",
+      ]) {
+        assert(text.includes(phrase), `Article includes ${phrase}`);
+      }
+
+      const diagram = article.querySelector(".plant-diagram");
+      assert(diagram?.getAttribute("role") === "img" && diagram.querySelector("title")
+        && diagram.querySelector("desc"),
+      "Chiller plant diagram has an accessible title and description");
+      for (const component of [
+        "離心式冰水主機", "變速冰水泵", "AHU／FCU 末端盤管",
+        "主機冷凝器", "冷卻水泵", "冷卻水塔", "最不利差壓重設",
+      ]) {
+        assert(diagram.textContent.includes(component), `Plant diagram labels ${component}`);
+      }
+      assert(article.querySelectorAll(".wide-table tbody tr").length >= 16,
+        "Article includes design-input and system-comparison tables");
+      const sections = [
+        "principle", "architecture", "applications", "design",
+        "calculation", "commissioning", "insights", "sources",
+      ];
+      assert(article.querySelectorAll("article section[id]").length === sections.length,
+        "Article has eight navigable technical sections");
+      assert(sections.every((id) => article.querySelector(`.toc a[href="#${id}"]`)
+        && article.querySelector(`#${id}`)),
+      "Every table-of-contents link resolves to its article section");
+      assert(article.querySelectorAll(".checklist li").length === 8,
+        "Article includes an eight-step commissioning checklist");
+      assert(!article.querySelector('a[href*="reference/ASHRAE"], a[href$=".pdf"]'),
+        "Article does not link to handbook PDF files");
+
+      output.textContent = `PASS: ${checks} checks`;
+    } catch (error) {
+      output.textContent = `Error: ${error.message}`;
+      throw error;
+    }
+  </script>
+</body>
+</html>

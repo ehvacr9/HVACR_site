@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="大型商辦水冷離心式冰水機組選型與大溫差小流量設計：涵蓋主機、水泵、冷卻塔、末端盤管、變流量控制、逐步算例及現場驗收。">
+  <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
+  <title>水冷離心式冰水機組與大溫差小流量設計｜工程專欄</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172b2b;
+      --muted: #5b6c68;
+      --paper: #f6f5ef;
+      --surface: #fffefa;
+      --green: #1d6252;
+      --line: #dce2d8;
+      --serif: Georgia, "Noto Serif TC", "PMingLiU", serif;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); line-height: 1.8; }
+    a { color: inherit; }
+    a:focus-visible { outline: 3px solid #9ab952; outline-offset: 4px; }
+    .wrap { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 100; display: flex; width: 100%; max-width: none;
+      min-height: 82px; align-items: center; justify-content: space-between; gap: 20px;
+      margin-inline: 0; padding-inline: max(24px, calc((100% - 1120px) / 2));
+      border-bottom: 1px solid var(--line); background: var(--paper);
+    }
+    .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); font-size: 15px; font-weight: 750; letter-spacing: .04em; text-decoration: none; }
+    .brand-mark { width: 34px; height: 34px; flex: 0 0 34px; object-fit: contain; }
+    nav { display: flex; gap: 24px; font-size: 13px; }
+    nav a { color: var(--muted); text-decoration: none; }
+    nav a:hover, nav a[aria-current="page"] { color: var(--green); }
+    .page { padding-block: 54px 84px; }
+    .breadcrumb { margin: 0 0 27px; color: var(--muted); font-size: 13px; }
+    .eyebrow { display: flex; align-items: center; gap: 10px; margin: 0 0 13px; color: var(--green); font-size: 12px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+    .eyebrow::before { width: 24px; height: 1px; background: currentColor; content: ""; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -.025em; }
+    h1 { max-width: 960px; margin-bottom: 20px; font-size: clamp(38px, 5.2vw, 62px); line-height: 1.22; }
+    h2 { margin-bottom: 16px; font-size: clamp(27px, 3vw, 36px); line-height: 1.35; }
+    h3 { margin-bottom: 10px; font-size: 22px; }
+    .dek { max-width: 870px; margin-bottom: 22px; color: var(--muted); font-size: 18px; line-height: 1.8; }
+    .byline { margin-bottom: 38px; color: var(--muted); font-size: 13px; }
+    .article-layout { display: grid; grid-template-columns: minmax(0, 1fr) 250px; align-items: start; gap: 48px; }
+    .article-body { min-width: 0; }
+    .article-body section { margin-bottom: 40px; scroll-margin-top: 105px; }
+    .article-body p, .article-body li { color: #304542; }
+    .article-body ul, .article-body ol { padding-left: 1.35em; }
+    .article-body li + li { margin-top: 8px; }
+    .toc { position: sticky; top: 108px; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .toc h2 { margin-bottom: 12px; font-family: inherit; font-size: 14px; font-weight: 750; letter-spacing: 0; }
+    .toc ol { margin: 0; padding-left: 1.25em; color: var(--muted); font-size: 13px; }
+    .toc li + li { margin-top: 6px; }
+    .toc a { text-decoration-color: #b7c5b9; text-underline-offset: 3px; }
+    .callout { margin: 20px 0; padding: 17px 19px; border-left: 3px solid var(--green); border-radius: 0 6px 6px 0; background: #edf1e7; color: #304542; }
+    .callout strong { color: var(--ink); }
+    .callout--warning { border-left-color: #9c5b22; background: #f7efe5; }
+    .system-figure { margin: 22px 0 18px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .diagram-scroll { overflow-x: auto; overscroll-behavior-inline: contain; }
+    .system-diagram { display: block; width: 100%; min-width: 760px; height: auto; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    .system-diagram text { fill: var(--ink); font-size: 14px; }
+    .system-diagram .small-label { fill: var(--muted); font-size: 12px; }
+    .system-diagram .section-label { font-size: 13px; font-weight: 700; }
+    .system-diagram .pipe { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 4; }
+    .system-diagram .chilled-supply { stroke: #3978a8; }
+    .system-diagram .chilled-return { stroke: #70a3c4; }
+    .system-diagram .condenser-supply { stroke: #ad7b2b; }
+    .system-diagram .condenser-return { stroke: #d18a4a; }
+    .system-diagram .equipment { fill: #f3f5ef; stroke: #94a69a; stroke-width: 1.5; }
+    .system-diagram .tower { fill: #fcf8ef; stroke: #c4a977; stroke-width: 1.5; }
+    .diagram-caption { margin: 10px 0 0; color: var(--muted) !important; font-size: 12px; }
+    .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
+    caption { padding: 13px 15px; color: var(--muted); font-size: 12px; text-align: left; }
+    th, td { padding: 11px 15px; border-top: 1px solid var(--line); white-space: nowrap; }
+    th { background: #edf1e7; font-weight: 700; }
+    .wide-table td { white-space: normal; vertical-align: top; }
+    .wide-table td:first-child { min-width: 145px; font-weight: 700; }
+    .calc-box { margin: 18px 0; padding: 20px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
+    .calc-box h3 { margin-bottom: 10px; }
+    .calc-line { overflow-wrap: anywhere; margin: 8px 0; font-family: Consolas, "Courier New", monospace; font-size: 14px; font-variant-numeric: tabular-nums; }
+    .result-line { margin: 13px 0 0; padding-top: 12px; border-top: 1px solid var(--line); color: var(--green) !important; font-weight: 750; }
+    .table-note { margin: 10px 0; color: var(--muted) !important; font-size: 12px; }
+    .checklist { counter-reset: startup; list-style: none; padding: 0 !important; }
+    .checklist li { position: relative; min-height: 42px; padding: 8px 0 8px 46px; border-bottom: 1px solid var(--line); }
+    .checklist li::before { position: absolute; top: 8px; left: 0; display: grid; width: 28px; height: 28px; place-items: center; border: 1px solid #b7c9b8; border-radius: 50%; color: var(--green); font-size: 12px; font-weight: 750; counter-increment: startup; content: counter(startup); }
+    .references { padding-top: 22px; border-top: 1px solid var(--line); }
+    .references h2 { font-size: 25px; }
+    .references li { font-size: 14px; }
+    .back-link { display: inline-block; margin-top: 8px; color: var(--green); font-size: 14px; text-underline-offset: 4px; }
+    footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .footer-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding-block: 24px; text-align: center; }
+    .footer-brand-link { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-size: 13px; font-weight: 750; text-decoration: none; }
+    .footer-brand-logo { width: 32px; height: 32px; flex: 0 0 32px; object-fit: contain; }
+    .scroll-top-button {
+      position: fixed; right: max(24px, env(safe-area-inset-right)); bottom: max(24px, env(safe-area-inset-bottom));
+      z-index: 110; display: grid; width: 44px; height: 44px; place-items: center; padding: 0;
+      border: 1px solid var(--green); border-radius: 50%; background: var(--green); color: #fffefa;
+      cursor: pointer; box-shadow: 0 6px 18px rgba(23, 43, 43, .18);
+      transition: background-color .18s ease, transform .18s ease;
+    }
+    .scroll-top-button[hidden] { display: none; }
+    .scroll-top-icon { width: 11px; height: 11px; margin-top: 5px; transform: rotate(45deg); border-top: 2px solid currentColor; border-left: 2px solid currentColor; }
+    .scroll-top-button:hover { transform: translateY(-2px); background: #174f43; }
+    .scroll-top-button:focus-visible { outline: 3px solid #9ab952; outline-offset: 4px; }
+    @media (max-width: 900px) {
+      .topbar { flex-wrap: wrap; gap: 10px; padding-block: 12px; }
+      nav { flex-wrap: wrap; gap: 8px 18px; }
+      .article-layout { grid-template-columns: 1fr; gap: 27px; }
+      .toc { position: static; grid-row: 1; }
+    }
+    @media (max-width: 600px) {
+      .wrap { width: calc(100% - 32px); }
+      .topbar { padding-inline: 16px; }
+      .brand { gap: 8px; font-size: 13px; }
+      nav { width: 100%; justify-content: space-between; gap: 6px; font-size: 12px; }
+      .page { padding-block: 38px 58px; }
+      .dek { font-size: 16px; }
+      .calc-box { padding: 16px; }
+      th, td { padding: 10px 12px; }
+      .scroll-top-button { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="wrap topbar">
+    <a class="brand" href="index.html" aria-label="回到能源與冷凍空調學習網首頁">
+      <img class="brand-mark" src="assets/hvacr-learning-logo.svg?v=3" alt="">
+      <span>能源與冷凍空調學習網</span>
+    </a>
+    <nav aria-label="主選單">
+      <a href="index.html">首頁</a>
+      <a href="about.html">關於我們</a>
+      <a href="exam-years.html">技師考題</a>
+      <a href="terminology.html">術語辭典</a>
+      <a href="columns.html" aria-current="page">工程專欄</a>
+      <a href="tools.html">計算工具</a>
+    </nav>
+  </header>
+  <main class="wrap page">
+    <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="columns.html">工程專欄</a> ／ 水冷離心式主機與低流量設計</p>
+    <p class="eyebrow">Centrifugal Chillers · Hydronic Plant Engineering</p>
+    <h1>水冷離心式冰水機組：大型商辦選型與大溫差小流量設計</h1>
+    <p class="dek">水冷離心式冰水機組（water-cooled centrifugal chiller）可承擔大型建築集中冷源。把冰水設計溫差由常見的 5 K 提高，理論上可用較小流量輸送相同冷量，降低部分水泵耗電與管路流速；但只有在主機蒸發器、末端盤管、控制閥、泵浦與控制策略全都配合時，才可能得到全站淨節能。大溫差不是單靠設定值就能取得的免費節能。</p>
+    <p class="byline">工程實務專題｜依 ASHRAE Handbook—HVAC Systems and Equipment 技術資料整理｜閱讀約 16 分鐘</p>
+
+    <div class="article-layout">
+      <article class="article-body">
+        <section id="principle">
+          <h2>1. 熱力學與水力原理：熱量不變，溫差提高才可減流量</h2>
+          <p>蒸氣壓縮式離心主機由蒸發器吸收冰水側熱量，壓縮機提升冷媒壓力，冷凝器將熱量排給冷卻水；節流後的冷媒再回到蒸發器。穩態能量平衡為：</p>
+          <div class="calc-box">
+            <div class="calc-line">Q̇<sub>cond</sub> ≈ Q̇<sub>evap</sub> + Ẇ<sub>compressor</sub></div>
+            <div class="calc-line">COP<sub>chiller</sub> = Q̇<sub>evap</sub> ÷ Ẇ<sub>chiller</sub></div>
+            <p class="table-note">冷凝器排熱包含蒸發器冷量及壓縮機輸入功。水泵、冷卻塔風機和冷卻水系統另計，評估節能時不可只看主機 COP。</p>
+          </div>
+          <p>冰水側的顯熱能量平衡為：</p>
+          <div class="calc-box">
+            <div class="calc-line">Q̇ = ṁ × c<sub>p</sub> × (T<sub>return</sub> − T<sub>supply</sub>) = ρ × V̇ × c<sub>p</sub> × ΔT</div>
+            <p class="table-note">Q̇：冷量（kW）；ṁ：質量流率（kg/s）；V̇：體積流率（m³/s）；ρ：流體密度（kg/m³）；c<sub>p</sub>：比熱（kJ/[kg·K]）；ΔT：冰水回水與供水溫差（K）。冷量、流率及溫差須採同一設計工況。</p>
+          </div>
+          <p>在負荷相同、流體性質近似不變時，ΔT 從 5 K 提高至 8 K，理論流量比例為 5/8，即降至 62.5%。但水泵功率不會自動按同一比例下降：水力功率是流量與揚程的乘積，實際揚程還受控制閥、盤管、主機壓降、管徑及泵浦曲線影響。</p>
+          <p>對幾何相似、以摩擦壓損為主的系統，近似有 Δp ∝ V̇²；若速度比為 r，理想泵軸功率約隨 r³ 變化。但這個立方律是簡化的相似定律，不是每座建築的節能保證。定壓控制過高、旁通短路、固定揚程、靜壓占比、最低流量限制與泵效率變化都會使實際結果偏離。</p>
+          <div class="callout callout--warning"><strong>兩個常見盲點：</strong>第一，回水溫度偏低（low ΔT syndrome）通常代表末端盤管、控制閥、風量或水力平衡沒有把設計溫差用出來；加大泵速可能只讓回水更冷、流量更大。第二，主機有最低／最高蒸發器流量及允許流量變化速率；低於下限可能造成凍結、低流量停機、控制不穩或熱交換性能受影響，須以原廠該機型資料核定。</div>
+        </section>
+
+        <section id="architecture">
+          <h2>2. 冷凍站架構與關鍵設備：低流量必須貫穿整個系統</h2>
+          <p>下圖以一次變流量（variable primary flow）概念呈現。實際冷凍站可採一次定流量加二次變流量、一次變流量或其他水力配置；選擇時應比較主機、泵浦、旁通與控制的全生命週期表現，不能直接把一種示意套用到所有專案。</p>
+          <figure class="system-figure">
+            <div class="diagram-scroll" tabindex="0" aria-label="可左右捲動查看大型商辦低流量冷凍站配置圖">
+              <svg class="system-diagram plant-diagram" viewBox="0 0 1040 530" role="img" aria-labelledby="plant-diagram-title plant-diagram-desc">
+                <title id="plant-diagram-title">水冷離心式冷凍站冰水及冷卻水配置示意</title>
+                <desc id="plant-diagram-desc">上方冰水迴路由離心式主機蒸發器、變速冰水泵與空調末端組成，冰水供回水溫差設計為大溫差。下方冷卻水迴路經冷凝器、冷卻水泵與冷卻塔排熱。BAS依最不利末端差壓與主機流量限制調整泵速及主機台數；兩個水迴路只在主機內部透過換熱器傳熱，不混水。</desc>
+                <defs>
+                  <marker id="plant-arrow-chw-supply" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#3978a8"/></marker>
+                  <marker id="plant-arrow-chw-return" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#70a3c4"/></marker>
+                  <marker id="plant-arrow-cw" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#ad7b2b"/></marker>
+                  <marker id="plant-arrow-cwr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#d18a4a"/></marker>
+                </defs>
+                <rect class="equipment" x="30" y="35" width="980" height="210" rx="8"/>
+                <text class="section-label" x="52" y="63">冰水側｜一次變流量（VPF）示意：負荷固定時，以較大 ΔT 降低設計流量</text>
+                <rect class="equipment" x="100" y="105" width="205" height="95" rx="7"/>
+                <text class="section-label" x="202" y="140" text-anchor="middle">離心式冰水主機</text>
+                <text class="small-label" x="202" y="165" text-anchor="middle">蒸發器／冷媒壓縮循環</text>
+                <text class="small-label" x="202" y="185" text-anchor="middle">每台流量守在原廠範圍內</text>
+                <circle cx="414" cy="152" r="28" fill="#fffefa" stroke="#3978a8" stroke-width="2"/>
+                <path d="M414 152 C396 144 402 132 414 152 C418 134 432 139 414 152 C434 154 429 168 414 152 C407 171 393 163 414 152" fill="#dceaf2" stroke="#3978a8" stroke-width="1.5"/>
+                <text class="small-label" x="414" y="197" text-anchor="middle">變速冰水泵</text>
+                <rect class="equipment" x="660" y="105" width="260" height="95" rx="7"/>
+                <text class="section-label" x="790" y="140" text-anchor="middle">AHU／FCU 末端盤管</text>
+                <text class="small-label" x="790" y="165" text-anchor="middle">二通控制閥／各支路平衡</text>
+                <text class="small-label" x="790" y="185" text-anchor="middle">設計盤管與空氣側 ΔT</text>
+                <path class="pipe chilled-supply" d="M305 120 H386" marker-end="url(#plant-arrow-chw-supply)"/>
+                <path class="pipe chilled-supply" d="M442 120 H660" marker-end="url(#plant-arrow-chw-supply)"/>
+                <text class="small-label" x="525" y="108" text-anchor="middle">較冷冰水供水</text>
+                <path class="pipe chilled-return" d="M790 200 V220 H202 V200" marker-end="url(#plant-arrow-chw-return)"/>
+                <text class="small-label" x="520" y="238" text-anchor="middle">較暖回水｜大溫差設計由盤管與流量控制共同實現</text>
+                <text class="small-label" x="52" y="91">供回水管路 →</text>
+
+                <rect class="equipment" x="30" y="285" width="980" height="190" rx="8"/>
+                <text class="section-label" x="52" y="313">冷卻水側｜獨立水迴路，將主機冷凝熱排到室外</text>
+                <rect class="equipment" x="100" y="355" width="205" height="80" rx="7"/>
+                <text class="section-label" x="202" y="386" text-anchor="middle">主機冷凝器</text>
+                <text class="small-label" x="202" y="412" text-anchor="middle">Q̇cond = Q̇evap + Ẇ</text>
+                <circle cx="495" cy="395" r="25" fill="#fffefa" stroke="#ad7b2b" stroke-width="2"/>
+                <path d="M495 395 C479 388 485 376 495 395 C499 378 512 382 495 395 C513 397 509 410 495 395 C489 412 477 406 495 395" fill="#f3e7d0" stroke="#ad7b2b" stroke-width="1.5"/>
+                <text class="small-label" x="495" y="439" text-anchor="middle">冷卻水泵</text>
+                <rect class="tower" x="730" y="350" width="190" height="88" rx="7"/>
+                <text class="section-label" x="825" y="382" text-anchor="middle">冷卻水塔</text>
+                <text class="small-label" x="825" y="408" text-anchor="middle">風機／填料／水處理</text>
+                <path class="pipe condenser-supply" d="M305 370 H470" marker-end="url(#plant-arrow-cw)"/>
+                <path class="pipe condenser-supply" d="M520 370 H730" marker-end="url(#plant-arrow-cw)"/>
+                <text class="small-label" x="605" y="358" text-anchor="middle">較冷冷卻水至冷凝器</text>
+                <path class="pipe condenser-return" d="M825 438 V455 H202 V435" marker-end="url(#plant-arrow-cwr)"/>
+                <text class="small-label" x="515" y="472" text-anchor="middle">冷卻水吸收冷凝熱後回塔</text>
+
+                <rect class="equipment" x="370" y="485" width="300" height="38" rx="6"/>
+                <text class="small-label" x="520" y="510" text-anchor="middle">BAS：台數排序＋最不利差壓重設＋流量／防凍聯鎖</text>
+                <text class="small-label" x="35" y="270">兩側水路各自封閉，只經主機蒸發器／冷凝器傳熱，不互相混水。</text>
+              </svg>
+            </div>
+            <figcaption class="diagram-caption">冷凍站配置概念圖：上方是冰水負載迴路，下方是冷卻水散熱迴路；變頻泵按末端需求調速，主機依負荷與流量允許範圍分級。一次變流量不是唯一方案；旁通若為主機最低流量而設，必須按啟用主機及原廠流量邊界設計，避免無謂供回水短路。實際泵、閥與主機配置依水力圖和廠商資料確認；手機可左右滑動查看完整圖面。</figcaption>
+          </figure>
+          <div class="table-wrap">
+            <table class="wide-table">
+              <caption>主要設備與低流量設計責任</caption>
+              <thead><tr><th scope="col">設備／系統</th><th scope="col">作用與控制</th><th scope="col">設計必核對項目</th></tr></thead>
+              <tbody>
+                <tr><td>離心式冰水主機</td><td>以離心葉輪壓縮冷媒，蒸發器供冷、冷凝器排熱；部分負載採導葉、變頻或其他原廠容量控制。</td><td>設計工況容量及輸入功率、部分負載性能、蒸發器最小／最大流量、允許流量變化率、最低負載與防喘振範圍。</td></tr>
+                <tr><td>變速冰水泵</td><td>提供末端所需流量與揚程；由差壓或末端閥位回饋調速。</td><td>泵浦曲線、馬達與變頻器效率、最小連續轉速、汽蝕餘裕、關閉揚程及多泵並聯控制。</td></tr>
+                <tr><td>末端盤管／二通閥</td><td>以空氣與水側熱交換承擔顯熱／潛熱；閥門調節負荷所需水量。</td><td>按高 ΔT 工況選盤管列數、面積、空氣側壓降、出風露點、控制閥可控比與壓差。</td></tr>
+                <tr><td>冷卻水泵／冷卻塔</td><td>輸送冷凝器排熱，塔風機與水處理維持散熱能力。</td><td>冷凝器流量／壓降、塔濕球工況、逼近度、漂水與補排水、水質、最小冷凝壓力及塔風機功率。</td></tr>
+                <tr><td>BAS／冷凍站控制</td><td>決定主機台數、泵速、差壓重設、塔風機及故障切換。</td><td>主機流量證明、逐台隔離與最小流量、啟停延遲、低 ΔT 偵測、故障時安全模式及趨勢點表。</td></tr>
+                <tr><td>管網／水處理</td><td>輸送冷／熱水並維持換熱面潔淨與腐蝕控制。</td><td>最不利環路壓損、管徑流速、平衡、排氣排污、保溫防結露、膨脹定壓與水質管理。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>多台主機可採並聯分級，方便部分負載與維修隔離；是否採 N+1 取決於業主可接受停機風險、法定要求和建築用途，不能只由平均能效決定。若選一次變流量，泵浦、蒸發器、旁通、流量計及主機台數控制必須協同；若選一次定流量加二次變流量，需把一次泵耗、混水與解耦管對 ΔT 的影響一併計入全年比較。</p>
+        </section>
+
+        <section id="applications">
+          <h2>3. 大溫差低流量適用條件與系統取捨</h2>
+          <p>大型商辦的區域負荷常隨時段、朝向及人員變動。低流量設計特別值得評估於主幹管長、泵浦運轉時數高、末端控制可整合、且可在改造前確認盤管容量與閥門條件的冷凍站。新建案可從盤管與水力設計階段建立較大設計溫差；既有案需先測量流量、供回水溫、閥位、空氣側工況與主機限制，不能直接調低泵速或升高回水設定來宣稱節能。</p>
+          <div class="table-wrap">
+            <table class="wide-table">
+              <caption>系統方案比較：以全年冷凍站性能與工程風險評估</caption>
+              <thead><tr><th scope="col">方案／策略</th><th scope="col">優勢</th><th scope="col">代價與限制</th><th scope="col">較適用情境</th></tr></thead>
+              <tbody>
+                <tr><td>水冷離心式主機</td><td>大型容量可集中管理；高效機型可在合適冷卻水條件及部分負載下取得良好性能。</td><td>需冷卻塔、冷卻水泵、水處理、機房與專業維護；低負載須避免喘振／短週期並按原廠曲線選機。</td><td>大型商辦、醫院及長時運轉中央冷凍站。</td></tr>
+                <tr><td>大溫差＋一次變流量</td><td>可降低設計水量與管線／泵浦輸送負擔，減少部分流量相關耗能。</td><td>盤管、控制閥、蒸發器和變流量控制須相容；低負荷時更易觸及主機最低流量。</td><td>可重新核算盤管與整體水力、具可靠 BAS 及主機聯鎖的新建或深度改造案。</td></tr>
+                <tr><td>一次定流量＋二次變流量</td><td>主機蒸發器流量較容易維持，末端側仍可隨負荷變流。</td><td>增加一次泵及解耦管；混水或泵控制失調可造成低 ΔT，泵耗須納入總站分析。</td><td>主機不支援寬幅變流量或既有主機對流量變化限制較嚴的系統。</td></tr>
+                <tr><td>水冷螺旋／渦旋／模組化</td><td>多台分級可能具備較低最小容量、維修隔離或備援彈性。</td><td>台數較多，設備與控制複雜度及占地可能增加；同條件比較全年效率及總持有成本。</td><td>負載分散或低負荷時數高、需要細分容量與韌性的專案。</td></tr>
+                <tr><td>風冷式冷水機</td><td>免冷卻塔與冷卻水處理，水資源與維護條件較簡化。</td><td>高室外乾球時容量與效率受影響，室外機占地、噪音及冷凝器清潔須評估。</td><td>缺水、無塔位或不適合建置冷卻水系統的場址。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>高 ΔT 對盤管不是免費升級。相同冷量下減少水流可能降低水側傳熱係數，須以指定進出水溫、流量、空氣乾／濕球、盤管列數及閥權度重新選型。若為維持出風溫度而降低冰水供水溫度，主機壓縮比可能上升，抵銷泵浦節能；若區域需要除濕，還須同時確認盤管露點與潛熱能力。</p>
+        </section>
+
+        <section id="design">
+          <h2>4. 設計與安裝實務：用量測和控制把設計溫差做出來</h2>
+          <ul>
+            <li><strong>逐區核算盤管：</strong>以設計負荷、送風乾／濕球、冰水供回水溫、設計流量與盤管壓降選型，確認同時滿足顯熱和除濕要求；不要只把既有盤管流量按比例調低。</li>
+            <li><strong>確認主機流量包絡：</strong>取得每台機組最小、最大蒸發器流量和容許變化率，核對流量計精度、隔離閥行程、啟停序列及低溫／低流量保護。任何 bypass 只按原廠最低流量需求及系統分析設計。</li>
+            <li><strong>管網水力計算：</strong>以最不利環路、各末端控制閥及主機壓降核算泵揚程；比較不同管徑的初設成本、流速、噪音、壓損與未來擴充。低流量不代表可忽略支管平衡和閥門可控性。</li>
+            <li><strong>差壓重設：</strong>優先使用遠端差壓或最不利末端閥位／開度重設泵速。避免只以泵出口固定差壓控制，長期把過多壓差耗散在近端二通閥上。</li>
+            <li><strong>主機台數排序：</strong>按建築負荷、主機效率曲線、最小穩定容量、泵與冷卻塔功率、設備運轉時數及備援策略排序；台數切換須設延時與流量證明，防止頻繁啟停。</li>
+            <li><strong>低 ΔT 診斷：</strong>建立同時段的總流量、供回水溫、主機負載、末端閥位和差壓趨勢。先排查盤管髒堵／空氣側風量、二通閥選型或洩漏、盤管過流、三通旁通及感測器偏差，再調整控制。</li>
+            <li><strong>施工與維護：</strong>冰水管保溫及防潮層須連續完整，冷凍水閥件、法蘭及吊架避免結露；施工沖洗、過濾器、排氣、流量計直管段、水質與化學處理按核定程序驗收。</li>
+            <li><strong>冷卻水側聯動：</strong>依室外濕球、主機允許冷凝水範圍、冷卻塔風機及冷卻水泵功率一起最佳化；降低冷卻水溫度不保證總能耗下降，須以主機與塔泵合計功率判斷。</li>
+          </ul>
+          <div class="callout"><strong>控制目標：</strong>在滿足最不利末端冷量、主機蒸發器流量範圍及設備安全的前提下，把泵速與差壓降至所需最低值；同時讓末端回水溫度接近設計、避免低 ΔT 與供回水短路。不要把「最低泵頻率」當成最佳控制策略。</div>
+        </section>
+
+        <section id="calculation">
+          <h2>5. 實戰算例：1,000 kW 商辦冷負荷的 8 K 冰水與變流量泵</h2>
+          <p>本算例用相同冷量比較 5 K 傳統溫差與 8 K 大溫差方案，並示範流量、初步管徑和泵浦功率估算。項目參數是透明的設計假設，不是所有建築的建議標準；盤管、主機、泵浦及塔的最終選型須用專案與製造商資料核實。</p>
+          <div class="table-wrap">
+            <table class="wide-table">
+              <caption>設計輸入與邊界假設</caption>
+              <thead><tr><th scope="col">項目</th><th scope="col">算例條件</th><th scope="col">說明</th></tr></thead>
+              <tbody>
+                <tr><td>建築規模</td><td>大型商辦 20,000 m²（約 6,050 坪）</td><td>多區 AHU／FCU，設計總負荷由逐時負荷計算取得。</td></tr>
+                <tr><td>室內設計空氣</td><td>26°C DB／19°C WB；約 52% RH</td><td>代表舒適性設計狀態；依地點、用途和規範調整。</td></tr>
+                <tr><td>室外夏季設計空氣</td><td>35°C DB／28°C WB；約 59% RH</td><td>濕球工況用於冷卻塔初選；正式值依所在地氣象資料。</td></tr>
+                <tr><td>設計冷負荷</td><td>1,000 kW（約 284.3 RT）；SHF = 0.80</td><td>假設包含空間與通風所需冷量；顯熱 800 kW、潛熱 200 kW，不得再重複加外氣負荷。</td></tr>
+                <tr><td>冰水溫度</td><td>大溫差方案 6.5°C 供水／14.5°C 回水；ΔT = 8 K</td><td>5 K 基準方案假設 6.5°C／11.5°C，只比較流量；供水溫度保持一致。</td></tr>
+                <tr><td>水物性與泵效率</td><td>ρ = 1,000 kg/m³；c<sub>p</sub> = 4.186 kJ/(kg·K)；η = 75%</td><td>近似初估；設計溫度下物性、泵／馬達／變頻器效率應由實際資料確認。</td></tr>
+                <tr><td>冷凍站泵側</td><td>基準流量下設計系統壓差 250 kPa</td><td>示例將壓差視為摩擦阻力主導，低流量時按流量平方初估。</td></tr>
+                <tr><td>主機與冷凝水側</td><td>3 × 550 kW；主機 COP 假設 5.0；冷卻水 ΔT = 5.5 K</td><td>3 台提供 N+1：失去 1 台後，2 台名目容量 1,100 kW；各型號仍須按設計工況修正。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>步驟一｜核對冷量與顯熱比</h3>
+          <div class="calc-box">
+            <div class="calc-line">RT = 1,000 kW ÷ 3.517 kW/RT ≈ 284.3 RT</div>
+            <div class="calc-line">SHF = Q̇<sub>s</sub> ÷ Q̇<sub>t</sub> = 800 ÷ 1,000 = 0.80</div>
+            <p class="table-note">Q̇<sub>s</sub>：顯熱冷負荷（kW）；Q̇<sub>t</sub>：總冷負荷（kW）；SHF：顯熱比。室內外 DB/WB 是空氣側設計條件，冰水機負荷與冷量仍須由逐區空氣、水量及心理濕計算確認。</p>
+          </div>
+          <h3>步驟二｜以能量平衡計算大溫差冰水流量</h3>
+          <div class="calc-box">
+            <div class="calc-line">ṁ = Q̇ ÷ (c<sub>p</sub> × ΔT) = 1,000 ÷ (4.186 × 8) = 29.86 kg/s</div>
+            <div class="calc-line">V̇ = ṁ ÷ ρ × 3,600 = 29.86 ÷ 1,000 × 3,600 ≈ 107.5 m³/h</div>
+            <div class="calc-line">5 K 基準：V̇<sub>5K</sub> = 1,000 ÷ (4.186 × 5) ÷ 1,000 × 3,600 ≈ 172.0 m³/h</div>
+            <div class="calc-line">流量降低率 = (172.0 − 107.5) ÷ 172.0 ≈ 37.5%</div>
+            <p class="table-note">同負荷下，流量與溫差成反比。此處只代表設計水量差，不等同總冷凍站節能率；末端盤管和主機需實際接受 8 K 工況。</p>
+          </div>
+          <h3>步驟三｜初估管徑與流速</h3>
+          <p>用設計流量及先行假設的管內流速 1.5 m/s 做主管初估，並和常見基準方案比較：</p>
+          <div class="calc-box">
+            <div class="calc-line">D<sub>i</sub> = √[4 × (107.5 ÷ 3,600) ÷ (π × 1.5)] ≈ 0.159 m</div>
+            <div class="calc-line">初選內徑約 160 mm；若採實際內徑 154 mm 管段，v = 4Q̇<sub>v</sub> ÷ (πD²) ≈ 1.61 m/s</div>
+            <div class="calc-line">5 K 基準在相同 1.5 m/s 下，計算內徑約 201 mm</div>
+            <p class="table-note">D<sub>i</sub>：管內徑（m）；v：平均流速（m/s）；Q̇<sub>v</sub>：體積流量（m³/s）。DN 是公稱尺寸而非內徑；約 DN150 僅為初選方向，需依管材實際內徑、流速／噪音限制、壓損、支管分配與規範完成水力計算，不可只用平方根公式定管徑。</p>
+          </div>
+          <h3>步驟四｜比較冰水泵輸入功率的理想估算</h3>
+          <p>以 5 K 基準流量下壓差 250 kPa 為假設，若管網阻力主要來自摩擦，且控制閥與水力配置相似，8 K 方案的流量比 r = 107.5/172.0 = 0.625：</p>
+          <div class="calc-box">
+            <div class="calc-line">Δp<sub>8K</sub> ≈ 250 × 0.625² ≈ 97.7 kPa</div>
+            <div class="calc-line">P<sub>pump</sub> ≈ V̇ × Δp ÷ η</div>
+            <div class="calc-line">P<sub>5K</sub> ≈ (172.0/3,600) × 250,000 ÷ 0.75 ≈ 15.9 kW</div>
+            <div class="calc-line">P<sub>8K</sub> ≈ (107.5/3,600) × 97,700 ÷ 0.75 ≈ 3.9 kW</div>
+            <p class="result-line">理想設計點泵輸入差約 12.0 kW（約 75%）；這是摩擦主導、相似水力與固定效率下的上限型示例，不可直接外推為全年節電或投資回收承諾。</p>
+          </div>
+          <p>現場泵浦功率還受到靜壓成分、末端閥權度、最低揚程、泵效率曲線、旁通、主機蒸發器壓降及多泵排序影響。水泵變頻器的輸入功率也不同於水力功率。應用趨勢數據與實際泵曲線重算，而不是只按「立方律」承諾節能。</p>
+          <h3>步驟五｜核對主機容量、N+1 與冷卻水</h3>
+          <div class="calc-box">
+            <div class="calc-line">名目主機配置：3 × 550 kW = 1,650 kW（裝置總量）</div>
+            <div class="calc-line">N+1 單台失效後可用冷量：2 × 550 kW = 1,100 kW</div>
+            <div class="calc-line">COP = 5.0 假設時，滿載 1,000 kW 主機功率 ≈ 1,000 ÷ 5.0 = 200 kW</div>
+            <div class="calc-line">冷凝排熱 ≈ 1,000 + 200 = 1,200 kW</div>
+            <div class="calc-line">冷卻水流量 = 1,200 ÷ (4.186 × 5.5) ÷ 1,000 × 3,600 ≈ 187.6 m³/h</div>
+            <p class="result-line">初步建議：3 台各 550 kW 淨可用容量，N+1 時兩台合計 1,100 kW，較 1,000 kW 設計峰值多 10%。實際採購須確認 35°C DB／28°C WB 等設計條件、冰水進出水、冷卻水工況及髒污裕度下各機組可用能力；若原廠修正後容量不足，不得用名牌容量代替。</p>
+          </div>
+          <p>3 台機組不是自動最佳解；控制應在負荷曲線下比較兩台運轉及一台備援、三台部分負載與故障時的冷量、COP、泵塔功率及切換穩定性。每台機組的設計／運轉流量須按其實際分攤冷量與 8 K 溫差計算，並符合原廠最小、最大流量和流量變化率。不得因總系統流量合格就假定每台蒸發器流量合格。</p>
+        </section>
+
+        <section id="commissioning">
+          <h2>6. 試車、能效驗證與交付資料</h2>
+          <ol class="checklist">
+            <li><strong>凍結設計基準：</strong>保存逐時負荷、室內外設計 DB/WB、供回水溫差、主機工況、N+1 邊界、盤管及閥門選型資料。</li>
+            <li><strong>核對水路施工：</strong>確認供回水方向、旁通／解耦管用途、泵與主機隔離閥、濾網、排氣、排污、感測器及流量計安裝位置。</li>
+            <li><strong>沖洗與水質：</strong>依設計與製造商要求完成沖洗、清潔、水處理及過濾器檢查；保存水質基線，避免施工殘渣進入蒸發器或末端閥件。</li>
+            <li><strong>校正量測：</strong>校驗供回水溫度感測器、主機及總管流量計、差壓變送器、電力表與 BMS 點位，確認方向、量程及趨勢取樣間隔。</li>
+            <li><strong>逐台驗證流量：</strong>在各主機啟停組合和泵速下量測蒸發器實際流量，驗證流量證明、最低流量、最高流量與低溫聯鎖；不可以主管總流量推算每台。</li>
+            <li><strong>水力平衡與末端測試：</strong>在代表區域確認設計流量、盤管進出水溫、閥位、風量、送風狀態與室內濕度；記錄最不利末端差壓及閥門可控性。</li>
+            <li><strong>分級帶載：</strong>在低、中、高負荷與不同主機台數下記錄冷量、主機功率、冰水泵／冷卻水泵／塔風機功率、供回水溫、流量及警報。</li>
+            <li><strong>驗證整站性能：</strong>比較同工況 kW/RT 或 kW/kW 冷量，將主機、泵、塔及必要輔機納入一致的能源邊界；設定性能偏差和低 ΔT 警報基準。</li>
+          </ol>
+          <p>計算冷量時可用 Q̇ = ρ × V̇ × c<sub>p</sub> × ΔT；流量、供回水溫度與電功率應同步取樣，並確認儀表精度。以單一主機面板 COP 或某天的瞬時 kW 判斷改造成效，容易把負荷、室外濕球、冷卻水溫或同時運轉台數差異誤當節能。</p>
+        </section>
+
+        <section id="insights">
+          <h2>7. 結論與專家洞察：低流量的價值在整站，而非單一溫差</h2>
+          <ol>
+            <li><strong>以負荷而非習慣定容量：</strong>用逐時負荷與設備實際工況選型；冗餘與容量裕度分開說明，不要習慣性在已含不確定性的估算上再疊加過度安全係數。</li>
+            <li><strong>先驗證末端，再追求高 ΔT：</strong>盤管、閥門與空氣側性能是回水溫度的根源；若末端不適合，降低泵流量可能犧牲舒適、除濕或室內空氣品質。</li>
+            <li><strong>控制每台主機的流量邊界：</strong>泵浦節能不能凌駕蒸發器最低流量、防凍、流量變化率與防喘振要求，原廠選型與聯鎖必須納入 BAS。</li>
+            <li><strong>以全站淨效益決策：</strong>計入主機、冰水泵、冷卻水泵、冷卻塔風機與水處理；用一致系統邊界的全年 kW/RT、能源成本與需量比較改造方案。</li>
+            <li><strong>讓節能可量測並支援淨零：</strong>建立校正後的冷量、用電、流量與室外濕球趨勢，依 LEED／淨零路徑持續調適；節能須維持舒適、濕度控制、可靠度與水資源管理。</li>
+          </ol>
+          <div class="callout"><strong>工程結論：</strong>大溫差小流量是一種需要末端、主機、水力與控制共同成立的系統設計策略。先證明設計冷量能在末端被有效傳遞、主機可在允許流量下穩定運轉，再用實測全站功率確認節能；如任一條件不成立，應先修正設備或控制，不應強推降流量。</div>
+        </section>
+
+        <section class="references" id="sources">
+          <h2>ASHRAE 來源與使用限制</h2>
+          <ol>
+            <li>ASHRAE, <cite>2024 ASHRAE Handbook—HVAC Systems and Equipment (SI)</cite>, Chapter 43, “Liquid-Chilling Systems”：液體冷卻系統、離心式主機選型、控制、性能與運轉；Chapter 44, “Centrifugal Pumps”：泵浦性能及系統應用；Chapter 14, “Condenser Water Systems”：冷卻水系統與冷卻塔散熱。</li>
+            <li>ASHRAE Standard 90.1：建築能源效率最低要求；適用版次及法規採用狀況依專案所在地確認。設備額定與部分負載性能應使用適用的 AHRI 標準、指定測試條件及製造商認證資料核對。</li>
+          </ol>
+          <p class="table-note">算例物性、效率、壓差及容量均為明示的工程初估假設，不能代替所在地規範、逐時負荷、泵浦曲線、盤管選型、主機原廠性能軟體、水處理方案或合格專業人員的詳細設計。本文為原創工程摘要，未重製 ASHRAE 圖表或長段原文。</p>
+          <a class="back-link" href="columns.html">← 返回工程專欄</a>
+        </section>
+      </article>
+      <aside class="toc" aria-label="本文目錄">
+        <h2>本文目錄</h2>
+        <ol>
+          <li><a href="#principle">熱力學與水力原理</a></li>
+          <li><a href="#architecture">冷凍站架構與設備</a></li>
+          <li><a href="#applications">適用條件與方案取捨</a></li>
+          <li><a href="#design">設計與安裝實務</a></li>
+          <li><a href="#calculation">工程計算案例</a></li>
+          <li><a href="#commissioning">試車與能效驗證</a></li>
+          <li><a href="#insights">結論與專家洞察</a></li>
+          <li><a href="#sources">來源與使用限制</a></li>
+        </ol>
+      </aside>
+    </div>
+  </main>
+  <footer>
+    <div class="wrap footer-inner">
+      <a class="footer-brand-link" href="index.html" aria-label="能源與冷凍空調學習網首頁">
+        <img class="footer-brand-logo" src="assets/hvacr-learning-logo.svg?v=3" alt="">
+        <span>能源與冷凍空調學習網</span>
+      </a>
+      <span>以學習、交流與實務應用為目的</span>
+    </div>
+  </footer>
+  <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
+  <script>
+    const scrollTopButton = document.querySelector(".scroll-top-button");
+
+    function updateScrollTopButton() {
+      scrollTopButton.hidden = window.scrollY <= 0;
+    }
+
+    window.addEventListener("scroll", updateScrollTopButton, { passive: true });
+    scrollTopButton.addEventListener("click", () => {
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      window.scrollTo({ top: 0, behavior });
+      updateScrollTopButton();
+    });
+    updateScrollTopButton();
+  </script>
+</body>
+</html>
