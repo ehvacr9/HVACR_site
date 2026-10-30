@@ -53,6 +53,7 @@
     .chiller-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 24px; font-weight: 700; letter-spacing: -.04em; }
     .mau-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 30px; font-weight: 700; letter-spacing: -.04em; }
     .ahu-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 30px; font-weight: 700; letter-spacing: -.04em; }
+    .vrf-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 30px; font-weight: 700; letter-spacing: -.04em; }
     .card-copy { align-self: center; }
     .card-kicker { margin-bottom: 10px; color: var(--green); font-size: 12px; font-weight: 750; letter-spacing: .1em; }
     .card-copy h2 { margin-bottom: 12px; font-size: clamp(25px, 3vw, 34px); }
@@ -89,6 +90,7 @@
       .chiller-mark { width: 88px; height: 88px; font-size: 21px; }
       .mau-mark { width: 88px; height: 88px; font-size: 26px; }
       .ahu-mark { width: 88px; height: 88px; font-size: 26px; }
+      .vrf-mark { width: 88px; height: 88px; font-size: 26px; }
       .scroll-top-button { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
@@ -148,6 +150,15 @@
           <p class="card-kicker">AIR HANDLING · 04</p>
           <h2>空氣處理箱 AHU：從氣流路徑到現場調試</h2>
           <p>看懂混風、過濾、盤管與風機的配合，並掌握熱負荷估算、選型、控制及試車排故。</p>
+          <span class="card-link">閱讀專欄 →</span>
+        </div>
+      </a>
+      <a class="column-card" href="vrf.html">
+        <div class="card-art" aria-hidden="true"><span class="vrf-mark">VRF</span></div>
+        <div class="card-copy">
+          <p class="card-kicker">VARIABLE REFRIGERANT FLOW · 05</p>
+          <h2>變頻多聯式空調 VRF：從熱泵原理到系統選型</h2>
+          <p>深入理解冷媒循環、系統配管、外氣邊界與冷媒安全，並用完整算例估算風量、外氣盤管與室外機容量。</p>
           <span class="card-link">閱讀專欄 →</span>
         </div>
       </a>

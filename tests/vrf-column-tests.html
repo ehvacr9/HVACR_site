@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VRF 專欄回歸測試</title>
+</head>
+<body>
+  <h1>VRF 專欄回歸測試</h1>
+  <p>請以 HTTP 伺服器提供網站；測試 VRF 專欄路由、ASHRAE 來源、系統配置、工程算例及導覽。</p>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+
+    try {
+      const [homeResponse, columnsResponse, articleResponse] = await Promise.all([
+        fetch("../index.html?vrf-test=" + Date.now()),
+        fetch("../columns.html?vrf-test=" + Date.now()),
+        fetch("../vrf.html?vrf-test=" + Date.now()),
+      ]);
+      assert(homeResponse.ok, "Homepage responds");
+      assert(columnsResponse.ok, "Engineering columns archive responds");
+      assert(articleResponse.ok, "VRF article responds");
+
+      const home = new DOMParser().parseFromString(await homeResponse.text(), "text/html");
+      const columns = new DOMParser().parseFromString(await columnsResponse.text(), "text/html");
+      const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
+      assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
+        "Main navigation links to engineering columns");
+      assert(columns.querySelector('a[href="vrf.html"] h2')?.textContent.includes("變頻多聯式空調 VRF"),
+        "Engineering columns archive links to the VRF article");
+      assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
+        "VRF article includes the scroll-to-top button");
+
+      const text = article.body.textContent;
+      for (const phrase of [
+        "2024 ASHRAE Handbook—HVAC Systems and Equipment",
+        "Chapter 18",
+        "Chapter 5",
+        "2022 ASHRAE Handbook—Refrigeration",
+        "逆卡諾循環",
+        "電子膨脹閥",
+        "SHF",
+        "600 m²",
+        "35°C DB／28°C WB",
+        "26°C DB／19°C WB",
+        "90 kW",
+        "23,140 m³/h",
+        "48.7 kW",
+        "97.8 kW",
+        "92 kW",
+        "A2L",
+        "冷媒安全",
+      ]) {
+        assert(text.includes(phrase), `VRF article includes ${phrase}`);
+      }
+
+      const diagram = article.querySelector(".vrf-system-diagram");
+      assert(diagram?.getAttribute("role") === "img" && diagram.querySelector("title")
+        && diagram.querySelector("desc"),
+      "VRF system diagram has an accessible title and description");
+      for (const component of [
+        "VRF 室外機", "分歧管", "室內機 A", "室內機 B", "室內機 C",
+        "MAU／DOAS（獨立新風）", "氣管主幹", "液管／支管",
+      ]) {
+        assert(diagram.textContent.includes(component), `System diagram labels ${component}`);
+      }
+      assert(article.querySelectorAll(".wide-table tbody tr").length >= 15,
+        "Article includes system, comparison, and project-condition tables");
+      const sections = [
+        "theory", "architecture", "selection", "applications", "installation",
+        "controls", "calculation", "commissioning", "sources",
+      ];
+      assert(article.querySelectorAll("article section[id]").length === sections.length,
+        "Article has nine navigable technical sections");
+      assert(sections.every((id) => article.querySelector(`.toc a[href="#${id}"]`)
+        && article.querySelector(`#${id}`)),
+      "Every table-of-contents link resolves to its article section");
+      assert(article.querySelectorAll(".checklist li").length === 7,
+        "Article includes a seven-step commissioning checklist");
+      assert(!article.querySelector('a[href*="reference/ASHRAE"], a[href$=".pdf"]'),
+        "Article does not link to handbook PDF files");
+
+      output.textContent = `PASS: ${checks} checks`;
+    } catch (error) {
+      output.textContent = `Error: ${error.message}`;
+      throw error;
+    }
+  </script>
+</body>
+</html>
