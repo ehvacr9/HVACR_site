@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="ASHRAE Journal 文章 Quantum Computing & The HVAC Industry 英文全文，提供 Oxford Learner's Dictionaries 與 Cambridge Dictionary 詞彙查詢。">
+  <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
+  <title>Quantum Computing & The HVAC Industry｜能源與冷凍空調學習網</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172b2b;
+      --muted: #5b6c68;
+      --paper: #f6f5ef;
+      --surface: #fffefa;
+      --green: #1d6252;
+      --line: #dce2d8;
+      --serif: Georgia, "Noto Serif TC", "PMingLiU", serif;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); line-height: 1.8; }
+    a { color: inherit; }
+    a:focus-visible, button:focus-visible { outline: 3px solid #9ab952; outline-offset: 3px; }
+    .wrap { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 100; display: flex; width: 100%; max-width: none;
+      min-height: 82px; align-items: center; justify-content: space-between; gap: 20px;
+      margin-inline: 0; padding-inline: max(24px, calc((100% - 1120px) / 2));
+      border-bottom: 1px solid var(--line); background: var(--paper);
+    }
+    .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); font-size: 15px; font-weight: 750; letter-spacing: .04em; text-decoration: none; }
+    .brand-mark { width: 34px; height: 34px; flex: 0 0 34px; object-fit: contain; }
+    nav { display: flex; gap: 24px; font-size: 13px; }
+    nav a { color: var(--muted); text-decoration: none; }
+    nav a:hover, nav a[aria-current="page"] { color: var(--green); }
+    .page { padding-block: 54px 84px; }
+    .breadcrumb { margin: 0 0 27px; color: var(--muted); font-size: 13px; }
+    .eyebrow { display: flex; align-items: center; gap: 10px; margin: 0 0 13px; color: var(--green); font-size: 12px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+    .eyebrow::before { width: 24px; height: 1px; background: currentColor; content: ""; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -.025em; }
+    h1 { max-width: 900px; margin-bottom: 20px; font-size: clamp(36px, 5vw, 58px); line-height: 1.25; }
+    h2 { margin: 34px 0 14px; font-size: clamp(25px, 3vw, 34px); line-height: 1.35; }
+    h3 { margin: 25px 0 10px; font-size: 22px; }
+    .dek { max-width: 840px; margin-bottom: 20px; color: var(--muted); font-size: 17px; }
+    .byline { margin-bottom: 32px; color: var(--muted); font-size: 13px; }
+    .article-text { max-width: 900px; padding: clamp(22px, 4vw, 48px); border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
+    .article-text p { margin: 0 0 17px; color: #304542; font-family: Georgia, "Times New Roman", serif; font-size: 17px; line-height: 1.85; }
+    .article-text .authors { color: var(--muted); font-size: 14px; }
+    .article-text .article-title { margin: 0 0 12px; font-size: clamp(30px, 4vw, 44px); line-height: 1.2; }
+    .article-text h2, .article-text h3 { color: var(--ink); }
+    .article-text ul, .article-text ol { padding-left: 1.5em; color: #304542; font-family: Georgia, "Times New Roman", serif; font-size: 17px; }
+    .article-text li + li { margin-top: 8px; }
+    .table-wrap { overflow-x: auto; margin: 20px 0 26px; border: 1px solid var(--line); border-radius: 7px; }
+    table { width: 100%; min-width: 900px; border-collapse: collapse; background: var(--surface); font-size: 14px; text-align: left; }
+    caption { padding: 14px; color: var(--muted); font-size: 14px; font-weight: 700; text-align: left; }
+    th, td { min-width: 125px; padding: 12px; border-top: 1px solid var(--line); vertical-align: top; }
+    th { background: #edf1e7; font-weight: 700; }
+    .table-note { margin: 10px 0 18px !important; color: var(--muted) !important; font-family: inherit !important; font-size: 13px !important; }
+    .dictionary-word {
+      display: inline; margin: 0; padding: 0; border: 0; border-radius: 2px; background: transparent;
+      color: inherit; font: inherit; line-height: inherit; cursor: pointer; text-decoration: underline;
+      text-decoration-color: transparent; text-decoration-thickness: 1px; text-underline-offset: 3px;
+      transition: background-color .12s ease, text-decoration-color .12s ease;
+    }
+    .dictionary-word:hover, .dictionary-word:focus-visible, .dictionary-word[aria-expanded="true"] {
+      background: #edf1e7; text-decoration-color: var(--green);
+    }
+    .dictionary-hint { margin: 0 0 20px; color: var(--muted); font-size: 13px; }
+    .dictionary-picker {
+      position: fixed; z-index: 300; width: min(290px, calc(100vw - 24px)); padding: 14px;
+      border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+      box-shadow: 0 12px 32px rgba(23, 43, 43, .2);
+    }
+    .dictionary-picker[hidden] { display: none; }
+    .dictionary-picker p { margin: 0 0 10px; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+    .dictionary-picker a { display: block; padding: 8px 10px; border-radius: 5px; color: var(--green); font-size: 14px; font-weight: 700; text-decoration: none; }
+    .dictionary-picker a:hover, .dictionary-picker a:focus-visible { background: #edf1e7; }
+    .source-note { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    .back-link { display: inline-block; margin-top: 23px; color: var(--green); font-size: 14px; text-underline-offset: 4px; }
+    footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .footer-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding-block: 24px; text-align: center; }
+    .footer-brand-link { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-size: 13px; font-weight: 750; text-decoration: none; }
+    .footer-brand-logo { width: 32px; height: 32px; flex: 0 0 32px; object-fit: contain; }
+    .scroll-top-button {
+      position: fixed; right: max(24px, env(safe-area-inset-right)); bottom: max(24px, env(safe-area-inset-bottom));
+      z-index: 110; display: grid; width: 44px; height: 44px; place-items: center; padding: 0;
+      border: 1px solid var(--green); border-radius: 50%; background: var(--green); color: #fffefa;
+      cursor: pointer; box-shadow: 0 6px 18px rgba(23, 43, 43, .18);
+    }
+    .scroll-top-button[hidden] { display: none; }
+    .scroll-top-icon { width: 11px; height: 11px; margin-top: 5px; transform: rotate(45deg); border-top: 2px solid currentColor; border-left: 2px solid currentColor; }
+    @media (max-width: 900px) { .topbar { flex-wrap: wrap; gap: 10px; padding-block: 12px; } nav { flex-wrap: wrap; gap: 8px 18px; } }
+    @media (max-width: 600px) {
+      .wrap { width: calc(100% - 32px); }
+      .topbar { padding-inline: 16px; }
+      .brand { gap: 8px; font-size: 13px; }
+      nav { width: 100%; justify-content: space-between; gap: 6px; font-size: 12px; }
+      .page { padding-block: 42px 60px; }
+      .article-text { padding: 20px 17px; }
+      .article-text p, .article-text ul, .article-text ol { font-size: 16px; }
+      .scroll-top-button { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="wrap topbar">
+    <a class="brand" href="index.html" aria-label="回到能源與冷凍空調學習網首頁">
+      <img class="brand-mark" src="assets/hvacr-learning-logo.svg?v=3" alt="">
+      <span>能源與冷凍空調學習網</span>
+    </a>
+    <nav aria-label="主選單">
+      <a href="index.html">首頁</a>
+      <a href="about.html">關於我們</a>
+      <a href="exam-years.html">技師考題</a>
+      <a href="terminology.html">術語辭典</a>
+      <a href="columns.html" aria-current="page">工程專欄</a>
+      <a href="tools.html">計算工具</a>
+    </nav>
+  </header>
+  <main class="wrap page">
+    <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="columns.html">工程專欄</a> ／ 量子運算與 HVAC 產業</p>
+    <p class="eyebrow">ASHRAE JOURNAL · ENGLISH ARTICLE</p>
+    <h1>Quantum Computing &amp; The HVAC Industry</h1>
+    <p class="dek">ASHRAE Journal 英文文章全文。點擊任一英文單字，即可選擇 Oxford Learner’s Dictionaries 或 Cambridge Dictionary 查詢。</p>
+    <p class="byline">Mario Mendoza, P.E., BCXP, HFDP; Yelissa Lopez; Ronald Diaz, P.E.; Adrian Johannes Menssen, Ph.D.｜ASHRAE Journal, November 2026, pp. 24–30</p>
+    <p class="dictionary-hint">閱讀提示：滑鼠移到英文單字上會顯示可查詢狀態；點擊或以鍵盤選取單字，再選擇要開啟的線上辭典。</p>
+
+    <article class="article-text" id="article-text" aria-label="Quantum Computing & The HVAC Industry article">
+      <p class="article-title">Quantum Computing &amp; The HVAC Industry</p>
+      <p class="authors">BY MARIO MENDOZA, P.E., BCXP, HFDP, MEMBER ASHRAE; YELISSA LOPEZ; RONALD DIAZ, P.E., MEMBER ASHRAE; ADRIAN JOHANNES MENSSEN, PH.D.</p>
+
+      <p>The mechanical and energy-engineering field has witnessed successive waves of technological disruption—from variable refrigerant flow systems to digital twins and AI-based analytics. Quantum computing represents the next such disruption, one with direct implications for HVAC engineers and facility designers. Collaboration between the physics and engineering communities, including ongoing dialogue with researchers at a quantum computer company and MIT’s Photonics Laboratory, has revealed a significant gap—little to no publicly available guidance exists on designing mechanical systems for quantum computing environments. As firms and governments increase investment in the quantum sector, MEP engineers will play a vital role in developing robust, stable and energy-efficient infrastructures. The purpose of this article is to initiate that dialogue—bridging the gap between physics laboratories and mechanical design practice—and to invite ASHRAE’s technical community to establish design standards for this transformative field.</p>
+
+      <h2>Environmental Requirements for Quantum Computing Systems</h2>
+      <p>Quantum computers differ fundamentally from classical systems. Classical bits represent 0 or 1, can exist as a superposition—a linear combination—of both basis states simultaneously. Pairs of qubits can also become entangled, a phenomenon producing correlated measurement outcomes regardless of physical separation. Sustaining these states depends on quantum coherence, the preservation of the well-defined phase relationships among a qubit’s quantum states, which is what allows superposition and entanglement to be harnessed for computation. These properties underpin the theoretical advantages of quantum computing but also introduce extreme environmental sensitivities.</p>
+      <p>Qubits lose coherence through decoherence, which is the disruption of quantum states caused by environmental noise, including temperature fluctuations, magnetic fields, vibration and stray electromagnetic radiation. Independent technical reviews confirm that minimizing thermal fluctuations, electromagnetic interference and mechanical vibration is crucial for preserving qubit coherence and minimizing computational errors.<sup>1,2</sup> Recent work has demonstrated that mechanical disturbances can introduce correlated errors across superconducting circuits.<sup>3</sup></p>
+      <p>Four leading qubit architectures are currently being developed at commercial scale: superconducting, trapped-ion, neutral/cold atom and photonic. Each imposes distinct facility requirements on temperature, vibration, electromagnetic environment, humidity, particulates and power quality. Table 1 summarizes these requirements alongside relevant infrastructure considerations. Where quantitative tolerances have been established through published research or reported operational practice, they are noted; where formal standards do not yet exist, the values represent current guideline-level benchmarks only. Temperatures in this article are given in kelvin (K), the SI unit of absolute temperature, where 0 K is absolute zero (−273.15°C) and one millikelvin (mK) is one-thousandth of a kelvin.</p>
+      <p>Superconducting and trapped-ion systems represent the most technologically mature quantum-computing platforms, as evidenced by the scale of commercial investment and the public profile of their leading developers. Superconducting qubits are the architecture of choice for IBM and Google Quantum AI. Trapped-ion systems are advanced commercially by IonQ and Quantinuum. Despite this commercial maturity, their thermal requirements differ substantially. Superconducting qubits must be maintained at ultralow temperatures, typically around 10 mK, within dilution refrigerators to sustain superconductivity and suppress decoherence. In contrast, trapped-ion platforms generally operate near room temperature, relying on laser cooling and electromagnetic confinement of ions in ultra-high-vacuum chambers rather than cryogenic refrigeration.</p>
+      <p>Photonic quantum architectures use qubits that function at ambient temperature, but cryogenic cooling (≈ 4 K) is often required for superconducting nanowire single-photon detectors and associated optical-switching electronics that enable readout and entanglement distribution.</p>
+      <p>Across all leading qubit modalities, the preservation of coherence depends on maintaining exceptionally stable thermal, vibrational and electromagnetic environments, emphasizing the need for integrated HVAC and infrastructure strategies tailored to quantum-computing facilities.</p>
+
+      <div class="table-wrap" tabindex="0" aria-label="Table 1; scroll horizontally to read all columns">
+        <table>
+          <caption>TABLE 1. Environmental and infrastructure requirements by qubit architecture.</caption>
+          <thead>
+            <tr><th scope="col">Qubit type</th><th scope="col">Temperature requirement</th><th scope="col">Vibration isolation</th><th scope="col">EMI/grounding</th><th scope="col">Humidity/particulates</th><th scope="col">Power quality</th><th scope="col">Key references</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Superconducting</th><td>~10–20 mK inside dilution refrigerator. Room ambient: ±0.5°C for ancillary electronics.</td><td>Vibration-isolated cryostat and cooling-water loops; structural decoupling from mechanical plant.</td><td>Shielded enclosure; star grounding; distance from RF sources and strong magnets.</td><td>Controlled lab ambient; UHV inside cryostat; HEPA filtration for surrounding space.</td><td>Independent filtered circuits; harmonic suppression.</td><td>1, 2, 7</td></tr>
+            <tr><th scope="row">Trapped ion</th><td>Room ambient: ~20–25°C (±0.1°C class preferred). Ions laser-cooled to μK—no cryogenic room cooling.</td><td>Vibration-isolated optical tables; decoupled HVAC supply.</td><td>Low-noise EM environment; UHV chamber integrity; magnetic-noise suppression.</td><td>≤50% RH; HEPA filtration; optics-area laminar flow.</td><td>Clean power for laser drivers and control electronics.</td><td>4</td></tr>
+            <tr><th scope="row">Neutral/cold atom</th><td>Room-temperature enclosure (±0.1°C where specified). Atoms cooled to 1–50 μK in optical-tweezer/magnetic lattice.</td><td>Laminar, low-turbulence airflow near optics; vibration-damped optical benches.</td><td>Magnetic-field homogeneity critical; shielded enclosure around vacuum chambers.</td><td>≤50% RH; low particulate near optical paths; vacuum chamber integrity.</td><td>Filtered circuits for laser systems.</td><td>5, 12</td></tr>
+            <tr><th scope="row">Photonic</th><td>Ambient for qubit optics; ~2–4 K for SNSPDs and cryogenic detectors. Thermal stability required to reduce optical phase drift.</td><td>Vibration-damped optical benches; isolated cryogenic detector mounts.</td><td>Clean optics; low stray photon environment; shielded detector electronics.</td><td>Humidity control critical for optical components (≤50% RH); HEPA/ULPA filtration.</td><td>Low-noise power for detector and switching electronics.</td><td>6, 7, 10, 11</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">Note: All qubit platforms require stringent control of electromagnetic interference, grounding and mechanical vibration to preserve quantum coherence. Values shown reflect current laboratory and prototype practice. No formalized ASHRAE or ISO design standards yet exist for quantum facilities; all values are guideline-level benchmarks, not prescriptive criteria. For facility design, thermal management, vibration isolation and electromagnetic shielding must be treated as an integrated system. Even submicron or sub-degree perturbations can disrupt qubit stability.<sup>3</sup></p>
+
+      <h2>Parallels with High-Tech Laboratory Design</h2>
+      <p>Conversations with one of the lead researchers at MIT’s Photonics Laboratory revealed that current quantum setups more closely resemble advanced laser or nanotechnology laboratories than conventional data centers. Common design targets include:</p>
+      <ul>
+        <li><strong>Temperature stability.</strong> ±0.1°C (0.2°F) in enclosures; ±1°C (1.8°F) at the room level.</li>
+        <li><strong>Humidity control.</strong> ≤50% RH to minimize optical-component drift.</li>
+        <li><strong>Particulate control.</strong> HEPA or ULPA filtration with laminar diffusers.</li>
+        <li><strong>Vibration isolation.</strong> Structural damping and decoupled mechanical systems.</li>
+        <li><strong>Electromagnetic noise.</strong> Use of non-magnetic materials and implementation of well-planned grounding (e.g., star grounding to avoid ground loops) to minimize interference. Equipment should also be located away from sources of electromagnetic radiation such as microwaves, strong magnets and other radiating electrical devices.</li>
+        <li><strong>Cooling infrastructure.</strong> Dedicated chilled-water or heat-exchanger loops with redundancy (~20 kW per rack).</li>
+        <li><strong>Power quality.</strong> Independent, filtered circuits with harmonic suppression.</li>
+      </ul>
+      <p>While these parameters resemble semiconductor cleanrooms, quantum laboratories demand tighter tolerances—often requiring thermal variation control of an order of magnitude smaller than standard data center thresholds.</p>
+
+      <h2>Energy and Sustainability Considerations</h2>
+      <p>Cryogenic systems and laser-stabilization units are energy-intensive. On a per-qubit basis, energy consumption can exceed that of conventional high-performance computing nodes. Near-term facility design must therefore account for substantial cooling loads, high-quality power distribution and the associated water and energy use intensity.</p>
+      <p>Longer-term, quantum computing is expected to accelerate discovery in sustainable materials relevant to the built environment. As an illustrative example: the cement and steel industries face a persistent challenge in reducing embodied carbon while meeting structural performance requirements. Quantum algorithms capable of modeling molecular interactions may enable the development of novel concretes and composites with lower embodied carbon and superior strength properties—a goal that classical computing cannot efficiently address due to the combinatorial complexity of quantum-mechanical simulations. Quantum-enabled breakthroughs in materials science could reduce global CO₂ emissions from cement, steel and building operations by more than 10%.<sup>8</sup></p>
+      <p>Research at the University of Notre Dame has demonstrated quantum-enhanced design tools applied to “smart glass” materials that dynamically control solar heat gain, illustrating direct relevance to HVAC energy reduction. While such outcomes remain developmental, they suggest that the near-term energy burden of quantum facility infrastructure may ultimately be offset by the optimization capabilities these systems unlock.</p>
+
+      <h2>Implications for the Construction and HVAC Industries</h2>
+      <h3>Design and Construction Outlook</h3>
+      <p>As quantum computing transitions from laboratory to production scale, quantum data centers will become a distinct facility type. Mechanical engineers will need to synthesize design knowledge from ASHRAE TC 9.9 (Data Centers), TC 9.10 (Laboratories), and TC 9.11 (Clean Spaces). Key priorities include:</p>
+      <ul>
+        <li>Ultra-stable micro-environments with advanced zoning and precise reheat control.</li>
+        <li>Modular, redundant systems designed for phased expansion.</li>
+        <li>Structural and material solutions that reduce vibration and magnetic interference.</li>
+        <li>Integrated controls with real-time monitoring of temperature, humidity and qubit-coherence parameters.</li>
+      </ul>
+
+      <h2>Digital Tools, Sensing Devices and Simulation</h2>
+      <p>Beyond their facility requirements, quantum computing platforms may also transform HVAC engineering practice itself. Quantum algorithms have demonstrated advantages over classical solvers on certain optimization and fluid-dynamics problems<sup>13,14</sup>—the same classes of challenges encountered in building-energy modeling and computational fluid dynamics (CFD)-based airflow design. As algorithm maturity and qubit counts increase, such tools may become accessible to building simulation workflows.</p>
+      <p>Quantum sensing represents a parallel development of direct relevance to building systems. Quantum sensors exploit superposition and entanglement to achieve measurement sensitivities beyond the limits of classical instrumentation. Published examples include atomic interferometers for inertial sensing,<sup>15</sup> optical clocks with sub-10<sup>−18</sup> fractional frequency uncertainty<sup>16</sup> and nitrogen-vacancy (NV) center magnetometers for sub-picotesla field detection. These capabilities come with trade-offs including cost, calibration complexity, cryogenic requirements for some modalities and limited operational robustness outside laboratory conditions. As these trade-offs are addressed, quantum sensors may enable new tiers of precision in building automation, system diagnostics and spatial positioning applications.</p>
+
+      <h2>The Human and Economic Dimension</h2>
+      <p>Beyond physics and engineering, workforce development will determine how fast the industry adapts. The demand for cross-disciplinary professionals (mechanical engineers versed in cryogenics, physicists familiar with HVAC systems and software developers attuned to real-time environmental data) is not yet reflected in standard professional development curricula.</p>
+      <p>Global public and private investment in quantum technology now exceeds $55 billion, reflecting rapid acceleration in national programs across the U.S., European Union, China, Japan and Canada, as well as major private initiatives led by IBM, Google, Amazon Web Services and PsiQuantum.<sup>9</sup> Each new quantum research test bed, commercial facility or data center prototype represents a critical opportunity for the HVAC and building-engineering sectors to innovate—developing infrastructure capable of meeting the precision environmental requirements that underpin this emerging industry.</p>
+
+      <h2>Toward a Framework for Quantum-Facility Design</h2>
+      <p>To ensure readiness and consistency, ASHRAE and allied organizations could:</p>
+      <ol>
+        <li>Establish a Technical Committee on quantum-facility environmental design to consolidate expertise and coordinate with relevant existing TCs (9.9, 9.10, 9.11).</li>
+        <li>Develop addenda to existing laboratory and data center guidelines addressing vibration, electromagnetic interference (EMI) and cryogenic integration, using existing quantum facilities as data sources.</li>
+        <li>Facilitate collaboration between physicists and building engineers to better understand and define environmental tolerances for each kind of qubit technology.</li>
+        <li>Engage standards bodies such as ISO, NIST and semiconductor-industry consortia to align quantum-facility design criteria with adjacent high-tech laboratory standards where applicable.</li>
+      </ol>
+      <p>As noted in industry analyses, early engagement by the engineering community will accelerate maturity and reliability within the quantum ecosystem, helping shape the standards that will govern future development.</p>
+
+      <h2>Conclusion</h2>
+      <p>Quantum computing represents both a design challenge and a transformative opportunity for the HVAC and construction industries. Each qubit architecture—superconducting, trapped-ion, photonic or neutral-atom—requires a unique environmental strategy, yet no formal design standards currently exist.</p>
+      <p>Developing clear, technology-specific HVAC guidelines is essential to ensure operational stability, safety and scalability. At the same time, quantum computing’s own optimization capabilities promise to revolutionize energy modeling and sustainable building design.</p>
+      <p>By engaging early, ASHRAE and its members can help define the environmental parameters for quantum infrastructure while positioning the HVAC profession at the forefront of this next technological frontier.</p>
+
+      <h2>References</h2>
+      <ol>
+        <li>Krantz, P., M. Kjaergaard, F. Yan, T.P. Orlando, et al. 2019. “A quantum engineer’s guide to superconducting qubits.” <em>Applied Physics Reviews</em> 6(2):021318. <a href="https://doi.org/10.1063/1.5089550" target="_blank" rel="noopener noreferrer">https://doi.org/10.1063/1.5089550</a></li>
+        <li>Arute, F., K. Arya, R. Babbush, et al. 2019. “Quantum supremacy using a programmable superconducting processor.” <em>Nature</em> 574(7779):505–510. <a href="https://doi.org/10.1038/s41586-019-1666-5" target="_blank" rel="noopener noreferrer">https://doi.org/10.1038/s41586-019-1666-5</a></li>
+        <li>Kono, S., J. Pan, M. Chegnizadeh, X. Wang, et al. 2024. “Mechanically induced correlated errors on superconducting qubits with relaxation times exceeding 0.4 ms.” <em>Nature Communications</em> 15:3950. <a href="https://doi.org/10.1038/s41467-024-48230-3" target="_blank" rel="noopener noreferrer">https://doi.org/10.1038/s41467-024-48230-3</a></li>
+        <li>Bruzewicz, C.D., J. Chiaverini, R. McConnell, J.M. Sage. 2019. “Trapped-ion quantum computing: Progress and challenges.” <em>Applied Physics Reviews</em> 6(2):021314. <a href="https://doi.org/10.1063/1.5088164" target="_blank" rel="noopener noreferrer">https://doi.org/10.1063/1.5088164</a></li>
+        <li>Kaufman, A.M., K.-K. Ni. 2021. “Quantum science with optical tweezer arrays of ultracold atoms and molecules.” <em>Nature Physics</em> 17(12):1324–1333. <a href="https://doi.org/10.1038/s41567-021-01357-2" target="_blank" rel="noopener noreferrer">https://doi.org/10.1038/s41567-021-01357-2</a></li>
+        <li>Slussarenko, S., G.J. Pryde. 2019. “Photonic quantum information processing: A concise review.” <em>Applied Physics Reviews</em> 6(4):041303. <a href="https://doi.org/10.1063/1.5115814" target="_blank" rel="noopener noreferrer">https://doi.org/10.1063/1.5115814</a></li>
+        <li>Esmaeil Zadeh, I., et al. 2021. “Superconducting nanowire single-photon detectors: A review.” <em>Applied Physics Letters</em> 118(19):190502. <a href="https://doi.org/10.1063/5.0045990" target="_blank" rel="noopener noreferrer">https://doi.org/10.1063/5.0045990</a></li>
+        <li>Bobier, J.-F., P. Gerbert, J. Burchardt, A. Gourévitch. 2020. “A Quantum Advantage in Fighting Climate Change.” Boston Consulting Group (BCG). <a href="https://tinyurl.com/mvkf9e7c" target="_blank" rel="noopener noreferrer">https://tinyurl.com/mvkf9e7c</a></li>
+        <li>Duranton, S. 2024. “Quantum Now: Global Investment Surges Past $55 Billion.” <em>Forbes</em>, June 26. <a href="https://tinyurl.com/5bm9vr2" target="_blank" rel="noopener noreferrer">https://tinyurl.com/5bm9vr2</a></li>
+        <li>PsiQuantum. 2024. “The Quantum Blueprint: Photonic Quantum Computing.” PsiQuantum. <a href="https://www.psiquantum.com/blueprint" target="_blank" rel="noopener noreferrer">https://www.psiquantum.com/blueprint</a></li>
+        <li>Menssen, A.J. 2024. Personal communication. MIT Photonics Laboratory.</li>
+        <li>QuEra Computing. 2023. Technical Notes on Neutral-Atom Qubits. Available at: <a href="https://www.quera.com/publications" target="_blank" rel="noopener noreferrer">https://www.quera.com/publications</a></li>
+        <li>Harrow, A.W., A. Hassidim, S. Lloyd. 2009. “Quantum algorithm for linear systems of equations.” <em>Physical Review Letters</em> 15(103):150502.</li>
+        <li>Preskill, J. 2018. “Quantum computing in the NISQ era and beyond.” <em>Quantum</em> 2:79. <a href="https://doi.org/10.22331/q-2018-08-06-79" target="_blank" rel="noopener noreferrer">https://doi.org/10.22331/q-2018-08-06-79</a></li>
+        <li>Peters, A., K.Y. Chung, S. Chu. 1999. “Measurement of gravitational acceleration by dropping atoms.” <em>Nature</em> 400(6747):849–852.</li>
+        <li>Bloom, B.J., et al. 2014. “An optical lattice clock with accuracy and stability at the 10<sup>−18</sup> level.” <em>Nature</em> 506(7486):71–75.</li>
+      </ol>
+    </article>
+    <p class="source-note">來源：Mario Mendoza, Yelissa Lopez, Ronald Diaz, and Adrian Johannes Menssen, “Quantum Computing &amp; The HVAC Industry,” <em>ASHRAE Journal</em>, November 2026, pp. 24–30. 全文依使用者確認已取得公開轉載授權後刊載；原文中的數值與設計建議為作者所述，未經本網站另行驗證。</p>
+    <a class="back-link" href="columns.html">← 返回工程專欄</a>
+  </main>
+
+  <div class="dictionary-picker" id="dictionary-picker" role="dialog" aria-label="選擇英文線上辭典" hidden>
+    <p>查詢 “<span id="dictionary-word-label"></span>”</p>
+    <a id="oxford-link" href="#" target="_blank" rel="noopener noreferrer">Oxford Learner’s Dictionaries</a>
+    <a id="cambridge-link" href="#" target="_blank" rel="noopener noreferrer">Cambridge Dictionary</a>
+    <a id="longman-link" href="#" target="_blank" rel="noopener noreferrer">Longman Dictionary</a>
+    <a id="collins-link" href="#" target="_blank" rel="noopener noreferrer">Collins Dictionary</a>
+    <a id="merriam-webster-link" href="#" target="_blank" rel="noopener noreferrer">Merriam-Webster</a>
+  </div>
+  <footer>
+    <div class="wrap footer-inner">
+      <a class="footer-brand-link" href="index.html" aria-label="能源與冷凍空調學習網首頁">
+        <img class="footer-brand-logo" src="assets/hvacr-learning-logo.svg?v=3" alt="">
+        <span>能源與冷凍空調學習網</span>
+      </a>
+      <span>以學習、交流與實務應用為目的</span>
+    </div>
+  </footer>
+  <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
+  <script>
+    const articleText = document.querySelector("#article-text");
+    const textWalker = document.createTreeWalker(articleText, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+
+    while (textWalker.nextNode()) {
+      if (/[A-Za-z]/.test(textWalker.currentNode.textContent)
+        && !textWalker.currentNode.parentElement.closest("a")) {
+        textNodes.push(textWalker.currentNode);
+      }
+    }
+
+    for (const textNode of textNodes) {
+      const content = textNode.textContent;
+      const wordPattern = /[A-Za-z]+(?:[’'][A-Za-z]+)*/g;
+      const fragment = document.createDocumentFragment();
+      let previousIndex = 0;
+
+      for (const match of content.matchAll(wordPattern)) {
+        const index = match.index;
+        if (index > previousIndex) fragment.append(content.slice(previousIndex, index));
+        const word = document.createElement("button");
+        word.className = "dictionary-word";
+        word.type = "button";
+        word.dataset.word = match[0];
+        word.setAttribute("aria-haspopup", "dialog");
+        word.setAttribute("aria-expanded", "false");
+        word.setAttribute("aria-label", `Look up ${match[0]} in an English dictionary`);
+        word.title = "Click to choose an English dictionary";
+        word.textContent = match[0];
+        fragment.append(word);
+        previousIndex = index + match[0].length;
+      }
+
+      if (previousIndex < content.length) fragment.append(content.slice(previousIndex));
+      textNode.replaceWith(fragment);
+    }
+
+    const dictionaryPicker = document.querySelector("#dictionary-picker");
+    const dictionaryWordLabel = document.querySelector("#dictionary-word-label");
+    const oxfordLink = document.querySelector("#oxford-link");
+    const cambridgeLink = document.querySelector("#cambridge-link");
+    const longmanLink = document.querySelector("#longman-link");
+    const collinsLink = document.querySelector("#collins-link");
+    const merriamWebsterLink = document.querySelector("#merriam-webster-link");
+    let activeWord = null;
+
+    function closeDictionaryPicker(returnFocus = false) {
+      if (activeWord) {
+        activeWord.setAttribute("aria-expanded", "false");
+        if (returnFocus) activeWord.focus();
+      }
+      activeWord = null;
+      dictionaryPicker.hidden = true;
+    }
+
+    function openDictionaryPicker(word, moveFocus) {
+      if (activeWord === word) {
+        closeDictionaryPicker();
+        return;
+      }
+
+      if (activeWord) activeWord.setAttribute("aria-expanded", "false");
+      activeWord = word;
+      activeWord.setAttribute("aria-expanded", "true");
+      const term = word.dataset.word.toLowerCase();
+      const encodedTerm = encodeURIComponent(term);
+      dictionaryWordLabel.textContent = word.dataset.word;
+      oxfordLink.href = `https://www.oxfordlearnersdictionaries.com/definition/english/${encodedTerm}`;
+      cambridgeLink.href = `https://dictionary.cambridge.org/dictionary/english/${encodedTerm}`;
+      longmanLink.href = `https://www.ldoceonline.com/dictionary/${encodedTerm}`;
+      collinsLink.href = `https://www.collinsdictionary.com/dictionary/english/${encodedTerm}`;
+      merriamWebsterLink.href = `https://www.merriam-webster.com/dictionary/${encodedTerm}`;
+      dictionaryPicker.hidden = false;
+
+      const wordBounds = word.getBoundingClientRect();
+      const pickerBounds = dictionaryPicker.getBoundingClientRect();
+      const left = Math.max(12, Math.min(wordBounds.left, window.innerWidth - pickerBounds.width - 12));
+      const top = wordBounds.bottom + pickerBounds.height + 12 <= window.innerHeight
+        ? wordBounds.bottom + 6
+        : Math.max(12, wordBounds.top - pickerBounds.height - 6);
+      dictionaryPicker.style.left = `${left}px`;
+      dictionaryPicker.style.top = `${top}px`;
+      if (moveFocus) oxfordLink.focus();
+    }
+
+    articleText.addEventListener("click", (event) => {
+      const word = event.target.closest(".dictionary-word");
+      if (word) openDictionaryPicker(word, event.detail === 0);
+    });
+    document.addEventListener("pointerdown", (event) => {
+      if (!dictionaryPicker.hidden && !dictionaryPicker.contains(event.target)
+        && !event.target.closest(".dictionary-word")) closeDictionaryPicker();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !dictionaryPicker.hidden) closeDictionaryPicker(true);
+    });
+    window.addEventListener("resize", () => closeDictionaryPicker());
+    window.addEventListener("scroll", () => closeDictionaryPicker(), { passive: true });
+
+    const scrollTopButton = document.querySelector(".scroll-top-button");
+    function updateScrollTopButton() {
+      scrollTopButton.hidden = window.scrollY <= 0;
+    }
+    window.addEventListener("scroll", updateScrollTopButton, { passive: true });
+    scrollTopButton.addEventListener("click", () => {
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      window.scrollTo({ top: 0, behavior });
+      updateScrollTopButton();
+    });
+    updateScrollTopButton();
+  </script>
+</body>
+</html>

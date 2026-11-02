@@ -21,7 +21,7 @@
       "exam-year-112.html", "exam-year-113.html", "exam-year-114.html", "exam-year-archive.html",
       "exam-paper.html", "humid-air.html", "refrigeration-cycle.html", "tools.html",
       "unit-converter.html", "water-refrigerant.html", "columns.html", "glycol.html", "chiller.html", "mau.html", "ahu.html",
-      "ahu-project-case.html", "vrf.html", "low-flow-chiller.html",
+      "ahu-project-case.html", "vrf.html", "low-flow-chiller.html", "quantum-computing-hvac.html",
     ];
 
     try {
@@ -33,15 +33,15 @@
           `${path} links to the technical columns`);
         if (path === "columns.html") {
           assert(page.querySelector("h1")?.textContent.trim() === "冷凍空調專欄"
-            && page.querySelectorAll("a.column-card").length === 4,
-          "Engineering columns archive matches the restored pre-prompt version");
+            && page.querySelectorAll("a.column-card").length === 5,
+          "Engineering columns archive contains the restored set plus the quantum article");
           assert(!page.querySelector('a[href="vrf.html"], a[href="low-flow-chiller.html"], a[href="ahu-project-case.html"]'),
             "Later articles are not listed in the restored archive");
         }
         assert(!page.querySelector('nav a[href="references.html"]'),
           `${path} does not expose the bibliography in the site navigation`);
         if (["columns.html", "glycol.html", "chiller.html", "mau.html", "ahu.html",
-          "ahu-project-case.html", "vrf.html", "low-flow-chiller.html"].includes(path)) {
+          "ahu-project-case.html", "vrf.html", "low-flow-chiller.html", "quantum-computing-hvac.html"].includes(path)) {
           assert(page.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
             `${path} includes the scroll-to-top button`);
         }

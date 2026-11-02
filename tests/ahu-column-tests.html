@@ -33,9 +33,9 @@
       assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
         "Main navigation links to engineering columns");
       assert(columns.querySelector("h1")?.textContent.trim() === "冷凍空調專欄"
-        && columns.querySelectorAll("a.column-card").length === 4
+        && columns.querySelectorAll("a.column-card").length === 5
         && columns.querySelector('a[href="ahu.html"] h2')?.textContent.includes("空氣處理箱 AHU"),
-      "Engineering columns archive lists the four original technical articles");
+      "Engineering columns archive includes the original articles and new feature");
       assert(!columns.querySelector('a[href="vrf.html"], a[href="low-flow-chiller.html"], a[href="ahu-project-case.html"]'),
         "Later AHU, VRF, and low-flow articles are not exposed in the original archive");
       assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),

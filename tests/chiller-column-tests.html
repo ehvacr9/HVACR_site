@@ -34,9 +34,9 @@
         "Chiller article includes the scroll-to-top button");
       assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
         "Main navigation links to the engineering columns");
-      assert(columns.querySelectorAll("a.column-card").length === 4
+      assert(columns.querySelectorAll("a.column-card").length === 5
         && columns.querySelector('a[href="chiller.html"] h2')?.textContent.includes("冰水主機 Chiller"),
-      "Chiller article is listed in the restored four-article archive");
+      "Chiller article is listed in the columns archive");
 
       const text = article.body.textContent;
       for (const phrase of [

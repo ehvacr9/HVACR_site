@@ -32,9 +32,9 @@
       const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
       assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
         "Main navigation links to engineering columns");
-      assert(columns.querySelectorAll("a.column-card").length === 4
+      assert(columns.querySelectorAll("a.column-card").length === 5
         && columns.querySelector('a[href="mau.html"] h2')?.textContent.includes("外氣空調箱 MAU"),
-      "MAU article is listed in the restored four-article archive");
+      "MAU article is listed in the columns archive");
       assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
         "MAU article includes the scroll-to-top button");
 
