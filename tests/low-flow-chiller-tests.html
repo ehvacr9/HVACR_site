@@ -27,9 +27,9 @@
 
       const columns = new DOMParser().parseFromString(await columnsResponse.text(), "text/html");
       const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
-      assert(columns.querySelectorAll("a.column-card").length === 1
+      assert(columns.querySelectorAll("a.column-card").length === 4
         && !columns.querySelector('a[href="low-flow-chiller.html"]'),
-      "Low-flow chiller article remains available by route but is no longer listed publicly");
+      "Low-flow chiller article remains available by route but is hidden from the restored archive");
       assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
         "Article includes the scroll-to-top button");
 

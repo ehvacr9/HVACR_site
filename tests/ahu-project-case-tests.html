@@ -27,9 +27,9 @@
 
       const columns = new DOMParser().parseFromString(await columnsResponse.text(), "text/html");
       const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
-      assert(columns.querySelectorAll("a.column-card").length === 1
+      assert(columns.querySelectorAll("a.column-card").length === 4
         && !columns.querySelector('a[href="ahu-project-case.html"]'),
-      "AHU project case remains available by route but is no longer listed publicly");
+      "AHU project case remains available by route but is hidden from the restored archive");
       assert(article.title.includes("ASHRAE 混風範例"), "Case article title identifies the handbook-based AHU case");
       assert([...article.querySelectorAll('a[href="ahu.html"]')]
         .some((link) => link.textContent.includes("系統原理版")),
