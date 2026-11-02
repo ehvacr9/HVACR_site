@@ -32,14 +32,14 @@
       const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
       assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
         "Glycol article includes the scroll-to-top button");
-      assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
+      assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "技術專欄",
         "Main navigation links to the column archive");
-      assert(home.querySelector("#columns-link-title")?.textContent.trim() === "冷凍空調專欄"
-        && home.querySelector('a[href="columns.html"].button')?.textContent.includes("閱讀工程專欄"),
+      assert(home.querySelector("#columns-link-title")?.textContent.trim() === "技術專欄"
+        && home.querySelector('a[href="columns.html"].button')?.textContent.includes("閱讀技術專欄"),
       "Homepage restores the engineering columns entry");
-      assert(columns.querySelectorAll("a.column-card").length === 5
-        && columns.querySelector('a[href="glycol.html"]')?.textContent.includes("閱讀專欄"),
-      "Glycol article is listed in the columns archive");
+      assert(columns.querySelectorAll("a.column-card").length === 1
+        && !columns.querySelector('a[href="glycol.html"]'),
+      "Glycol article remains available by route but is hidden from the technical columns");
 
       const text = article.body.textContent;
       for (const phrase of [

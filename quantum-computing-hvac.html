@@ -47,7 +47,6 @@
     h1 { max-width: 900px; margin-bottom: 20px; font-size: clamp(36px, 5vw, 58px); line-height: 1.25; }
     h2 { margin: 34px 0 14px; font-size: clamp(25px, 3vw, 34px); line-height: 1.35; }
     h3 { margin: 25px 0 10px; font-size: 22px; }
-    .dek { max-width: 840px; margin-bottom: 20px; color: var(--muted); font-size: 17px; }
     .byline { margin-bottom: 32px; color: var(--muted); font-size: 13px; }
     .article-text { max-width: 900px; padding: clamp(22px, 4vw, 48px); border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
     .article-text p { margin: 0 0 17px; color: #304542; font-family: Georgia, "Times New Roman", serif; font-size: 17px; line-height: 1.85; }
@@ -81,7 +80,6 @@
     .dictionary-picker p { margin: 0 0 10px; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
     .dictionary-picker a { display: block; padding: 8px 10px; border-radius: 5px; color: var(--green); font-size: 14px; font-weight: 700; text-decoration: none; }
     .dictionary-picker a:hover, .dictionary-picker a:focus-visible { background: #edf1e7; }
-    .source-note { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
     .back-link { display: inline-block; margin-top: 23px; color: var(--green); font-size: 14px; text-underline-offset: 4px; }
     footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
     .footer-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding-block: 24px; text-align: center; }
@@ -120,15 +118,14 @@
       <a href="about.html">關於我們</a>
       <a href="exam-years.html">技師考題</a>
       <a href="terminology.html">術語辭典</a>
-      <a href="columns.html" aria-current="page">工程專欄</a>
+      <a href="columns.html" aria-current="page">技術專欄</a>
       <a href="tools.html">計算工具</a>
     </nav>
   </header>
   <main class="wrap page">
-    <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="columns.html">工程專欄</a> ／ 量子運算與 HVAC 產業</p>
+    <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="columns.html">技術專欄</a> ／ 量子運算與 HVAC 產業</p>
     <p class="eyebrow">ASHRAE JOURNAL · ENGLISH ARTICLE</p>
     <h1>Quantum Computing &amp; The HVAC Industry</h1>
-    <p class="dek">ASHRAE Journal 英文文章全文。點擊任一英文單字，即可選擇 Oxford Learner’s Dictionaries 或 Cambridge Dictionary 查詢。</p>
     <p class="byline">Mario Mendoza, P.E., BCXP, HFDP; Yelissa Lopez; Ronald Diaz, P.E.; Adrian Johannes Menssen, Ph.D.｜ASHRAE Journal, November 2026, pp. 24–30</p>
     <p class="dictionary-hint">閱讀提示：滑鼠移到英文單字上會顯示可查詢狀態；點擊或以鍵盤選取單字，再選擇要開啟的線上辭典。</p>
 
@@ -233,17 +230,16 @@
         <li>Bloom, B.J., et al. 2014. “An optical lattice clock with accuracy and stability at the 10<sup>−18</sup> level.” <em>Nature</em> 506(7486):71–75.</li>
       </ol>
     </article>
-    <p class="source-note">來源：Mario Mendoza, Yelissa Lopez, Ronald Diaz, and Adrian Johannes Menssen, “Quantum Computing &amp; The HVAC Industry,” <em>ASHRAE Journal</em>, November 2026, pp. 24–30. 全文依使用者確認已取得公開轉載授權後刊載；原文中的數值與設計建議為作者所述，未經本網站另行驗證。</p>
-    <a class="back-link" href="columns.html">← 返回工程專欄</a>
+    <a class="back-link" href="columns.html">← 返回技術專欄</a>
   </main>
 
   <div class="dictionary-picker" id="dictionary-picker" role="dialog" aria-label="選擇英文線上辭典" hidden>
     <p>查詢 “<span id="dictionary-word-label"></span>”</p>
-    <a id="oxford-link" href="#" target="_blank" rel="noopener noreferrer">Oxford Learner’s Dictionaries</a>
+    <a id="oxford-link" href="#" target="_blank" rel="noopener noreferrer">Oxford Dictionary</a>
     <a id="cambridge-link" href="#" target="_blank" rel="noopener noreferrer">Cambridge Dictionary</a>
     <a id="longman-link" href="#" target="_blank" rel="noopener noreferrer">Longman Dictionary</a>
     <a id="collins-link" href="#" target="_blank" rel="noopener noreferrer">Collins Dictionary</a>
-    <a id="merriam-webster-link" href="#" target="_blank" rel="noopener noreferrer">Merriam-Webster</a>
+    <a id="merriam-webster-link" href="#" target="_blank" rel="noopener noreferrer">Merriam-Webster Dictionary</a>
   </div>
   <footer>
     <div class="wrap footer-inner">

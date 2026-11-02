@@ -27,9 +27,30 @@
 
       const columns = new DOMParser().parseFromString(await columnsResponse.text(), "text/html");
       const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
-      assert(columns.querySelectorAll("a.column-card").length === 5
+      assert(columns.querySelector("h1")?.textContent.trim() === "技術專欄"
+        && columns.querySelectorAll("a.column-card").length === 1
         && columns.querySelector('a[href="quantum-computing-hvac.html"] h2')?.textContent.includes("Quantum Computing"),
-      "Columns index links to the quantum HVAC article");
+      "Technical columns index lists only the quantum HVAC article");
+      const cover = columns.querySelector('a.column-card[href="quantum-computing-hvac.html"] img.column-cover');
+      assert(cover?.getAttribute("src") === "assets/quantum-hvac-cover.svg"
+        && cover.getAttribute("width") === "640" && cover.getAttribute("height") === "480",
+      "Quantum article card includes its illustrated cover with reserved dimensions");
+      const coverResponse = await fetch("../assets/quantum-hvac-cover.svg");
+      assert(coverResponse.ok, "Article cover responds");
+      const coverDocument = new DOMParser().parseFromString(await coverResponse.text(), "image/svg+xml");
+      assert(!coverDocument.querySelector("parsererror")
+        && coverDocument.documentElement.localName === "svg",
+      "Article cover is a valid SVG");
+      const notice = columns.querySelector(".educational-notice");
+      assert(notice?.querySelector("h2")?.textContent === "教育用途與使用聲明"
+        && notice.textContent.includes("教育、學習與技術交流")
+        && notice.textContent.includes("著作權")
+        && notice.textContent.includes("專業審查")
+        && notice.textContent.includes("外部字典"),
+      "Technical columns includes education, copyright, engineering, and external-link notices");
+      assert(!article.querySelector(".dek")
+        && !article.body.textContent.includes("ASHRAE Journal 英文文章全文。點擊任一英文單字"),
+      "Article omits the removed introductory dictionary description");
       assert(article.querySelector("h1")?.textContent.includes("Quantum Computing & The HVAC Industry"),
         "Article has its original title");
       assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
@@ -64,12 +85,12 @@
         "Reference DOI links are clickable");
       assert(!article.querySelector('iframe, embed, object, a[href$=".pdf"]'),
         "Article displays text rather than embedding the source PDF");
-      assert(article.querySelector("#dictionary-picker a#oxford-link")?.textContent.includes("Oxford Learner")
-        && article.querySelector("#dictionary-picker a#cambridge-link")?.textContent.includes("Cambridge Dictionary")
-        && article.querySelector("#dictionary-picker a#longman-link")?.textContent.includes("Longman Dictionary")
-        && article.querySelector("#dictionary-picker a#collins-link")?.textContent.includes("Collins Dictionary")
-        && article.querySelector("#dictionary-picker a#merriam-webster-link")?.textContent.includes("Merriam-Webster"),
-      "Dictionary picker offers Oxford, Cambridge, Longman, Collins, and Merriam-Webster");
+      assert(JSON.stringify(Array.from(article.querySelectorAll("#dictionary-picker a"),
+        (link) => link.textContent.trim()))
+        === JSON.stringify(["Oxford Dictionary", "Cambridge Dictionary",
+          "Longman Dictionary", "Collins Dictionary",
+          "Merriam-Webster Dictionary"]),
+      "Dictionary picker uses consistent short names ending in Dictionary");
 
       const frame = document.createElement("iframe");
       frame.src = `../quantum-computing-hvac.html?interaction-test=${Date.now()}`;

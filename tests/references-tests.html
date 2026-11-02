@@ -29,14 +29,15 @@
         const response = await fetch(`../${path}?navigation-test=${Date.now()}`);
         assert(response.ok, `${path} responds`);
         const page = new DOMParser().parseFromString(await response.text(), "text/html");
-        assert(page.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
+        assert(page.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "技術專欄",
           `${path} links to the technical columns`);
         if (path === "columns.html") {
-          assert(page.querySelector("h1")?.textContent.trim() === "冷凍空調專欄"
-            && page.querySelectorAll("a.column-card").length === 5,
-          "Engineering columns archive contains the restored set plus the quantum article");
-          assert(!page.querySelector('a[href="vrf.html"], a[href="low-flow-chiller.html"], a[href="ahu-project-case.html"]'),
-            "Later articles are not listed in the restored archive");
+          assert(page.querySelector("h1")?.textContent.trim() === "技術專欄"
+            && page.querySelectorAll("a.column-card").length === 1
+            && page.querySelector('a.column-card[href="quantum-computing-hvac.html"]'),
+          "Technical columns lists only the quantum article");
+          assert(!page.querySelector('a[href="glycol.html"], a[href="chiller.html"], a[href="mau.html"], a[href="ahu.html"], a[href="vrf.html"], a[href="low-flow-chiller.html"], a[href="ahu-project-case.html"]'),
+            "Other articles are not listed in the technical columns");
         }
         assert(!page.querySelector('nav a[href="references.html"]'),
           `${path} does not expose the bibliography in the site navigation`);

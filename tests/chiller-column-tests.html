@@ -32,11 +32,11 @@
       const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
       assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
         "Chiller article includes the scroll-to-top button");
-      assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
+      assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "技術專欄",
         "Main navigation links to the engineering columns");
-      assert(columns.querySelectorAll("a.column-card").length === 5
-        && columns.querySelector('a[href="chiller.html"] h2')?.textContent.includes("冰水主機 Chiller"),
-      "Chiller article is listed in the columns archive");
+      assert(columns.querySelectorAll("a.column-card").length === 1
+        && !columns.querySelector('a[href="chiller.html"]'),
+      "Chiller article remains available by route but is hidden from the technical columns");
 
       const text = article.body.textContent;
       for (const phrase of [

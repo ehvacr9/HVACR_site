@@ -30,11 +30,11 @@
       const home = new DOMParser().parseFromString(await homeResponse.text(), "text/html");
       const columns = new DOMParser().parseFromString(await columnsResponse.text(), "text/html");
       const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
-      assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "工程專欄",
+      assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "技術專欄",
         "Main navigation links to engineering columns");
-      assert(columns.querySelectorAll("a.column-card").length === 5
-        && columns.querySelector('a[href="mau.html"] h2')?.textContent.includes("外氣空調箱 MAU"),
-      "MAU article is listed in the columns archive");
+      assert(columns.querySelectorAll("a.column-card").length === 1
+        && !columns.querySelector('a[href="mau.html"]'),
+      "MAU article remains available by route but is hidden from the technical columns");
       assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
         "MAU article includes the scroll-to-top button");
 

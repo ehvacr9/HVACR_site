@@ -27,7 +27,7 @@
 
       const columns = new DOMParser().parseFromString(await columnsResponse.text(), "text/html");
       const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
-      assert(columns.querySelectorAll("a.column-card").length === 5
+      assert(columns.querySelectorAll("a.column-card").length === 1
         && !columns.querySelector('a[href="ahu-project-case.html"]'),
       "AHU project case remains available by route but is hidden from the restored archive");
       assert(article.title.includes("ASHRAE 混風範例"), "Case article title identifies the handbook-based AHU case");

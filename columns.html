@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="以 ASHRAE Handbook 等資料為基礎，整理冷凍空調原理與工程實務專欄。">
+  <meta name="description" content="技術專欄：閱讀 Quantum Computing &amp; The HVAC Industry 英文文章，並使用線上字典查詢單字。">
   <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
-  <title>冷凍空調專欄｜能源與冷凍空調學習網</title>
+  <title>技術專欄｜能源與冷凍空調學習網</title>
   <style>
     :root {
       color-scheme: light;
@@ -46,6 +46,10 @@
     h1, h2 { font-family: var(--serif); font-weight: 500; letter-spacing: -.035em; }
     h1 { max-width: 820px; margin-bottom: 18px; font-size: clamp(36px, 5vw, 58px); line-height: 1.25; }
     .intro { max-width: 760px; margin-bottom: 36px; color: var(--muted); font-size: 16px; }
+    .educational-notice { max-width: 1000px; margin-top: 32px; padding: 22px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); font-size: 14px; }
+    .educational-notice h2 { margin-bottom: 12px; color: var(--ink); font-size: 22px; }
+    .educational-notice p { margin-bottom: 12px; }
+    .educational-notice p:last-child { margin-bottom: 0; }
     .column-card { display: grid; max-width: 1000px; grid-template-columns: minmax(180px, .7fr) 1.3fr; gap: 26px; padding: 28px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); text-decoration: none; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
     .column-card:hover { transform: translateY(-2px); border-color: #a9beb0; box-shadow: 0 12px 30px rgba(23, 43, 43, .08); }
     .card-art { display: grid; min-height: 196px; place-items: center; overflow: hidden; border-radius: 7px; background: linear-gradient(145deg, #e5eee4, #cbded2); }
@@ -53,7 +57,7 @@
     .chiller-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 24px; font-weight: 700; letter-spacing: -.04em; }
     .mau-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 30px; font-weight: 700; letter-spacing: -.04em; }
     .ahu-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 30px; font-weight: 700; letter-spacing: -.04em; }
-    .quantum-mark { display: grid; width: 112px; height: 112px; place-items: center; border: 1px solid rgba(29, 98, 82, .25); border-radius: 50%; background: rgba(255, 254, 250, .8); color: var(--green); font-family: var(--serif); font-size: 25px; font-weight: 700; letter-spacing: -.04em; }
+    .column-cover { display: block; width: 100%; height: auto; }
     .card-copy { align-self: center; }
     .card-kicker { margin-bottom: 10px; color: var(--green); font-size: 12px; font-weight: 750; letter-spacing: .1em; }
     .card-copy h2 { margin-bottom: 12px; font-size: clamp(25px, 3vw, 34px); }
@@ -90,7 +94,6 @@
       .chiller-mark { width: 88px; height: 88px; font-size: 21px; }
       .mau-mark { width: 88px; height: 88px; font-size: 26px; }
       .ahu-mark { width: 88px; height: 88px; font-size: 26px; }
-      .quantum-mark { width: 88px; height: 88px; font-size: 23px; }
       .scroll-top-button { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
@@ -107,62 +110,33 @@
       <a href="about.html">關於我們</a>
       <a href="exam-years.html">技師考題</a>
       <a href="terminology.html">術語辭典</a>
-      <a href="columns.html" aria-current="page">工程專欄</a>
+      <a href="columns.html" aria-current="page">技術專欄</a>
       <a href="tools.html">計算工具</a>
     </nav>
   </header>
   <main class="wrap page">
-    <p class="breadcrumb"><a href="index.html">首頁</a> ／ 專欄</p>
+    <p class="breadcrumb"><a href="index.html">首頁</a> ／ <span aria-current="page">技術專欄</span></p>
     <p class="eyebrow">HVACR · Technical Columns</p>
-    <h1>冷凍空調專欄</h1>
-    <p class="intro">以工程手冊與技術資料為基礎，將冷凍空調常見材料、設備與系統原理整理成容易查閱的專題。</p>
+    <h1>技術專欄</h1>
+    <p class="intro">閱讀冷凍空調與新興科技的英文技術文章，並透過線上字典查詢單字。</p>
     <section aria-label="專欄文章">
-      <a class="column-card" href="glycol.html">
-        <div class="card-art" aria-hidden="true"><span class="glycol-mark">EG</span></div>
-        <div class="card-copy">
-          <p class="card-kicker">SECONDARY COOLANTS · 01</p>
-          <h2>乙二醇水系統：從選濃度到試運轉</h2>
-          <p>用 ASHRAE 物性資料做濃度初選與流量估算，並掌握泵浦檢核、充填試運轉、維護和故障排查。</p>
-          <span class="card-link">閱讀專欄 →</span>
-        </div>
-      </a>
-      <a class="column-card" href="chiller.html">
-        <div class="card-art" aria-hidden="true"><span class="chiller-mark">CHILLER</span></div>
-        <div class="card-copy">
-          <p class="card-kicker">CENTRAL PLANT · 02</p>
-          <h2>冰水主機 Chiller：從冷凍循環到現場運轉</h2>
-          <p>用三個迴路看懂冰水主機，從流量估算、設備選型到試車、效率與故障排查。</p>
-          <span class="card-link">閱讀專欄 →</span>
-        </div>
-      </a>
-      <a class="column-card" href="mau.html">
-        <div class="card-art" aria-hidden="true"><span class="mau-mark">MAU</span></div>
-        <div class="card-copy">
-          <p class="card-kicker">VENTILATION · 03</p>
-          <h2>外氣空調箱 MAU：從外氣負荷到現場試車</h2>
-          <p>掌握外氣量與空氣平衡、濕空氣負荷估算、盤管與風機檢核、控制及試車排故。</p>
-          <span class="card-link">閱讀專欄 →</span>
-        </div>
-      </a>
-      <a class="column-card" href="ahu.html">
-        <div class="card-art" aria-hidden="true"><span class="ahu-mark">AHU</span></div>
-        <div class="card-copy">
-          <p class="card-kicker">AIR HANDLING · 04</p>
-          <h2>空氣處理箱 AHU：從氣流路徑到現場調試</h2>
-          <p>看懂混風、過濾、盤管與風機的配合，並掌握熱負荷估算、選型、控制及試車排故。</p>
-          <span class="card-link">閱讀專欄 →</span>
-        </div>
-      </a>
       <a class="column-card" href="quantum-computing-hvac.html">
-        <div class="card-art" aria-hidden="true"><span class="quantum-mark">Q&amp;HVAC</span></div>
+        <div class="card-art" aria-hidden="true"><img class="column-cover" src="assets/quantum-hvac-cover.svg" width="640" height="480" alt=""></div>
         <div class="card-copy">
-          <p class="card-kicker">QUANTUM COMPUTING · 05</p>
+          <p class="card-kicker">QUANTUM COMPUTING · 01</p>
           <h2>Quantum Computing &amp; The HVAC Industry</h2>
-          <p>閱讀 ASHRAE Journal 英文全文，並點選單字使用 Oxford Learner’s Dictionaries 或 Cambridge Dictionary 查詢。</p>
+          <p>閱讀 ASHRAE Journal 英文全文，點選單字即可從五本線上字典中選擇查詢。</p>
           <span class="card-link">閱讀文章 →</span>
         </div>
       </a>
     </section>
+    <aside class="educational-notice" aria-labelledby="educational-notice-title">
+      <h2 id="educational-notice-title">教育用途與使用聲明</h2>
+      <p>本專欄以教育、學習與技術交流為目的，協助讀者理解冷凍空調及相關科技，並練習英文技術閱讀。</p>
+      <p>文章著作權屬原作者或權利人所有，來源與刊載資訊請參閱各文章頁面。教育用途不代表內容可自由轉載；重製、散布、翻譯或其他利用，仍須遵守著作權法及相關授權條件。</p>
+      <p>內容僅供學習參考，不構成個案工程設計、施工或操作建議，亦不能取代現行法規、標準、原廠技術文件與合格專業人員的評估。實際應用前，應依現場條件查證資料並完成必要的專業審查。</p>
+      <p>外部字典連結僅供查詢便利，其內容、可用性及使用規範由各網站負責；列出來源或提供連結，不代表原作者、出版機構或字典服務對本網站提供背書。</p>
+    </aside>
   </main>
   <footer>
     <div class="wrap footer-inner">

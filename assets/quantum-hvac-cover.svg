@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" fill="none">
+  <title>Quantum Computing &amp; The HVAC Industry</title>
+  <desc>Original editorial illustration of a quantum chip, qubit orbits and cooling circuits in deep green and warm ivory. Conceptual artwork, not a system diagram.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="640" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#102E2C"/>
+      <stop offset="1" stop-color="#205C50"/>
+    </linearGradient>
+    <linearGradient id="chip" x1="266" y1="190" x2="376" y2="306" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#437E6B"/>
+      <stop offset="1" stop-color="#143F39"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" stroke="#CCE1CF" stroke-opacity=".07"/>
+    </pattern>
+  </defs>
+  <rect width="640" height="480" fill="url(#background)"/>
+  <rect width="640" height="480" fill="url(#grid)"/>
+  <circle cx="320" cy="248" r="160" fill="#92BDA4" fill-opacity=".04"/>
+  <circle cx="320" cy="248" r="136" stroke="#C9DDB8" stroke-opacity=".18"/>
+  <path d="M32 38H68" stroke="#D8DEAA" stroke-width="3"/>
+  <text x="80" y="43" fill="#D8DEAA" font-family="Arial, Helvetica, sans-serif" font-size="14" letter-spacing="3">TECHNICAL COLUMN / 01</text>
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <path d="M0 208H104Q120 208 120 224V296Q120 312 136 312H214M0 232H80Q96 232 96 248V320Q96 336 112 336H192"
+      stroke="#84C8BC" stroke-width="3"/>
+    <path d="M640 176H542Q526 176 526 192V264Q526 280 510 280H426M640 200H566Q550 200 550 216V288Q550 304 534 304H448"
+      stroke="#D8DEAA" stroke-width="3"/>
+    <path d="M44 200L52 208L44 216M590 168L582 176L590 184" stroke="#F3F0DA" stroke-width="2"/>
+    <circle cx="158" cy="312" r="7" fill="#153E37" stroke="#84C8BC" stroke-width="2"/>
+    <path d="M156 308L160 316M154 314L162 310" stroke="#84C8BC"/>
+    <circle cx="488" cy="280" r="7" fill="#153E37" stroke="#D8DEAA" stroke-width="2"/>
+    <path d="M486 276L490 284M484 282L492 278" stroke="#D8DEAA"/>
+    <rect x="248" y="176" width="144" height="144" rx="18" fill="#123B35" stroke="#94B59E"/>
+    <path d="M272 164V176M296 164V176M320 164V176M344 164V176M368 164V176M272 320V332M296 320V332M320 320V332M344 320V332M368 320V332M236 200H248M236 224H248M236 248H248M236 272H248M236 296H248M392 200H404M392 224H404M392 248H404M392 272H404M392 296H404"
+      stroke="#C5CFA8" stroke-width="3"/>
+    <rect x="266" y="194" width="108" height="108" rx="10" fill="url(#chip)" stroke="#B3C9AB"/>
+    <ellipse cx="320" cy="248" rx="106" ry="38" stroke="#A8D9C7" stroke-width="2" transform="rotate(-32 320 248)"/>
+    <ellipse cx="320" cy="248" rx="106" ry="38" stroke="#D8DEAA" stroke-width="2" transform="rotate(32 320 248)"/>
+    <circle cx="320" cy="248" r="12" fill="#F1ECCC"/>
+    <circle cx="232" cy="194" r="6" fill="#D8DEAA"/>
+    <circle cx="408" cy="194" r="6" fill="#A8D9C7"/>
+  </g>
+  <path d="M32 368H608" stroke="#BED1B8" stroke-opacity=".3"/>
+  <text x="32" y="412" fill="#F6F3E5" font-family="Georgia, 'Times New Roman', serif" font-size="40">Quantum Computing</text>
+  <text x="32" y="450" fill="#D8DEAA" font-family="Arial, Helvetica, sans-serif" font-size="23" letter-spacing="2">&amp; THE HVAC INDUSTRY</text>
+</svg>
