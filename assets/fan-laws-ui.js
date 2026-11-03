@@ -32,11 +32,6 @@ function updateLaw() {
 form.addEventListener("input", clearResults);
 form.addEventListener("change", clearResults);
 law.addEventListener("change", updateLaw);
-document.querySelector("#fluid").addEventListener("change", (event) => {
-  const density = event.target.value === "air" ? "1.204" : "998.2";
-  document.querySelector("#base-density").value = density;
-  document.querySelector("#target-density").value = density;
-});
 form.addEventListener("invalid", () => {
   clearResults();
   status.textContent = "請修正欄位中的無效或缺漏數值後重新計算。";
@@ -61,9 +56,7 @@ form.addEventListener("submit", (event) => {
     const input = wrapper.querySelector("input");
     if (input.disabled) input.value = String(Number(result[wrapper.dataset.known].toPrecision(7)));
   }
-  warning.textContent = document.querySelector("#fluid").value === "water"
-    ? "水泵估算：請核對系統曲線、靜揚程、NPSH 與原廠泵浦曲線；葉輪修剪不等於幾何相似縮放。"
-    : "風機估算：請核對系統曲線、靜壓／全壓定義與原廠風機曲線；請勿將軸功率直接當作耗電量。";
+  warning.textContent = "估算結果須依實際系統曲線及設備性能曲線核對；壓差定義需一致，軸功率也不可直接視為耗電量。";
   warning.hidden = false;
   status.textContent = `${lawSets[law.value].label}計算完成。`;
 });

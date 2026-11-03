@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="風機相似定律計算器：依目標轉速、壓差或流量選擇 Law 1、2、3，估算空氣風機與水泵的相似工況。">
+  <meta name="description" content="風機相似定律計算器：依目標轉速、壓差或流量選擇 Law 1、2、3，估算風機相似工況。">
   <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
   <title>風機定律計算器｜計算工具</title>
   <style>
@@ -19,29 +19,75 @@
     nav { display: flex; flex-wrap: wrap; gap: 12px 24px; font-size: 13px; }
     nav a { color: var(--muted); text-decoration: none; }
     nav a[aria-current] { color: var(--green); }
-    main { padding-block: 48px 72px; }
-    h1 { font-size: clamp(28px, 5vw, 42px); line-height: 1.3; }
+    main { padding-block: 40px 72px; }
+    .breadcrumb { margin: 0 0 22px; }
+    h1 { margin: 0 0 12px; font-size: clamp(28px, 5vw, 42px); line-height: 1.3; }
+    main > p:not(.breadcrumb) { max-width: 760px; margin: 0; color: var(--muted); }
     h2 { color: var(--green); font-size: 23px; }
     .breadcrumb, .hint { color: var(--muted); font-size: 14px; }
-    .panel { margin-top: 24px; padding: clamp(18px, 3vw, 28px); border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    .panel { margin-top: 28px; padding: clamp(20px, 3vw, 30px); border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    #fan-form { overflow: hidden; margin-top: 24px; padding: 0; }
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    .setup-panel { padding: 22px 26px; background: #f0f3ec; }
+    .setup-panel > .grid { grid-template-columns: minmax(0, 360px); gap: 16px 24px; }
+    .setup-panel label { margin-top: 0; }
+    #law-hint { margin: 16px 0 8px; padding: 10px 14px; border-left: 3px solid #9ab952; border-radius: 0 4px 4px 0; background: rgba(255, 254, 250, .8); color: #405650; font-size: 14px; }
+    .condition-grid { gap: 0; }
+    .condition-grid fieldset { min-width: 0; margin: 0; padding: 22px 26px; border: 0; border-radius: 0; background: var(--surface); }
+    .condition-grid fieldset + fieldset { border-left: 1px solid var(--line); background: #fbfbf7; }
+    .condition-grid legend { padding: 0 0 8px; font-size: 18px; }
+    .parameter-field { display: grid; grid-template-columns: minmax(0, 1fr) minmax(112px, 36%); gap: 8px 14px; align-items: center; margin-top: 10px; }
+    .parameter-field label { min-width: 0; margin: 0; line-height: 1.45; }
+    .parameter-field input { min-width: 0; }
+    .form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; padding: 14px 26px; border-top: 1px solid var(--line); background: #f7f8f3; }
+    .form-actions button { flex: 0 0 auto; min-width: 104px; margin: 0; }
+    .action-feedback { min-width: 0; flex: 1; }
+    .action-feedback p { margin: 0; }
+    .density-reference { flex: 0 0 100%; margin: 0; color: var(--muted); font-size: 13px; }
+    #result-status { color: var(--muted); font-size: 13px; }
+    .calculation-notes { margin: 0; padding: 0; color: var(--muted); font-size: 13px; }
+    .calculation-notes p { margin: 0; padding: 8px 26px 12px; }
+    .formula-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; padding: 0; }
+    main > .formula-panel { margin-top: 14px; }
+    .formula-content { min-width: 0; padding: 18px 22px; }
+    .formula-content h2, .formula-symbols h2 { margin: 0 0 9px; color: var(--green); font-size: 20px; }
+    .formula-symbols { align-self: stretch; margin: 0; padding: 18px 22px; border-left: 1px solid var(--line); background: #fbfbf7; color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .formula-symbols h2 { font-size: 18px; }
+    .formula-symbols ul { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; text-align: left; }
+    .formula-symbols li { margin: 0; }
+    .formula-symbols p { margin: 7px 0 0; text-align: left; }
     #target-conditions input:disabled { background: #ececec; color: #a32828; -webkit-text-fill-color: #a32828; opacity: 1; cursor: not-allowed; }
-    #result-warning { font-size: 14px; color: var(--muted); }
-    .calculation-notes { margin-top: 16px; color: var(--muted); font-size: 14px; }
-    .calculation-notes summary { cursor: pointer; color: var(--green); font-weight: 700; }
-    fieldset { min-width: 0; border: 1px solid var(--line); border-radius: 8px; padding: 20px; }
+    #result-warning { color: var(--muted); }
+    fieldset { min-width: 0; }
     legend { font-weight: 700; color: var(--green); }
-    label { display: block; margin-block: 12px 5px; font-size: 14px; font-weight: 700; }
+    label { display: block; margin-block: 12px 5px; font-size: 13px; font-weight: 700; }
     input, select { width: 100%; min-height: 44px; padding: 9px; border: 1px solid #a9beb0; border-radius: 5px; background: #fff; color: var(--ink); font: inherit; }
-    button { padding: 12px 24px; margin-top: 20px; border: 0; border-radius: 5px; background: var(--green); color: white; font: inherit; cursor: pointer; }
-    a:focus-visible, input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid #9ab952; outline-offset: 3px; }
-    #law-hint { padding: 14px; background: #edf1e7; border-left: 3px solid var(--green); }
+    button { padding: 11px 22px; border: 0; border-radius: 5px; background: var(--green); color: white; font: inherit; font-weight: 700; cursor: pointer; }
+    button:hover { background: #174f43; }
+    a:focus-visible, input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid #9ab952; outline-offset: 3px; }
     #error { color: #a32828; }
-    .formula { overflow-wrap: anywhere; padding: 10px; margin-block: 8px; background: #edf1e7; }
+    #formulas { display: grid; gap: 4px; justify-items: start; }
+    .formula { width: fit-content; max-width: 100%; overflow-wrap: anywhere; padding: 5px 10px; margin: 0; border-left: 3px solid #9ab952; background: #f3f5ef; font-size: 14px; line-height: 1.5; font-variant-numeric: lining-nums; }
     footer { padding: 24px; border-top: 1px solid var(--line); text-align: center; }
     footer p { color: var(--muted); font-size: 12px; }
     [hidden] { display: none !important; }
-    @media(max-width: 650px) { .wrap { width: calc(100% - 32px); } .grid { grid-template-columns: 1fr; } .topbar { padding-inline: 16px; } nav { font-size: 12px; gap: 8px 14px; } }
+    @media(max-width: 760px) {
+      .condition-grid { grid-template-columns: 1fr; }
+      .condition-grid fieldset + fieldset { border-top: 1px solid var(--line); border-left: 0; }
+      .formula-panel { grid-template-columns: 1fr; }
+      .formula-content, .formula-symbols { padding: 16px 20px; }
+      .formula-symbols { border-top: 1px solid var(--line); border-left: 0; }
+    }
+    @media(max-width: 650px) {
+      .wrap { width: calc(100% - 32px); }
+      .grid { grid-template-columns: 1fr; }
+      .topbar { padding-inline: 16px; }
+      nav { font-size: 12px; gap: 8px 14px; }
+      main { padding-block: 32px 54px; }
+      .setup-panel, .condition-grid fieldset, .form-actions { padding-inline: 18px; }
+      .calculation-notes p { padding-inline: 18px; }
+      .formula-content, .formula-symbols { padding-inline: 18px; }
+    }
   </style>
   <link rel="stylesheet" href="assets/scroll-top.css">
 </head>
@@ -53,59 +99,66 @@
   <main class="wrap">
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="tools.html">計算工具</a> ／ <span aria-current="page">風機定律計算器</span></p>
     <h1>風機定律計算器</h1>
-    <p>輸入原型參數（下標 1），再依已知的目標轉速、壓差或流量選擇定律，即可估算目標工況（下標 2）。三組定律以相同的相似關係為基礎，只是依不同的已知條件求解。</p>
+    <p>輸入原型參數，再依已知的目標轉速、壓差或流量選擇定律，即可估算目標工況。三組定律以相同的相似關係為基礎，只是依不同的已知條件求解。</p>
     <form id="fan-form" class="panel">
+      <div class="setup-panel">
       <div class="grid">
-        <div><label for="fluid">流體</label><select id="fluid"><option value="air">空氣（風機）</option><option value="water">水（泵浦相似工況）</option></select></div>
         <div><label for="law">已知哪一項目標條件？</label><select id="law" aria-describedby="law-hint"><option value="speed">Law 1：已知目標轉速 N₂</option><option value="pressure">Law 2：已知目標壓差 Δp₂</option><option value="flow">Law 3：已知目標流量 Q₂</option></select></div>
       </div>
       <p id="law-hint" role="status"></p>
-      <p class="hint">密度參考值：空氣 1.204 kg/m³（20°C、101.325 kPa、乾空氣）；水 998.2 kg/m³（約 20°C）。選擇流體會重設兩側密度為參考值，不會自動查物性；請依實際溫度、壓力及濕度修正。可使用<a href="humid-air.html">濕空氣性質</a>或<a href="water-refrigerant.html">水與冷媒性質</a>工具查證。</p>
-      <div class="grid">
+      </div>
+      <div class="grid condition-grid">
         <fieldset><legend>原型參數</legend>
-          <label for="base-diameter">葉輪直徑 D₁（m）</label><input id="base-diameter" type="number" step="any" min="0" required value="0.5">
-          <label for="base-speed">轉速 N₁（rpm）</label><input id="base-speed" type="number" step="any" min="0" required value="1200">
-          <label for="base-flow">實際體積流量 Q₁（m³/h）</label><input id="base-flow" type="number" step="any" min="0" required value="10000">
-          <label for="base-pressure">壓差 Δp₁（Pa）</label><input id="base-pressure" type="number" step="any" min="0" required value="500">
-          <label for="base-power">軸功率 W₁（kW）</label><input id="base-power" type="number" step="any" min="0" required value="3">
-          <label for="base-density">密度 ρ₁（kg/m³）</label><input id="base-density" type="number" step="any" min="0" required value="1.204">
+          <div class="parameter-field"><label for="base-diameter">葉輪直徑 D₁（m）</label><input id="base-diameter" type="number" step="any" min="0" required value="0.5"></div>
+          <div class="parameter-field"><label for="base-speed">轉速 N₁（rpm）</label><input id="base-speed" type="number" step="any" min="0" required value="1200"></div>
+          <div class="parameter-field"><label for="base-flow">實際體積流量 Q₁（m³/h）</label><input id="base-flow" type="number" step="any" min="0" required value="10000"></div>
+          <div class="parameter-field"><label for="base-pressure">壓差 Δp₁（Pa）</label><input id="base-pressure" type="number" step="any" min="0" required value="500"></div>
+          <div class="parameter-field"><label for="base-power">軸功率 W₁（kW）</label><input id="base-power" type="number" step="any" min="0" required value="3"></div>
+          <div class="parameter-field"><label for="base-density">密度 ρ₁（kg/m³）</label><input id="base-density" type="number" step="any" min="0" required value="1.204"></div>
         </fieldset>
         <fieldset id="target-conditions"><legend>目標條件</legend>
-          <label for="target-diameter">葉輪直徑 D₂（m）</label><input id="target-diameter" type="number" step="any" min="0" required value="0.5">
-          <div data-known="speed"><label for="target-speed">目標轉速 N₂（rpm）<span class="field-role"> · 已知</span></label><input id="target-speed" type="number" step="any" min="0" required value="960"></div>
-          <div data-known="flow"><label for="target-flow">目標實際體積流量 Q₂（m³/h）<span class="field-role"> · 計算</span></label><input id="target-flow" type="number" step="any" min="0" placeholder="計算後顯示" disabled></div>
-          <div data-known="pressure"><label for="target-pressure">目標壓差 Δp₂（Pa）<span class="field-role"> · 計算</span></label><input id="target-pressure" type="number" step="any" min="0" placeholder="計算後顯示" disabled></div>
-          <div data-known="power"><label for="target-power">目標軸功率 W₂（kW）<span class="field-role"> · 計算</span></label><input id="target-power" type="number" step="any" min="0" placeholder="計算後顯示" disabled></div>
-          <label for="target-density">密度 ρ₂（kg/m³）</label><input id="target-density" type="number" step="any" min="0" required value="1.204">
+          <div class="parameter-field"><label for="target-diameter">葉輪直徑 D₂（m）</label><input id="target-diameter" type="number" step="any" min="0" required value="0.5"></div>
+          <div class="parameter-field" data-known="speed"><label for="target-speed">目標轉速 N₂（rpm）<span class="field-role"> · 已知</span></label><input id="target-speed" type="number" step="any" min="0" required></div>
+          <div class="parameter-field" data-known="flow"><label for="target-flow">目標實際體積流量 Q₂（m³/h）<span class="field-role"> · 計算</span></label><input id="target-flow" type="number" step="any" min="0" placeholder="計算後顯示" disabled></div>
+          <div class="parameter-field" data-known="pressure"><label for="target-pressure">目標壓差 Δp₂（Pa）<span class="field-role"> · 計算</span></label><input id="target-pressure" type="number" step="any" min="0" placeholder="計算後顯示" disabled></div>
+          <div class="parameter-field" data-known="power"><label for="target-power">目標軸功率 W₂（kW）<span class="field-role"> · 計算</span></label><input id="target-power" type="number" step="any" min="0" placeholder="計算後顯示" disabled></div>
+          <div class="parameter-field"><label for="target-density">密度 ρ₂（kg/m³）</label><input id="target-density" type="number" step="any" min="0" required value="1.204"></div>
         </fieldset>
       </div>
-      <button type="submit">計算</button>
-      <p id="error" role="alert" hidden></p>
-      <p id="result-status" role="status">請確認範例數值或輸入工程條件，再按計算。</p>
-      <details class="calculation-notes">
-        <summary>操作說明與工程提醒</summary>
-        <p>直徑、密度與本組已知條件可輸入；灰底紅字欄位為鎖定的計算結果。修改條件後請重新計算。同一設備變轉速時，兩側直徑相同；更換尺寸僅適用幾何相似設備。</p>
+      </div>
+      <div class="form-actions">
+        <button type="submit">計算</button>
+        <div class="action-feedback">
+          <p id="error" role="alert" hidden></p>
+          <p id="result-status" role="status">請確認範例數值或輸入工程條件，再按計算。</p>
+        </div>
+        <p class="density-reference">密度預設為乾空氣參考值 1.204 kg/m³（20°C、101.325 kPa）。</p>
+      </div>
+      <section class="calculation-notes" aria-label="工程提醒">
         <p id="result-warning" hidden></p>
-      </details>
+      </section>
     </form>
-    <section class="panel" aria-labelledby="formula-title"><h2 id="formula-title">本組計算公式</h2><div id="formulas"></div><p class="hint">D：葉輪直徑（m）；N：轉速（rpm）；Q：實際體積流量（m³/h）；Δp：設備壓升／壓差（Pa）；W：軸功率（kW，非電功率）；ρ：密度（kg/m³）。下標 1 為原型，下標 2 為目標。壓差需使用相同定義，不可混用靜壓與全壓。</p></section>
-    <section class="panel" aria-labelledby="limits-title">
-      <h2 id="limits-title">選用提示與適用限制</h2>
-      <ul>
-        <li>Law 1 適合已知轉速；Law 2 適合已知壓差；Law 3 適合已知流量。每組 a、b、c 分別顯示三個待求量；原型須具備完整的 D、N、Q、Δp、W、ρ。</li>
-        <li>前提為幾何相似、相似運轉點、效率近似不變，以及可忽略壓縮性。大幅改變轉速、尺寸、雷諾數或馬赫數時，須以原廠性能曲線與試驗確認。</li>
-        <li>選擇水時為泵浦相似定律估算，不是用風機輸送水。同一泵浦調速可套用；僅修剪葉輪直徑通常不符合全幾何相似，不可直接套用此處 D³、D⁵ 的尺度關係。</li>
-        <li>水的 Δp 為泵浦壓差，不是揚程 H；以 Δp = ρgH 換算（g ≈ 9.80665 m/s²）。有靜揚程的系統，實際工作點不一定遵循本工具的簡化比例。</li>
-        <li>本工具不求解系統曲線交點，也不檢核失速、喘振、汽蝕、NPSH、機械強度或馬達容量。軸功率不等於輸入電功率，後者還需考慮馬達與驅動效率。</li>
-        <li>本工具供教育與初步估算，不能取代工程選型。</li>
-      </ul>
+    <section class="panel formula-panel" aria-labelledby="formula-title">
+      <div class="formula-content"><h2 id="formula-title">本組計算公式</h2><div id="formulas"></div></div>
+      <aside class="formula-symbols" aria-label="公式符號說明">
+        <h2>符號說明</h2>
+        <ul>
+          <li>D：葉輪直徑（m）</li>
+          <li>N：轉速（rpm）</li>
+          <li>Q：實際體積流量（m³/h）</li>
+          <li>Δp：設備壓升／壓差（Pa）</li>
+          <li>W：軸功率（kW，非電功率）</li>
+          <li>ρ：密度（kg/m³）</li>
+        </ul>
+        <p>下標 1 為原型，下標 2 為目標。壓差需使用相同定義，不可混用靜壓與全壓。</p>
+      </aside>
     </section>
   </main>
   <footer>
     <a class="brand" href="index.html"><img src="assets/hvacr-learning-logo.svg?v=3" alt=""><span>能源與冷凍空調學習網</span></a>
     <p>Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</p>
   </footer>
-  <script type="module" src="assets/fan-laws-ui.js"></script>
+  <script type="module" src="assets/fan-laws-ui.js?v=2"></script>
   <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
   <script type="module" src="assets/scroll-top.js"></script>
 </body>

@@ -68,10 +68,65 @@
       document.body.append(frame);
       await new Promise((resolve) => { frame.onload = resolve; frame.src = `../fan-laws.html?test=${Date.now()}`; });
       const doc = frame.contentDocument;
+      const style = frame.contentWindow.getComputedStyle.bind(frame.contentWindow);
+      assert(doc.querySelector("#result-warning").hidden
+        && doc.querySelector(".calculation-notes").getBoundingClientRect().height === 0,
+      "Hidden engineering warning leaves no blank space below the calculator");
+      assert(doc.querySelector(".formula-panel").getBoundingClientRect().top
+        - doc.querySelector("#fan-form").getBoundingClientRect().bottom <= 16,
+      "Formula panel sits close to the calculator");
+      assert(doc.querySelector("#fan-form").children.length === 4
+        && [...doc.querySelector("#fan-form").children].map((element) => element.className || element.id)
+          .join("|") === "setup-panel|grid condition-grid|form-actions|calculation-notes",
+      "Calculator inputs, action and guidance form one unified card");
+      assert(style(doc.querySelector(".condition-grid fieldset")).borderTopWidth === "0px"
+        && style(doc.querySelector(".condition-grid fieldset + fieldset")).borderLeftWidth === "1px",
+      "Prototype and target fields use a shared divider instead of separate cards");
+      assert(doc.querySelectorAll("main > .panel").length === 2,
+        "Calculator and formula remain the only main panels");
+      assert(doc.querySelector(".formula-panel h2").textContent === "本組計算公式"
+        && doc.querySelectorAll("#formulas .formula").length === 3,
+      "Formula panel has a left-aligned equations area");
+      assert(doc.querySelector(".formula-symbols").textContent.includes("符號說明")
+        && doc.querySelector(".formula-symbols").textContent.includes("ρ：密度"),
+      "Formula symbol definitions are in a distinct right-side area");
+      assert(doc.querySelectorAll(".formula-symbols li").length === 6
+        && [...doc.querySelectorAll(".formula-symbols li")].every((item) =>
+          style(item).textAlign === "left" && item.getBoundingClientRect().height > 0),
+      "Formula symbols are left-aligned on separate lines");
+      assert(Number.parseFloat(style(doc.querySelector(".formula-content")).paddingTop) <= 18
+        && Number.parseFloat(style(doc.querySelector(".formula-symbols")).lineHeight) <= 21
+        && Number.parseFloat(style(doc.querySelector("#formulas")).rowGap) <= 4,
+      "Formula and symbol layout uses compact spacing");
+      assert(!doc.querySelector("main").textContent.includes("原型參數（下標 1）")
+        && !doc.querySelector("main").textContent.includes("目標工況（下標 2）"),
+      "Intro omits redundant subscript parentheticals");
+      assert(doc.querySelectorAll(".condition-grid .parameter-field").length === 12,
+        "All prototype and target values use aligned parameter rows");
+      assert(doc.querySelector(".density-reference").textContent === "密度預設為乾空氣參考值 1.204 kg/m³（20°C、101.325 kPa）。"
+        && !doc.querySelector('a[href="humid-air.html"]'),
+      "Density reference is retained without the property-tool link");
+      assert(!doc.querySelector(".calculation-notes h2")
+        && !doc.body.textContent.includes("直徑、密度與本組已知條件可輸入"),
+      "Remove the operation guide heading and paragraph");
+      const lawSelect = doc.querySelector("#law").getBoundingClientRect();
+      const setupPanel = doc.querySelector(".setup-panel").getBoundingClientRect();
+      assert(lawSelect.width <= 360 && lawSelect.right <= setupPanel.right,
+        "Law selector has a compact width");
+      assert(!doc.querySelector("#fluid")
+        && doc.querySelector("#base-density").value === "1.204"
+        && doc.querySelector("#target-density").value === "1.204",
+      "Remove fluid selection and preserve air density defaults");
+      const pageText = doc.body.textContent + doc.querySelector('meta[name="description"]').content;
+      const excludedTerms = ["\u6c34", "\u6cf5\u6d66", "\u6c34\u6d41\u91cf"];
+      assert(!excludedTerms.some((term) => pageText.includes(term)),
+        "Calculator page omits unrelated fluid terms");
+      assert(!doc.querySelector('[aria-label="適用限制"]')
+        && !doc.body.textContent.includes("Law 1 適合已知轉速")
+        && !doc.body.textContent.includes("本工具供教育與初步估算"),
+      "Remove the requested usage and limitation bullets");
       assert(doc.querySelector("footer").innerHTML.trim() === tools.querySelector("footer").innerHTML.trim(),
         "Footer matches tool overview branding and copyright");
-      assert(doc.querySelector('[aria-labelledby="limits-title"]').textContent.includes("本工具供教育與初步估算，不能取代工程選型。"),
-        "Engineering disclaimer preserved in limitations");
       assert(doc.querySelector('label[for="base-speed"]').textContent.includes("N₁")
         && doc.querySelector('label[for="target-speed"]').textContent.includes("N₂")
         && doc.querySelector('label[for="target-power"]').textContent.includes("W₂"),
@@ -88,8 +143,12 @@
       const outputs = () => [...doc.querySelectorAll("#target-conditions input:disabled")];
       const cleared = () => outputs().every((input) => input.value === "");
       assert(cleared() && outputs().length === 3, "Three empty locked outputs initially visible");
+      assert(doc.querySelector("#target-speed").value === ""
+        && !doc.querySelector("#target-speed").hasAttribute("value"),
+      "Target speed has no preset value");
       assert(!doc.querySelector("#results") && doc.querySelector("#target-conditions #target-power"),
         "Results integrated into target conditions without separate result table");
+      set("#target-speed", "960");
       submit();
       assert(doc.querySelector("#target-power").value === "1.536", "Speed result renders in target power");
       close(doc.querySelector("#target-flow").valueAsNumber, 8000, "Target flow displayed");
@@ -113,10 +172,10 @@
         submit();
         assert(doc.querySelector("#target-power").value === "1.536", "Equivalent target values match each law");
       }
-      set("#fluid", "water");
-      assert(doc.querySelector("#base-density").value === "998.2" && doc.querySelector("#target-density").value === "998.2", "Water reference densities");
+      set("#base-density", "998.2");
+      set("#target-density", "998.2");
       submit();
-      assert(doc.querySelector("#result-warning").textContent.includes("NPSH"), "Pump limitation visible");
+      assert(doc.querySelector("#result-warning").textContent.includes("系統曲線"), "Engineering verification warning visible");
       set("#base-speed", "0");
       submit();
       assert(!doc.querySelector("#error").hidden && cleared(), "Zero values show explicit error and no stale result");
@@ -130,19 +189,58 @@
         await new Promise((resolve) => setTimeout(resolve, 50));
         assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth, `No page overflow ${width}`);
         const button = doc.querySelector("button[type=submit]");
+        const densityReference = doc.querySelector(".density-reference").getBoundingClientRect();
+        assert(densityReference.top >= button.getBoundingClientRect().bottom,
+          `Density reference sits below the calculation button ${width}`);
+        for (const field of doc.querySelectorAll(".condition-grid .parameter-field")) {
+          const label = field.querySelector("label").getBoundingClientRect();
+          const input = field.querySelector("input").getBoundingClientRect();
+          const fieldset = field.closest("fieldset").getBoundingClientRect();
+          assert(input.left >= label.right - 1
+            && Math.abs((input.top + input.height / 2) - (label.top + label.height / 2)) < 2,
+            `Parameter label and input align side by side ${width}`);
+          assert(input.width < fieldset.width * 0.6,
+            `Parameter input remains narrower than its fieldset ${width}`);
+        }
+        const formulaContent = doc.querySelector(".formula-content").getBoundingClientRect();
+        const formulaSymbols = doc.querySelector(".formula-symbols").getBoundingClientRect();
+        if (width > 760) {
+          assert(formulaSymbols.left >= formulaContent.right - 1
+            && Math.abs(formulaSymbols.top - formulaContent.top) < 1,
+          "Formula and symbols columns align side by side");
+          const targetColumn = doc.querySelector(".condition-grid fieldset + fieldset").getBoundingClientRect();
+          assert(Math.abs(formulaSymbols.left - targetColumn.left) < 1,
+            "Formula divider aligns with the prototype and target divider");
+          const formulaTitle = doc.querySelector("#formula-title").getBoundingClientRect();
+          const symbolsTitle = doc.querySelector(".formula-symbols h2").getBoundingClientRect();
+          assert(Math.abs(formulaTitle.top - symbolsTitle.top) < 1
+            && Math.abs(formulaContent.left + Number.parseFloat(style(doc.querySelector(".formula-content")).paddingLeft)
+              - formulaTitle.left) < 1
+            && Math.abs(formulaSymbols.left
+              + Number.parseFloat(style(doc.querySelector(".formula-symbols")).borderLeftWidth)
+              + Number.parseFloat(style(doc.querySelector(".formula-symbols")).paddingLeft)
+              - symbolsTitle.left) < 1,
+          "Formula and symbol headings start at the same top line with aligned left edges");
+          const equations = [...doc.querySelectorAll("#formulas .formula")].map((element) => element.getBoundingClientRect());
+          assert(Math.max(...equations.map((rect) => rect.left)) - Math.min(...equations.map((rect) => rect.left)) < 1,
+            "Equations are aligned to the same left edge");
+        } else {
+          assert(formulaSymbols.top >= formulaContent.bottom - 1,
+            `Formula symbols stack below equations on narrow screens ${width}`);
+        }
+        assert(style(doc.querySelector(".setup-panel")).backgroundColor !== style(doc.body).backgroundColor,
+          `Calculator setup has a subtle grouped surface ${width}`);
         const notes = doc.querySelector(".calculation-notes");
-        assert(!notes.open, `Long guidance collapsed by default ${width}`);
+        assert(notes.tagName === "SECTION" && !notes.querySelector("details, summary")
+          && frame.contentWindow.getComputedStyle(notes).display !== "none",
+        `Guidance and reminders are always visible ${width}`);
         set("#base-speed", "1200");
         const buttonTop = button.getBoundingClientRect().top;
         submit();
         assert(Math.abs(button.getBoundingClientRect().top - buttonTop) < 1,
           `Calculation status and warning do not shift button ${width}`);
-        notes.open = true;
-        assert(Math.abs(button.getBoundingClientRect().top - buttonTop) < 1,
-          `Expanding guidance does not shift button ${width}`);
         assert(doc.querySelector("#result-warning").getBoundingClientRect().top >= button.getBoundingClientRect().bottom,
           `Engineering warning stays below button ${width}`);
-        notes.open = false;
         const inputBounds = doc.querySelector("#base-speed").closest("fieldset").getBoundingClientRect();
         const resultBounds = doc.querySelector("#target-conditions").getBoundingClientRect();
         if (width > 650) {
