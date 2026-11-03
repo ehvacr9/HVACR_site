@@ -68,6 +68,10 @@
       document.body.append(frame);
       await new Promise((resolve) => { frame.onload = resolve; frame.src = `../fan-laws.html?test=${Date.now()}`; });
       const doc = frame.contentDocument;
+      assert(doc.querySelector("footer").innerHTML.trim() === tools.querySelector("footer").innerHTML.trim(),
+        "Footer matches tool overview branding and copyright");
+      assert(doc.querySelector('[aria-labelledby="limits-title"]').textContent.includes("本工具供教育與初步估算，不能取代工程選型。"),
+        "Engineering disclaimer preserved in limitations");
       assert(doc.querySelector('label[for="base-speed"]').textContent.includes("N₁")
         && doc.querySelector('label[for="target-speed"]').textContent.includes("N₂")
         && doc.querySelector('label[for="target-power"]').textContent.includes("W₂"),
@@ -84,7 +88,7 @@
       const outputs = () => [...doc.querySelectorAll("#target-conditions input:disabled")];
       const cleared = () => outputs().every((input) => input.value === "");
       assert(cleared() && outputs().length === 3, "Three empty locked outputs initially visible");
-      assert(!doc.querySelector("#results") && doc.querySelector("#target-conditions #result-status"),
+      assert(!doc.querySelector("#results") && doc.querySelector("#target-conditions #target-power"),
         "Results integrated into target conditions without separate result table");
       submit();
       assert(doc.querySelector("#target-power").value === "1.536", "Speed result renders in target power");
@@ -125,6 +129,20 @@
         frame.style.width = `${width}px`;
         await new Promise((resolve) => setTimeout(resolve, 50));
         assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth, `No page overflow ${width}`);
+        const button = doc.querySelector("button[type=submit]");
+        const notes = doc.querySelector(".calculation-notes");
+        assert(!notes.open, `Long guidance collapsed by default ${width}`);
+        set("#base-speed", "1200");
+        const buttonTop = button.getBoundingClientRect().top;
+        submit();
+        assert(Math.abs(button.getBoundingClientRect().top - buttonTop) < 1,
+          `Calculation status and warning do not shift button ${width}`);
+        notes.open = true;
+        assert(Math.abs(button.getBoundingClientRect().top - buttonTop) < 1,
+          `Expanding guidance does not shift button ${width}`);
+        assert(doc.querySelector("#result-warning").getBoundingClientRect().top >= button.getBoundingClientRect().bottom,
+          `Engineering warning stays below button ${width}`);
+        notes.open = false;
         const inputBounds = doc.querySelector("#base-speed").closest("fieldset").getBoundingClientRect();
         const resultBounds = doc.querySelector("#target-conditions").getBoundingClientRect();
         if (width > 650) {
