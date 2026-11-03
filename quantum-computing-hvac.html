@@ -50,13 +50,19 @@
     .byline { margin-bottom: 32px; color: var(--muted); font-size: 13px; }
     .article-text { max-width: 900px; padding: clamp(22px, 4vw, 48px); border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
     .article-text p { margin: 0 0 17px; color: #304542; font-family: Georgia, "Times New Roman", serif; font-size: 17px; line-height: 1.85; }
-    .article-text .authors { color: var(--muted); font-size: 14px; }
-    .article-text .article-title { margin: 0 0 12px; font-size: clamp(30px, 4vw, 44px); line-height: 1.2; }
     .article-text h2, .article-text h3 { color: var(--ink); }
-    .article-abstract { margin-block: 26px; padding: 22px; border: 1px solid var(--line); border-radius: 7px; background: #edf1e7; }
-    .article-abstract h2 { margin-top: 0; font-size: 26px; }
-    .article-abstract p[lang="zh-Hant"] { font-family: inherit; }
-    .article-abstract p:last-child { margin-bottom: 0; }
+    .article-abstract { margin: 0 0 36px; padding: clamp(18px, 3vw, 28px); border: 1px solid var(--line); border-top: 3px solid var(--green); border-radius: 7px; background: #f1f4ec; }
+    .abstract-block + .abstract-block { margin-top: 16px; padding-top: 16px; border-top: 1px solid #cdd8cb; }
+    .abstract-block summary { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 16px; cursor: pointer; list-style: none; }
+    .abstract-block summary::-webkit-details-marker { display: none; }
+    .abstract-block summary::after { content: ""; width: 9px; height: 9px; flex: 0 0 9px; margin-right: 4px; border-right: 2px solid var(--green); border-bottom: 2px solid var(--green); transform: rotate(45deg); }
+    .abstract-block[open] summary::after { transform: rotate(225deg); }
+    .abstract-block summary:focus-visible { outline: 3px solid #9ab952; outline-offset: 3px; }
+    .abstract-block[open] summary { margin-bottom: 14px; }
+    .article-abstract h2 { margin: 0; color: var(--green); font-size: 23px; line-height: 1.4; }
+    .article-abstract p { margin: 0; text-align: left; }
+    .article-abstract p[lang="en"] { line-height: 1.8; }
+    .article-abstract p[lang="zh-Hant"] { font-family: inherit; line-height: 2; letter-spacing: .025em; }
     .article-text ul, .article-text ol { padding-left: 1.5em; color: #304542; font-family: Georgia, "Times New Roman", serif; font-size: 17px; }
     .article-text li + li { margin-top: 8px; }
     .table-wrap { overflow-x: auto; margin: 20px 0 26px; border: 1px solid var(--line); border-radius: 7px; }
@@ -134,14 +140,15 @@
     <p class="dictionary-hint">閱讀提示：滑鼠移到英文單字上會顯示可查詢狀態；點擊或以鍵盤選取單字，再選擇要開啟的線上辭典。</p>
 
     <article class="article-text" id="article-text" aria-label="Quantum Computing & The HVAC Industry article">
-      <p class="article-title">Quantum Computing &amp; The HVAC Industry</p>
-      <p class="authors">BY MARIO MENDOZA, P.E., BCXP, HFDP, MEMBER ASHRAE; YELISSA LOPEZ; RONALD DIAZ, P.E., MEMBER ASHRAE; ADRIAN JOHANNES MENSSEN, PH.D.</p>
-
       <section class="article-abstract" aria-labelledby="abstract-title abstract-zh-title">
-        <h2 id="abstract-title" lang="en">English Abstract</h2>
+        <details class="abstract-block" open>
+        <summary><h2 id="abstract-title" lang="en">Abstract</h2></summary>
         <p lang="en">Quantum computing introduces facility requirements that extend beyond conventional data-center cooling. This article examines how superconducting, trapped-ion, neutral-atom and photonic architectures differ in their thermal, vibration, electromagnetic, humidity, particulate and power-quality needs. Protecting quantum coherence requires coordinated HVAC, structural, electrical and cryogenic design rather than temperature control alone. The discussion connects quantum facilities with high-tech laboratory practice and considers cooling redundancy, energy use, workforce development and collaboration on design guidance. It also explores potential applications of quantum computation and sensing to building simulation, diagnostics and sustainable materials. The environmental values presented are guideline-level benchmarks from research and prototype practice, not universally applicable design criteria; proposed benefits remain dependent on technological maturity.</p>
-        <h2 id="abstract-zh-title" lang="zh-Hant">中文摘要</h2>
+        </details>
+        <details class="abstract-block">
+        <summary><h2 id="abstract-zh-title" lang="zh-Hant">摘要</h2></summary>
         <p lang="zh-Hant">量子運算設施的需求不僅止於傳統資料中心的冷卻。本文探討超導、離子阱、中性原子與光子四種架構，在熱環境、振動、電磁干擾、濕度、微粒與電力品質方面的差異。維持量子相干性需要整合暖通空調（HVAC）、結構、電氣與低溫系統設計，而非單純控制溫度。文章將量子設施與高科技實驗室實務相互對照，並討論冷卻備援、能源使用、跨領域人才培育及設計指引的協作發展。同時，也探討量子運算與感測在建築模擬、系統診斷及永續材料上的潛在應用。文中環境數值屬研究與原型實務的指引性基準，並非通用設計準則；預期效益仍取決於技術成熟度。</p>
+        </details>
       </section>
 
       <p>The mechanical and energy-engineering field has witnessed successive waves of technological disruption—from variable refrigerant flow systems to digital twins and AI-based analytics. Quantum computing represents the next such disruption, one with direct implications for HVAC engineers and facility designers. Collaboration between the physics and engineering communities, including ongoing dialogue with researchers at a quantum computer company and MIT’s Photonics Laboratory, has revealed a significant gap—little to no publicly available guidance exists on designing mechanical systems for quantum computing environments. As firms and governments increase investment in the quantum sector, MEP engineers will play a vital role in developing robust, stable and energy-efficient infrastructures. The purpose of this article is to initiate that dialogue—bridging the gap between physics laboratories and mechanical design practice—and to invite ASHRAE’s technical community to establish design standards for this transformative field.</p>
@@ -269,7 +276,7 @@
 
     while (textWalker.nextNode()) {
       if (/[A-Za-z]/.test(textWalker.currentNode.textContent)
-        && !textWalker.currentNode.parentElement.closest("a")) {
+        && !textWalker.currentNode.parentElement.closest("a, summary")) {
         textNodes.push(textWalker.currentNode);
       }
     }

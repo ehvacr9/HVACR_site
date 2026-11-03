@@ -54,20 +54,26 @@
       assert(article.querySelector("h1")?.textContent.includes("Quantum Computing & The HVAC Industry"),
         "Article has its original title");
       const abstract = article.querySelector(".article-abstract");
-      assert(abstract?.querySelector("#abstract-title")?.textContent === "English Abstract"
-        && abstract.querySelector("#abstract-zh-title")?.textContent === "中文摘要"
+      assert(abstract?.querySelector("#abstract-title")?.textContent === "Abstract"
+        && abstract.querySelector("#abstract-zh-title")?.textContent === "摘要"
         && abstract.querySelector("h2")?.id === "abstract-title"
+        && abstract.querySelectorAll(".abstract-block").length === 2
+        && abstract.querySelectorAll("details.abstract-block:not([open]) > summary").length === 1
+        && abstract.querySelector(".abstract-block").hasAttribute("open")
+        && abstract.querySelector(".abstract-block")?.querySelector('p[lang="en"]')
         && abstract.querySelector('p[lang="en"]')?.textContent.includes("quantum coherence")
         && abstract.querySelector('p[lang="zh-Hant"]')?.textContent.includes("量子相干性")
         && !abstract.querySelector(".abstract-note")
         && !abstract.textContent.includes("Abstract ／ 摘要"),
-      "Article displays English Abstract and Chinese abstract headings with no introductory note");
+      "Article displays Abstract and Chinese summary headings with English first and no introductory note");
       assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
         "Article includes the scroll-to-top button");
 
       const text = article.querySelector("#article-text")?.textContent ?? "";
+      assert(!article.querySelector("#article-text .article-title, #article-text .authors")
+        && article.querySelector(".byline")?.textContent.includes("Mario Mendoza"),
+      "Article omits repeated title and author block but retains the page byline");
       for (const phrase of [
-        "BY MARIO MENDOZA",
         "Environmental Requirements for Quantum Computing Systems",
         "Parallels with High-Tech Laboratory Design",
         "Energy and Sustainability Considerations",
@@ -111,9 +117,19 @@
         frame.addEventListener("error", reject, { once: true });
       });
       const frameDocument = frame.contentDocument;
+      const disclosures = frameDocument.querySelectorAll(".article-abstract details");
+      assert(disclosures[0].open && !disclosures[1].open
+        && !frameDocument.querySelector(".article-abstract summary button"),
+      "English abstract starts expanded and Chinese abstract starts collapsed without nested dictionary buttons");
+      disclosures[1].querySelector("summary").click();
+      assert(Array.from(disclosures).every((detail) => detail.open),
+        "Both abstracts can be expanded independently at the same time");
+      disclosures[1].querySelector("summary").click();
+      assert(disclosures[0].open && !disclosures[1].open,
+        "Collapsing the Chinese abstract leaves the English abstract open");
       assert(frameDocument.querySelectorAll('.article-abstract p[lang="en"] .dictionary-word').length > 0,
         "English abstract supports dictionary lookup");
-      const firstWord = frameDocument.querySelector("button.dictionary-word");
+      const firstWord = frameDocument.querySelector('button.dictionary-word[data-word="Quantum"]');
       firstWord.dispatchEvent(new frame.contentWindow.MouseEvent("click", { bubbles: true, detail: 1 }));
       assert(!frameDocument.querySelector("#dictionary-picker").hidden
         && frameDocument.querySelector("#oxford-link").href.includes("/definition/english/quantum")

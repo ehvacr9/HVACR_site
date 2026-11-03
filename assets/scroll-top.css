@@ -1,0 +1,25 @@
+.scroll-top-button {
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  z-index: 110;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #1d6252;
+  border-radius: 50%;
+  background: #1d6252;
+  color: #fffefa;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(23, 43, 43, .18);
+}
+.scroll-top-button[hidden] { display: none; }
+.scroll-top-button:hover { background: #174f43; }
+.scroll-top-button:focus-visible { outline: 3px solid #9ab952; outline-offset: 4px; }
+.scroll-top-icon { width: 11px; height: 11px; margin-top: 5px; transform: rotate(45deg); border-top: 2px solid currentColor; border-left: 2px solid currentColor; }
+@media (max-width: 600px) {
+  .scroll-top-button { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
+}

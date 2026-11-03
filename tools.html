@@ -4,9 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="能源與冷凍空調計算工具：水與冷媒性質、濕空氣性質、冷凍循環分析器及單位換算。">
+  <meta name="description" content="能源與冷凍空調計算工具：水與冷媒性質、濕空氣性質、冷凍循環分析器、風機定律及單位換算。">
   <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
   <link rel="stylesheet" href="assets/tools.css">
+  <link rel="stylesheet" href="assets/scroll-top.css">
   <title>計算工具 | 能源與冷凍空調學習網</title>
   <style>
     :root {
@@ -74,7 +75,7 @@
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ <span aria-current="page">計算工具</span></p>
     <p class="eyebrow">Calculation Tools</p>
     <h1>計算工具</h1>
-    <p class="intro">查詢物性、分析冷凍循環，或換算常用工程單位。</p>
+    <p class="intro">查詢物性、分析冷凍循環與風機相似工況，或換算常用工程單位。</p>
     <section class="tool-group" aria-labelledby="properties-title">
       <h2 id="properties-title">物性查詢與計算</h2>
       <div class="tool-cards">
@@ -84,8 +85,9 @@
     </section>
     <section class="tool-group" aria-labelledby="engineering-title">
       <h2 id="engineering-title">工程應用</h2>
-      <div class="tool-cards tool-cards-single">
+      <div class="tool-cards">
         <a class="tool-card" href="refrigeration-cycle.html"><h3>冷凍循環分析器</h3><p>分析四點循環、COP、壓縮功與冷媒流率。</p><span>開啟工具 →</span></a>
+        <a class="tool-card" href="fan-laws.html"><h3>風機定律計算器</h3><p>依目標轉速、壓差或流量選擇相似定律，估算空氣風機與水泵工況。</p><span>開啟工具 →</span></a>
       </div>
     </section>
     <section class="tool-group" aria-labelledby="units-title">
@@ -100,5 +102,7 @@
     <a class="brand" href="index.html"><img src="assets/hvacr-learning-logo.svg?v=3" alt=""><span>能源與冷凍空調學習網</span></a>
     <p>Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</p>
   </footer>
+  <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
+  <script type="module" src="assets/scroll-top.js"></script>
 </body>
 </html>
