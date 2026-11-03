@@ -53,6 +53,15 @@
       "Article omits the removed introductory dictionary description");
       assert(article.querySelector("h1")?.textContent.includes("Quantum Computing & The HVAC Industry"),
         "Article has its original title");
+      const abstract = article.querySelector(".article-abstract");
+      assert(abstract?.querySelector("#abstract-title")?.textContent === "English Abstract"
+        && abstract.querySelector("#abstract-zh-title")?.textContent === "中文摘要"
+        && abstract.querySelector("h2")?.id === "abstract-title"
+        && abstract.querySelector('p[lang="en"]')?.textContent.includes("quantum coherence")
+        && abstract.querySelector('p[lang="zh-Hant"]')?.textContent.includes("量子相干性")
+        && !abstract.querySelector(".abstract-note")
+        && !abstract.textContent.includes("Abstract ／ 摘要"),
+      "Article displays English Abstract and Chinese abstract headings with no introductory note");
       assert(article.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
         "Article includes the scroll-to-top button");
 
@@ -102,6 +111,8 @@
         frame.addEventListener("error", reject, { once: true });
       });
       const frameDocument = frame.contentDocument;
+      assert(frameDocument.querySelectorAll('.article-abstract p[lang="en"] .dictionary-word').length > 0,
+        "English abstract supports dictionary lookup");
       const firstWord = frameDocument.querySelector("button.dictionary-word");
       firstWord.dispatchEvent(new frame.contentWindow.MouseEvent("click", { bubbles: true, detail: 1 }));
       assert(!frameDocument.querySelector("#dictionary-picker").hidden
