@@ -107,6 +107,9 @@
       assert(doc.querySelector("#result-reynolds").value !== "—"
         && doc.querySelector("#result-relative-roughness").value !== "—",
       "Show derived Reynolds number and relative roughness");
+      assert(doc.querySelector('label[for="diameter"]').textContent === "管內徑（mm）"
+        && !doc.querySelector("#diameter").parentElement.querySelector("small"),
+      "Keep the diameter field concise without additional helper text");
       const resultOrder = [...doc.querySelectorAll(".result-metric dt")].map((item) => item.textContent.trim());
       assert(resultOrder.join("|") === "雷諾數 Re|相對粗糙度 ε / D|Darcy 摩擦因子 f|流況",
         "Present derived Reynolds and relative roughness before looked-up friction factor and flow regime");
