@@ -87,11 +87,11 @@
         && firstAnswer.textContent.includes("水不是獨立的冷媒迴路")
         && firstAnswer.textContent.includes("RHX")
         && firstAnswer.textContent.includes("SCR")
-        && absorptionFlowPaths.includes("M100 465 H520 M675 465 H700 V225 H320 V150 H300")
-        && absorptionFlowPaths.includes("M520 465 H675")
-        && absorptionFlowPaths.includes("M225 171 V255 H600 V420")
+        && absorptionFlowPaths.includes("M100 465 H520")
+        && absorptionFlowPaths.includes("M675 455 H700 V205 H235 C230 205 230 195 225 195 C220 195 220 205 215 205 H180 V128 H195")
+        && absorptionFlowPaths.includes("M225 142 V255 H600 V420")
         && absorptionFlowPaths.includes("M600 490 V520 H225 V446")
-        && absorptionFlowPaths.includes("M472 148 V195 H325 V150 H300"),
+        && absorptionFlowPaths.includes("M472 136 V190 H300 V100 H225 V106"),
       "114 refrigeration first-question diagram shows distinct ammonia-rich, ammonia-poor and water-reflux pipe loops");
       const flowLegend = [...(firstAnswer.querySelectorAll(".answer-flow-legend .answer-flow-swatch") ?? [])]
         .map((swatch) => swatch.classList[1]);
@@ -99,6 +99,20 @@
         && [...absorptionDiagram.querySelectorAll(".flow")].every((path) =>
           path.matches(".refrigerant-flow, .rich-solution-flow, .weak-solution-flow, .reflux-flow")),
       "114 refrigeration first-question diagram uses a legend and distinct pipe colors for each fluid circuit");
+      const equipmentTags = [...absorptionDiagram.querySelectorAll(".equipment-tag")]
+        .map((tag) => tag.textContent.trim());
+      assert(absorptionDiagram.querySelectorAll(".equipment-symbol").length >= 10
+        && ["G-1", "R-1", "C-1", "E-1", "A-1", "P-1", "HX-1", "V-1", "V-2"]
+          .every((tag) => equipmentTags.includes(tag))
+        && !absorptionDiagram.querySelector('rect.equipment[x="150"][y="95"]')
+        && absorptionDiagram.querySelector(".equipment-label").textContent === "發生器",
+      "114 refrigeration first-question schematic uses equipment symbols and component tags instead of generic equipment boxes");
+      assert(absorptionDiagram.querySelectorAll(".flow-direction[marker-end]").length === 12
+        && [...absorptionDiagram.querySelectorAll("marker")].every((marker) =>
+          marker.getAttribute("markerUnits") === "userSpaceOnUse")
+        && absorptionDiagram.querySelector('[data-segment="exchanger-to-generator"]').getAttribute("d")
+          .includes("C230 205 230 195 225 195"),
+      "114 refrigeration schematic uses restrained inline arrows and a pipe bridge to clarify flow direction and crossings");
       const firstEquations = [...firstAnswer.querySelectorAll("math.answer-equation-display")];
       const thermalCop = firstEquations.find((equation) =>
         equation.getAttribute("aria-label").includes("冷凍效果除以發生器驅動熱輸入"));

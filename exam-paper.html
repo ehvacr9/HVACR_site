@@ -59,9 +59,13 @@
     .answer-schematic { margin: 16px 0; padding: 16px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
     .answer-schematic svg { display: block; width: 100%; height: auto; font-family: inherit; }
     .answer-schematic figcaption, .answer-note, .answer-pending { color: var(--muted); font-size: 14px; }
-    .answer-schematic .equipment { fill: var(--surface); stroke: var(--line); stroke-width: 2; }
+    .answer-schematic .equipment { fill: var(--surface); stroke: var(--ink); stroke-width: 2.2; }
+    .answer-schematic .equipment-detail { fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .answer-schematic .equipment-symbol { fill: var(--surface); stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    .answer-schematic .equipment-tag { fill: var(--green); font-size: 11px; font-weight: 750; letter-spacing: .04em; }
+    .answer-schematic .equipment-label { fill: var(--ink); font-size: 15px; font-weight: 650; }
     .answer-schematic .cycle-boundary { fill: none; stroke: var(--muted); stroke-dasharray: 8 6; stroke-width: 2; }
-    .answer-schematic .flow { fill: none; stroke-width: 3; }
+    .answer-schematic .flow { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
     .answer-schematic .refrigerant-flow { stroke: #287b9b; }
     .answer-schematic .rich-solution-flow { stroke: #26836b; }
     .answer-schematic .weak-solution-flow { stroke: #bd7628; }
@@ -180,68 +184,93 @@
               </div>
               <svg viewBox="0 0 980 560" role="img" aria-labelledby="absorption-diagram-title absorption-diagram-desc">
                 <title id="absorption-diagram-title">氨－水吸收式冷凍循環示意圖</title>
-                <desc id="absorption-diagram-desc">圖中分別標示氨冷媒管路、氨較多的富氨溶液與水較多的稀氨溶液管路，以及精餾器分離出的水回流至發生器。富氨溶液經泵及溶液熱交換器送往發生器，稀氨溶液經溶液熱交換器及節流返回吸收器；精餾熱以Q_r表示。</desc>
+                <desc id="absorption-diagram-desc">工程示意圖以容器、精餾塔、熱交換器、泵和節流閥的圖形符號呈現設備，並以代號和箭頭標示氨冷媒、富氨溶液、稀氨溶液及精餾富水回流的路徑。富氨溶液經泵及溶液熱交換器送往發生器，稀氨溶液經溶液熱交換器及節流返回吸收器；精餾熱以Q_r表示。</desc>
                 <defs>
-                  <marker id="absorption-refrigerant-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-                    <path d="M0,0 L10,5 L0,10 z" fill="#287b9b"></path>
+                  <marker id="absorption-refrigerant-arrow" markerWidth="8" markerHeight="8" viewBox="0 0 8 8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0,0 L8,4 L0,8 z" fill="#287b9b"></path>
                   </marker>
-                  <marker id="absorption-rich-solution-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-                    <path d="M0,0 L10,5 L0,10 z" fill="#26836b"></path>
+                  <marker id="absorption-rich-solution-arrow" markerWidth="8" markerHeight="8" viewBox="0 0 8 8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0,0 L8,4 L0,8 z" fill="#26836b"></path>
                   </marker>
-                  <marker id="absorption-weak-solution-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-                    <path d="M0,0 L10,5 L0,10 z" fill="#bd7628"></path>
+                  <marker id="absorption-weak-solution-arrow" markerWidth="8" markerHeight="8" viewBox="0 0 8 8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0,0 L8,4 L0,8 z" fill="#bd7628"></path>
                   </marker>
-                  <marker id="absorption-reflux-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-                    <path d="M0,0 L10,5 L0,10 z" fill="#756c9a"></path>
+                  <marker id="absorption-reflux-arrow" markerWidth="8" markerHeight="8" viewBox="0 0 8 8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0,0 L8,4 L0,8 z" fill="#756c9a"></path>
                   </marker>
-                  <marker id="absorption-heat-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-                    <path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"></path>
+                  <marker id="absorption-heat-arrow" markerWidth="8" markerHeight="8" viewBox="0 0 8 8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0,0 L8,4 L0,8 z" fill="var(--ink)"></path>
                   </marker>
                 </defs>
-                <rect class="equipment" x="150" y="95" width="150" height="76" rx="5"></rect>
-                <text class="label" x="225" y="129" text-anchor="middle">發生器</text>
-                <text class="minor-label" x="225" y="153" text-anchor="middle">加熱使氨蒸出</text>
-                <rect class="equipment" x="400" y="80" width="145" height="68" rx="5"></rect>
-                <text class="label" x="472" y="110" text-anchor="middle">精餾器</text>
-                <text class="minor-label" x="472" y="132" text-anchor="middle">分離水蒸氣</text>
-                <rect class="equipment" x="720" y="95" width="150" height="76" rx="5"></rect>
-                <text class="label" x="795" y="129" text-anchor="middle">冷凝器</text>
-                <text class="minor-label" x="795" y="153" text-anchor="middle">放熱 Q̇<tspan baseline-shift="sub">c</tspan></text>
-                <rect class="equipment" x="720" y="370" width="150" height="76" rx="5"></rect>
-                <text class="label" x="795" y="404" text-anchor="middle">蒸發器</text>
-                <text class="minor-label" x="795" y="428" text-anchor="middle">吸熱 Q̇<tspan baseline-shift="sub">e</tspan></text>
-                <rect class="equipment" x="150" y="370" width="150" height="76" rx="5"></rect>
-                <text class="label" x="225" y="404" text-anchor="middle">吸收器</text>
-                <text class="minor-label" x="225" y="428" text-anchor="middle">放熱 Q̇<tspan baseline-shift="sub">a</tspan></text>
-                <path class="flow refrigerant-flow" d="M300 133 H400" marker-end="url(#absorption-refrigerant-arrow)"></path>
-                <text class="minor-label" x="350" y="121" text-anchor="middle">氨蒸氣</text>
-                <path class="flow refrigerant-flow" d="M545 114 H720" marker-end="url(#absorption-refrigerant-arrow)"></path>
+                <path class="equipment-symbol" d="M195 106 C195 100 255 100 255 106 V136 C255 142 195 142 195 136 Z"></path>
+                <path class="equipment-detail" d="M195 106 C195 112 255 112 255 106 M195 136 C195 130 255 130 255 136 M207 126 l6 -7 6 7 6 -7 6 7 6 -7 6 7"></path>
+                <path class="flow refrigerant-flow" d="M255 112 H456" data-segment="generator-to-rectifier"></path>
+                <path class="flow weak-solution-flow" d="M225 142 V255 H600 V420" data-segment="generator-to-exchanger"></path>
+                <text class="equipment-label" x="188" y="163" text-anchor="end">發生器</text>
+                <text class="equipment-tag" x="272" y="96" text-anchor="middle">G-1</text>
+                <path class="equipment-symbol" d="M456 91 C456 85 488 85 488 91 V130 C488 136 456 136 456 130 Z"></path>
+                <path class="equipment-detail" d="M457 99 H487 M457 108 H487 M457 117 H487 M457 126 H487"></path>
+                <path class="flow refrigerant-flow" d="M488 114 H720" data-segment="rectifier-to-condenser"></path>
+                <path class="flow reflux-flow" d="M472 136 V190 H300 V100 H225 V106" data-segment="rectifier-reflux"></path>
+                <text class="equipment-label" x="448" y="147" text-anchor="end">精餾器</text>
+                <text class="equipment-tag" x="518" y="91" text-anchor="middle">R-1</text>
+                <rect class="equipment-symbol" x="720" y="95" width="150" height="76" rx="38"></rect>
+                <path class="equipment-detail" d="M720 114 H730 L742 126 L754 114 L766 138 L778 114 L790 138 L802 114 L814 138 L826 114 L838 126 L850 114 H870"></path>
+                <text class="equipment-label" x="795" y="163" text-anchor="middle">冷凝器</text>
+                <text class="equipment-tag" x="850" y="88" text-anchor="middle">C-1</text>
+                <rect class="equipment-symbol" x="720" y="370" width="150" height="76" rx="38"></rect>
+                <path class="equipment-detail" d="M720 408 H730 L742 396 L754 420 L766 396 L778 420 L790 396 L802 420 L814 396 L826 420 L838 396 L850 408 H870"></path>
+                <text class="equipment-label" x="795" y="440" text-anchor="middle">蒸發器</text>
+                <text class="equipment-tag" x="850" y="360" text-anchor="middle">E-1</text>
+                <text class="minor-label" x="875" y="447">吸熱 Q̇<tspan baseline-shift="sub">e</tspan></text>
+                <rect class="equipment-symbol" x="150" y="370" width="150" height="76" rx="38"></rect>
+                <path class="equipment-detail" d="M150 408 H160 M170 388 H280 M180 388 V400 M200 388 V400 M220 388 V400 M240 388 V400 M260 388 V400 M225 446 V432"></path>
+                <text class="equipment-label" x="225" y="425" text-anchor="middle">吸收器</text>
+                <text class="equipment-tag" x="272" y="360" text-anchor="middle">A-1</text>
+                <text class="minor-label" x="145" y="449" text-anchor="end">Q̇<tspan baseline-shift="sub">a</tspan></text>
+                <text class="minor-label" x="350" y="100" text-anchor="middle">氨蒸氣</text>
                 <text class="minor-label" x="632" y="102" text-anchor="middle">氨冷媒蒸氣</text>
                 <path class="work" d="M545 88 H580" marker-end="url(#absorption-heat-arrow)"></path>
                 <text class="minor-label" x="615" y="82" text-anchor="middle">精餾排熱 Q̇<tspan baseline-shift="sub">r</tspan></text>
-                <path class="flow reflux-flow" d="M472 148 V195 H325 V150 H300" marker-end="url(#absorption-reflux-arrow)"></path>
-                <text class="minor-label" x="395" y="187" text-anchor="middle">富水回流液 → 發生器</text>
-                <path class="flow refrigerant-flow" d="M795 171 V260" marker-end="url(#absorption-refrigerant-arrow)"></path>
-                <path class="equipment" d="M783 207 L795 220 L807 207 Z"></path>
+                <text class="minor-label" x="395" y="181" text-anchor="middle">富水回流液 → 發生器</text>
+                <path class="flow refrigerant-flow" d="M795 171 V202" data-segment="condenser-to-valve"></path>
+                <path class="equipment-symbol" d="M786 206 L795 215 L786 224 Z M804 206 L795 215 L804 224 Z"></path>
+                <path class="equipment-detail" d="M795 202 V228"></path>
                 <text class="minor-label" x="820" y="228">氨節流閥</text>
-                <path class="flow refrigerant-flow" d="M795 260 V370" marker-end="url(#absorption-refrigerant-arrow)"></path>
+                <text class="equipment-tag" x="820" y="246">V-1</text>
+                <path class="flow refrigerant-flow" d="M795 228 V370" data-segment="valve-to-evaporator"></path>
                 <text class="minor-label" x="815" y="315">低壓液氨</text>
-                <path class="flow refrigerant-flow" d="M720 408 H300" marker-end="url(#absorption-refrigerant-arrow)"></path>
+                <path class="flow refrigerant-flow" d="M720 408 H300" data-segment="evaporator-to-absorber"></path>
                 <text class="minor-label" x="510" y="396" text-anchor="middle">氨蒸氣返回吸收器</text>
-                <path class="flow rich-solution-flow" d="M150 408 H80 V465" marker-end="url(#absorption-rich-solution-arrow)"></path>
-                <circle class="equipment" cx="80" cy="465" r="20"></circle>
-                <text class="minor-label" x="80" y="470" text-anchor="middle">泵</text>
+                <path class="flow rich-solution-flow" d="M150 408 H80 V445" data-segment="absorber-to-pump"></path>
+                <circle class="equipment-symbol" cx="80" cy="465" r="20"></circle>
+                <path class="equipment-symbol" d="M73 475 V455 L90 465 Z"></path>
+                <text class="equipment-tag" x="80" y="497" text-anchor="middle">P-1</text>
                 <text class="minor-label" x="130" y="497">富氨溶液（NH₃多）</text>
-                <path class="flow rich-solution-flow" d="M100 465 H520 M675 465 H700 V225 H320 V150 H300" marker-end="url(#absorption-rich-solution-arrow)"></path>
-                <rect class="equipment" x="520" y="420" width="155" height="70" rx="5"></rect>
-                <text class="label" x="597" y="443" text-anchor="middle">溶液熱交換器</text>
-                <text class="minor-label" x="597" y="482" text-anchor="middle">富液預熱、稀液冷卻</text>
-                <path class="flow rich-solution-flow" d="M520 465 H675" marker-end="url(#absorption-rich-solution-arrow)"></path>
-                <path class="flow weak-solution-flow" d="M225 171 V255 H600 V420" marker-end="url(#absorption-weak-solution-arrow)"></path>
+                <path class="flow rich-solution-flow" d="M100 465 H520" data-segment="pump-to-exchanger"></path>
+                <rect class="equipment-symbol" x="520" y="420" width="155" height="70" rx="5"></rect>
+                <path class="equipment-detail" d="M520 465 H535 L545 445 L557 481 L569 445 L581 481 L593 445 L605 481 L617 445 L629 481 L641 445 L653 481 L663 465 H675 M600 420 V434 M600 476 V490"></path>
+                <text class="equipment-label" x="597" y="510" text-anchor="middle">溶液熱交換器</text>
+                <text class="equipment-tag" x="647" y="416" text-anchor="middle">HX-1</text>
+                <path class="flow rich-solution-flow" d="M675 455 H700 V205 H235 C230 205 230 195 225 195 C220 195 220 205 215 205 H180 V128 H195" data-segment="exchanger-to-generator"></path>
                 <text class="minor-label" x="420" y="243" text-anchor="middle">稀氨（富水）溶液 →</text>
-                <path class="flow weak-solution-flow" d="M600 490 V520 H225 V446" marker-end="url(#absorption-weak-solution-arrow)"></path>
-                <path class="equipment" d="M345 508 L357 520 L345 532 Z"></path>
+                <path class="flow weak-solution-flow" d="M600 490 V520 H225 V446" data-segment="exchanger-to-absorber"></path>
+                <path class="equipment-symbol" d="M338 513 L350 520 L338 527 Z M362 513 L350 520 L362 527 Z"></path>
+                <path class="equipment-detail" d="M350 507 V533"></path>
+                <text class="equipment-tag" x="380" y="516">V-2</text>
                 <text class="minor-label" x="350" y="550" text-anchor="middle">稀溶液節流閥</text>
+                <path class="flow flow-direction refrigerant-flow" d="M345 112 H365" marker-end="url(#absorption-refrigerant-arrow)" aria-hidden="true"></path>
+                <path class="flow flow-direction refrigerant-flow" d="M590 114 H610" marker-end="url(#absorption-refrigerant-arrow)" aria-hidden="true"></path>
+                <path class="flow flow-direction refrigerant-flow" d="M795 180 V194" marker-end="url(#absorption-refrigerant-arrow)" aria-hidden="true"></path>
+                <path class="flow flow-direction refrigerant-flow" d="M795 290 V310" marker-end="url(#absorption-refrigerant-arrow)" aria-hidden="true"></path>
+                <path class="flow flow-direction refrigerant-flow" d="M535 408 H515" marker-end="url(#absorption-refrigerant-arrow)" aria-hidden="true"></path>
+                <path class="flow flow-direction rich-solution-flow" d="M80 420 V438" marker-end="url(#absorption-rich-solution-arrow)" aria-hidden="true"></path>
+                <path class="flow flow-direction rich-solution-flow" d="M280 465 H300" marker-end="url(#absorption-rich-solution-arrow)" aria-hidden="true"></path>
+                <path class="flow flow-direction rich-solution-flow" d="M500 205 H480" marker-end="url(#absorption-rich-solution-arrow)" aria-hidden="true"></path>
+                <path class="flow flow-direction weak-solution-flow" d="M225 185 V205" marker-end="url(#absorption-weak-solution-arrow)" aria-hidden="true"></path>
+                <path class="flow flow-direction weak-solution-flow" d="M400 255 H420" marker-end="url(#absorption-weak-solution-arrow)" aria-hidden="true"></path>
+                <path class="flow flow-direction weak-solution-flow" d="M400 520 H380" marker-end="url(#absorption-weak-solution-arrow)" aria-hidden="true"></path>
+                <path class="flow flow-direction reflux-flow" d="M400 190 H380" marker-end="url(#absorption-reflux-arrow)" aria-hidden="true"></path>
                 <path class="work" d="M225 35 V89" marker-end="url(#absorption-heat-arrow)"></path>
                 <text class="label" x="240" y="61">供熱 Q̇<tspan baseline-shift="sub">g</tspan></text>
                 <path class="work" d="M875 133 H910" marker-end="url(#absorption-heat-arrow)"></path>
@@ -254,7 +283,7 @@
                 <text class="minor-label" x="33" y="443" text-anchor="middle">Ẇ<tspan baseline-shift="sub">p</tspan></text>
               </svg>
               <p class="answer-water-note"><strong>水的路徑：</strong>水不是獨立的冷媒迴路。發生器送出的稀氨（富水）溶液，經熱交換與節流回到吸收器；水在吸收器吸收氨後，成為富氨溶液，再由溶液泵送回發生器。精餾器另將夾帶的水蒸氣凝成富水回流液，送回發生器。</p>
-              <figcaption>依單效氨－水吸收循環重繪，非複製手冊插圖。藍線為氨冷媒管路，綠線為吸收器至發生器的富氨溶液，橙線為發生器回吸收器的稀氨（富水）溶液，紫色虛線為精餾富水回流。圖中採用氨含量標示溶液組成；基本圖未畫出可回收顯熱的冷媒熱交換器（RHX），實際設計亦可採溶液冷卻精餾器（SCR）。</figcaption>
+              <figcaption>依單效氨－水吸收循環重繪，參考 OpenModelica／Simulink 的工程圖示語彙，使用設備符號、管路端口、流向與設備代號呈現；非複製軟體畫面或手冊插圖。藍線為氨冷媒管路，綠線為吸收器至發生器的富氨溶液，橙線為發生器回吸收器的稀氨（富水）溶液，紫色虛線為精餾富水回流。圖中採用氨含量標示溶液組成；基本圖未畫出可回收顯熱的冷媒熱交換器（RHX），實際設計亦可採溶液冷卻精餾器（SCR）。</figcaption>
             </figure>
           </div>
           <div class="answer-step">
