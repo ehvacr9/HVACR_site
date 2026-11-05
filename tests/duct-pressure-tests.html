@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>風管壓損計算器回歸測試</title></head>
+<body>
+  <h1>風管壓損計算器回歸測試</h1>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    import { calculateDuctPressureLoss } from "../assets/duct-pressure.js";
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+    const close = (actual, expected, label, tolerance = 1e-9) =>
+      assert(Math.abs(actual - expected) <= Math.max(tolerance, Math.abs(expected) * 1e-8), label);
+    const base = {
+      flowRateM3h: 10000, shape: "round", diameterMm: 500, widthMm: 500, heightMm: 300,
+      lengthM: 20, roughnessMm: .09, density: 1.204, viscosity: .0000181,
+      localLossCoefficient: 2.5, targetVelocity: 5,
+    };
+    const frame = document.createElement("iframe");
+    frame.title = "Duct pressure calculator interaction tests";
+    frame.style.cssText = "position:fixed;left:-10000px;width:1100px;height:1200px";
+    try {
+      const round = calculateDuctPressureLoss(base);
+      close(round.area, Math.PI * .5 ** 2 / 4, "Round duct area");
+      close(round.hydraulicDiameter, .5, "Round duct hydraulic diameter");
+      close(round.velocity, (10000 / 3600) / round.area, "Round duct mean velocity");
+      close(round.reynoldsNumber, 1.204 * round.velocity * .5 / .0000181, "Round duct Reynolds number");
+      assert(round.flowRegime === "紊流" && round.frictionFactor > .01 && round.frictionFactor < .03,
+        "Turbulent flow uses a plausible Darcy factor");
+      const colebrookLeft = 1 / Math.sqrt(round.frictionFactor);
+      const colebrookRight = -2 * Math.log10(.00009 / (3.7 * .5)
+        + 2.51 / (round.reynoldsNumber * Math.sqrt(round.frictionFactor)));
+      close(colebrookLeft, colebrookRight, "Turbulent Darcy factor satisfies Colebrook equation");
+      close(round.dynamicPressure, 1.204 * round.velocity ** 2 / 2, "Dynamic pressure");
+      close(round.localLoss, round.dynamicPressure * 2.5, "Fitting loss uses K times dynamic pressure");
+      close(round.totalLoss, round.frictionLoss + round.localLoss, "Total loss combines straight and fitting loss");
+      close(round.frictionRate, round.frictionLoss / 20, "Friction rate");
+      close(round.requiredArea, (10000 / 3600) / 5, "Target velocity sizing area");
+      close(round.recommendedCircularDiameter, Math.sqrt(4 * round.requiredArea / Math.PI), "Recommended round size");
+      close(round.recommendedSquareSide ** 2, round.requiredArea, "Square size preserves the target area");
+      close(round.recommendedRectangularWidth * round.recommendedRectangularHeight, round.requiredArea,
+        "Rectangular size preserves the target area");
+
+      const rectangular = calculateDuctPressureLoss({ ...base, shape: "rectangular", flowRateM3h: 5400, widthMm: 500, heightMm: 300 });
+      close(rectangular.area, .5 * .3, "Rectangular duct area");
+      close(rectangular.hydraulicDiameter, 4 * .5 * .3 / (2 * (.5 + .3)), "Rectangular hydraulic diameter");
+      close(rectangular.velocity, 10, "Rectangular duct mean velocity");
+      close(rectangular.localLoss, 1.204 * 10 ** 2 / 2 * 2.5, "Rectangular fitting loss");
+
+      const laminar = calculateDuctPressureLoss({
+        ...base, flowRateM3h: 10, lengthM: 10, localLossCoefficient: 0,
+      });
+      assert(laminar.flowRegime === "層流", "Laminar flow is identified");
+      close(laminar.frictionFactor, 64 / laminar.reynoldsNumber, "Laminar Darcy factor");
+      close(laminar.localLoss, 0, "Zero fitting coefficient yields no local loss");
+      const squareLaminar = calculateDuctPressureLoss({
+        ...base, shape: "rectangular", flowRateM3h: 10, widthMm: 300, heightMm: 300,
+      });
+      close(squareLaminar.frictionFactor * squareLaminar.reynoldsNumber, 96
+        * (1 - 1.3553 + 1.9467 - 1.7012 + .9564 - .2537),
+      "Rectangular laminar friction factor accounts for aspect ratio");
+      const transitionFlow = 3000 * base.viscosity / (base.density * .1)
+        * (Math.PI * .1 ** 2 / 4) * 3600;
+      const transitional = calculateDuctPressureLoss({
+        ...base, flowRateM3h: transitionFlow, diameterMm: 100,
+      });
+      assert(transitional.flowRegime === "過渡區（估算）", "Transitional flow is identified");
+
+      for (const [key, value, shape] of [
+        ["flowRateM3h", 0], ["lengthM", -1], ["roughnessMm", -1], ["density", 0],
+        ["viscosity", 0], ["localLossCoefficient", -1], ["targetVelocity", 0],
+        ["diameterMm", 0, "round"], ["widthMm", 0, "rectangular"], ["heightMm", 0, "rectangular"],
+      ]) {
+        let rejected = false;
+        try { calculateDuctPressureLoss({ ...base, ...(shape ? { shape } : {}), [key]: value }); }
+        catch (error) { rejected = error instanceof RangeError; }
+        assert(rejected, `Reject invalid ${key}`);
+      }
+      let excessiveRoughnessRejected = false;
+      try { calculateDuctPressureLoss({ ...base, roughnessMm: 500 }); }
+      catch (error) { excessiveRoughnessRejected = error instanceof RangeError; }
+      assert(excessiveRoughnessRejected, "Reject wall roughness at or above hydraulic diameter");
+      for (const shape of ["unknown", "", null]) {
+        let rejected = false;
+        try { calculateDuctPressureLoss({ ...base, shape }); }
+        catch (error) { rejected = error instanceof RangeError; }
+        assert(rejected, "Reject unsupported duct shape");
+      }
+      let overflowRejected = false;
+      try { calculateDuctPressureLoss({ ...base, flowRateM3h: 1e200 }); }
+      catch (error) { overflowRejected = error instanceof RangeError; }
+      assert(overflowRejected, "Reject results outside numeric range");
+
+      const tools = new DOMParser().parseFromString(await (await fetch("../tools.html")).text(), "text/html");
+      const home = new DOMParser().parseFromString(await (await fetch("../index.html")).text(), "text/html");
+      assert(tools.querySelector('[aria-labelledby="engineering-title"] a[href="duct-pressure.html"]'),
+        "Tool is listed under engineering applications");
+      assert(home.querySelector('.tool-card[href="duct-pressure.html"]'), "Tool is listed on the home page");
+      document.body.append(frame);
+      await new Promise((resolve, reject) => {
+        frame.onload = resolve;
+        frame.onerror = () => reject(new Error("Unable to load duct pressure calculator"));
+        frame.src = `../duct-pressure.html?test=${Date.now()}`;
+      });
+      const doc = frame.contentDocument;
+      assert(doc.querySelector("h1").textContent === "風管尺寸與壓損計算器", "Calculator page title");
+      assert(doc.querySelector("#results").hidden, "Results are hidden before calculation");
+      assert(doc.querySelector('label[for="roughness"]').textContent === "內壁絕對粗糙度（mm）"
+        && doc.querySelector("#roughness-material").value === "galvanized"
+        && doc.querySelector("#roughness").value === "0.09"
+        && doc.querySelector("#roughness").readOnly
+        && doc.querySelector("#roughness-value-note").textContent.includes("絕對粗糙度"),
+      "Separate material selector and absolute roughness field default to galvanized sheet");
+      const materialRoughness = [
+        ["commercial-steel", "0.045"], ["stainless-steel", "0.015"],
+        ["plastic", "0.0015"], ["concrete", "0.3"],
+      ];
+      for (const [material, expectedRoughness] of materialRoughness) {
+        doc.querySelector("#roughness-material").value = material;
+        doc.querySelector("#roughness-material").dispatchEvent(new frame.contentWindow.Event("change", { bubbles: true }));
+        assert(doc.querySelector("#roughness").value === expectedRoughness && doc.querySelector("#roughness").readOnly,
+          `${material} material displays its absolute roughness reference value`);
+      }
+      assert(!doc.querySelector("#diameter").disabled && doc.querySelector("#width").disabled,
+        "Round duct dimensions are initially enabled");
+      doc.querySelector("#shape").value = "rectangular";
+      doc.querySelector("#shape").dispatchEvent(new frame.contentWindow.Event("change", { bubbles: true }));
+      assert(doc.querySelector("#diameter").disabled && !doc.querySelector("#width").disabled
+        && !doc.querySelector("#height").disabled, "Selecting rectangular duct enables its dimensions");
+      doc.querySelector("#shape").value = "round";
+      doc.querySelector("#shape").dispatchEvent(new frame.contentWindow.Event("change", { bubbles: true }));
+      doc.querySelector("#roughness-material").value = "galvanized";
+      doc.querySelector("#roughness-material").dispatchEvent(new frame.contentWindow.Event("change", { bubbles: true }));
+      doc.querySelector("#flow-rate").value = "10000";
+      doc.querySelector("#local-k").value = "2.5";
+      doc.querySelector("button[type=submit]").click();
+      assert(!doc.querySelector("#results").hidden && doc.querySelector("#error").hidden,
+        "Valid form reveals results");
+      assert(doc.querySelector("#result-flow-regime").textContent === "紊流"
+        && doc.querySelector("#result-total-loss").textContent.endsWith(" Pa")
+        && doc.querySelector("#result-rect-size").textContent.includes("×"),
+      "Results show flow regime, pressure loss and sizing estimates");
+      const galvanizedLoss = Number.parseFloat(doc.querySelector("#result-friction-loss").textContent);
+      doc.querySelector("#roughness-material").value = "concrete";
+      doc.querySelector("#roughness-material").dispatchEvent(new frame.contentWindow.Event("change", { bubbles: true }));
+      doc.querySelector("button[type=submit]").click();
+      const concreteLoss = Number.parseFloat(doc.querySelector("#result-friction-loss").textContent);
+      assert(doc.querySelector("#roughness").value === "0.3" && concreteLoss > galvanizedLoss,
+        "Selected material roughness is used by the pressure-loss calculation");
+      doc.querySelector("#roughness-material").value = "galvanized";
+      doc.querySelector("#roughness-material").dispatchEvent(new frame.contentWindow.Event("change", { bubbles: true }));
+      doc.querySelector("#shape").value = "rectangular";
+      doc.querySelector("#shape").dispatchEvent(new frame.contentWindow.Event("change", { bubbles: true }));
+      assert(doc.querySelector("#results").hidden, "Changing inputs clears stale results");
+      doc.querySelector("#flow-rate").value = "0";
+      doc.querySelector("button[type=submit]").click();
+      assert(doc.querySelector("#results").hidden, "Invalid form does not show results");
+      doc.querySelector("#flow-rate").value = "10000";
+      doc.querySelector("#shape").value = "round";
+      doc.querySelector("#shape").dispatchEvent(new frame.contentWindow.Event("change", { bubbles: true }));
+      doc.querySelector("button[type=submit]").click();
+      assert(!doc.querySelector("#results").hidden, "Valid input recalculates after validation error");
+
+      for (const width of [320, 390, 768, 1280]) {
+        frame.style.width = `${width}px`;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth, `No page overflow ${width}`);
+        for (const metric of doc.querySelectorAll(".metric")) {
+          assert(metric.getBoundingClientRect().width > 0, `Metric card remains visible ${width}`);
+        }
+      }
+
+      output.dataset.kind = "success";
+      output.textContent = `PASS: ${checks} checks`;
+    } catch (error) {
+      output.dataset.kind = "error";
+      output.textContent = error.stack;
+      console.error(error);
+    } finally {
+      frame.remove();
+    }
+  </script>
+</body>
+</html>

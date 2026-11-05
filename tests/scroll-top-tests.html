@@ -3,11 +3,11 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Back-to-top regression tests</title></head>
 <body>
   <h1>Back-to-top regression tests</h1>
-  <p>Serve over HTTP. Checks the tool overview and all five calculators. Use reduced motion for automated runs.</p>
+  <p>Serve over HTTP. Checks the tool overview and all calculators. Use reduced motion for automated runs.</p>
   <pre id="results" role="status">Running...</pre>
   <script type="module">
     const output = document.querySelector("#results");
-    const pages = ["tools.html", "fan-laws.html", "humid-air.html", "refrigeration-cycle.html", "unit-converter.html", "water-refrigerant.html"];
+    const pages = ["tools.html", "fan-laws.html", "duct-pressure.html", "moody-chart.html", "humid-air.html", "refrigeration-cycle.html", "unit-converter.html", "water-refrigerant.html"];
     let checks = 0;
     const assert = (condition, label) => {
       checks += 1;
@@ -26,6 +26,10 @@
         });
         const win = frame.contentWindow;
         const doc = frame.contentDocument;
+        const matchMedia = win.matchMedia.bind(win);
+        win.matchMedia = (query) => query === "(prefers-reduced-motion: reduce)"
+          ? { matches: true }
+          : matchMedia(query);
         const button = doc.querySelector(".scroll-top-button");
         assert(doc.querySelectorAll(".scroll-top-button").length === 1, `${path} has one button`);
         assert(button.getAttribute("aria-label") === "捲動到最上方", `${path} accessible button label`);
@@ -35,7 +39,10 @@
         assert(win.scrollY > 0 && !button.hidden, `${path} shown after scroll`);
         assert(win.getComputedStyle(button).position === "fixed", `${path} fixed positioning`);
         button.click();
-        await new Promise((resolve) => setTimeout(resolve, 1200));
+        const scrollDeadline = Date.now() + 4000;
+        while (win.scrollY > 0 && Date.now() < scrollDeadline) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
         assert(win.scrollY === 0, `${path} returns to page start`);
         win.dispatchEvent(new win.Event("scroll"));
         assert(button.hidden, `${path} hidden again at page start`);

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Moody chart regression tests</title></head>
+<body>
+  <h1>Moody chart regression tests</h1>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    import {
+      calculateMoodyFrictionFactor,
+      calculateMoodyFromFluidProperties,
+      calculateTurbulentMoodyCurveFactor,
+    } from "../assets/moody-chart.js";
+
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+    const closeTo = (actual, expected, tolerance) => Math.abs(actual - expected) <= tolerance;
+    const frame = document.createElement("iframe");
+    frame.title = "Moody chart UI tests";
+    frame.style.cssText = "position:fixed;left:-10000px;width:1100px;height:1000px;";
+    try {
+      const laminar = calculateMoodyFrictionFactor(1000, .001);
+      assert(laminar.flowRegime === "層流" && closeTo(laminar.frictionFactor, .064, 1e-12),
+        "Laminar Darcy friction factor equals 64/Re");
+      const turbulent = calculateMoodyFrictionFactor(100000, .001);
+      assert(turbulent.flowRegime === "紊流" && turbulent.frictionFactor > .021
+        && turbulent.frictionFactor < .023, "Turbulent friction factor follows Colebrook-White");
+      const smooth = calculateMoodyFrictionFactor(100000, 0);
+      assert(smooth.frictionFactor < turbulent.frictionFactor, "Smooth-pipe friction factor is below rough-pipe value");
+      assert(calculateTurbulentMoodyCurveFactor(2000, .001) > 0,
+        "Turbulent reference curve can be evaluated at its Re=2000 extension");
+      const properties = calculateMoodyFromFluidProperties({
+        density: 1.2, velocity: 2, diameterMm: 100, dynamicViscosity: .000018,
+        absoluteRoughnessMm: .045,
+      });
+      assert(closeTo(properties.reynoldsNumber, 13333.3333333333, 1e-8)
+        && closeTo(properties.relativeRoughness, .00045, 1e-12),
+      "Calculate Reynolds number and relative roughness from fluid and pipe properties");
+      assert(properties.frictionFactor > .02 && properties.frictionFactor < .03,
+        "Calculate Darcy factor from derived properties");
+      const transition = calculateMoodyFrictionFactor(3000, .001);
+      assert(transition.flowRegime === "過渡區（估算）"
+        && transition.frictionFactor > .02 && transition.frictionFactor < .065,
+      "Transition region is identified and estimated");
+      for (const propertiesInput of [
+        { density: 0, velocity: 2, diameterMm: 100, dynamicViscosity: .000018, absoluteRoughnessMm: .045 },
+        { density: 1.2, velocity: 2, diameterMm: 100, dynamicViscosity: 0, absoluteRoughnessMm: .045 },
+        { density: 1.2, velocity: 2, diameterMm: 100, dynamicViscosity: .000018, absoluteRoughnessMm: 100 },
+        { density: 1.2, velocity: .001, diameterMm: 100, dynamicViscosity: .000018, absoluteRoughnessMm: .045 },
+      ]) {
+        let rejected = false;
+        try {
+          calculateMoodyFromFluidProperties(propertiesInput);
+        } catch (error) {
+          if (!(error instanceof RangeError)) throw error;
+          rejected = true;
+        }
+        assert(rejected, "Reject invalid or out-of-chart-range fluid and pipe conditions");
+      }
+
+      document.body.append(frame);
+      await new Promise((resolve, reject) => {
+        frame.onload = resolve;
+        frame.onerror = () => reject(new Error("Unable to load Moody chart"));
+        frame.src = `../moody-chart.html?test=${Date.now()}`;
+      });
+      const doc = frame.contentDocument;
+      assert(doc.querySelector("h1").textContent === "Moody 圖與摩擦因子計算器",
+        "Moody chart page title");
+      assert(doc.querySelector("#friction-factor").textContent !== "—"
+        && doc.querySelector("#moody-chart #current-point"),
+      "Default condition computes a result and marks its position on the chart");
+      const referenceRows = [...doc.querySelectorAll("#roughness-reference-title + .table-scroll tbody tr")]
+        .map((row) => [...row.cells].map((cell) => cell.textContent.trim()).join("|"));
+      assert(referenceRows.join(";") === [
+        "鍍鋅鋼板|0.09", "商用鋼材|0.045", "不鏽鋼|0.015", "PVC／塑膠|0.0015", "混凝土|0.3",
+      ].join(";") && doc.querySelector(".roughness-reference .hint").textContent.includes("參考值")
+        && doc.querySelector(".roughness-entry").contains(doc.querySelector("#absolute-roughness")),
+      "Provide compact material roughness reference table beside the absolute-roughness input");
+      const roughnessFieldBounds = doc.querySelector("#absolute-roughness").getBoundingClientRect();
+      const referenceBounds = doc.querySelector(".roughness-reference").getBoundingClientRect();
+      assert(referenceBounds.left >= roughnessFieldBounds.right
+        && referenceBounds.top < roughnessFieldBounds.bottom,
+      "Desktop reference table sits beside the roughness input");
+      assert(doc.querySelector('#moody-form button[type="submit"]').textContent === "計算",
+        "Calculation button is labeled simply as calculate");
+      assert(doc.querySelector("#result-reynolds").value !== "—"
+        && doc.querySelector("#result-relative-roughness").value !== "—",
+      "Show derived Reynolds number and relative roughness");
+      const resultOrder = [...doc.querySelectorAll(".result-metric dt")].map((item) => item.textContent.trim());
+      assert(resultOrder.join("|") === "雷諾數 Re|相對粗糙度 ε / D|Darcy 摩擦因子 f|流況",
+        "Present derived Reynolds and relative roughness before looked-up friction factor and flow regime");
+      const resultStyles = [...doc.querySelectorAll(".result-metric dd")].map((item) => {
+        const style = frame.contentWindow.getComputedStyle(item);
+        return `${style.fontSize}|${style.fontWeight}`;
+      });
+      assert(new Set(resultStyles).size === 1,
+        "All result values share the same font size and weight");
+      const expectedRoughnessLevels = [
+        "0.05", "0.04", "0.03", "0.02", "0.015", "0.01", "0.008", "0.006", "0.004",
+        "0.002", "0.001", "0.0008", "0.0006", "0.0004", "0.0002", "0.0001", "0.00005", "0.00001",
+      ];
+      const chartRoughnessLevels = [...doc.querySelectorAll("#moody-chart .curve-label")]
+        .map((item) => item.getAttribute("data-relative-roughness"));
+      assert(doc.querySelectorAll("#moody-chart path.curve").length === expectedRoughnessLevels.length + 2
+        && chartRoughnessLevels.join("|") === expectedRoughnessLevels.join("|")
+        && doc.querySelectorAll("#moody-chart .curve-label-leader").length === expectedRoughnessLevels.length
+        && doc.querySelector("#moody-chart .curve-label-title").textContent === "相對粗糙度 ε / D"
+        && doc.querySelector("#moody-chart .curve-smooth")
+        && doc.querySelectorAll("#moody-chart .curve-annotation-arrow[data-target]").length === 2
+        && doc.querySelectorAll("#moody-chart .curve-annotation-label").length === 2
+        && doc.querySelector('#moody-chart .curve-annotation-arrow[data-target="laminar"]')
+        && doc.querySelector('#moody-chart .curve-annotation-arrow[data-target="smooth"]')
+        && !doc.querySelector("#moody-chart #fully-turbulent-line")
+        && !doc.querySelector('#moody-chart [data-target="fully-turbulent"]')
+        && doc.querySelector("#chart-legend li").textContent.includes("層流線"),
+      "Chart includes roughness curves and smooth/laminar callouts without a fully turbulent limit line");
+      const curveColors = new Map([...doc.querySelectorAll("#moody-chart path.curve:not(.curve-laminar)")]
+        .map((curve) => [curve.getAttribute("data-relative-roughness"), curve.getAttribute("stroke")]));
+      assert([...doc.querySelectorAll("#moody-chart .curve-label")].every((label) => {
+        const roughness = label.getAttribute("data-relative-roughness");
+        const leader = doc.querySelector(`#moody-chart .curve-label-leader[data-relative-roughness="${roughness}"]`);
+        return curveColors.get(roughness) === label.getAttribute("fill")
+          && label.getAttribute("fill") === leader?.getAttribute("stroke");
+      }), "Each right-axis roughness label and leader matches its curve color");
+      assert([...doc.querySelectorAll("#moody-chart text.axis-tick tspan[baseline-shift='super']")]
+        .map((tick) => tick.textContent).join("") === "345678",
+      "Logarithmic Reynolds axis displays powers of ten with superscript exponents");
+      const frictionFactorTicks = [...doc.querySelectorAll("#moody-chart text.y-axis-tick")]
+        .map((tick) => Number(tick.textContent));
+      assert(Math.max(...frictionFactorTicks) === .1
+        && !frictionFactorTicks.includes(.15) && !frictionFactorTicks.includes(.2),
+      "Moody chart Darcy friction-factor axis is capped at 0.1");
+      assert([...doc.querySelectorAll("#moody-chart path.curve:not(.curve-laminar)")]
+        .every((curve) => curve.getAttribute("data-reynolds-start") === "2000")
+        && doc.querySelector("#chart-description").textContent.includes("Re 小於 2300")
+        && doc.querySelector(".chart-panel .hint").textContent.includes("Re > 4000"),
+      "Turbulent curves extend to Re=2000 and chart notes laminar and turbulent limits");
+      assert(doc.querySelector('label[for="dynamic-viscosity"]').textContent === "絕對黏度 μ（Pa·s）"
+        && !doc.querySelector("#roughness-material")
+        && !doc.querySelector("#absolute-roughness").readOnly,
+      "Use the absolute-viscosity label and an editable absolute-roughness input without material selection");
+      doc.querySelector("#absolute-roughness").value = "0.3";
+      doc.querySelector("#absolute-roughness").dispatchEvent(new frame.contentWindow.Event("input", { bubbles: true }));
+      assert(doc.querySelector("#friction-factor").textContent === "—",
+        "Editing absolute roughness invalidates stale results");
+      doc.querySelector("#moody-form button[type=submit]").click();
+      assert(doc.querySelector("#result-relative-roughness").value === "0.000375",
+        "Manually entered absolute roughness is converted to relative roughness using pipe diameter");
+      doc.querySelector("#absolute-roughness").value = "0.09";
+      doc.querySelector("#absolute-roughness").dispatchEvent(new frame.contentWindow.Event("input", { bubbles: true }));
+      doc.querySelector("#density").value = "1";
+      doc.querySelector("#velocity").value = "1";
+      doc.querySelector("#diameter").value = "1000";
+      doc.querySelector("#dynamic-viscosity").value = "0.001";
+      doc.querySelector("#moody-form button[type=submit]").click();
+      assert(doc.querySelector("#friction-factor").textContent === "0.064"
+        && doc.querySelector("#flow-regime").textContent === "層流"
+        && doc.querySelector("#result-reynolds").value === "1,000"
+        && doc.querySelector("#result-relative-roughness").value === "0.00009"
+        && doc.querySelector("#moody-chart #current-point").getAttribute("aria-label").includes("Re 1000"),
+      "Calculate outputs Reynolds number, relative roughness, friction factor, and chart marker");
+      doc.querySelector("#velocity").value = "3";
+      doc.querySelector("#velocity").dispatchEvent(new frame.contentWindow.Event("input", { bubbles: true }));
+      assert(doc.querySelector("#friction-factor").textContent === "—"
+        && !doc.querySelector("#moody-chart #current-point"),
+      "Changing conditions clears the outdated factor and chart marker");
+      doc.querySelector("#moody-form button[type=submit]").click();
+      assert(doc.querySelector("#flow-regime").textContent === "過渡區（估算）"
+        && doc.querySelector("#result-reynolds").value === "3,000"
+        && doc.querySelector("#status").textContent.includes("過渡區"),
+      "Transition estimate is clearly communicated");
+      output.textContent = `PASS: ${checks} checks`;
+    } catch (error) {
+      output.textContent = `Error: ${error.stack}`;
+      console.error(error);
+    } finally {
+      frame.remove();
+    }
+  </script>
+</body>
+</html>

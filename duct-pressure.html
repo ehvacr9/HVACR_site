@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="計算圓形或矩形風管的風速、雷諾數、直管摩擦壓損與局部損失，並依目標風速估算風管尺寸。">
+  <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
+  <link rel="stylesheet" href="assets/scroll-top.css">
+  <title>風管尺寸與壓損計算器｜計算工具</title>
+  <style>
+    :root { color-scheme: light; --ink: #172b2b; --muted: #5b6c68; --paper: #f6f5ef; --surface: #fffefa; --green: #1d6252; --line: #dce2d8; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); line-height: 1.7; }
+    a { color: var(--green); text-underline-offset: 3px; }
+    .wrap { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
+    .topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px max(24px, calc((100% - 1120px) / 2)); border-bottom: 1px solid var(--line); }
+    .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); font-size: 15px; font-weight: 750; text-decoration: none; }
+    .brand img { width: 34px; height: 34px; }
+    nav { display: flex; flex-wrap: wrap; gap: 12px 24px; font-size: 13px; }
+    nav a { color: var(--muted); text-decoration: none; }
+    nav a[aria-current] { color: var(--green); }
+    main { padding-block: 40px 72px; }
+    .breadcrumb, .hint { color: var(--muted); font-size: 14px; }
+    .breadcrumb { margin: 0 0 22px; }
+    h1 { margin: 0 0 12px; font-size: clamp(28px, 5vw, 42px); line-height: 1.3; }
+    .intro { max-width: 760px; margin: 0; color: var(--muted); }
+    h2 { color: var(--green); font-size: 21px; }
+    .panel { margin-top: 24px; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    .inputs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 22px; padding: 24px; }
+    .inputs h2 { grid-column: 1 / -1; margin: 0; }
+    .field { min-width: 0; }
+    label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 700; }
+    input, select { width: 100%; min-height: 44px; padding: 9px; border: 1px solid #a9beb0; border-radius: 5px; background: #fff; color: var(--ink); font: inherit; }
+    .field small { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+    button { padding: 11px 22px; border: 0; border-radius: 5px; background: var(--green); color: white; font: inherit; font-weight: 700; cursor: pointer; }
+    button:hover { background: #174f43; }
+    input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid #9ab952; outline-offset: 3px; }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 14px 24px; border-top: 1px solid var(--line); background: #f7f8f3; }
+    #status { margin: 0; color: var(--muted); font-size: 13px; }
+    #error { flex-basis: 100%; margin: 0; color: #a32828; }
+    .results { margin-top: 24px; padding: 24px; }
+    .results h2 { margin: 0 0 14px; }
+    .results h2:not(:first-child) { margin-top: 24px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .metric { min-width: 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 7px; background: #fbfbf7; }
+    .metric dt { color: var(--muted); font-size: 13px; }
+    .metric dd { margin: 3px 0 0; font-size: 18px; font-weight: 700; overflow-wrap: anywhere; }
+    .size-results { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .hint { margin: 16px 0 0; }
+    #transition-note { padding: 10px 12px; border-left: 3px solid #c58a27; background: #fff8e9; }
+    .formula { padding: 18px 22px; border-top: 1px solid var(--line); background: #f7f8f3; }
+    .formula h2 { margin: 0 0 8px; font-size: 17px; }
+    .formula p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+    footer { padding: 24px; border-top: 1px solid var(--line); text-align: center; }
+    footer p { color: var(--muted); font-size: 12px; }
+    [hidden] { display: none !important; }
+    @media(max-width: 800px) {
+      .inputs, .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .size-results { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media(max-width: 560px) {
+      .wrap { width: calc(100% - 32px); }
+      .topbar { padding-inline: 16px; }
+      nav { font-size: 12px; gap: 8px 14px; }
+      main { padding-block: 32px 54px; }
+      .inputs, .metrics, .size-results { grid-template-columns: 1fr; }
+      .inputs, .results { padding: 18px; }
+      .actions { padding-inline: 18px; }
+      .formula { padding-inline: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html"><img src="assets/hvacr-learning-logo.svg?v=3" alt=""><span>能源與冷凍空調學習網</span></a>
+    <nav aria-label="主選單"><a href="index.html">首頁</a><a href="about.html">關於我們</a><a href="exam-years.html">技師考題</a><a href="terminology.html">術語辭典</a><a href="columns.html">技術專欄</a><a href="tools.html" aria-current="location">計算工具</a></nav>
+  </header>
+  <main class="wrap">
+    <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="tools.html">計算工具</a> ／ <span aria-current="page">風管尺寸與壓損計算器</span></p>
+    <h1>風管尺寸與壓損計算器</h1>
+    <p class="intro">輸入風量、風管尺寸與管件局部損失係數，估算風速、直管摩擦壓損及總壓損；也可依目標風速推估所需尺寸。</p>
+    <form id="duct-form" class="panel">
+      <div class="inputs">
+        <h2>設計條件</h2>
+        <div class="field"><label for="flow-rate">風量（m³/h）</label><input id="flow-rate" type="number" step="any" min="0.001" required value="10000"></div>
+        <div class="field"><label for="shape">風管形狀</label><select id="shape"><option value="round">圓形風管</option><option value="rectangular">矩形風管</option></select></div>
+        <div class="field" data-shape="round"><label for="diameter">內徑（mm）</label><input id="diameter" type="number" step="any" min="0.001" required value="800"></div>
+        <div class="field" data-shape="rectangular" hidden><label for="width">內寬（mm）</label><input id="width" type="number" step="any" min="0.001" required value="500" disabled></div>
+        <div class="field" data-shape="rectangular" hidden><label for="height">內高（mm）</label><input id="height" type="number" step="any" min="0.001" required value="300" disabled></div>
+        <div class="field"><label for="length">直管長度（m）</label><input id="length" type="number" step="any" min="0" required value="20"></div>
+        <div class="field">
+          <label for="roughness-material">風管材料</label>
+          <select id="roughness-material" aria-describedby="roughness-hint">
+            <option value="galvanized">鍍鋅鋼板</option>
+            <option value="commercial-steel">商用鋼材</option>
+            <option value="stainless-steel">不鏽鋼</option>
+            <option value="plastic">PVC／塑膠</option>
+            <option value="concrete">混凝土</option>
+          </select>
+          <small id="roughness-hint">下方顯示材料常用的絕對粗糙度參考值，實際值會因表面狀態與施工品質而異。</small>
+        </div>
+        <div class="field">
+          <label for="roughness">內壁絕對粗糙度（mm）</label>
+          <input id="roughness" type="number" step="any" min="0" required value="0.09" readonly>
+          <small id="roughness-value-note">絕對粗糙度 ε；非相對粗糙度。</small>
+        </div>
+        <div class="field"><label for="density">空氣密度（kg/m³）</label><input id="density" type="number" step="any" min="0.001" required value="1.204"></div>
+        <div class="field"><label for="viscosity">動力黏度（Pa·s）</label><input id="viscosity" type="number" step="any" min="0.000000001" required value="0.0000181"><small>空氣 20°C 參考值約 1.81 × 10⁻⁵ Pa·s。</small></div>
+        <div class="field"><label for="local-k">管件總局部損失係數 K</label><input id="local-k" type="number" step="any" min="0" required value="0"><small>填入所有管件係數總和，並以此風管風速為基準；未計入的管件不會反映在壓損結果。</small></div>
+        <div class="field"><label for="target-velocity">尺寸建議目標風速（m/s）</label><input id="target-velocity" type="number" step="any" min="0.001" required value="5"></div>
+      </div>
+      <div class="actions">
+        <button type="submit">計算</button>
+        <p id="status" role="status" aria-live="polite">請確認條件後計算。</p>
+        <p id="error" role="alert" hidden></p>
+      </div>
+    </form>
+    <section id="results" class="panel results" aria-labelledby="results-title" hidden>
+      <h2 id="results-title">計算結果</h2>
+      <dl class="metrics">
+        <div class="metric"><dt>風管截面積</dt><dd id="result-area"></dd></div>
+        <div class="metric"><dt>平均風速</dt><dd id="result-velocity"></dd></div>
+        <div class="metric"><dt>水力直徑</dt><dd id="result-hydraulic-diameter"></dd></div>
+        <div class="metric"><dt>雷諾數</dt><dd id="result-reynolds"></dd></div>
+        <div class="metric"><dt>Darcy 摩擦因子</dt><dd id="result-friction-factor"></dd></div>
+        <div class="metric"><dt>流況</dt><dd id="result-flow-regime"></dd></div>
+        <div class="metric"><dt>直管摩擦壓損</dt><dd id="result-friction-loss"></dd></div>
+        <div class="metric"><dt>管件局部壓損</dt><dd id="result-local-loss"></dd></div>
+        <div class="metric"><dt>總壓損</dt><dd id="result-total-loss"></dd></div>
+        <div class="metric"><dt>單位長度摩擦率</dt><dd id="result-friction-rate"></dd></div>
+      </dl>
+      <p id="transition-note" class="hint" hidden>目前雷諾數位於過渡區，摩擦因子以層流與紊流估算值內插，結果僅供初步參考。</p>
+      <h2>依目標風速估算尺寸</h2>
+      <dl class="size-results">
+        <div class="metric"><dt>所需截面積</dt><dd id="result-required-area"></dd></div>
+        <div class="metric"><dt>圓形風管內徑</dt><dd id="result-round-size"></dd></div>
+        <div class="metric"><dt>正方形風管邊長</dt><dd id="result-square-size"></dd></div>
+        <div class="metric"><dt>矩形風管尺寸（寬 × 高，2:1）</dt><dd id="result-rect-size"></dd></div>
+      </dl>
+      <p class="hint">尺寸為依目標風速計算的理論尺寸，尚未依標準規格進位，也未檢核噪音、空間、強度或系統平衡。</p>
+    </section>
+    <section class="panel formula" aria-labelledby="formula-title">
+      <h2 id="formula-title">計算方法與適用範圍</h2>
+      <p>直管摩擦損失採 Darcy–Weisbach 式：Δp = f (L / Dₕ) (ρv² / 2)；管件局部損失採 Δpₗ = K (ρv² / 2)。f 為 Darcy 摩擦因子，L 為直管長度，ρ 為空氣密度，v 為平均風速。</p>
+      <p>圓形風管使用內徑；矩形風管以水力直徑 Dₕ = 4A / P 估算摩擦損失，A 為截面積、P 為潤周長，層流並依長寬比修正摩擦因子。紊流以 Colebrook 式數值求解，並以內壁絕對粗糙度 ε 計算相對粗糙度 ε / Dₕ。</p>
+      <p>本工具估算定密度、定黏度下的風管壓損，不會自動推算管件 K 值，也不會求解風機與系統曲線交點；設計請依實際管件資料與工程條件覆核。</p>
+    </section>
+  </main>
+  <footer>
+    <a class="brand" href="index.html"><img src="assets/hvacr-learning-logo.svg?v=3" alt=""><span>能源與冷凍空調學習網</span></a>
+    <p>Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</p>
+  </footer>
+  <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
+  <script type="module" src="assets/duct-pressure-ui.js"></script>
+  <script type="module" src="assets/scroll-top.js"></script>
+</body>
+</html>
