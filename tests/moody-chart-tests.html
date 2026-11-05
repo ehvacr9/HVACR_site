@@ -73,18 +73,35 @@
       assert(doc.querySelector("#friction-factor").textContent !== "—"
         && doc.querySelector("#moody-chart #current-point"),
       "Default condition computes a result and marks its position on the chart");
-      const referenceRows = [...doc.querySelectorAll("#roughness-reference-title + .table-scroll tbody tr")]
+      const references = doc.querySelector(".reference-details");
+      const fluidReferenceRows = [...references.querySelectorAll("#fluid-reference-title + .table-scroll tbody tr")]
         .map((row) => [...row.cells].map((cell) => cell.textContent.trim()).join("|"));
-      assert(referenceRows.join(";") === [
-        "鍍鋅鋼板|0.09", "商用鋼材|0.045", "不鏽鋼|0.015", "PVC／塑膠|0.0015", "混凝土|0.3",
-      ].join(";") && doc.querySelector(".roughness-reference .hint").textContent.includes("參考值")
+      const roughnessReferenceRows = [...references.querySelectorAll("#roughness-reference-title + .table-scroll tbody tr")]
+        .map((row) => [...row.cells].map((cell) => cell.textContent.trim()).join("|"));
+      assert(!references.open
+        && references.querySelector("summary").textContent.includes("常用流體與管壁粗糙度參考值")
+        && fluidReferenceRows.join(";") === [
+          "水（20°C）|998.2|0.001002",
+          "空氣（20°C、1 atm）|1.204|0.0000181",
+        ].join(";")
+        && roughnessReferenceRows.join(";") === [
+          "鍍鋅鋼板|0.09", "商用鋼材|0.045", "不鏽鋼|0.015", "PVC／塑膠|0.0015", "混凝土|0.3",
+        ].join(";")
+        && references.querySelector("#fluid-reference-title + .table-scroll + .hint").textContent.includes("溫度及壓力")
+        && references.querySelector("#roughness-reference-title + .table-scroll + .hint").textContent.includes("參考值")
         && doc.querySelector(".roughness-entry").contains(doc.querySelector("#absolute-roughness")),
-      "Provide compact material roughness reference table beside the absolute-roughness input");
-      const roughnessFieldBounds = doc.querySelector("#absolute-roughness").getBoundingClientRect();
-      const referenceBounds = doc.querySelector(".roughness-reference").getBoundingClientRect();
-      assert(referenceBounds.left >= roughnessFieldBounds.right
-        && referenceBounds.top < roughnessFieldBounds.bottom,
-      "Desktop reference table sits beside the roughness input");
+      "Group fluid-property and material-roughness references in a collapsed disclosure");
+      assert(references.previousElementSibling.classList.contains("inputs")
+        && references.nextElementSibling.classList.contains("actions")
+        && doc.querySelector("#moody-form button[type=submit]").closest(".actions").previousElementSibling === references,
+      "Place the reference disclosure between condition inputs and the calculate action");
+      references.querySelector("summary").click();
+      assert(references.open && references.querySelector(".reference-content").getBoundingClientRect().height > 0,
+        "Expand the reference disclosure to reveal both reference tables");
+      assert(fluidReferenceRows.length === 2 && !references.contains(doc.querySelector("#density"))
+        && doc.querySelector(".fluid-property-entry").contains(doc.querySelector("#density"))
+        && doc.querySelector(".fluid-property-entry").contains(doc.querySelector("#dynamic-viscosity")),
+      "Keep fluid-property inputs separate from their reference table");
       assert(doc.querySelector('#moody-form button[type="submit"]').textContent === "計算",
         "Calculation button is labeled simply as calculate");
       assert(doc.querySelector("#result-reynolds").value !== "—"

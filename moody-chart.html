@@ -39,15 +39,20 @@
     .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 14px 24px; border-top: 1px solid var(--line); background: #f7f8f3; }
     #status { margin: 0; color: var(--muted); font-size: 13px; }
     #error { flex-basis: 100%; margin: 0; color: #a32828; }
-    .roughness-entry { display: grid; grid-column: 1 / -1; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); align-items: start; gap: 18px 22px; }
-    .roughness-reference { min-width: 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 7px; background: #fbfbf7; }
-    .roughness-reference h3 { margin: 0 0 6px; color: var(--green); font-size: 15px; }
+    .fluid-property-entry { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 22px; }
+    .roughness-entry { grid-column: 1 / -1; }
+    .reference-details { border-top: 1px solid var(--line); }
+    .reference-details summary { padding: 13px 24px; color: var(--green); font-size: 14px; font-weight: 700; cursor: pointer; }
+    .reference-details summary:focus-visible { outline: 3px solid #9ab952; outline-offset: -3px; }
+    .reference-content { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding: 0 24px 18px; }
+    .reference-content section { min-width: 0; }
+    .reference-content h3 { margin: 0 0 6px; color: var(--green); font-size: 15px; }
+    .reference-content .hint { margin: 6px 0 0; font-size: 11px; line-height: 1.5; }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
     .table-scroll { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
     th, td { padding: 3px 7px; border-bottom: 1px solid var(--line); }
     th { background: #f1f4ee; font-weight: 650; }
-    .roughness-reference .hint { margin: 6px 0 0; font-size: 11px; line-height: 1.5; }
     .results { padding: 20px 24px; }
     .results h2 { margin: 0 0 14px; }
     .result-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0; }
@@ -92,7 +97,9 @@
       nav { font-size: 12px; gap: 8px 14px; }
       main { padding-block: 32px 54px; }
       .inputs { grid-template-columns: 1fr; padding: 18px; }
-      .roughness-entry { grid-template-columns: 1fr; gap: 12px; }
+      .fluid-property-entry { grid-template-columns: 1fr; gap: 12px; }
+      .reference-details summary { padding-inline: 18px; }
+      .reference-content { grid-template-columns: 1fr; gap: 12px; padding-inline: 18px; }
       .results { padding: 18px; }
       .result-metrics { grid-template-columns: 1fr; }
       .actions { padding-inline: 18px; }
@@ -113,9 +120,15 @@
     <form id="moody-form" class="panel">
       <div class="inputs">
         <h2>流體與管道條件</h2>
-        <div class="field">
-          <label for="density">流體密度（kg/m³）</label>
-          <input id="density" type="number" step="any" min="0.001" required value="1.204">
+        <div class="fluid-property-entry">
+          <div class="field">
+            <label for="density">流體密度（kg/m³）</label>
+            <input id="density" type="number" step="any" min="0.001" required value="1.204">
+          </div>
+          <div class="field">
+            <label for="dynamic-viscosity">絕對黏度 μ（Pa·s）</label>
+            <input id="dynamic-viscosity" type="number" step="any" min="0.000000001" required value="0.0000181">
+          </div>
         </div>
         <div class="field">
           <label for="velocity">平均流速（m/s）</label>
@@ -125,17 +138,32 @@
           <label for="diameter">管內徑（mm）</label>
           <input id="diameter" type="number" step="any" min="0.001" required value="800">
         </div>
-        <div class="field">
-          <label for="dynamic-viscosity">絕對黏度 μ（Pa·s）</label>
-          <input id="dynamic-viscosity" type="number" step="any" min="0.000000001" required value="0.0000181">
-        </div>
         <div class="roughness-entry">
           <div class="field">
             <label for="absolute-roughness">絕對粗糙度 ε（mm）</label>
             <input id="absolute-roughness" type="number" step="any" min="0" required value="0.09">
             <small>直接輸入管壁的絕對粗糙度 ε；計算時會依管徑換算相對粗糙度 ε / D。</small>
           </div>
-          <aside class="roughness-reference" aria-labelledby="roughness-reference-title">
+        </div>
+      </div>
+      <details class="reference-details">
+        <summary>常用流體與管壁粗糙度參考值</summary>
+        <div class="reference-content">
+          <section aria-labelledby="fluid-reference-title">
+            <h3 id="fluid-reference-title">常用流體參考值</h3>
+            <div class="table-scroll">
+              <table>
+                <caption class="sr-only">常用流體在約 20°C 下的密度與絕對黏度參考值</caption>
+                <thead><tr><th scope="col">流體／條件</th><th scope="col">密度（kg/m³）</th><th scope="col">絕對黏度（Pa·s）</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">水（20°C）</th><td>998.2</td><td>0.001002</td></tr>
+                  <tr><th scope="row">空氣（20°C、1 atm）</th><td>1.204</td><td>0.0000181</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="hint">約略參考值；密度與黏度會隨溫度及壓力改變。</p>
+          </section>
+          <section aria-labelledby="roughness-reference-title">
             <h3 id="roughness-reference-title">常見材料參考（mm）</h3>
             <div class="table-scroll">
               <table>
@@ -151,9 +179,9 @@
               </table>
             </div>
             <p class="hint">常用參考值；實際值依材料表面及施工狀況而異。</p>
-          </aside>
+          </section>
         </div>
-      </div>
+      </details>
       <div class="actions">
         <button type="submit">計算</button>
         <p id="status" role="status" aria-live="polite">請確認條件後計算。</p>
