@@ -20,7 +20,7 @@
       "index.html", "about.html", "founder.html", "terminology.html", "exam-years.html",
       "exam-year-112.html", "exam-year-113.html", "exam-year-114.html", "exam-year-archive.html",
       "exam-paper.html", "humid-air.html", "refrigeration-cycle.html", "tools.html",
-      "unit-converter.html", "fan-laws.html", "duct-pressure.html", "moody-chart.html", "water-refrigerant.html", "columns.html", "glycol.html", "chiller.html", "mau.html", "ahu.html",
+      "unit-converter.html", "fan-laws.html", "duct-pressure.html", "moody-chart.html", "fin-efficiency.html", "water-refrigerant.html", "columns.html", "glycol.html", "chiller.html", "mau.html", "ahu.html",
       "ahu-project-case.html", "vrf.html", "low-flow-chiller.html", "quantum-computing-hvac.html",
     ];
 
@@ -41,7 +41,7 @@
         }
         assert(!page.querySelector('nav a[href="references.html"]'),
           `${path} does not expose the bibliography in the site navigation`);
-        if (["columns.html", "glycol.html", "chiller.html", "mau.html", "ahu.html", "duct-pressure.html", "moody-chart.html",
+        if (["columns.html", "glycol.html", "chiller.html", "mau.html", "ahu.html", "duct-pressure.html", "moody-chart.html", "fin-efficiency.html",
           "ahu-project-case.html", "vrf.html", "low-flow-chiller.html", "quantum-computing-hvac.html"].includes(path)) {
           assert(page.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
             `${path} includes the scroll-to-top button`);

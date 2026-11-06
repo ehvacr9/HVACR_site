@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Fin efficiency calculator regression tests</title></head>
+<body>
+  <h1>Fin efficiency calculator regression tests</h1>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    import { calculateFinEfficiency } from "../assets/fin-efficiency.js";
+
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+    const close = (actual, expected, label, tolerance = 1e-10) =>
+      assert(Math.abs(actual - expected) <= Math.max(tolerance, Math.abs(expected) * 1e-9), label);
+    const base = {
+      geometry: "rectangular", convectionCoefficient: 50, conductivity: 205,
+      lengthMm: 50, widthMm: 50, thicknessMm: 2, diameterMm: 10,
+    };
+    const frame = document.createElement("iframe");
+    frame.title = "Fin efficiency calculator interaction tests";
+    frame.style.cssText = "position:fixed;left:-10000px;width:1100px;height:1100px;";
+    try {
+      const rectangular = calculateFinEfficiency(base);
+      const area = .05 * .002;
+      const perimeter = 2 * (.05 + .002);
+      const correctedLength = .05 + area / perimeter;
+      const parameter = Math.sqrt(50 * perimeter / (205 * area));
+      const expectedEfficiency = Math.tanh(parameter * correctedLength) / (parameter * correctedLength);
+      close(rectangular.crossSectionArea, area, "Rectangular fin cross-section area");
+      close(rectangular.perimeter, perimeter, "Rectangular fin perimeter");
+      close(rectangular.correctedLength, correctedLength, "Rectangular fin corrected length");
+      close(rectangular.efficiency, expectedEfficiency, "Rectangular fin efficiency");
+      assert(rectangular.efficiency > 0 && rectangular.efficiency <= 1,
+        "Fin efficiency stays between zero and one");
+
+      const cylindrical = calculateFinEfficiency({ ...base, geometry: "cylindrical" });
+      const pinDiameter = .01;
+      const pinArea = Math.PI * pinDiameter ** 2 / 4;
+      const pinPerimeter = Math.PI * pinDiameter;
+      close(cylindrical.crossSectionArea, pinArea, "Cylindrical pin cross-section area");
+      close(cylindrical.perimeter, pinPerimeter, "Cylindrical pin perimeter");
+      close(cylindrical.correctedLength, .05 + pinDiameter / 4, "Cylindrical pin corrected length");
+      assert(cylindrical.efficiency > 0 && cylindrical.efficiency <= 1,
+        "Cylindrical pin efficiency stays between zero and one");
+      assert(calculateFinEfficiency({ ...base, lengthMm: 100 }).efficiency < rectangular.efficiency
+        && calculateFinEfficiency({ ...base, convectionCoefficient: 100 }).efficiency < rectangular.efficiency
+        && calculateFinEfficiency({ ...base, conductivity: 410 }).efficiency > rectangular.efficiency,
+      "Fin efficiency responds correctly to length, convection and conductivity");
+      for (const [key, value] of [
+        ["convectionCoefficient", 0], ["conductivity", -1], ["lengthMm", 0],
+        ["widthMm", 0], ["thicknessMm", -1],
+      ]) {
+        let rejected = false;
+        try { calculateFinEfficiency({ ...base, [key]: value }); }
+        catch (error) { rejected = error instanceof RangeError; }
+        assert(rejected, `Reject invalid ${key}`);
+      }
+      for (const geometry of ["annular", "", null]) {
+        let rejected = false;
+        try { calculateFinEfficiency({ ...base, geometry }); }
+        catch (error) { rejected = error instanceof RangeError; }
+        assert(rejected, "Reject unsupported fin geometry");
+      }
+      let overflowRejected = false;
+      try { calculateFinEfficiency({ ...base, convectionCoefficient: 1e308 }); }
+      catch (error) { overflowRejected = error instanceof RangeError; }
+      assert(overflowRejected, "Reject results outside numeric range");
+
+      const tools = new DOMParser().parseFromString(await (await fetch("../tools.html")).text(), "text/html");
+      const home = new DOMParser().parseFromString(await (await fetch("../index.html")).text(), "text/html");
+      assert(tools.querySelector('[aria-labelledby="engineering-title"] a[href="fin-efficiency.html"]')
+        && home.querySelector('.tool-card[href="fin-efficiency.html"]'),
+      "List the fin calculator in the tools and home pages");
+
+      document.body.append(frame);
+      await new Promise((resolve, reject) => {
+        frame.onload = resolve;
+        frame.onerror = () => reject(new Error("Unable to load fin efficiency calculator"));
+        frame.src = `../fin-efficiency.html?test=${Date.now()}`;
+      });
+      const doc = frame.contentDocument;
+      assert(doc.querySelector("h1").textContent === "鰭片效率計算器"
+        && doc.querySelector("#results").hidden,
+      "Calculator page title and results are initially hidden");
+      const geometrySelect = doc.querySelector("#geometry");
+      assert(geometrySelect.options[0].textContent === "平板鰭片"
+        && geometrySelect.options[1].textContent === "針狀鰭片"
+        && !doc.querySelector("[data-geometry='rectangular']").hidden
+        && doc.querySelector("[data-geometry='cylindrical']").hidden
+        && doc.querySelector("#width").required && doc.querySelector("#diameter").disabled,
+      "Plate fin geometry fields are enabled by default");
+      const materialReference = doc.querySelector(".material-reference");
+      assert(materialReference && !materialReference.open
+        && ["銅", "401", "鋁（純鋁）", "237", "鋁合金（6061-T6）", "167", "黃銅", "109", "碳鋼", "54", "不鏽鋼（304）", "16.2"]
+          .every((label) => materialReference.textContent.includes(label)),
+      "Provide a collapsed reference table of common material conductivity values");
+      assert(!doc.querySelector("#fin-form").contains(materialReference)
+        && materialReference.nextElementSibling === doc.querySelector("#results"),
+      "Place the material reference between the input form and result section");
+      assert(!doc.querySelector("#method-title").nextElementSibling.textContent.includes("不需要輸入溫度"),
+        "Omit the temperature-input sentence from the calculation method");
+      const rectangularDiagram = doc.querySelector('[data-geometry-diagram="rectangular"]');
+      const cylindricalDiagram = doc.querySelector('[data-geometry-diagram="cylindrical"]');
+      assert(!rectangularDiagram.hasAttribute("hidden")
+        && ["L：長度", "t：厚度", "w：寬度", "h：表面對流", "k：沿鰭片導熱"]
+          .every((label) => rectangularDiagram.textContent.includes(label)),
+      "Rectangular fin 3D diagram labels dimensions and heat-transfer coefficients");
+      assert(rectangularDiagram.querySelectorAll(".fin-side")[0].getAttribute("points")
+        === "145,346 445,346 445,366 145,366"
+        && (346 + 366) / 2 === (326 + 386) / 2,
+      "Plate fin is centered vertically on the base face");
+      assert(cylindricalDiagram.hasAttribute("hidden")
+        && ["L：長度", "d：直徑", "h：表面對流", "k：沿鰭片導熱"]
+          .every((label) => cylindricalDiagram.textContent.includes(label)),
+      "Needle fin 3D diagram labels dimensions and heat-transfer coefficients");
+      assert(cylindricalDiagram.querySelector(".base-top").getAttribute("points")
+        === rectangularDiagram.querySelector(".base-top").getAttribute("points")
+        && cylindricalDiagram.querySelector(".base-side[points='95,326 145,326 145,386 95,386']")
+        && cylindricalDiagram.querySelector(".cylinder-end[cx='161'][cy='346']").nextElementSibling
+          === cylindricalDiagram.querySelector(".pin-body")
+        && cylindricalDiagram.querySelector(".pin-root").classList.contains("cylinder-end")
+        && cylindricalDiagram.querySelector(".pin-body").getAttribute("d") === "M161 326 H430 A10 20 0 0 1 430 366 H161"
+        && cylindricalDiagram.querySelector(".cylinder-end[cx='430'][cy='346']")
+        && cylindricalDiagram.querySelector(".cylinder-end[cx='161'][cy='346']")
+        && [...cylindricalDiagram.querySelectorAll(".convection")].every((arrow) => arrow.getAttribute("d").includes("C")),
+      "Needle fin shares the plate fin's base perspective and has a rounded horizontal 3D body with wavy convection arrows");
+      assert(cylindricalDiagram.textContent.includes("d：直徑")
+        && cylindricalDiagram.querySelector(".dimension[x1='161'][y1='400'][x2='430'][y2='400']")
+        && cylindricalDiagram.querySelector(".dimension[x1='470'][y1='326'][x2='470'][y2='366']"),
+      "Needle fin diagram marks its length and diameter like a standard pin-fin schematic");
+      assert(cylindricalDiagram.querySelector(".cylinder-end[cx='161'][cy='346']")
+        && (326 + 366) / 2 === 346
+        && cylindricalDiagram.querySelector(".pin-body").getAttribute("d").startsWith("M161 326 H430"),
+      "Needle fin emerges from the center of the base's right side face");
+      assert(doc.querySelectorAll(".geometry-diagram svg g[data-geometry-diagram]").length === 2
+        && !doc.querySelector(".geometry-diagram").textContent.includes("側視圖")
+        && !doc.querySelector(".geometry-diagram").textContent.includes("俯視圖"),
+      "Show only the selected 3D fin diagram");
+      assert(!doc.querySelector("#heat-transfer")
+        && !doc.querySelector("#base-temperature")
+        && !doc.querySelector("#ambient-temperature"),
+      "Remove heat-transfer results and temperature inputs");
+      geometrySelect.value = "cylindrical";
+      geometrySelect.dispatchEvent(new frame.contentWindow.Event("change", { bubbles: true }));
+      assert(doc.querySelector("[data-geometry='rectangular']").hidden
+        && !doc.querySelector("[data-geometry='cylindrical']").hidden
+        && doc.querySelector("#width").disabled && !doc.querySelector("#diameter").disabled
+        && !cylindricalDiagram.hasAttribute("hidden") && rectangularDiagram.hasAttribute("hidden")
+        && frame.contentWindow.getComputedStyle(cylindricalDiagram).display !== "none",
+      "Switching geometry enables pin dimensions and its matching diagram");
+      geometrySelect.value = "rectangular";
+      geometrySelect.dispatchEvent(new frame.contentWindow.Event("change", { bubbles: true }));
+      doc.querySelector("#fin-form button[type=submit]").click();
+      assert(!doc.querySelector("#results").hidden
+        && doc.querySelector("#fin-efficiency").textContent.endsWith("%")
+        && doc.querySelector("#status").textContent === "計算完成。",
+      "Calculate and display fin efficiency without temperature inputs");
+      doc.querySelector("#length").value = "0";
+      doc.querySelector("#length").dispatchEvent(new frame.contentWindow.Event("input", { bubbles: true }));
+      doc.querySelector("#length").dispatchEvent(new frame.contentWindow.Event("invalid", { bubbles: false }));
+      assert(doc.querySelector("#error").hidden && doc.querySelector("#results").hidden
+        && doc.querySelector("#status").textContent.includes("修正欄位"),
+      "Hide stale results and explain native form validation errors");
+
+      output.textContent = `PASS: ${checks} checks`;
+    } catch (error) {
+      output.textContent = `Error: ${error.stack}`;
+      console.error(error);
+    } finally {
+      frame.remove();
+    }
+  </script>
+</body>
+</html>
