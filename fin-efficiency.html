@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="選擇平板鰭片或針狀鰭片，依對流熱傳係數、材料熱傳導係數與尺寸計算鰭片效率。">
+  <meta name="description" content="選擇平板、針狀或環狀鰭片，依對流熱傳係數、材料熱傳導係數與尺寸計算鰭片效率。">
   <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
   <link rel="stylesheet" href="assets/scroll-top.css">
   <title>鰭片效率計算器｜計算工具</title>
@@ -34,6 +34,10 @@
     .geometry-diagram svg { display: block; width: 100%; height: auto; }
     .geometry-diagram figcaption { margin-top: 6px; color: var(--muted); font-size: 12px; }
     .geometry-diagram .dimension { fill: none; stroke: #756c9a; stroke-width: 1.6; marker-start: url(#fin-dimension-arrow); marker-end: url(#fin-dimension-arrow); }
+    .geometry-diagram .dimension-compact { marker-start: url(#fin-dimension-arrow-small); marker-end: url(#fin-dimension-arrow-small); }
+    .geometry-diagram .dimension-tiny { marker-start: url(#fin-dimension-arrow-tiny); marker-end: url(#fin-dimension-arrow-tiny); }
+    .geometry-diagram .dimension-shaft { fill: none; stroke: #756c9a; stroke-width: 1.2; }
+    .geometry-diagram .dimension-arrowheads { fill: #756c9a; }
     .geometry-diagram .conduction { fill: none; stroke: #bd7628; stroke-width: 2.4; marker-end: url(#fin-heat-arrow); }
     .geometry-diagram .convection { fill: none; stroke: #287b9b; stroke-width: 1.8; marker-end: url(#fin-air-arrow); }
     .geometry-diagram .fin-top { fill: #dcecf0; stroke: #287b9b; stroke-width: 2; }
@@ -44,6 +48,12 @@
     .geometry-diagram .pin-root { fill: url(#pin-fin-shading); stroke: #9aaeb0; }
     .geometry-diagram .pin-wall { fill: #dcd7f2; stroke: #655e87; stroke-width: 1.5; }
     .geometry-diagram .pin-body { fill: url(#pin-fin-shading); stroke: #879ca1; stroke-width: 1.5; }
+    .geometry-diagram .annular-back { fill: #aab8b0; stroke: #53665e; stroke-width: 1.5; fill-rule: evenodd; }
+    .geometry-diagram .annular-face { fill: url(#pin-fin-shading); stroke: #287b9b; stroke-width: 1.8; fill-rule: evenodd; }
+    .geometry-diagram .annular-front { fill: url(#pin-fin-shading); stroke: none; }
+    .geometry-diagram .annular-bridge { fill: #aab8b0; stroke: none; }
+    .geometry-diagram .annular-bridge-edge { fill: none; stroke: #53665e; stroke-width: 1.5; }
+    .geometry-diagram .centerline { fill: none; stroke: #756c9a; stroke-width: 1.2; stroke-dasharray: 4 4; }
     .geometry-diagram .diagram-label { fill: var(--ink); font: 14px "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
     .material-reference { margin-top: 24px; border: 1px solid var(--line); border-radius: 7px; background: #fbfbf7; }
     .material-reference summary { padding: 11px 14px; color: var(--green); font-size: 14px; font-weight: 700; cursor: pointer; }
@@ -100,17 +110,23 @@
   <main class="wrap">
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="tools.html">計算工具</a> ／ <span aria-current="page">鰭片效率計算器</span></p>
     <h1>鰭片效率計算器</h1>
-    <p class="intro">輸入鰭片幾何、材料熱傳導係數與對流熱傳係數，即可計算鰭片效率。</p>
+    <p class="intro">選擇平板、針狀或環狀鰭片，輸入幾何尺寸、材料熱傳導係數與對流熱傳係數，即可計算鰭片效率。</p>
     <form id="fin-form" class="panel">
       <div class="inputs">
         <h2>鰭片與熱傳條件</h2>
         <figure class="geometry-diagram">
           <h3 id="diagram-title">鰭片 3D 幾何示意圖</h3>
-          <svg viewBox="0 0 520 220" role="img" aria-labelledby="diagram-title diagram-description">
-            <desc id="diagram-description">以立體圖標示所選鰭片幾何尺寸，以及熱傳導係數 k 和對流熱傳係數 h。</desc>
+          <svg viewBox="0 0 520 260" role="img" aria-labelledby="diagram-title diagram-description">
+            <desc id="diagram-description">以立體圖標示所選鰭片尺寸與熱傳係數；環狀鰭片圍繞直立圓柱基底，導熱箭頭由基底沿半徑向外。</desc>
             <defs>
-              <marker id="fin-dimension-arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse">
+              <marker id="fin-dimension-arrow" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse">
                 <path d="M0 0 L8 4 L0 8 Z" fill="#756c9a"></path>
+              </marker>
+              <marker id="fin-dimension-arrow-small" markerWidth="4" markerHeight="4" refX="4" refY="2" orient="auto-start-reverse">
+                <path d="M0 0 L4 2 L0 4 Z" fill="#756c9a"></path>
+              </marker>
+              <marker id="fin-dimension-arrow-tiny" markerWidth="3" markerHeight="3" refX="3" refY="1.5" orient="auto-start-reverse">
+                <path d="M0 0 L3 1.5 L0 3 Z" fill="#756c9a"></path>
               </marker>
               <marker id="fin-heat-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
                 <path d="M0 0 L8 4 L0 8 Z" fill="#bd7628"></path>
@@ -137,12 +153,18 @@
                 <text class="diagram-label" x="395" y="292">h：表面對流</text>
                 <path class="convection" d="M350 330 C340 326 360 322 350 318 C340 314 360 310 350 306"></path>
                 <path class="convection" d="M405 378 C395 382 415 386 405 390 C395 394 415 398 405 402"></path>
+                <line x1="145" y1="366" x2="145" y2="404" stroke="#756c9a" stroke-width="1.2"></line>
+                <line x1="445" y1="366" x2="445" y2="404" stroke="#756c9a" stroke-width="1.2"></line>
                 <line class="dimension" x1="145" y1="398" x2="445" y2="398"></line>
                 <text class="diagram-label" x="295" y="391" text-anchor="middle">L：長度</text>
-                <line class="dimension" x1="451" y1="315" x2="478" y2="298"></line>
-                <text class="diagram-label" x="484" y="302">w：寬度</text>
-                <line class="dimension" x1="462" y1="329" x2="462" y2="343"></line>
-                <text class="diagram-label" x="485" y="344">t：厚度</text>
+                <line x1="445" y1="346" x2="453" y2="346" stroke="#756c9a" stroke-width="1.2"></line>
+                <line x1="477" y1="326" x2="485" y2="326" stroke="#756c9a" stroke-width="1.2"></line>
+                <line class="dimension dimension-compact" x1="453" y1="346" x2="485" y2="326"></line>
+                <text class="diagram-label" x="488" y="322">w：寬度</text>
+                <line x1="445" y1="346" x2="470" y2="346" stroke="#756c9a" stroke-width="1.2"></line>
+                <line x1="445" y1="366" x2="470" y2="366" stroke="#756c9a" stroke-width="1.2"></line>
+                <line class="dimension dimension-compact" x1="470" y1="350" x2="470" y2="362"></line>
+                <text class="diagram-label" x="475" y="364">t：厚度</text>
               </g>
             </g>
             <g data-geometry-diagram="cylindrical" hidden>
@@ -161,12 +183,43 @@
                 <path class="convection" d="M300 321 C292 316 308 312 300 307 C292 302 308 298 300 293"></path>
                 <path class="convection" d="M355 321 C347 316 363 312 355 307 C347 302 363 298 355 293"></path>
                 <path class="convection" d="M400 321 C392 316 408 312 400 307 C392 302 408 298 400 293"></path>
+                <line x1="161" y1="366" x2="161" y2="404" stroke="#756c9a" stroke-width="1.2"></line>
+                <line x1="430" y1="366" x2="430" y2="404" stroke="#756c9a" stroke-width="1.2"></line>
                 <line class="dimension" x1="161" y1="400" x2="430" y2="400"></line>
-                <line class="dimension" x1="470" y1="326" x2="470" y2="366"></line>
+                <line class="dimension" x1="470" y1="330" x2="470" y2="362"></line>
                 <line x1="440" y1="326" x2="470" y2="326" stroke="#756c9a" stroke-width="1.2"></line>
                 <line x1="440" y1="366" x2="470" y2="366" stroke="#756c9a" stroke-width="1.2"></line>
                 <text class="diagram-label" x="295" y="393" text-anchor="middle">L：長度</text>
                 <text class="diagram-label" x="480" y="352">d：直徑</text>
+              </g>
+            </g>
+            <g data-geometry-diagram="annular" hidden>
+              <g>
+                <path class="annular-back" d="M145 126 A110 40 0 1 0 365 126 A110 40 0 1 0 145 126 Z M255 116 A25 10 0 1 1 255 136 A25 10 0 1 1 255 116 Z" transform="translate(0 9)"></path>
+                <path class="annular-face" d="M145 126 A110 40 0 1 0 365 126 A110 40 0 1 0 145 126 Z M255 116 A25 10 0 1 1 255 136 A25 10 0 1 1 255 116 Z"></path>
+                <path class="pin-body" d="M230 20 A25 10 0 0 1 280 20 V210 A25 10 0 0 1 230 210 Z"></path>
+                <ellipse class="cylinder-end" cx="255" cy="20" rx="25" ry="10"></ellipse>
+                <ellipse class="cylinder-end" cx="255" cy="210" rx="25" ry="10"></ellipse>
+                <path class="centerline" d="M255 32 V110 M255 142 V200"></path>
+                <path class="annular-front" d="M145 126 A110 40 0 0 0 365 126 L280 126 A25 10 0 0 1 230 126 Z"></path>
+                <path class="annular-bridge" d="M228 165 Q255 167 282 165 L282 174 Q255 176 228 174 Z"></path>
+                <path class="annular-bridge-edge" d="M230 165 Q255 167 280 165 M230 174 Q255 176 280 174"></path>
+                <path class="conduction" d="M230 116 L160 104"></path>
+                <path class="conduction" d="M280 116 L350 104"></path>
+                <path class="conduction" d="M230 136 L160 148"></path>
+                <line class="dimension dimension-compact" x1="280" y1="126" x2="340" y2="151"></line>
+                <text class="diagram-label" x="322" y="179">L：徑向長度</text>
+                <text class="diagram-label" x="12" y="24">k：由圓柱基底沿 r 向外傳導</text>
+                <text class="diagram-label" x="398" y="24">h：表面對流</text>
+                <path class="convection" d="M155 103 C147 98 163 94 155 89 C147 84 163 80 155 75"></path>
+                <path class="convection" d="M355 103 C347 98 363 94 355 89 C347 84 363 80 355 75"></path>
+                <line class="dimension dimension-compact" x1="255" y1="210" x2="280" y2="210"></line>
+                <text class="diagram-label" x="290" y="237">r：管外半徑</text>
+                <line x1="365" y1="126" x2="414" y2="126" stroke="#756c9a" stroke-width="1.2"></line>
+                <line x1="365" y1="135" x2="414" y2="135" stroke="#756c9a" stroke-width="1.2"></line>
+                <line class="dimension-shaft" x1="414" y1="116" x2="414" y2="145"></line>
+                <path class="dimension-arrowheads" d="M411 120 L414 126 L417 120 Z M411 141 L414 135 L417 141 Z"></path>
+                <text class="diagram-label" x="423" y="145">t：厚度</text>
               </g>
             </g>
           </svg>
@@ -175,13 +228,15 @@
         <div class="field">
           <label for="geometry">鰭片幾何</label>
           <select id="geometry">
-            <option value="rectangular">平板鰭片</option>
-            <option value="cylindrical">針狀鰭片</option>
+            <option value="rectangular">平板鰭片（Plate fin）</option>
+            <option value="cylindrical">針狀鰭片（Pin fin）</option>
+            <option value="annular">環狀鰭片（Annular fin）</option>
           </select>
         </div>
-        <div class="field">
+        <div class="field" data-geometry="rectangular cylindrical annular">
           <label for="length">鰭片長度 L（mm）</label>
           <input id="length" type="number" step="any" min="0.001" required value="50">
+          <small id="length-help">由鰭片基底到尖端的長度。</small>
         </div>
         <div class="field" data-geometry="rectangular">
           <label for="width">鰭片寬度 w（mm）</label>
@@ -194,6 +249,15 @@
         <div class="field" data-geometry="cylindrical" hidden>
           <label for="diameter">鰭片針徑 d（mm）</label>
           <input id="diameter" type="number" step="any" min="0.001" required value="10" disabled>
+        </div>
+        <div class="field" data-geometry="annular" hidden>
+          <label for="pipe-radius">管外半徑 r（mm）</label>
+          <input id="pipe-radius" type="number" step="any" min="0.001" required value="10" disabled aria-describedby="pipe-radius-help">
+          <small id="pipe-radius-help">從圓柱中心軸到管外壁；也是鰭片根部半徑。</small>
+        </div>
+        <div class="field" data-geometry="annular" hidden>
+          <label for="annular-thickness">環狀鰭片厚度 t（mm）</label>
+          <input id="annular-thickness" type="number" step="any" min="0.001" required value="2" disabled>
         </div>
         <div class="field">
           <label for="conductivity">材料熱傳導係數 k（W/m·K）</label>
@@ -234,14 +298,17 @@
       <h2 id="result-title">計算結果</h2>
       <dl class="metrics">
         <div class="metric"><dt>鰭片效率 η<sub>f</sub></dt><dd><output id="fin-efficiency">—</output></dd></div>
-        <div class="metric"><dt>參數 mL<sub>c</sub></dt><dd><output id="fin-parameter">—</output></dd></div>
-        <div class="metric"><dt>修正長度 L<sub>c</sub></dt><dd><output id="corrected-length">—</output></dd></div>
+        <div class="metric" data-result-geometry="straight"><dt>參數 mL<sub>c</sub></dt><dd><output id="fin-parameter">—</output></dd></div>
+        <div class="metric" data-result-geometry="straight"><dt>修正長度 L<sub>c</sub></dt><dd><output id="corrected-length">—</output></dd></div>
+        <div class="metric" data-result-geometry="annular" hidden><dt>徑向參數 mL</dt><dd><output id="annular-parameter">—</output></dd></div>
+        <div class="metric" data-result-geometry="annular" hidden><dt>鰭片表面積</dt><dd><output id="annular-area">—</output></dd></div>
       </dl>
     </section>
     <section class="formula" aria-labelledby="method-title">
       <h2 id="method-title">計算方法與適用範圍</h2>
       <p>適用於等截面直鰭片。先依幾何計算截面積 A<sub>c</sub> 與周長 P，再以 m = √(hP / kA<sub>c</sub>)、L<sub>c</sub> = L + A<sub>c</sub> / P 計算修正長度近似。</p>
       <p>鰭片效率 η<sub>f</sub> = tanh(mL<sub>c</sub>) / (mL<sub>c</sub>)，由鰭片幾何、材料熱傳導係數及對流熱傳係數決定。修正長度法近似考慮鰭片端部對流，適用於常見薄鰭片工程估算。</p>
+      <p>環狀鰭片輸入管外半徑 r（圓柱中心軸至管外壁）與鰭片長度 L（管外壁至鰭片頂端），鰭片外緣半徑 r<sub>o</sub> = r + L。圖中虛線表示圓柱中心軸，也是半徑 r 的起算位置。徑向離散計算假設薄鰭片內溫度均勻，並考慮兩側表面與外緣對流；效率以暴露表面積為基準。</p>
       <p>計算假設穩態、一維導熱、材料均質且熱傳導係數與對流熱傳係數固定；未考慮接觸熱阻及鰭片間熱輻射。</p>
     </section>
   </main>
@@ -250,7 +317,7 @@
     <p>Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</p>
   </footer>
   <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
-  <script type="module" src="assets/fin-efficiency-ui.js"></script>
+  <script type="module" src="assets/fin-efficiency-ui.js?v=5"></script>
   <script type="module" src="assets/scroll-top.js"></script>
 </body>
 </html>

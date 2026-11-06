@@ -5,7 +5,7 @@
   <h1>Fin efficiency calculator regression tests</h1>
   <pre id="results" role="status">Running...</pre>
   <script type="module">
-    import { calculateFinEfficiency } from "../assets/fin-efficiency.js";
+    const { calculateFinEfficiency } = await import(`../assets/fin-efficiency.js?test=${Date.now()}`);
 
     const output = document.querySelector("#results");
     let checks = 0;
@@ -45,6 +45,27 @@
       close(cylindrical.correctedLength, .05 + pinDiameter / 4, "Cylindrical pin corrected length");
       assert(cylindrical.efficiency > 0 && cylindrical.efficiency <= 1,
         "Cylindrical pin efficiency stays between zero and one");
+      const annularInput = {
+        ...base,
+        geometry: "annular",
+        innerRadiusMm: 10,
+        finLengthMm: 40,
+        thicknessMm: 2,
+      };
+      const annular = calculateFinEfficiency(annularInput);
+      assert(annular.efficiency > 0 && annular.efficiency <= 1
+        && annular.exposedArea > 0 && annular.parameterLength > 0,
+      "Annular fin efficiency and radial result metrics are valid");
+      close(annular.parameterLength,
+        Math.sqrt(2 * base.convectionCoefficient / (base.conductivity * .002)) * .04,
+        "Annular fin radial parameter uses pipe radius and fin length");
+      assert(calculateFinEfficiency({ ...annularInput, convectionCoefficient: 1 }).efficiency
+        > annular.efficiency
+        && calculateFinEfficiency({ ...annularInput, finLengthMm: 50 }).efficiency
+          < annular.efficiency
+        && calculateFinEfficiency({ ...annularInput, conductivity: 410 }).efficiency
+          > annular.efficiency,
+      "Annular fin efficiency responds to convection, outer diameter and conductivity");
       assert(calculateFinEfficiency({ ...base, lengthMm: 100 }).efficiency < rectangular.efficiency
         && calculateFinEfficiency({ ...base, convectionCoefficient: 100 }).efficiency < rectangular.efficiency
         && calculateFinEfficiency({ ...base, conductivity: 410 }).efficiency > rectangular.efficiency,
@@ -58,12 +79,16 @@
         catch (error) { rejected = error instanceof RangeError; }
         assert(rejected, `Reject invalid ${key}`);
       }
-      for (const geometry of ["annular", "", null]) {
+      for (const geometry of ["conical", "", null]) {
         let rejected = false;
         try { calculateFinEfficiency({ ...base, geometry }); }
         catch (error) { rejected = error instanceof RangeError; }
         assert(rejected, "Reject unsupported fin geometry");
       }
+      let invalidAnnularLengthRejected = false;
+      try { calculateFinEfficiency({ ...annularInput, finLengthMm: 0 }); }
+      catch (error) { invalidAnnularLengthRejected = error instanceof RangeError; }
+      assert(invalidAnnularLengthRejected, "Reject annular fins with non-positive radial length");
       let overflowRejected = false;
       try { calculateFinEfficiency({ ...base, convectionCoefficient: 1e308 }); }
       catch (error) { overflowRejected = error instanceof RangeError; }
@@ -86,11 +111,16 @@
         && doc.querySelector("#results").hidden,
       "Calculator page title and results are initially hidden");
       const geometrySelect = doc.querySelector("#geometry");
-      assert(geometrySelect.options[0].textContent === "平板鰭片"
-        && geometrySelect.options[1].textContent === "針狀鰭片"
+      assert(geometrySelect.options[0].textContent.includes("平板鰭片")
+        && geometrySelect.options[0].textContent.includes("Plate fin")
+        && geometrySelect.options[1].textContent.includes("針狀鰭片")
+        && geometrySelect.options[1].textContent.includes("Pin fin")
+        && geometrySelect.options[2].textContent.includes("環狀鰭片")
         && !doc.querySelector("[data-geometry='rectangular']").hidden
         && doc.querySelector("[data-geometry='cylindrical']").hidden
-        && doc.querySelector("#width").required && doc.querySelector("#diameter").disabled,
+        && doc.querySelector("[data-geometry='annular']").hidden
+        && doc.querySelector("#width").required && doc.querySelector("#diameter").disabled
+        && doc.querySelector("#pipe-radius").disabled,
       "Plate fin geometry fields are enabled by default");
       const materialReference = doc.querySelector(".material-reference");
       assert(materialReference && !materialReference.open
@@ -104,6 +134,7 @@
         "Omit the temperature-input sentence from the calculation method");
       const rectangularDiagram = doc.querySelector('[data-geometry-diagram="rectangular"]');
       const cylindricalDiagram = doc.querySelector('[data-geometry-diagram="cylindrical"]');
+      const annularDiagram = doc.querySelector('[data-geometry-diagram="annular"]');
       assert(!rectangularDiagram.hasAttribute("hidden")
         && ["L：長度", "t：厚度", "w：寬度", "h：表面對流", "k：沿鰭片導熱"]
           .every((label) => rectangularDiagram.textContent.includes(label)),
@@ -112,6 +143,21 @@
         === "145,346 445,346 445,366 145,366"
         && (346 + 366) / 2 === (326 + 386) / 2,
       "Plate fin is centered vertically on the base face");
+      assert(rectangularDiagram.querySelector("line[x1='145'][y1='366'][x2='145'][y2='404']")
+        && rectangularDiagram.querySelector("line[x1='445'][y1='366'][x2='445'][y2='404']")
+        && cylindricalDiagram.querySelector("line[x1='161'][y1='366'][x2='161'][y2='404']")
+        && cylindricalDiagram.querySelector("line[x1='430'][y1='366'][x2='430'][y2='404']"),
+      "Fin length dimensions have extension lines from both ends");
+      assert(rectangularDiagram.querySelector(".dimension[x1='453'][y1='346'][x2='485'][y2='326']")
+        && rectangularDiagram.querySelector("line[x1='445'][y1='346'][x2='453'][y2='346']")
+        && rectangularDiagram.querySelector("line[x1='477'][y1='326'][x2='485'][y2='326']")
+        && rectangularDiagram.querySelector(".dimension-compact[x1='453'][y1='346'][x2='485'][y2='326']")
+        && rectangularDiagram.querySelector(".dimension-compact[x1='470'][y1='350'][x2='470'][y2='362']")
+        && doc.querySelector("#fin-dimension-arrow").getAttribute("refX") === "8"
+        && doc.querySelector("#fin-dimension-arrow-small").getAttribute("refX") === "4"
+        && rectangularDiagram.querySelector("line[x1='445'][y1='346'][x2='470'][y2='346']")
+        && rectangularDiagram.querySelector("line[x1='445'][y1='366'][x2='470'][y2='366']"),
+      "Plate fin width and thickness dimensions align with their projected edges");
       assert(cylindricalDiagram.hasAttribute("hidden")
         && ["L：長度", "d：直徑", "h：表面對流", "k：沿鰭片導熱"]
           .every((label) => cylindricalDiagram.textContent.includes(label)),
@@ -129,13 +175,57 @@
       "Needle fin shares the plate fin's base perspective and has a rounded horizontal 3D body with wavy convection arrows");
       assert(cylindricalDiagram.textContent.includes("d：直徑")
         && cylindricalDiagram.querySelector(".dimension[x1='161'][y1='400'][x2='430'][y2='400']")
-        && cylindricalDiagram.querySelector(".dimension[x1='470'][y1='326'][x2='470'][y2='366']"),
+        && cylindricalDiagram.querySelector(".dimension[x1='470'][y1='330'][x2='470'][y2='362']")
+        && cylindricalDiagram.querySelector("line[x1='440'][y1='326'][x2='470'][y2='326']")
+        && cylindricalDiagram.querySelector("line[x1='440'][y1='366'][x2='470'][y2='366']"),
       "Needle fin diagram marks its length and diameter like a standard pin-fin schematic");
       assert(cylindricalDiagram.querySelector(".cylinder-end[cx='161'][cy='346']")
         && (326 + 366) / 2 === 346
         && cylindricalDiagram.querySelector(".pin-body").getAttribute("d").startsWith("M161 326 H430"),
       "Needle fin emerges from the center of the base's right side face");
-      assert(doc.querySelectorAll(".geometry-diagram svg g[data-geometry-diagram]").length === 2
+      assert(annularDiagram.hasAttribute("hidden")
+        && ["r：管外半徑", "L：徑向長度", "t：厚度", "h：表面對流", "k：由圓柱基底沿 r 向外傳導"]
+          .every((label) => annularDiagram.textContent.includes(label))
+        && frame.contentWindow.getComputedStyle(annularDiagram.querySelector(".annular-face"))
+          .getPropertyValue("fill-rule") === "evenodd"
+        && annularDiagram.querySelector(".pin-body").getAttribute("d").includes("V210")
+        && annularDiagram.querySelector(".annular-face").getAttribute("d")
+          .includes("M255 116 A25 10 0 1 1 255 136 A25 10 0 1 1 255 116")
+        && annularDiagram.querySelector(".centerline[d='M255 32 V110 M255 142 V200']")
+        && frame.contentWindow.getComputedStyle(annularDiagram.querySelector(".centerline"))
+          .getPropertyValue("stroke-dasharray") === "4px, 4px"
+        && annularDiagram.querySelectorAll(".annular-face").length === 1
+        && annularDiagram.querySelector(".annular-face").compareDocumentPosition(
+          annularDiagram.querySelector(".pin-body")) & Node.DOCUMENT_POSITION_FOLLOWING
+        && annularDiagram.querySelector(".pin-body").compareDocumentPosition(
+          annularDiagram.querySelector(".annular-front")) & Node.DOCUMENT_POSITION_FOLLOWING
+        && frame.contentWindow.getComputedStyle(annularDiagram.querySelector(".annular-front"))
+          .getPropertyValue("stroke") === "none"
+        && annularDiagram.querySelector(".annular-bridge[d='M228 165 Q255 167 282 165 L282 174 Q255 176 228 174 Z']")
+        && frame.contentWindow.getComputedStyle(annularDiagram.querySelector(".annular-bridge"))
+          .getPropertyValue("fill") === "rgb(170, 184, 176)"
+        && frame.contentWindow.getComputedStyle(annularDiagram.querySelector(".annular-bridge"))
+          .getPropertyValue("stroke") === "none"
+        && annularDiagram.querySelector(".annular-bridge-edge[d='M230 165 Q255 167 280 165 M230 174 Q255 176 280 174']")
+        && [...annularDiagram.querySelectorAll(".conduction")].length === 3
+        && annularDiagram.querySelector(".conduction[d='M230 116 L160 104']")
+        && annularDiagram.querySelector(".conduction[d='M280 116 L350 104']")
+        && annularDiagram.querySelector(".dimension-compact[x1='280'][y1='126'][x2='340'][y2='151']")
+        && annularDiagram.querySelector(".dimension-compact[x1='255'][y1='210'][x2='280'][y2='210']")
+        && annularDiagram.querySelector("line[x1='365'][y1='126'][x2='414'][y2='126']")
+        && annularDiagram.querySelector("line[x1='365'][y1='135'][x2='414'][y2='135']")
+        && annularDiagram.querySelector(".dimension-shaft[x1='414'][y1='116'][x2='414'][y2='145']")
+        && annularDiagram.querySelector(".dimension-arrowheads[d='M411 120 L414 126 L417 120 Z M411 141 L414 135 L417 141 Z']")
+        && [...annularDiagram.querySelectorAll(".diagram-label")].some((label) => label.textContent === "r：管外半徑")
+        && [...annularDiagram.querySelectorAll(".diagram-label")].some((label) => label.textContent === "L：徑向長度")
+        && doc.querySelector(".formula").textContent.includes("ro = r + L")
+        && doc.querySelector(".formula").textContent.includes("虛線表示圓柱中心軸")
+        && doc.querySelector("#pipe-radius").parentElement.textContent.includes("也是鰭片根部半徑")
+        && !doc.querySelector("#outer-radius")
+        && geometrySelect.querySelector("option[value='rectangular']").textContent.includes("Plate fin")
+        && geometrySelect.querySelector("option[value='cylindrical']").textContent.includes("Pin fin"),
+      "Annular fin diagram wraps a vertical cylindrical base, shows outward radial heat flow, and labels all fin types in English");
+      assert(doc.querySelectorAll(".geometry-diagram svg g[data-geometry-diagram]").length === 3
         && !doc.querySelector(".geometry-diagram").textContent.includes("側視圖")
         && !doc.querySelector(".geometry-diagram").textContent.includes("俯視圖"),
       "Show only the selected 3D fin diagram");
@@ -143,6 +233,25 @@
         && !doc.querySelector("#base-temperature")
         && !doc.querySelector("#ambient-temperature"),
       "Remove heat-transfer results and temperature inputs");
+      geometrySelect.value = "annular";
+      geometrySelect.dispatchEvent(new frame.contentWindow.Event("change", { bubbles: true }));
+      assert([...doc.querySelectorAll("[data-geometry='annular']")].every((field) => !field.hidden)
+        && doc.querySelector("#pipe-radius").required
+        && doc.querySelector("#annular-thickness").required
+        && doc.querySelector("#width").disabled && doc.querySelector("#diameter").disabled
+        && !doc.querySelector("#length").parentElement.hidden && !doc.querySelector("#length").disabled
+        && doc.querySelector("#length-help").textContent.includes("管外壁到鰭片頂端")
+        && !annularDiagram.hasAttribute("hidden") && rectangularDiagram.hasAttribute("hidden")
+        && doc.querySelector("[data-result-geometry='straight']").hidden
+        && !doc.querySelector("[data-result-geometry='annular']").hidden,
+      "Switching to annular fins enables only annular inputs, diagram and result metrics");
+      doc.querySelector("#fin-form button[type=submit]").click();
+      assert(!doc.querySelector("#results").hidden
+        && doc.querySelector("#fin-efficiency").textContent.endsWith("%")
+        && doc.querySelector("#annular-area").textContent.endsWith("cm²")
+        && doc.querySelector("[data-result-geometry='annular'] dt").textContent === "徑向參數 mL"
+        && doc.querySelector("#status").textContent === "計算完成。",
+      "Calculate annular fin efficiency and display annular result metrics");
       geometrySelect.value = "cylindrical";
       geometrySelect.dispatchEvent(new frame.contentWindow.Event("change", { bubbles: true }));
       assert(doc.querySelector("[data-geometry='rectangular']").hidden

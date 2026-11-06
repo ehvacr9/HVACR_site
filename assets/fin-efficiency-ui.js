@@ -1,4 +1,4 @@
-import { calculateFinEfficiency } from "./fin-efficiency.js";
+import { calculateFinEfficiency } from "./fin-efficiency.js?v=4";
 
 const form = document.querySelector("#fin-form");
 const geometry = document.querySelector("#geometry");
@@ -16,17 +16,21 @@ function setValue(id, number, suffix = "") {
 }
 
 function updateGeometryFields() {
-  const rectangular = geometry.value === "rectangular";
-  for (const element of document.querySelectorAll("[data-geometry='rectangular']")) {
-    element.hidden = !rectangular;
-    element.querySelector("input").disabled = !rectangular;
+  for (const field of document.querySelectorAll("[data-geometry]")) {
+    const enabled = field.dataset.geometry.split(/\s+/).includes(geometry.value);
+    field.hidden = !enabled;
+    field.querySelector("input").disabled = !enabled;
   }
-  for (const element of document.querySelectorAll("[data-geometry='cylindrical']")) {
-    element.hidden = rectangular;
-    element.querySelector("input").disabled = rectangular;
-  }
+  document.querySelector("#length-help").textContent = geometry.value === "annular"
+    ? "由管外壁到鰭片頂端的徑向距離。"
+    : "由鰭片基底到尖端的長度。";
   for (const diagram of document.querySelectorAll("[data-geometry-diagram]")) {
     diagram.toggleAttribute("hidden", diagram.dataset.geometryDiagram !== geometry.value);
+  }
+  for (const result of document.querySelectorAll("[data-result-geometry]")) {
+    result.hidden = result.dataset.resultGeometry === "straight"
+      ? geometry.value === "annular"
+      : result.dataset.resultGeometry !== geometry.value;
   }
 }
 
@@ -53,12 +57,19 @@ form.addEventListener("submit", (event) => {
       conductivity: value("conductivity"),
       lengthMm: value("length"),
       widthMm: value("width"),
-      thicknessMm: value("thickness"),
+      thicknessMm: value(geometry.value === "annular" ? "annular-thickness" : "thickness"),
       diameterMm: value("diameter"),
+      innerRadiusMm: value("pipe-radius"),
+      finLengthMm: value("length"),
     });
     setValue("fin-efficiency", calculation.efficiency * 100, "%");
-    setValue("fin-parameter", calculation.parameterLength);
-    setValue("corrected-length", calculation.correctedLength * 1000, " mm");
+    if (geometry.value === "annular") {
+      setValue("annular-parameter", calculation.parameterLength);
+      setValue("annular-area", calculation.exposedArea * 1e4, " cm²");
+    } else {
+      setValue("fin-parameter", calculation.parameterLength);
+      setValue("corrected-length", calculation.correctedLength * 1000, " mm");
+    }
     results.hidden = false;
     status.textContent = "計算完成。";
   } catch (cause) {
