@@ -141,8 +141,56 @@
       thirdAnswer.open = true;
       thirdAnswer.querySelector(".answer-collapse").click();
       assert(!thirdAnswer.open, "Answer collapse button closes the expanded question");
-      assert([...answers.querySelectorAll(".answer-pending")].length === 2,
-        "the two unwritten questions are clearly marked as pending");
+      const fourthAnswer = answers.querySelectorAll(".answer-item")[3];
+      assert(fourthAnswer.querySelectorAll(".answer-step h3").length === 7,
+        "114 refrigeration fourth-question answer follows all seven steps");
+      assert(fourthAnswer.textContent.includes("265,356") && fourthAnswer.textContent.includes("36.807")
+        && fourthAnswer.textContent.includes("5.23352") && fourthAnswer.textContent.includes("61.09")
+        && fourthAnswer.textContent.includes("195 支") && fourthAnswer.textContent.includes("外徑"),
+      "Condenser answer includes heat rejection, water outlet, LMTD, area and rounded-up tube count");
+      assert(fourthAnswer.querySelectorAll("math.answer-equation-display").length === 8
+        && fourthAnswer.querySelector("#condenser-diagram-title"),
+      "Fourth answer includes native MathML calculations and an accessible condenser schematic");
+      const condenserHeat = 75 * 3024 * 1.17;
+      const waterRise = condenserHeat / (920 * 60);
+      const lmtd = waterRise / Math.log(8 / (8 - waterRise));
+      const condenserArea = condenserHeat / (830 * lmtd);
+      const tubeArea = Math.PI * 0.05 * 2;
+      assert(Math.abs(condenserArea - 61.088117) < 0.000001
+        && Math.ceil(condenserArea / tubeArea) === 195
+        && 194 * tubeArea < condenserArea && 195 * tubeArea >= condenserArea,
+      "Independent heat balance and LMTD calculation verifies the required area and minimum tube count");
+      fourthAnswer.open = true;
+      fourthAnswer.querySelector(".answer-collapse").click();
+      assert(!fourthAnswer.open, "Fourth answer collapse button closes the question");
+      const secondAnswer = answers.querySelectorAll(".answer-item")[1];
+      assert(secondAnswer.querySelectorAll(".answer-step h3").length === 7
+        && secondAnswer.querySelector("#capillary-diagram-title")
+        && secondAnswer.querySelectorAll("math.answer-equation-display").length === 7,
+      "Second answer has seven steps, an accessible capillary schematic and MathML");
+      assert(secondAnswer.textContent.includes("98,000.5")
+        && secondAnswer.textContent.includes("0.05025")
+        && secondAnswer.textContent.includes("0.04290")
+        && secondAnswer.textContent.includes("Fanning")
+        && secondAnswer.textContent.includes("Darcy")
+        && secondAnswer.textContent.includes("無合理的正長度解"),
+      "Capillary answer explicitly explains inconsistent data and both friction conventions");
+      const capillaryArea = Math.PI * 0.00163 ** 2 / 4;
+      const capillaryFlux = 0.05 / capillaryArea;
+      const accelerationDrop = capillaryFlux * (29.40 - 25.31);
+      const meanDensity = 2 / (0.001231 + 0.001422);
+      const meanSpeed = (25.31 + 29.40) / 2;
+      const shear = 0.0023 * meanDensity * meanSpeed ** 2 / 2;
+      const formalLength = (18000 - accelerationDrop) * 0.00163 / (4 * shear);
+      assert(Math.abs(accelerationDrop - 98000.48436) < 0.001
+        && Math.abs(formalLength + 0.05025233) < 0.00000001
+        && capillaryFlux ** 2 * (0.001422 - 0.001231) > 18000,
+      "Independent momentum calculation confirms no positive capillary length for original data");
+      secondAnswer.open = true;
+      secondAnswer.querySelector(".answer-collapse").click();
+      assert(!secondAnswer.open, "Second answer collapse button closes the question");
+      assert(answers.querySelectorAll(".answer-pending").length === 0,
+        "All four refrigeration reference answers are now written");
       const scrollTopButton = frame.contentDocument.querySelector(".scroll-top-button");
       assert(scrollTopButton && scrollTopButton.hidden, "Scroll-to-top button starts hidden at page top");
       frame.contentWindow.scrollTo({ top: 500, behavior: "auto" });

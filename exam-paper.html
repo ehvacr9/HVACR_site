@@ -334,7 +334,101 @@
       <details class="answer-item">
         <summary>第二題</summary>
         <div class="answer-content">
-          <p class="answer-pending">本題詳解尚在整理中。</p>
+          <div class="answer-step">
+            <h3>1. 已知（Known）</h3>
+            <ul class="answer-list">
+              <li>冷媒質量流率 ṁ = 0.05 kg/s，毛細管內徑 D = 1.63 mm = 0.00163 m；題給摩擦因子 f = 0.0023。</li>
+              <li>入口：T₁ = 34°C，p₁ = 1470.1 kPa，比容 v₁ = 0.001231 m³/kg，h₁ = 261.32 kJ/kg，速度 u₁ = 25.31 m/s。</li>
+              <li>出口：T₂ = 33°C，p₂ = 1452.1 kPa，比容 v₂ = 0.001422 m³/kg，h₂ = 261.32 kJ/kg，速度 u₂ = 29.40 m/s。</li>
+              <li>可用壓差 p₁ − p₂ = 18.0 kPa = 18,000 Pa。以下以 v 表示比容、u 表示流速，避免混淆。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>2. 求（Find）</h3>
+            <p>利用連續方程式與包含加速項的動量平衡，求此段毛細管長度 L，並檢查題給數據是否容許正的物理解。</p>
+          </div>
+          <div class="answer-step">
+            <h3>3. 示意圖（Schematic）</h3>
+            <figure class="answer-schematic">
+              <svg viewBox="0 0 820 280" role="img" aria-labelledby="capillary-diagram-title capillary-diagram-desc">
+                <title id="capillary-diagram-title">等截面毛細管控制體與作用力</title>
+                <desc id="capillary-diagram-desc">冷媒由入口流向出口，壓力下降且速度上升。入口與出口壓力力之差，須同時克服壁面摩擦並提供冷媒加速所需的動量變化。</desc>
+                <defs>
+                  <marker id="capillary-flow-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0 0 L8 4 L0 8 Z" fill="#287b9b"></path>
+                  </marker>
+                  <marker id="capillary-friction-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0 0 L8 4 L0 8 Z" fill="#bd7628"></path>
+                  </marker>
+                </defs>
+                <rect class="cycle-boundary" x="195" y="58" width="430" height="130" rx="8"></rect>
+                <path d="M180 80 H640 M180 166 H640" fill="none" stroke="#53665e" stroke-width="3"></path>
+                <path d="M55 123 H760" fill="none" stroke="#287b9b" stroke-width="2.5" marker-end="url(#capillary-flow-arrow)"></path>
+                <path d="M455 91 H355 M455 155 H355" fill="none" stroke="#bd7628" stroke-width="2" marker-end="url(#capillary-friction-arrow)"></path>
+                <text class="minor-label" x="410" y="46" text-anchor="middle">壁面摩擦力與流向相反；D = 1.63 mm</text>
+                <text class="minor-label" x="95" y="78" text-anchor="middle">入口 p₁</text>
+                <text class="minor-label" x="95" y="158" text-anchor="middle">u₁ = 25.31 m/s</text>
+                <text class="minor-label" x="725" y="78" text-anchor="middle">出口 p₂</text>
+                <text class="minor-label" x="725" y="158" text-anchor="middle">u₂ = 29.40 m/s</text>
+                <text class="label" x="410" y="222" text-anchor="middle">待求長度 L；壓降 = 加速壓降 + 摩擦壓降</text>
+                <text class="minor-label" x="410" y="256" text-anchor="middle">虛線為控制體；忽略高差與局部損失</text>
+              </svg>
+              <figcaption>毛細管中速度隨比容增加而上升，不能將全部壓差直接當作摩擦壓降。</figcaption>
+            </figure>
+          </div>
+          <div class="answer-step">
+            <h3>4. 假設（Assumptions）</h3>
+            <ul class="answer-list">
+              <li>穩態、一維、水平、等截面流動；忽略重力沿程分量與局部損失，採均勻截面速度的動量模型。</li>
+              <li>壁面平均剪應力 τ̄<sub>w</sub> 為正，方向阻礙流動。估算摩擦項時取平均比容 v̄ = (v₁ + v₂)/2、平均速度 ū = (u₁ + u₂)/2。</li>
+              <li>題目沒有明定摩擦因子的定義；以下先以 Fanning 因子 f<sub>F</sub> = τ̄<sub>w</sub>/(ρ̄ū²/2) 計算，另列 Darcy 因子 f<sub>D</sub> = 4f<sub>F</sub> 的結果。</li>
+              <li>原題數值照錄，不自行把質量流率、管徑或壓力改成其他數字。平均性質只用於展示代入結果，並不能消除數據矛盾。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>5. 性質與資料（Properties）</h3>
+            <p>數據取自本頁所附的 114 年官方試題 PDF。題目已提供端點性質，無需假定冷媒種類或另查冷媒表。</p>
+            <math class="answer-equation-display" display="block" aria-label="管截面積約為2.086724乘10的負6次方平方米，質量通量約23961公斤每平方米每秒">
+              <mrow><mi>A</mi><mo>=</mo><mfrac><mrow><mi>π</mi><msup><mi>D</mi><mn>2</mn></msup></mrow><mn>4</mn></mfrac><mo>≈</mo><mn>2.086724</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>6</mn></mrow></msup><mspace width=".3em"/><msup><mtext>m</mtext><mn>2</mn></msup><mo>;</mo><mspace width="1em"/><mi>G</mi><mo>=</mo><mfrac><mover><mi>m</mi><mo>˙</mo></mover><mi>A</mi></mfrac><mo>≈</mo><mn>23,961.0</mn><mspace width=".3em"/><mtext>kg/(m²·s)</mtext></mrow>
+            </math>
+            <p>平均比容 v̄ = 0.0013265 m³/kg，平均密度 ρ̄ = 1/v̄ ≈ 753.864 kg/m³，平均速度 ū = 27.355 m/s。</p>
+          </div>
+          <div class="answer-step">
+            <h3>6. 分析（Analysis）</h3>
+            <p><strong>（一）先列動量平衡，檢查壓差是否足夠</strong></p>
+            <p>入口壓力力減去出口壓力力與壁面摩擦力，等於冷媒流出、流入的動量流率差：</p>
+            <math class="answer-equation-display" display="block" aria-label="壓力差乘截面積減壁面剪應力乘圓周與管長等於質量流率乘速度差">
+              <mrow><mo>(</mo><msub><mi>p</mi><mn>1</mn></msub><mo>−</mo><msub><mi>p</mi><mn>2</mn></msub><mo>)</mo><mi>A</mi><mo>−</mo><msub><mover><mi>τ</mi><mo>¯</mo></mover><mi>w</mi></msub><mi>π</mi><mi>D</mi><mi>L</mi><mo>=</mo><mover><mi>m</mi><mo>˙</mo></mover><mo>(</mo><msub><mi>u</mi><mn>2</mn></msub><mo>−</mo><msub><mi>u</mi><mn>1</mn></msub><mo>)</mo></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="總壓降等於質量通量乘速度差加4倍平均壁面剪應力乘管長除以管徑">
+              <mrow><mi>Δp</mi><mo>=</mo><mi>G</mi><mo>(</mo><msub><mi>u</mi><mn>2</mn></msub><mo>−</mo><msub><mi>u</mi><mn>1</mn></msub><mo>)</mo><mo>+</mo><mfrac><mrow><mn>4</mn><msub><mover><mi>τ</mi><mo>¯</mo></mover><mi>w</mi></msub><mi>L</mi></mrow><mi>D</mi></mfrac></mrow>
+            </math>
+            <p>代入題給速度，加速項為：</p>
+            <math class="answer-equation-display" display="block" aria-label="加速壓降為23961乘29.40減25.31，約98000.5帕，大於題給18000帕">
+              <mrow><msub><mi>Δp</mi><mtext>acc</mtext></msub><mo>=</mo><mn>23,961.0</mn><mo>×</mo><mo>(</mo><mn>29.40</mn><mo>−</mo><mn>25.31</mn><mo>)</mo><mo>≈</mo><mn>98,000.5</mn><mspace width=".3em"/><mtext>Pa</mtext><mo>&gt;</mo><mn>18,000</mn><mspace width=".3em"/><mtext>Pa</mtext></mrow>
+            </math>
+            <p>因此可分配給摩擦的壓降為 18,000 − 98,000.5 = −80,000.5 Pa。被動管路的摩擦壓降不能為負，故<strong>原題數據無法得到正的毛細管長度</strong>；此結論不受摩擦因子採 Darcy 或 Fanning 定義影響。</p>
+            <p><strong>（二）展示形式上的長度計算，不將負值當成設計答案</strong></p>
+            <math class="answer-equation-display" display="block" aria-label="採Fanning摩擦因子時平均壁面剪應力約648.73帕">
+              <mrow><msub><mover><mi>τ</mi><mo>¯</mo></mover><mi>w</mi></msub><mo>=</mo><msub><mi>f</mi><mi>F</mi></msub><mfrac><mrow><mover><mi>ρ</mi><mo>¯</mo></mover><msup><mover><mi>u</mi><mo>¯</mo></mover><mn>2</mn></msup></mrow><mn>2</mn></mfrac><mo>=</mo><mn>0.0023</mn><mo>×</mo><mfrac><mrow><mn>753.864</mn><mo>×</mo><msup><mn>27.355</mn><mn>2</mn></msup></mrow><mn>2</mn></mfrac><mo>≈</mo><mn>648.73</mn><mspace width=".3em"/><mtext>Pa</mtext></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="形式計算長度約為負0.05025公尺，沒有物理意義">
+              <mrow><mi>L</mi><mo>=</mo><mfrac><mrow><mo>[</mo><mi>Δp</mi><mo>−</mo><mi>G</mi><mo>(</mo><msub><mi>u</mi><mn>2</mn></msub><mo>−</mo><msub><mi>u</mi><mn>1</mn></msub><mo>)</mo><mo>]</mo><mi>D</mi></mrow><mrow><mn>4</mn><msub><mover><mi>τ</mi><mo>¯</mo></mover><mi>w</mi></msub></mrow></mfrac><mo>=</mo><mfrac><mrow><mo>−</mo><mn>80,000.5</mn><mo>×</mo><mn>0.00163</mn></mrow><mrow><mn>4</mn><mo>×</mo><mn>648.73</mn></mrow></mfrac><mo>≈</mo><mo>−</mo><mn>0.05025</mn><mspace width=".3em"/><mtext>m</mtext></mrow>
+            </math>
+            <p>若題給 0.0023 是 Darcy 因子，τ̄<sub>w</sub> = f<sub>D</sub>ρ̄ū²/8，形式結果為 −0.2010 m；仍非有效長度。不可取絕對值作答，也不可省略加速項來製造正管長。</p>
+            <p><strong>（三）再以連續方程式交叉檢查</strong></p>
+            <p>同一根等截面管應滿足 ṁ = Au/v。用題給兩端的速度及比容回算：</p>
+            <math class="answer-equation-display" display="block" aria-label="入口與出口回算質量流率分別約0.04290及0.04314公斤每秒，均非題給0.05">
+              <mrow><msub><mover><mi>m</mi><mo>˙</mo></mover><mn>1</mn></msub><mo>=</mo><mfrac><mrow><mi>A</mi><msub><mi>u</mi><mn>1</mn></msub></mrow><msub><mi>v</mi><mn>1</mn></msub></mfrac><mo>≈</mo><mn>0.04290</mn><mspace width=".3em"/><mtext>kg/s</mtext><mo>;</mo><mspace width="1em"/><msub><mover><mi>m</mi><mo>˙</mo></mover><mn>2</mn></msub><mo>=</mo><mfrac><mrow><mi>A</mi><msub><mi>u</mi><mn>2</mn></msub></mrow><msub><mi>v</mi><mn>2</mn></msub></mfrac><mo>≈</mo><mn>0.04314</mn><mspace width=".3em"/><mtext>kg/s</mtext></mrow>
+            </math>
+            <p>兩端回算流率彼此不完全一致，亦均不等於題給 0.05 kg/s。若改以題給流率、管徑與比容強制滿足 u = Gv，加速項 G²(v₂ − v₁) 約為 109.66 kPa，仍大於 18.0 kPa。因此不是單純改用連續方程式就能解決。</p>
+            <p><strong>結論：照原題數據，在上述穩態水平等截面模型下，無合理的正長度解。必須先核對原始流量、管徑、壓力、速度與摩擦因子定義，才能給出可用管長。</strong></p>
+          </div>
+          <div class="answer-step">
+            <h3>7. 討論（Comments）</h3>
+            <p>本題重點是區分摩擦壓降與加速壓降。毛細管內比容增加時，冷媒加速所需的壓差不能忽略；負的摩擦餘額是資料不相容的警訊，不代表毛細管可以有負長度。此處列出負值僅供辨識矛盾，不宣稱其為官方標準答案。</p>
+            <p class="answer-note">題給兩端焓相同可視為節流的近似描述；若採嚴格絕熱、無軸功模型，還須滿足 h₁ + u₁²/2 = h₂ + u₂²/2，本題速度差對應約 0.1119 kJ/kg 的動能增加。不能僅憑「等焓」略去動量方程式中的加速項。實際兩相毛細管設計也需沿程物性與合適的摩擦模型；未取得更正資料前，不推測題目原本想給的數字。</p>
+          </div>
         </div>
         <button class="answer-collapse" type="button">收起答案</button>
       </details>
@@ -446,7 +540,108 @@
       <details class="answer-item">
         <summary>第四題</summary>
         <div class="answer-content">
-          <p class="answer-pending">本題詳解尚在整理中。</p>
+          <div class="answer-step">
+            <h3>1. 已知（Known）</h3>
+            <ul class="answer-list">
+              <li>R22 水冷式冷凝器；冷凍能力 Q̇<sub>e</sub> = 75 USRT，1 USRT = 3024 kcal/hr。</li>
+              <li>蒸發溫度 0°C，冷凝溫度 T<sub>c</sub> = 40°C；放熱比 HRR = 1.17。</li>
+              <li>冷卻水入口溫度 T<sub>w,in</sub> = 32°C，體積流率 V̇<sub>w</sub> = 920 liter/min。</li>
+              <li>總熱傳係數 U = 830 kcal/(m²·°C·hr)；銅管管徑 50 mm，每支長度 2 m。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>2. 求（Find）</h3>
+            <ul class="answer-list">
+              <li>冷凝器所需總熱交換面積 A（m²）。</li>
+              <li>所需銅管數量 N（支）。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>3. 示意圖（Schematic）</h3>
+            <figure class="answer-schematic">
+              <svg viewBox="0 0 820 280" role="img" aria-labelledby="condenser-diagram-title condenser-diagram-desc">
+                <title id="condenser-diagram-title">水冷式冷凝器熱交換示意圖</title>
+                <desc id="condenser-diagram-desc">R22 於40°C等溫冷凝，將熱量傳給銅管內的冷卻水；水由32°C進入、約36.81°C流出。兩端溫差分別為8與3.193°C，使用對數平均溫差計算總面積。</desc>
+                <defs>
+                  <marker id="condenser-water-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0 0 L8 4 L0 8 Z" fill="#287b9b"></path>
+                  </marker>
+                  <marker id="condenser-heat-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0 0 L8 4 L0 8 Z" fill="#bd7628"></path>
+                  </marker>
+                </defs>
+                <rect class="equipment" x="200" y="52" width="420" height="160" rx="16"></rect>
+                <text class="label" x="410" y="84" text-anchor="middle">R22 冷凝：40°C</text>
+                <path d="M210 155 H610" fill="none" stroke="#287b9b" stroke-width="24" opacity=".12"></path>
+                <path d="M40 155 H780" fill="none" stroke="#287b9b" stroke-width="2.5" marker-end="url(#condenser-water-arrow)"></path>
+                <path d="M320 99 V133 M410 99 V133 M500 99 V133" fill="none" stroke="#bd7628" stroke-width="2" marker-end="url(#condenser-heat-arrow)"></path>
+                <text class="minor-label" x="410" y="192" text-anchor="middle">銅管內冷卻水：920 liter/min</text>
+                <text class="label" x="110" y="128" text-anchor="middle">入口 32°C</text>
+                <text class="label" x="720" y="128" text-anchor="middle">出口 36.81°C</text>
+                <text class="minor-label" x="110" y="192" text-anchor="middle">端溫差 8°C</text>
+                <text class="minor-label" x="720" y="192" text-anchor="middle">端溫差 3.193°C</text>
+                <text class="minor-label" x="410" y="252" text-anchor="middle">排熱 Q̇c = 265,356 kcal/hr；U = 830 kcal/(m²·°C·hr)</text>
+              </svg>
+              <figcaption>冷媒凝結時近似等溫，冷卻水沿程升溫；本圖僅表示熱交換關係，不指定實際管程配置。</figcaption>
+            </figure>
+          </div>
+          <div class="answer-step">
+            <h3>4. 假設（Assumptions）</h3>
+            <ul class="answer-list">
+              <li>穩態運轉、對外散熱可忽略；冷凝器排熱全由冷卻水帶走。</li>
+              <li>R22 在 40°C 等溫冷凝，忽略冷媒壓降、過熱蒸氣冷卻與液體過冷區；U 視為固定。</li>
+              <li>冷卻水密度取 1 kg/liter，比熱取 1 kcal/(kg·°C)。</li>
+              <li>題目未區分管內、外徑，計算採 50 mm 為銅管外徑，並假設 U 以管外面積為基準；每支 2 m 均為有效換熱長度，忽略端面積。</li>
+              <li>等溫冷凝條件下採對數平均溫差法；理想化模型取溫差修正係數 F = 1。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>5. 性質與資料（Properties）</h3>
+            <ul class="answer-list">
+              <li>設計數據與單位換算依本頁所附的 114 年官方試題 PDF；水的密度與比熱採上述工程近似值。</li>
+              <li>放熱比定義為 HRR = Q̇<sub>c</sub>/Q̇<sub>e</sub>，不是冷凍能力本身，也不是 COP。</li>
+              <li>已知放熱比及冷凝溫度，本題不需再查 R22 的焓值或其他冷媒物性。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>6. 分析（Analysis）</h3>
+            <p><strong>（一）求總熱交換面積</strong></p>
+            <p>先由冷凍能力與放熱比求冷凝器排熱量：</p>
+            <math class="answer-equation-display" display="block" aria-label="冷凍能力為226800，冷凝器排熱量為265356千卡每小時">
+              <mrow><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>e</mi></msub><mo>=</mo><mn>75</mn><mo>×</mo><mn>3024</mn><mo>=</mo><mn>226,800</mn><mspace width=".3em"/><mtext>kcal/hr</mtext></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="冷凝排熱等於1.17乘226800等於265356千卡每小時">
+              <mrow><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>c</mi></msub><mo>=</mo><mtext>HRR</mtext><mo>×</mo><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>e</mi></msub><mo>=</mo><mn>1.17</mn><mo>×</mo><mn>226,800</mn><mo>=</mo><mn>265,356</mn><mspace width=".3em"/><mtext>kcal/hr</mtext></mrow>
+            </math>
+            <p>將水流量換為每小時質量流率，再由水側能量平衡求出口溫度：</p>
+            <math class="answer-equation-display" display="block" aria-label="冷卻水質量流率為55200公斤每小時">
+              <mrow><msub><mover><mi>m</mi><mo>˙</mo></mover><mi>w</mi></msub><mo>=</mo><mn>920</mn><mo>×</mo><mn>60</mn><mo>×</mo><mn>1</mn><mo>=</mo><mn>55,200</mn><mspace width=".3em"/><mtext>kg/hr</mtext></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="冷卻水出口溫度等於32加265356除以55200乘1，等於36.807攝氏度">
+              <mrow><msub><mi>T</mi><mtext>w,out</mtext></msub><mo>=</mo><msub><mi>T</mi><mtext>w,in</mtext></msub><mo>+</mo><mfrac><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>c</mi></msub><mrow><msub><mover><mi>m</mi><mo>˙</mo></mover><mi>w</mi></msub><msub><mi>c</mi><mi>p</mi></msub></mrow></mfrac><mo>=</mo><mn>32</mn><mo>+</mo><mfrac><mn>265,356</mn><mrow><mn>55,200</mn><mo>×</mo><mn>1</mn></mrow></mfrac><mo>≈</mo><mn>36.807</mn><mspace width=".3em"/><mtext>°C</mtext></mrow>
+            </math>
+            <p>兩端溫差為 ΔT<sub>1</sub> = 40 − 32 = 8°C、ΔT<sub>2</sub> = 40 − 36.807 ≈ 3.193°C。冷卻水會升溫，不能把入口端的 8°C 直接當作全程溫差：</p>
+            <math class="answer-equation-display" display="block" aria-label="對數平均溫差約為5.234攝氏度">
+              <mrow><msub><mi>ΔT</mi><mtext>lm</mtext></msub><mo>=</mo><mfrac><mrow><msub><mi>ΔT</mi><mn>1</mn></msub><mo>−</mo><msub><mi>ΔT</mi><mn>2</mn></msub></mrow><mrow><mi mathvariant="normal">ln</mi><mo>(</mo><msub><mi>ΔT</mi><mn>1</mn></msub><mo>/</mo><msub><mi>ΔT</mi><mn>2</mn></msub><mo>)</mo></mrow></mfrac><mo>=</mo><mfrac><mrow><mn>8</mn><mo>−</mo><mn>3.192826</mn></mrow><mrow><mi mathvariant="normal">ln</mi><mo>(</mo><mn>8</mn><mo>/</mo><mn>3.192826</mn><mo>)</mo></mrow></mfrac><mo>≈</mo><mn>5.23352</mn><mspace width=".3em"/><mtext>°C</mtext></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="總熱交換面積等於265356除以830乘5.23352，約61.09平方米">
+              <mrow><mi>A</mi><mo>=</mo><mfrac><msub><mover><mi>Q</mi><mo>˙</mo></mover><mi>c</mi></msub><mrow><mi>U</mi><msub><mi>ΔT</mi><mtext>lm</mtext></msub></mrow></mfrac><mo>=</mo><mfrac><mn>265,356</mn><mrow><mn>830</mn><mo>×</mo><mn>5.23352</mn></mrow></mfrac><mo>≈</mo><mn>61.09</mn><mspace width=".3em"/><msup><mi mathvariant="normal">m</mi><mn>2</mn></msup></mrow>
+            </math>
+            <p><strong>（二）求銅管數量</strong></p>
+            <p>管徑換算為 D<sub>o</sub> = 0.050 m。以單支圓管的外側面積 πD<sub>o</sub>L 計算，不採管截面積，也不另乘兩側：</p>
+            <math class="answer-equation-display" display="block" aria-label="每支銅管面積約0.314159平方米">
+              <mrow><msub><mi>A</mi><mtext>tube</mtext></msub><mo>=</mo><mi>π</mi><msub><mi>D</mi><mi>o</mi></msub><mi>L</mi><mo>=</mo><mi>π</mi><mo>×</mo><mn>0.050</mn><mo>×</mo><mn>2</mn><mo>≈</mo><mn>0.314159</mn><mspace width=".3em"/><msup><mi mathvariant="normal">m</mi><mn>2</mn></msup></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="所需管數為61.0881除以0.314159，約194.45，向上取整為195支">
+              <mrow><mi>N</mi><mo>=</mo><mo>⌈</mo><mfrac><mi>A</mi><msub><mi>A</mi><mtext>tube</mtext></msub></mfrac><mo>⌉</mo><mo>=</mo><mo>⌈</mo><mn>194.45</mn><mo>⌉</mo><mo>=</mo><mn>195</mn><mspace width=".3em"/><mtext>支</mtext></mrow>
+            </math>
+            <p><strong>答案：總熱交換面積約 61.09 m²；需 195 支外徑 50 mm、有效長度 2 m 的銅管。</strong>195 支提供約 61.26 m²，大於所需的 61.0881 m²；194 支僅約 60.95 m²，不足，故不可四捨五入為 194 支。</p>
+          </div>
+          <div class="answer-step">
+            <h3>7. 討論（Comments）</h3>
+            <p>水出口約 36.81°C，低於 40°C 冷凝溫度；對數平均溫差約 5.234°C，介於兩端溫差 3.193°C 與 8°C 之間，符合熱交換物理意義。蒸發溫度已反映於題給放熱比的設計條件，無須再用它計算冷凝器與水之間的溫差。</p>
+            <p class="answer-note">上述為題定 U 下的理想化熱設計。實際選管還須核對 U 的面積基準、管內外徑、有效長度、污垢熱阻、水速、壓降與管程配置；195 支代表總管數，不等於每管程的並聯管數。若 50 mm 是內徑或公稱管徑，應先取得實際外徑並採用一致的 U 與面積基準，不能直接套用本題管數。</p>
+          </div>
         </div>
         <button class="answer-collapse" type="button">收起答案</button>
       </details>
