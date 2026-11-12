@@ -16,10 +16,10 @@
     const pages = [
       "index.html", "about.html", "founder.html", "exam-years.html", "exam-year-archive.html", "exam-year-112.html", "exam-year-113.html",
       "exam-year-114.html", "exam-paper.html", "terminology.html", "tools.html",
-      "water-refrigerant.html", "humid-air.html", "refrigeration-cycle.html", "fan-laws.html", "duct-pressure.html", "moody-chart.html", "fin-efficiency.html", "unit-converter.html",
+      "water-refrigerant.html", "humid-air.html", "refrigeration-cycle.html", "fan-laws.html", "duct-pressure.html", "moody-chart.html", "fin-efficiency.html", "pipe-loss.html", "unit-converter.html",
     ];
-    const tools = ["water-refrigerant.html", "humid-air.html", "refrigeration-cycle.html", "fan-laws.html", "moody-chart.html", "fin-efficiency.html", "unit-converter.html"];
-    const names = ["水與冷媒性質", "濕空氣性質", "冷凍循環分析器", "風機定律計算器", "Moody 圖與摩擦因子計算器", "鰭片效率計算器", "單位換算"];
+    const tools = ["water-refrigerant.html", "humid-air.html", "refrigeration-cycle.html", "fan-laws.html", "moody-chart.html", "fin-efficiency.html", "pipe-loss.html", "unit-converter.html"];
+    const names = ["水與冷媒性質", "濕空氣性質", "冷凍循環分析器", "風機定律計算器", "Moody 圖與摩擦因子計算器", "鰭片效率計算器", "管路損失係數計算器", "單位換算"];
     const frame = document.createElement("iframe");
     frame.title = "Tool navigation layout tests";
     frame.style.cssText = "position:fixed;left:-10000px;width:1100px;height:1000px;";
@@ -68,7 +68,7 @@
               assert(group.getAttribute("aria-labelledby") === heading.id,
                 `Tools category accessible label ${index}`);
               assert([...group.querySelectorAll(".tool-card")].map((card) => card.getAttribute("href")).join("|")
-                === [tools.slice(0, 2), tools.slice(2, 6), [tools[6]]][index].join("|"), `Tools category destinations ${index}`);
+                === [tools.slice(0, 2), tools.slice(2, -1), tools.slice(-1)][index].join("|"), `Tools category destinations ${index}`);
             });
             assert(groups[2].querySelectorAll("h2, h3").length === 1,
               "Standalone conversion has no duplicate heading");

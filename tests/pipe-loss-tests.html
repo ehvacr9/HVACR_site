@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><title>Pipe loss regression tests</title></head>
+<body>
+  <h1>Pipe loss regression tests</h1>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    import { calculatePipeLoss, lossCoefficient } from "../assets/pipe-loss.js";
+    const output = document.querySelector("#results");
+    let checks = 0;
+    function assert(condition, label) {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    }
+    const near = (a, b) => Math.abs(a - b) < 1e-9;
+    const base = { kind: "contraction", upstreamMm: 100, downstreamMm: 50, flowM3h: 10, density: 1000 };
+    const frame = document.createElement("iframe");
+    frame.title = "Pipe loss calculator test";
+    document.body.append(frame);
+    try {
+      assert(lossCoefficient("expansion", 0) === 1 && lossCoefficient("expansion", 1) === 0, "Expansion limits");
+      assert(lossCoefficient("contraction", 0) === 0.5 && lossCoefficient("contraction", 1) === 0, "Contraction limits");
+      const contraction = calculatePipeLoss(base);
+      assert(near(contraction.ratio, 0.25) && near(contraction.coefficient, 0.375), "Area ratio squares diameter ratio");
+      assert(near(contraction.referenceVelocity, contraction.downstreamVelocity), "Contraction uses downstream velocity");
+      const expansion = calculatePipeLoss({ ...base, kind: "expansion", upstreamMm: 50, downstreamMm: 100 });
+      assert(near(expansion.coefficient, 0.5625) && near(expansion.referenceVelocity, expansion.upstreamVelocity), "Expansion uses upstream small-pipe velocity");
+      assert(near(expansion.head, (expansion.upstreamVelocity - expansion.downstreamVelocity) ** 2 / (2 * 9.80665)), "Borda-Carnot head");
+      assert(near(expansion.pressureLoss, 1000 * 9.80665 * expansion.head), "Pressure and head consistency");
+      assert(near(calculatePipeLoss({ ...base, flowM3h: 20 }).head, 4 * contraction.head), "Quadratic flow scaling");
+      assert(calculatePipeLoss({ ...base, flowM3h: 0 }).head === 0, "Zero flow still gives K");
+      assert(calculatePipeLoss({ ...base, downstreamMm: 100 }).coefficient === 0, "Equal diameters have no local loss");
+      for (const change of [{ upstreamMm: 0 }, { density: -1 }, { flowM3h: NaN }, { flowM3h: -1 }, { downstreamMm: 200 }, { kind: "other" }, { upstreamMm: Infinity }]) {
+        let rejected = false;
+        try { calculatePipeLoss({ ...base, ...change }); } catch (error) { if (!(error instanceof RangeError)) throw error; rejected = true; }
+        assert(rejected, `Reject invalid input ${JSON.stringify(change)}`);
+      }
+      await new Promise((resolve) => { frame.onload = resolve; frame.src = "../pipe-loss.html"; });
+      const doc = frame.contentDocument;
+      assert(Boolean(doc.querySelector("#pipe-title").closest("section").compareDocumentPosition(
+        doc.querySelector("#loss-form")) & Node.DOCUMENT_POSITION_FOLLOWING), "Schematic precedes input form");
+      assert(doc.querySelector("#curve-chart").closest("section") === doc.querySelector("#results").closest("section"),
+        "Curve and numeric results share a panel");
+      const submit = () => doc.querySelector("#loss-form").requestSubmit();
+      submit();
+      assert(!doc.querySelector("#results").hidden && doc.querySelector("#k-result").textContent === "0.375", "Default UI calculation");
+      const select = doc.querySelector("#kind");
+      select.value = "expansion";
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+      assert(doc.querySelector("#upstream").value === "50" && doc.querySelector("#downstream").value === "100", "Type switch preserves valid geometry by swapping diameters");
+      assert(doc.querySelector("#results").hidden && doc.querySelector("#current-point").hasAttribute("hidden"), "Type change clears stale result and chart point");
+      submit();
+      assert(doc.querySelector("#k-result").textContent === "0.5625"
+        && !doc.querySelector("#current-point").hasAttribute("hidden"), "Expansion result and chart point");
+      doc.querySelector("#downstream").value = "25";
+      submit();
+      assert(!doc.querySelector("#error").hidden && doc.querySelector("#results").hidden, "Wrong diameter ordering shows error");
+      assert(doc.querySelector("#curve").getAttribute("d").startsWith("M60 30"), "Expansion chart endpoint");
+      for (const path of ["tools.html", "index.html"]) {
+        const response = await fetch(`../${path}`);
+        const page = new DOMParser().parseFromString(await response.text(), "text/html");
+        assert(page.querySelector('a[href="pipe-loss.html"]'), `${path} links calculator`);
+      }
+      output.textContent = `PASS: ${checks} checks`;
+    } catch (error) {
+      output.textContent = error.stack;
+      console.error(error);
+    } finally { frame.remove(); }
+  </script>
+</body>
+</html>
