@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="計算圓管突縮、突擴與等徑三通的局部損失，搭配曲線與管路示意圖。">
+  <meta name="description" content="計算圓管突縮、突擴、等徑三通與鋼管彎頭的局部損失。">
   <title>管路損失係數計算器｜計算工具</title>
   <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
   <link rel="stylesheet" href="assets/scroll-top.css">
@@ -73,7 +73,7 @@
   <main class="wrap">
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="tools.html">計算工具</a> ／ <span aria-current="page">管路損失係數計算器</span></p>
     <h1>管路損失係數計算器</h1>
-    <p>計算圓管突縮、突擴與等徑三通的局部損失，並由流量估算損失水頭與壓力損失。所有管徑均為內徑，下標 1 為上游、2 為下游。</p>
+    <p>計算圓管突縮、突擴、等徑三通與鋼管彎頭的局部損失，並由流量估算損失水頭與壓力損失。流速採實際內徑計算，下標 1 為上游、2 為下游。</p>
     <section class="panel" aria-labelledby="diagram-title">
       <h2 id="diagram-title">選擇管路元件</h2>
       <div class="component-choices" role="radiogroup" aria-labelledby="diagram-title">
@@ -139,8 +139,34 @@
             <span class="component-name">等徑三通・合流</span>
           </label>
         </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-elbow-90" value="elbow-90" aria-label="90 度標準螺紋鋼管彎頭：左側上游，頂部下游">
+          <label for="kind-elbow-90">
+            <svg viewBox="0 0 180 120" aria-hidden="true">
+              <text x="135" y="13" text-anchor="middle">下游 2</text>
+              <path d="M10 55 H90 Q115 55 115 30 V20 H155 V30 Q155 95 90 95 H10 Z" fill="#dcecf0"></path>
+              <path d="M10 55 H90 Q115 55 115 30 V20 M155 20 V30 Q155 95 90 95 H10" fill="none" stroke="#53665e" stroke-width="2.5"></path>
+              <path d="M20 75 H90 Q135 75 135 30 M130 36 L135 30 L140 36" fill="none" stroke="#287b9b" stroke-width="2"></path>
+              <text x="45" y="110" text-anchor="middle">上游 1</text>
+            </svg>
+            <span class="component-name">90° 彎頭</span>
+          </label>
+        </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-elbow-45" value="elbow-45" aria-label="45 度螺紋鋼管彎頭：左側上游，右上方下游">
+          <label for="kind-elbow-45">
+            <svg viewBox="0 0 180 120" aria-hidden="true">
+              <text x="145" y="13" text-anchor="middle">下游 2</text>
+              <path d="M10 55 H75 Q85 55 92 48 L125 15 L153 43 L120 76 Q101 95 75 95 H10 Z" fill="#dcecf0"></path>
+              <path d="M10 55 H75 Q85 55 92 48 L125 15 M153 43 L120 76 Q101 95 75 95 H10" fill="none" stroke="#53665e" stroke-width="2.5"></path>
+              <path d="M20 75 H75 Q94 75 106 63 L136 33 M128 34 L136 33 L135 41" fill="none" stroke="#287b9b" stroke-width="2"></path>
+              <text x="45" y="110" text-anchor="middle">上游 1</text>
+            </svg>
+            <span class="component-name">45° 彎頭</span>
+          </label>
+        </div>
       </div>
-      <p class="hint component-note">突縮與突擴為銳邊、同軸突然變徑；三通為等徑 90°。圖形不按輸入比例縮放。</p>
+      <p class="hint component-note">突縮與突擴為銳邊、同軸突然變徑；三通為等徑 90°；彎頭為螺紋鋼管。圖形不按輸入比例縮放。</p>
     </section>
     <form id="loss-form" class="panel" aria-labelledby="conditions-title">
       <h2 id="conditions-title">管路與流體條件</h2>
@@ -150,6 +176,9 @@
         <div data-transition-field><label for="downstream">下游內徑 D₂（mm）</label><input id="downstream" type="number" min="0" step="any" value="50" required></div>
         <div data-tee-field hidden><label for="tee-diameter">三管口內徑 D（mm）</label><input id="tee-diameter" type="number" min="0" step="any" value="100" required disabled></div>
         <div data-tee-field hidden><label for="tee-fraction">支管流量比例（%）</label><input id="tee-fraction" type="number" min="0" max="100" step="any" value="50" required disabled><small>支管流量 ÷ 共同管口總流量。</small></div>
+        <div data-elbow-field hidden><label for="elbow-nominal">彎頭公稱管徑 DN（mm）</label><select id="elbow-nominal" disabled><option value="25">DN 25</option><option value="50">DN 50</option><option value="100">DN 100</option></select><small>依公稱尺寸選取參考 K；非實際內徑。</small></div>
+        <div data-elbow-field hidden><label for="elbow-schedule">鋼管管壁規格</label><select id="elbow-schedule" disabled><option value="40">Schedule 40</option><option value="80">Schedule 80</option><option value="custom">自訂內徑</option></select><small>標準尺寸採鋼管名義值。</small></div>
+        <div data-elbow-field hidden><label for="elbow-diameter">管內徑 D（mm）</label><input id="elbow-diameter" type="number" min="0" step="any" required disabled readonly><small id="elbow-diameter-hint">依公稱管徑與 Schedule 帶入名義內徑；請核對實際管材。</small></div>
         <div><label for="flow" id="flow-label">實際體積流量 Q（m³/h）</label><input id="flow" type="number" min="0" step="any" value="10" required><small id="flow-hint">若只查 K，可將流量設為 0。</small></div>
       </div>
       <p id="velocity-basis" class="hint"></p>
@@ -220,6 +249,19 @@
         <p class="hint result-note">係數均以共同管口流速為基準；估算值不代表實際管件性能。三通各路徑之壓力變化可能因動能交換而與局部損失不同，正式設計應查核相應管件資料。</p>
       </div>
     </section>
+    <section id="elbow-results-panel" class="panel" aria-labelledby="elbow-results-title" hidden>
+      <h2 id="elbow-results-title">彎頭計算結果</h2>
+      <p class="hint">按「計算」後顯示數值。係數為所選型式與公稱尺寸的離散參考值，不進行插值。</p>
+      <div id="elbow-results">
+        <dl class="metrics">
+          <div><dt>局部損失係數 K</dt><dd id="elbow-k-result">—</dd></div>
+          <div><dt>管內流速 V（m/s）</dt><dd id="elbow-velocity-result">—</dd></div>
+          <div><dt>損失水頭 h<sub>L</sub>（m 流體柱）</dt><dd id="elbow-head-result">—</dd></div>
+          <div><dt>壓力損失 Δp<sub>L</sub>（Pa）</dt><dd id="elbow-pressure-result">—</dd></div>
+        </dl>
+      </div>
+      <p class="hint">K 以管內平均流速為基準；實際管件可能因尺寸、幾何及流況而異。</p>
+    </section>
     <section class="panel" aria-labelledby="method-title">
       <h2 id="method-title">計算方法與適用範圍</h2>
       <h3>突擴：Borda–Carnot 關係式</h3>
@@ -231,6 +273,10 @@
       <h3>水頭與壓力損失</h3>
       <p class="equation">A = πD²/4；V = Q/A；h<sub>L</sub> = K V<sub>ref</sub>²/(2g)；Δp<sub>L</sub> = ρg h<sub>L</sub></p>
       <p>使用 g = 9.80665 m/s²，輸入流量換為 m³/s 後計算。K 無因次，兩種構件都以小管流速為基準，不能混用大管流速與此 K。</p>
+      <h3>螺紋鋼管彎頭</h3>
+      <p>參考 <a href="https://handbook.ashrae.org/Handbooks/F21/SI/F21_Ch22/F21_Ch22_si.aspx">ASHRAE Handbook—Fundamentals 2021，第 22 章，表 3</a>（來源為 Hydraulic Institute，1990），選用標準 90° 螺紋彎頭及 45° 螺紋彎頭的 DN 25、50、100 參考係數。這些尺寸以公稱管徑查 K，流速則以實際內徑計算；不適用於不同接頭、材質或長半徑 90° 彎頭。</p>
+      <p>鋼管 Schedule 40／80 的名義內徑取自同章表 16（ASME B36.10M）；可改選自訂內徑以輸入實際值。名義尺寸不包含製造公差、結垢或腐蝕影響，請依實際管材核對；輸入內徑不會改變按公稱尺寸選取的彎頭 K。</p>
+      <p>參考值供初步估算，流況、製造差異及相鄰管件均可能影響損失；未輸入黏度，無法判斷雷諾數。正式設計請採實際管件製造商資料並確認適用流況。</p>
       <h3>等徑三通：保守上限估算</h3>
       <p>依 <a href="https://handbook.ashrae.org/Handbooks/F21/SI/F21_Ch22/F21_Ch22_si.aspx">ASHRAE Handbook—Fundamentals 2021，Chapter 22，Tee Fitting Pressure Drop</a> 的上限估算，以進口與出口速度水頭之和估算各路徑損失：h<sub>L</sub> ≈ (V<sub>in</sub>² + V<sub>out</sub>²)/(2g)。此為估算而非實測值，也不能保證涵蓋所有管件與工況。</p>
       <p>假設三管口等內徑，令 x = Q<sub>支</sub>/Q，並以共同管口流速 V<sub>共</sub> 為基準，直通路徑 K ≈ 1 + (1 − x)²；支管路徑 K ≈ 1 + x²。分流和合流分別按共同管口與各支路的進、出口速度代入；無流量路徑不報告損失。流量為零時比例沒有物理意義，故不顯示路徑係數與損失。</p>
@@ -239,7 +285,7 @@
   </main>
   <footer><a class="brand" href="index.html">能源與冷凍空調學習網</a><p>Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</p></footer>
   <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
-  <script type="module" src="assets/pipe-loss-ui.js?v=6"></script>
+  <script type="module" src="assets/pipe-loss-ui.js?v=9"></script>
   <script type="module" src="assets/scroll-top.js"></script>
 </body>
 </html>

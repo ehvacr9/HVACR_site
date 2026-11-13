@@ -51,3 +51,46 @@ export function calculateTeeLoss({ diameterMm, flowM3h, density, branchFraction 
   }
   return result;
 }
+
+const threadedElbows = {
+  "elbow-90": { "25": 1.5, "50": 1.0, "100": 0.7 },
+  "elbow-45": { "25": 0.34, "50": 0.31, "100": 0.28 },
+};
+
+const steelPipeInsideDiameters = {
+  "25": { "40": 26.64, "80": 24.31 },
+  "50": { "40": 52.50, "80": 49.25 },
+  "100": { "40": 102.26, "80": 97.18 },
+};
+
+export function steelPipeInsideDiameter(nominalMm, schedule) {
+  const nominal = String(nominalMm);
+  const wall = String(schedule);
+  if (!Object.hasOwn(steelPipeInsideDiameters, nominal)
+    || !Object.hasOwn(steelPipeInsideDiameters[nominal], wall)) {
+    throw new RangeError("請選擇支援的鋼管公稱尺寸及 Schedule。");
+  }
+  return steelPipeInsideDiameters[nominal][wall];
+}
+
+export function calculateElbowLoss({ kind, nominalMm, diameterMm, flowM3h, density }) {
+  const coefficients = Object.hasOwn(threadedElbows, kind) ? threadedElbows[kind] : null;
+  const nominal = String(nominalMm);
+  if (!coefficients || !Object.hasOwn(coefficients, nominal)) {
+    throw new RangeError("請選擇支援的螺紋鋼管彎頭與公稱管徑。");
+  }
+  if (!Number.isFinite(diameterMm) || diameterMm <= 0 || !Number.isFinite(density) || density <= 0) {
+    throw new RangeError("管內徑及流體密度必須為有限正數。");
+  }
+  if (!Number.isFinite(flowM3h) || flowM3h < 0) throw new RangeError("體積流量必須為有限非負數。");
+  const area = Math.PI * (diameterMm / 1000) ** 2 / 4;
+  const velocity = flowM3h / 3600 / area;
+  const coefficient = coefficients[nominal];
+  const head = coefficient * velocity ** 2 / (2 * 9.80665);
+  const pressureLoss = density * 9.80665 * head;
+  const result = { velocity, coefficient, head, pressureLoss };
+  if (!area || !Object.values(result).every(Number.isFinite)) {
+    throw new RangeError("輸入尺度超出可計算範圍，請調整管徑或流量。");
+  }
+  return result;
+}

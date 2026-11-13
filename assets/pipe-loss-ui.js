@@ -1,8 +1,9 @@
-import { calculatePipeLoss, calculateTeeLoss, lossCoefficient } from "./pipe-loss.js?v=2";
+import { calculatePipeLoss, calculateTeeLoss, calculateElbowLoss, lossCoefficient, steelPipeInsideDiameter } from "./pipe-loss.js?v=4";
 
 const byId = (id) => document.getElementById(id);
 const selectedKind = () => document.querySelector('input[name="kind"]:checked').value;
 const isTee = () => ["tee-dividing", "tee-combining"].includes(selectedKind());
+const isElbow = () => ["elbow-90", "elbow-45"].includes(selectedKind());
 const form = byId("loss-form");
 const format = new Intl.NumberFormat("zh-TW", { maximumSignificantDigits: 6 });
 const svgNamespace = "http://www.w3.org/2000/svg";
@@ -12,6 +13,7 @@ function reset() {
     byId(id).textContent = "—";
   }
   for (const value of byId("tee-results").querySelectorAll("dd")) value.textContent = "—";
+  for (const value of byId("elbow-results").querySelectorAll("dd")) value.textContent = "—";
   byId("current-point").setAttribute("hidden", "");
   byId("tee-straight-point").setAttribute("hidden", "");
   byId("tee-branch-point").setAttribute("hidden", "");
@@ -21,19 +23,25 @@ function reset() {
 
 function draw() {
   const tee = isTee();
-  for (const field of document.querySelectorAll("[data-transition-field], [data-tee-field]")) {
-    const active = field.hasAttribute(tee ? "data-tee-field" : "data-transition-field");
+  const elbow = isElbow();
+  for (const field of document.querySelectorAll("[data-transition-field], [data-tee-field], [data-elbow-field]")) {
+    const active = field.hasAttribute(tee ? "data-tee-field" : elbow ? "data-elbow-field" : "data-transition-field");
     field.hidden = !active;
     for (const control of field.querySelectorAll("input, select")) control.disabled = !active;
   }
-  byId("transition-results-panel").hidden = tee;
+  byId("transition-results-panel").hidden = tee || elbow;
   byId("tee-results-panel").hidden = !tee;
+  byId("elbow-results-panel").hidden = !elbow;
   byId("flow-label").textContent = tee ? "共同管口總流量 Q（m³/h）" : "實際體積流量 Q（m³/h）";
   byId("flow-hint").textContent = tee
     ? (selectedKind() === "tee-dividing" ? "共同管口為入口，請輸入入口總流量。" : "共同管口為出口，請輸入出口總流量。")
     : "若只查 K，可將流量設為 0。";
   if (tee) {
     byId("velocity-basis").textContent = "三管口等內徑；K 以共同管口總流量對應的流速為基準，為保守上限估算。";
+    return;
+  }
+  if (elbow) {
+    byId("velocity-basis").textContent = "螺紋鋼管彎頭；K 依彎頭角度及公稱管徑選取，並以實際管內平均流速為基準。";
     return;
   }
   const expansion = selectedKind() === "expansion";
@@ -96,6 +104,18 @@ document.querySelector(".component-choices").addEventListener("change", () => {
   draw();
   reset();
 });
+function updateElbowDiameter() {
+  const diameter = byId("elbow-diameter");
+  const schedule = byId("elbow-schedule").value;
+  const custom = schedule === "custom";
+  diameter.readOnly = !custom;
+  diameter.value = custom ? "" : steelPipeInsideDiameter(byId("elbow-nominal").value, schedule);
+  byId("elbow-diameter-hint").textContent = custom
+    ? "請輸入與所選公稱尺寸相符的實際內徑。"
+    : "依公稱管徑與 Schedule 帶入名義內徑；請核對實際管材。";
+}
+byId("elbow-nominal").addEventListener("change", updateElbowDiameter);
+byId("elbow-schedule").addEventListener("change", updateElbowDiameter);
 form.addEventListener("input", reset);
 form.addEventListener("change", reset);
 form.addEventListener("invalid", () => {
@@ -106,6 +126,20 @@ form.addEventListener("submit", (event) => {
   event.preventDefault();
   reset();
   try {
+    if (isElbow()) {
+      const result = calculateElbowLoss({
+        kind: selectedKind(),
+        nominalMm: byId("elbow-nominal").value,
+        diameterMm: byId("elbow-diameter").valueAsNumber,
+        flowM3h: byId("flow").valueAsNumber,
+        density: byId("density").valueAsNumber,
+      });
+      for (const [id, key] of [["k", "coefficient"], ["velocity", "velocity"], ["head", "head"], ["pressure", "pressureLoss"]]) {
+        byId(`elbow-${id}-result`).textContent = format.format(result[key]);
+      }
+      byId("status").textContent = "計算完成。";
+      return;
+    }
     if (isTee()) {
       const branchFraction = byId("tee-fraction").valueAsNumber / 100;
       const result = calculateTeeLoss({
@@ -154,4 +188,5 @@ form.addEventListener("submit", (event) => {
     byId("status").textContent = "計算未完成，請檢查條件。";
   }
 });
+updateElbowDiameter();
 draw();
