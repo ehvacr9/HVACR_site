@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="計算圓管突縮、突擴的局部損失係數、損失水頭與壓力損失，搭配面積比曲線與管路示意圖。">
+  <meta name="description" content="計算圓管突縮、突擴與等徑三通的局部損失，搭配曲線與管路示意圖。">
   <title>管路損失係數計算器｜計算工具</title>
   <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
   <link rel="stylesheet" href="assets/scroll-top.css">
@@ -19,35 +19,50 @@
     .brand img { width: 34px; height: 34px; }
     nav { display: flex; flex-wrap: wrap; gap: 12px 24px; font-size: 13px; }
     nav a { color: var(--muted); text-decoration: none; }
-    main { padding-block: 36px 64px; }
-    h1 { font-size: clamp(26px, 5vw, 40px); margin-bottom: 10px; }
-    h2 { font-size: 20px; color: var(--green); }
+    main { padding-block: 28px 48px; }
+    h1 { font-size: clamp(26px, 5vw, 40px); margin: 0 0 8px; }
+    h2 { margin: 0 0 12px; font-size: 20px; color: var(--green); }
     .breadcrumb, .hint, figcaption { color: var(--muted); font-size: 14px; }
-    .panel { margin-top: 24px; border: 1px solid var(--line); border-radius: 10px; background: #fffefa; padding: 24px; }
-    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; }
+    .breadcrumb { margin: 0 0 14px; }
+    main > p:not(.breadcrumb) { margin: 0; }
+    .panel { margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; background: #fffefa; padding: 18px; }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 16px; }
     label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 5px; }
     input, select { width: 100%; min-height: 44px; padding: 9px; border: 1px solid #a9beb0; border-radius: 5px; color: var(--ink); background: white; font: inherit; }
     button { border: 0; padding: 11px 22px; background: var(--green); color: white; border-radius: 5px; font: inherit; cursor: pointer; }
     :focus-visible { outline: 3px solid #9ab952; outline-offset: 3px; }
-    .actions { margin-top: 22px; }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 14px; }
+    .actions p { margin: 0; }
     #error { color: #a32828; }
     figure { margin: 0; min-width: 0; }
-    .pipe-schematic { max-width: 560px; margin-inline: auto; }
-    .result-grid { align-items: start; }
+    .component-choices { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .component-choice { position: relative; min-width: 0; }
+    .component-choice input { position: absolute; width: 1px; min-height: 0; height: 1px; padding: 0; opacity: 0; }
+    .component-choice label { height: 100%; margin: 0; padding: 10px 12px; border: 2px solid var(--line); border-radius: 8px; background: #fff; text-align: center; cursor: pointer; }
+    .component-choice input:checked + label { border-color: var(--green); background: #eef5ed; color: var(--green); }
+    .component-choice input:focus-visible + label { outline: 3px solid #9ab952; outline-offset: 3px; }
+    .component-choice svg { width: 100%; max-width: 190px; height: auto; margin: 0 auto 4px; }
+    .component-choice svg text { fill: var(--muted); font: 12px "Microsoft JhengHei", sans-serif; }
+    .component-name { display: block; }
+    .component-note { margin: 10px 0 0; }
+    .result-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
     .result-grid > div { min-width: 0; }
-    .result-grid .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 0; }
+    .result-grid .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 0; gap: 8px; }
+    .result-grid .metrics > div:last-child { grid-column: 1 / -1; }
+    .result-grid > .result-note { grid-column: 1 / -1; margin: 0; }
     svg { display: block; width: 100%; height: auto; }
     svg text { fill: var(--ink); font: 14px "Microsoft JhengHei", sans-serif; }
     .scroll { overflow-x: auto; }
-    #curve-chart { min-width: 360px; }
+    #curve-chart, #tee-chart { min-width: 360px; }
     .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-    .metrics div { padding: 12px; background: #f4f6ef; border-radius: 6px; }
+    .metrics div { padding: 9px 10px; background: #f4f6ef; border-radius: 6px; }
     dt { color: var(--muted); font-size: 14px; }
-    dd { margin: 4px 0 0; font-size: 18px; overflow-wrap: anywhere; }
+    dd { margin: 2px 0 0; font-size: 16px; overflow-wrap: anywhere; }
     .equation { font-size: 18px; overflow-wrap: anywhere; }
     footer { border-top: 1px solid var(--line); text-align: center; padding: 24px; font-size: 13px; color: var(--muted); }
     [hidden] { display: none !important; }
-    @media (max-width: 600px) { .wrap { width: calc(100% - 32px); } .panel { padding: 16px; } .grid, .metrics { grid-template-columns: 1fr; } }
+    @media (max-width: 800px) { .grid, .component-choices { grid-template-columns: repeat(2, minmax(0, 1fr)); } .result-grid { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 600px) { .wrap { width: calc(100% - 32px); } .panel { padding: 14px; } .grid, .metrics, .result-grid .metrics { grid-template-columns: 1fr; } .component-choices { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } }
   </style>
 </head>
 <body>
@@ -58,36 +73,89 @@
   <main class="wrap">
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="tools.html">計算工具</a> ／ <span aria-current="page">管路損失係數計算器</span></p>
     <h1>管路損失係數計算器</h1>
-    <p>計算圓管突縮與突擴的局部損失係數 K，並由流量估算損失水頭與壓力損失。所有管徑均為內徑，下標 1 為上游、2 為下游。</p>
+    <p>計算圓管突縮、突擴與等徑三通的局部損失，並由流量估算損失水頭與壓力損失。所有管徑均為內徑，下標 1 為上游、2 為下游。</p>
     <section class="panel" aria-labelledby="diagram-title">
-      <h2 id="diagram-title">管路示意圖</h2>
-      <figure class="pipe-schematic">
-        <svg viewBox="0 0 480 260" role="img" aria-labelledby="pipe-title pipe-desc">
-          <title id="pipe-title">突縮管路示意圖</title><desc id="pipe-desc">流體由左側上游流向右側下游，尺寸為示意比例。</desc>
-          <defs><marker id="flow-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#287b9b"></path></marker></defs>
-          <path id="pipe-fill" fill="#dcecf0"></path>
-          <path id="pipe-wall" fill="none" stroke="#53665e" stroke-width="3"></path>
-          <path d="M50 125 H420" fill="none" stroke="#287b9b" stroke-width="2" marker-end="url(#flow-arrow)"></path>
-          <text x="80" y="28">上游 1</text><text x="345" y="28">下游 2</text>
-          <text id="diameter-one" x="55" y="225">D₁</text><text id="diameter-two" x="330" y="225">D₂</text>
-          <text x="180" y="250">流向 →</text>
-        </svg>
-        <figcaption>銳邊、同軸、突然變徑；圖形不按輸入比例縮放。</figcaption>
-      </figure>
+      <h2 id="diagram-title">選擇管路元件</h2>
+      <div class="component-choices" role="radiogroup" aria-labelledby="diagram-title">
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-contraction" value="contraction" aria-label="突縮：上游 D₁ 大管流向下游 D₂ 小管" checked>
+          <label for="kind-contraction">
+            <svg viewBox="0 0 180 120" aria-hidden="true">
+              <text x="45" y="13" text-anchor="middle">上游 1</text><text x="135" y="13" text-anchor="middle">下游 2</text>
+              <g transform="translate(0 20)">
+              <path d="M10 10 H90 V25 H170 V55 H90 V70 H10 Z" fill="#dcecf0"></path>
+              <path d="M10 10 H90 V25 H170 M10 70 H90 V55 H170" fill="none" stroke="#53665e" stroke-width="2.5"></path>
+              <path d="M20 40 H155 M148 34 L155 40 L148 46" fill="none" stroke="#287b9b" stroke-width="2"></path>
+              </g>
+              <text x="45" y="110" text-anchor="middle">D₁：大管</text><text x="135" y="110" text-anchor="middle">D₂：小管</text>
+            </svg>
+            <span class="component-name">突縮</span>
+          </label>
+        </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-expansion" value="expansion" aria-label="突擴：上游 D₁ 小管流向下游 D₂ 大管">
+          <label for="kind-expansion">
+            <svg viewBox="0 0 180 120" aria-hidden="true">
+              <text x="45" y="13" text-anchor="middle">上游 1</text><text x="135" y="13" text-anchor="middle">下游 2</text>
+              <g transform="translate(0 20)">
+              <path d="M10 25 H90 V10 H170 V70 H90 V55 H10 Z" fill="#dcecf0"></path>
+              <path d="M10 25 H90 V10 H170 M10 55 H90 V70 H170" fill="none" stroke="#53665e" stroke-width="2.5"></path>
+              <path d="M20 40 H155 M148 34 L155 40 L148 46" fill="none" stroke="#287b9b" stroke-width="2"></path>
+              </g>
+              <text x="45" y="110" text-anchor="middle">D₁：小管</text><text x="135" y="110" text-anchor="middle">D₂：大管</text>
+            </svg>
+            <span class="component-name">突擴</span>
+          </label>
+        </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-tee-dividing" value="tee-dividing" aria-label="等徑三通分流：左側共同管口流向右側直通與上方支管">
+          <label for="kind-tee-dividing">
+            <svg viewBox="0 0 180 120" aria-hidden="true">
+              <text x="90" y="13" text-anchor="middle">支管 Q支</text>
+              <g transform="translate(0 20)">
+              <path d="M10 35 H70 V5 H110 V35 H170 V70 H10 Z" fill="#dcecf0"></path>
+              <path d="M10 35 H70 V5 M110 5 V35 H170 M10 70 H170" fill="none" stroke="#53665e" stroke-width="2.5"></path>
+              <path d="M20 52 H60 M54 47 L60 52 L54 57 M120 52 H160 M154 47 L160 52 L154 57" fill="none" stroke="#287b9b" stroke-width="2"></path>
+              <path d="M90 42 V15 M85 21 L90 15 L95 21" fill="none" stroke="#bd7628" stroke-width="2"></path>
+              </g>
+              <text x="45" y="110" text-anchor="middle">共同管口 Q</text><text x="135" y="110" text-anchor="middle">直通 Q直</text>
+            </svg>
+            <span class="component-name">等徑三通・分流</span>
+          </label>
+        </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-tee-combining" value="tee-combining" aria-label="等徑三通合流：右側直通與上方支管流向左側共同管口">
+          <label for="kind-tee-combining">
+            <svg viewBox="0 0 180 120" aria-hidden="true">
+              <text x="90" y="13" text-anchor="middle">支管 Q支</text>
+              <g transform="translate(0 20)">
+              <path d="M10 35 H70 V5 H110 V35 H170 V70 H10 Z" fill="#dcecf0"></path>
+              <path d="M10 35 H70 V5 M110 5 V35 H170 M10 70 H170" fill="none" stroke="#53665e" stroke-width="2.5"></path>
+              <path d="M60 52 H20 M26 47 L20 52 L26 57 M160 52 H120 M126 47 L120 52 L126 57" fill="none" stroke="#287b9b" stroke-width="2"></path>
+              <path d="M90 15 V42 M85 36 L90 42 L95 36" fill="none" stroke="#bd7628" stroke-width="2"></path>
+              </g>
+              <text x="45" y="110" text-anchor="middle">共同管口 Q</text><text x="135" y="110" text-anchor="middle">直通 Q直</text>
+            </svg>
+            <span class="component-name">等徑三通・合流</span>
+          </label>
+        </div>
+      </div>
+      <p class="hint component-note">突縮與突擴為銳邊、同軸突然變徑；三通為等徑 90°。圖形不按輸入比例縮放。</p>
     </section>
-    <form id="loss-form" class="panel">
-      <h2>管路與流體條件</h2>
+    <form id="loss-form" class="panel" aria-labelledby="conditions-title">
+      <h2 id="conditions-title">管路與流體條件</h2>
       <div class="grid">
-        <div><label for="kind">局部構件</label><select id="kind"><option value="contraction">突縮（Sudden contraction）</option><option value="expansion">突擴（Sudden expansion）</option></select></div>
         <div><label for="density">流體密度 ρ（kg/m³）</label><input id="density" type="number" min="0" step="any" value="998.2" required><small>預設為約 20°C 水的密度。</small></div>
-        <div><label for="upstream">上游內徑 D₁（mm）</label><input id="upstream" type="number" min="0" step="any" value="100" required></div>
-        <div><label for="downstream">下游內徑 D₂（mm）</label><input id="downstream" type="number" min="0" step="any" value="50" required></div>
-        <div><label for="flow">實際體積流量 Q（m³/h）</label><input id="flow" type="number" min="0" step="any" value="10" required><small>若只查 K，可將流量設為 0。</small></div>
+        <div data-transition-field><label for="upstream">上游內徑 D₁（mm）</label><input id="upstream" type="number" min="0" step="any" value="100" required></div>
+        <div data-transition-field><label for="downstream">下游內徑 D₂（mm）</label><input id="downstream" type="number" min="0" step="any" value="50" required></div>
+        <div data-tee-field hidden><label for="tee-diameter">三管口內徑 D（mm）</label><input id="tee-diameter" type="number" min="0" step="any" value="100" required disabled></div>
+        <div data-tee-field hidden><label for="tee-fraction">支管流量比例（%）</label><input id="tee-fraction" type="number" min="0" max="100" step="any" value="50" required disabled><small>支管流量 ÷ 共同管口總流量。</small></div>
+        <div><label for="flow" id="flow-label">實際體積流量 Q（m³/h）</label><input id="flow" type="number" min="0" step="any" value="10" required><small id="flow-hint">若只查 K，可將流量設為 0。</small></div>
       </div>
       <p id="velocity-basis" class="hint"></p>
       <div class="actions"><button type="submit">計算</button><p id="status" role="status">請確認條件後按計算。</p><p id="error" role="alert" hidden></p></div>
     </form>
-    <section class="panel" aria-labelledby="results-title">
+    <section id="transition-results-panel" class="panel" aria-labelledby="results-title">
       <h2 id="results-title">損失係數曲線與計算結果</h2>
       <div class="grid result-grid">
         <figure>
@@ -101,39 +169,77 @@
           <figcaption id="curve-caption"></figcaption>
         </figure>
       <div>
-      <p class="hint">按「計算」後，結果會顯示於此，曲線上也會標出對應點。</p>
-      <div id="results" hidden>
+      <p class="hint">結果面板固定於此；按「計算」後填入數值，曲線亦會標出計算點。</p>
+      <div id="results">
       <dl class="metrics">
-        <div><dt>小管／大管面積比 r</dt><dd id="ratio-result"></dd></div>
-        <div><dt>局部損失係數 K</dt><dd id="k-result"></dd></div>
-        <div><dt>參考流速 Vref（m/s）</dt><dd id="velocity-result"></dd></div>
-        <div><dt>上游流速 V₁（m/s）</dt><dd id="v1-result"></dd></div>
-        <div><dt>下游流速 V₂（m/s）</dt><dd id="v2-result"></dd></div>
-        <div><dt>損失水頭 hL（m 流體柱）</dt><dd id="head-result"></dd></div>
-        <div><dt>不可逆壓力損失 ΔpL（Pa）</dt><dd id="pressure-result"></dd></div>
+        <div><dt>小管／大管面積比 r</dt><dd id="ratio-result">—</dd></div>
+        <div><dt>局部損失係數 K</dt><dd id="k-result">—</dd></div>
+        <div><dt>參考流速 V<sub>ref</sub>（m/s）</dt><dd id="velocity-result">—</dd></div>
+        <div><dt>上游流速 V₁（m/s）</dt><dd id="v1-result">—</dd></div>
+        <div><dt>下游流速 V₂（m/s）</dt><dd id="v2-result">—</dd></div>
+        <div><dt>損失水頭 h<sub>L</sub>（m 流體柱）</dt><dd id="head-result">—</dd></div>
+        <div><dt>不可逆壓力損失 Δp<sub>L</sub>（Pa）</dt><dd id="pressure-result">—</dd></div>
       </dl>
-      <p class="hint">ΔpL 是機械能損失的壓力當量，不是兩端靜壓差。突擴時可能有靜壓回升，仍有正的能量損失。</p>
       </div>
       </div>
+      <p class="hint result-note">Δp<sub>L</sub> 是機械能損失的壓力當量，不是兩端靜壓差。突擴時可能有靜壓回升，仍有正的能量損失。</p>
+      </div>
+    </section>
+    <section id="tee-results-panel" class="panel" aria-labelledby="tee-results-title" hidden>
+      <h2 id="tee-results-title">三通損失估算曲線與計算結果</h2>
+      <div class="grid result-grid">
+        <figure>
+          <div class="scroll"><svg id="tee-chart" viewBox="0 0 480 300" role="img" aria-labelledby="tee-chart-title tee-chart-desc">
+            <title id="tee-chart-title">三通估算係數與支管流量比例</title>
+            <desc id="tee-chart-desc">等徑三通以共同管口流速為基準的上限估算，綠線為直通路徑，橘線為支管路徑，並非實測曲線。</desc>
+            <g id="tee-chart-grid"></g>
+            <path id="tee-straight-curve" fill="none" stroke="#1d6252" stroke-width="2.5"></path>
+            <path id="tee-branch-curve" fill="none" stroke="#bd7628" stroke-width="2.5"></path>
+            <circle id="tee-straight-point" r="5" fill="#1d6252" hidden></circle>
+            <circle id="tee-branch-point" r="5" fill="#bd7628" hidden></circle>
+            <text x="12" y="25">K</text><text x="250" y="290" text-anchor="middle">支管流量比例（%）</text>
+          </svg></div>
+          <figcaption>綠線：直通；橘線：支管。曲線為上限估算，非實測值。</figcaption>
+        </figure>
+        <div>
+          <p class="hint">按「計算」後顯示數值；無流量的路徑以「—」表示。</p>
+          <div id="tee-results">
+            <dl class="metrics">
+              <div><dt>共同管口流速（m/s）</dt><dd id="tee-velocity-result">—</dd></div>
+              <div><dt>直通流量（m³/h）</dt><dd id="tee-straight-flow-result">—</dd></div>
+              <div><dt>直通估算係數 K</dt><dd id="tee-straight-k-result">—</dd></div>
+              <div><dt>直通損失水頭 h<sub>L</sub>（m）</dt><dd id="tee-straight-head-result">—</dd></div>
+              <div><dt>直通壓力損失 Δp<sub>L</sub>（Pa）</dt><dd id="tee-straight-pressure-result">—</dd></div>
+              <div><dt>支管流量（m³/h）</dt><dd id="tee-branch-flow-result">—</dd></div>
+              <div><dt>支管估算係數 K</dt><dd id="tee-branch-k-result">—</dd></div>
+              <div><dt>支管損失水頭 h<sub>L</sub>（m）</dt><dd id="tee-branch-head-result">—</dd></div>
+              <div><dt>支管壓力損失 Δp<sub>L</sub>（Pa）</dt><dd id="tee-branch-pressure-result">—</dd></div>
+            </dl>
+          </div>
+        </div>
+        <p class="hint result-note">係數均以共同管口流速為基準；估算值不代表實際管件性能。三通各路徑之壓力變化可能因動能交換而與局部損失不同，正式設計應查核相應管件資料。</p>
       </div>
     </section>
     <section class="panel" aria-labelledby="method-title">
       <h2 id="method-title">計算方法與適用範圍</h2>
       <h3>突擴：Borda–Carnot 關係式</h3>
-      <p class="equation">r = A₁/A₂ = (D₁/D₂)²；K = (1 − r)²；Vref = V₁</p>
-      <p>由等截面入口與出口的連續、動量及能量平衡，假設分離區壓力近似上游壓力，可得 hL = (V₁ − V₂)²/(2g)。以小管的上游流速表示後即為上述 K。</p>
+      <p class="equation">r = A₁/A₂ = (D₁/D₂)²；K = (1 − r)²；V<sub>ref</sub> = V₁</p>
+      <p>由等截面入口與出口的連續、動量及能量平衡，假設分離區壓力近似上游壓力，可得 h<sub>L</sub> = (V₁ − V₂)²/(2g)。以小管的上游流速表示後即為上述 K。</p>
       <h3>突縮：銳邊工程近似</h3>
-      <p class="equation">r = A₂/A₁ = (D₂/D₁)²；K ≈ 0.5(1 − r)；Vref = V₂</p>
+      <p class="equation">r = A₂/A₁ = (D₂/D₁)²；K ≈ 0.5(1 − r)；V<sub>ref</sub> = V₂</p>
       <p>突然收縮形成縮流斷面（vena contracta），主要損失來自縮流後的混合與再擴張。若縮流係數 Cc = Ac/A₂，模型為 K = (1/Cc − 1)²；但 Cc 受幾何及流況影響，不能單靠守恆方程式唯一決定。本工具採常用的銳邊簡化近似 K ≈ 0.5(1 − r)，不是精確理論解，也不是圖片曲線的擬合。r → 0 時 K → 0.5；r = 1 時 K = 0。</p>
       <h3>水頭與壓力損失</h3>
-      <p class="equation">A = πD²/4；V = Q/A；hL = K Vref²/(2g)；ΔpL = ρg hL</p>
+      <p class="equation">A = πD²/4；V = Q/A；h<sub>L</sub> = K V<sub>ref</sub>²/(2g)；Δp<sub>L</sub> = ρg h<sub>L</sub></p>
       <p>使用 g = 9.80665 m/s²，輸入流量換為 m³/s 後計算。K 無因次，兩種構件都以小管流速為基準，不能混用大管流速與此 K。</p>
+      <h3>等徑三通：保守上限估算</h3>
+      <p>依 <a href="https://handbook.ashrae.org/Handbooks/F21/SI/F21_Ch22/F21_Ch22_si.aspx">ASHRAE Handbook—Fundamentals 2021，Chapter 22，Tee Fitting Pressure Drop</a> 的上限估算，以進口與出口速度水頭之和估算各路徑損失：h<sub>L</sub> ≈ (V<sub>in</sub>² + V<sub>out</sub>²)/(2g)。此為估算而非實測值，也不能保證涵蓋所有管件與工況。</p>
+      <p>假設三管口等內徑，令 x = Q<sub>支</sub>/Q，並以共同管口流速 V<sub>共</sub> 為基準，直通路徑 K ≈ 1 + (1 − x)²；支管路徑 K ≈ 1 + x²。分流和合流分別按共同管口與各支路的進、出口速度代入；無流量路徑不報告損失。流量為零時比例沒有物理意義，故不顯示路徑係數與損失。</p>
       <p class="hint">適用於穩態、單相、近似不可壓縮、充分紊流的同軸圓管突然變徑估算。不適用於漸縮／漸擴、圓角入口、層流、兩相流、明顯可壓縮或汽蝕情況；不包含直管摩擦與其他管件。因未輸入黏度，本工具不自動判斷雷諾數，請另行確認。正式設計應採與實際構件相符的試驗或供應商 K 資料。</p>
     </section>
   </main>
   <footer><a class="brand" href="index.html">能源與冷凍空調學習網</a><p>Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</p></footer>
   <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
-  <script type="module" src="assets/pipe-loss-ui.js"></script>
+  <script type="module" src="assets/pipe-loss-ui.js?v=6"></script>
   <script type="module" src="assets/scroll-top.js"></script>
 </body>
 </html>

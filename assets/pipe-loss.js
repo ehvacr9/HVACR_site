@@ -28,3 +28,26 @@ export function calculatePipeLoss({ kind, upstreamMm, downstreamMm, flowM3h, den
   }
   return result;
 }
+
+export function calculateTeeLoss({ diameterMm, flowM3h, density, branchFraction }) {
+  if (!Number.isFinite(diameterMm) || diameterMm <= 0 || !Number.isFinite(density) || density <= 0) {
+    throw new RangeError("管內徑及流體密度必須為有限正數。");
+  }
+  if (!Number.isFinite(flowM3h) || flowM3h < 0) throw new RangeError("總體積流量必須為有限非負數。");
+  if (!Number.isFinite(branchFraction) || branchFraction < 0 || branchFraction > 1) {
+    throw new RangeError("支管流量比例必須介於 0 與 100%。");
+  }
+  const area = Math.PI * (diameterMm / 1000) ** 2 / 4;
+  const velocity = flowM3h / 3600 / area;
+  const path = (fraction) => {
+    const coefficient = 1 + fraction ** 2;
+    const head = coefficient * velocity ** 2 / (2 * 9.80665);
+    return { flow: flowM3h * fraction, coefficient, head, pressureLoss: density * 9.80665 * head };
+  };
+  const result = { velocity, straight: path(1 - branchFraction), branch: path(branchFraction) };
+  if (!area || !Number.isFinite(velocity)
+    || ![...Object.values(result.straight), ...Object.values(result.branch)].every(Number.isFinite)) {
+    throw new RangeError("輸入尺度超出可計算範圍，請調整管徑或流量。");
+  }
+  return result;
+}

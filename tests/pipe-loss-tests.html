@@ -5,7 +5,7 @@
   <h1>Pipe loss regression tests</h1>
   <pre id="results" role="status">Running...</pre>
   <script type="module">
-    import { calculatePipeLoss, lossCoefficient } from "../assets/pipe-loss.js";
+    import { calculatePipeLoss, calculateTeeLoss, lossCoefficient } from "../assets/pipe-loss.js?v=2";
     const output = document.querySelector("#results");
     let checks = 0;
     function assert(condition, label) {
@@ -16,6 +16,7 @@
     const base = { kind: "contraction", upstreamMm: 100, downstreamMm: 50, flowM3h: 10, density: 1000 };
     const frame = document.createElement("iframe");
     frame.title = "Pipe loss calculator test";
+    frame.style.cssText = "position:fixed;left:-1200px;width:1100px;height:900px;";
     document.body.append(frame);
     try {
       assert(lossCoefficient("expansion", 0) === 1 && lossCoefficient("expansion", 1) === 0, "Expansion limits");
@@ -35,27 +36,143 @@
         try { calculatePipeLoss({ ...base, ...change }); } catch (error) { if (!(error instanceof RangeError)) throw error; rejected = true; }
         assert(rejected, `Reject invalid input ${JSON.stringify(change)}`);
       }
-      await new Promise((resolve) => { frame.onload = resolve; frame.src = "../pipe-loss.html"; });
+      const teeBase = { diameterMm: 100, flowM3h: 10, density: 1000, branchFraction: 0.25 };
+      const tee = calculateTeeLoss(teeBase);
+      assert(near(tee.straight.flow, 7.5) && near(tee.branch.flow, 2.5), "Tee flow conservation");
+      assert(near(tee.straight.coefficient, 1.5625) && near(tee.branch.coefficient, 1.0625), "Tee estimate uses common-port velocity basis");
+      assert(near(tee.straight.head, (tee.velocity ** 2 + (tee.velocity * 0.75) ** 2) / (2 * 9.80665))
+        && near(tee.branch.pressureLoss, 1000 * 9.80665 * tee.branch.head), "Tee estimate sums inlet and outlet velocity heads");
+      assert(near(calculateTeeLoss({ ...teeBase, flowM3h: 20 }).branch.head, 4 * tee.branch.head), "Tee loss scales with flow squared");
+      for (const change of [{ diameterMm: 0 }, { density: 0 }, { flowM3h: -1 }, { branchFraction: -0.01 }, { branchFraction: 1.01 }, { branchFraction: NaN }, { diameterMm: 1e-300 }]) {
+        let rejected = false;
+        try { calculateTeeLoss({ ...teeBase, ...change }); } catch (error) { if (!(error instanceof RangeError)) throw error; rejected = true; }
+        assert(rejected, `Reject invalid tee input ${JSON.stringify(change)}`);
+      }
+      await new Promise((resolve) => { frame.onload = resolve; frame.src = `../pipe-loss.html?test=${Date.now()}`; });
       const doc = frame.contentDocument;
-      assert(Boolean(doc.querySelector("#pipe-title").closest("section").compareDocumentPosition(
-        doc.querySelector("#loss-form")) & Node.DOCUMENT_POSITION_FOLLOWING), "Schematic precedes input form");
+      const schematicPanel = doc.querySelector("#diagram-title").closest("section");
+      assert(schematicPanel !== doc.querySelector("#loss-form")
+        && Boolean(schematicPanel.compareDocumentPosition(doc.querySelector("#loss-form")) & Node.DOCUMENT_POSITION_FOLLOWING),
+      "Component selector occupies a separate panel above the condition form");
+      assert(doc.querySelectorAll('.component-choices input[type="radio"]').length === 4
+        && doc.querySelector("#kind-contraction").checked
+        && !doc.querySelector(".diagram-details")
+        && doc.querySelector('label[for="kind-contraction"] svg').textContent.includes("D₁：大管")
+        && doc.querySelector('label[for="kind-expansion"] svg').textContent.includes("D₂：大管")
+        && doc.querySelector('label[for="kind-tee-dividing"] svg').textContent.includes("共同管口 Q")
+        && doc.querySelector('label[for="kind-tee-combining"] svg').textContent.includes("支管 Q支")
+        && [...doc.querySelectorAll('.component-choices input')].every((input) => input.hasAttribute("aria-label"))
+        && !doc.querySelector("#tee-direction"),
+      "Component thumbnails include port labels without a separate detailed diagram");
+      assert(doc.defaultView.getComputedStyle(doc.querySelector(".component-choices")).gridTemplateColumns.split(" ").length === 4,
+        "Desktop displays all four components in one row");
+      assert(Number.parseFloat(doc.defaultView.getComputedStyle(schematicPanel).marginTop) <= 16
+        && Number.parseFloat(doc.defaultView.getComputedStyle(doc.querySelector("#loss-form")).marginTop) <= 16,
+      "Main panels use compact spacing");
+      assert(doc.defaultView.getComputedStyle(doc.querySelector("#loss-form .grid")).gridTemplateColumns.split(" ").length === 3
+        && doc.querySelector("#density").getBoundingClientRect().width < 400,
+      "Desktop input grid uses compact three-column fields");
       assert(doc.querySelector("#curve-chart").closest("section") === doc.querySelector("#results").closest("section"),
         "Curve and numeric results share a panel");
+      assert(doc.defaultView.getComputedStyle(doc.querySelector(".result-grid")).gridTemplateColumns.split(" ").length === 2,
+        "Desktop curve and results use the full two-column panel");
+      assert(doc.defaultView.getComputedStyle(doc.querySelector(".result-note")).gridColumnEnd === "-1"
+        && doc.defaultView.getComputedStyle(doc.querySelector("#pressure-result").parentElement).gridColumnEnd === "-1",
+      "Explanatory note and final metric fill the available result width");
+      frame.style.width = "700px";
+      assert(doc.defaultView.getComputedStyle(doc.querySelector(".result-grid")).gridTemplateColumns.split(" ").length === 1,
+        "Narrow layouts stack the curve and results without an empty column");
+      frame.style.width = "1100px";
+      const chartScroll = doc.querySelector(".scroll");
+      assert(chartScroll.scrollWidth === chartScroll.clientWidth,
+        "Desktop chart fits its column without a horizontal scrollbar");
+      assert(!doc.querySelector("#results").hidden
+        && [...doc.querySelectorAll("#results dd")].every((value) => value.textContent === "—"),
+      "Results panel stays visible with placeholders before calculation");
+      const resultsPanelRect = doc.querySelector("#results").getBoundingClientRect();
       const submit = () => doc.querySelector("#loss-form").requestSubmit();
       submit();
       assert(!doc.querySelector("#results").hidden && doc.querySelector("#k-result").textContent === "0.375", "Default UI calculation");
-      const select = doc.querySelector("#kind");
-      select.value = "expansion";
-      select.dispatchEvent(new Event("change", { bubbles: true }));
+      const calculatedPanelRect = doc.querySelector("#results").getBoundingClientRect();
+      assert(resultsPanelRect.x === calculatedPanelRect.x && resultsPanelRect.y === calculatedPanelRect.y,
+        "Calculation does not shift the results panel");
+      const choose = (kind) => doc.querySelector(`label[for="kind-${kind}"]`).click();
+      choose("expansion");
+      assert(doc.querySelector("#kind-expansion").checked && !doc.querySelector("#kind-contraction").checked,
+        "Clicking a thumbnail selects only that component");
       assert(doc.querySelector("#upstream").value === "50" && doc.querySelector("#downstream").value === "100", "Type switch preserves valid geometry by swapping diameters");
-      assert(doc.querySelector("#results").hidden && doc.querySelector("#current-point").hasAttribute("hidden"), "Type change clears stale result and chart point");
+      assert(!doc.querySelector("#results").hidden
+        && [...doc.querySelectorAll("#results dd")].every((value) => value.textContent === "—")
+        && doc.querySelector("#current-point").hasAttribute("hidden"), "Type change keeps panel and clears stale values and chart point");
       submit();
       assert(doc.querySelector("#k-result").textContent === "0.5625"
         && !doc.querySelector("#current-point").hasAttribute("hidden"), "Expansion result and chart point");
       doc.querySelector("#downstream").value = "25";
       submit();
-      assert(!doc.querySelector("#error").hidden && doc.querySelector("#results").hidden, "Wrong diameter ordering shows error");
+      assert(!doc.querySelector("#error").hidden && !doc.querySelector("#results").hidden
+        && [...doc.querySelectorAll("#results dd")].every((value) => value.textContent === "—"),
+      "Wrong diameter ordering shows error and keeps result panel with placeholders");
       assert(doc.querySelector("#curve").getAttribute("d").startsWith("M60 30"), "Expansion chart endpoint");
+      choose("tee-dividing");
+      assert(!doc.querySelector("#tee-results-panel").hidden && doc.querySelector("#transition-results-panel").hidden
+        && doc.querySelector("#kind-tee-dividing").checked && doc.querySelector("#flow-hint").textContent.includes("入口")
+        && doc.querySelector("#upstream").disabled,
+      "Tee selection changes diagram, results and active inputs");
+      assert([...doc.querySelectorAll("#tee-results dd")].every((value) => value.textContent === "—"), "Tee results start with placeholders");
+      frame.style.width = "375px";
+      assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth
+        && doc.defaultView.getComputedStyle(doc.querySelector("#tee-results .metrics")).gridTemplateColumns.split(" ").length === 1
+        && doc.defaultView.getComputedStyle(doc.querySelector(".component-choices")).gridTemplateColumns.split(" ").length === 2,
+      "Tee layout fits mobile viewport with stacked results");
+      frame.style.width = "1100px";
+      doc.querySelector("#tee-fraction").value = "25";
+      submit();
+      assert(doc.querySelector("#tee-straight-flow-result").textContent === "7.5"
+        && doc.querySelector("#tee-branch-flow-result").textContent === "2.5"
+        && doc.querySelector("#tee-straight-k-result").textContent === "1.5625"
+        && doc.querySelector("#tee-branch-k-result").textContent === "1.0625", "Dividing tee UI calculation");
+      assert(!doc.querySelector("#tee-straight-point").hasAttribute("hidden")
+        && !doc.querySelector("#tee-branch-point").hasAttribute("hidden"), "Both active tee paths are marked on chart");
+      choose("tee-combining");
+      assert(doc.querySelector("#kind-tee-combining").checked && !doc.querySelector("#kind-tee-dividing").checked
+        && doc.querySelector("#flow-hint").textContent.includes("出口")
+        && doc.querySelector("#tee-fraction").value === "25"
+        && doc.querySelector("#tee-diameter").value === "100"
+        && doc.querySelector("#tee-straight-point").hasAttribute("hidden")
+        && [...doc.querySelectorAll("#tee-results dd")].every((value) => value.textContent === "—"),
+      "Combining thumbnail preserves inputs while clearing prior results");
+      submit();
+      assert(doc.querySelector("#tee-branch-k-result").textContent === "1.0625", "Combining tee UI calculation");
+      choose("tee-dividing");
+      assert(doc.querySelector("#kind-tee-dividing").checked && doc.querySelector("#flow-hint").textContent.includes("入口")
+        && [...doc.querySelectorAll("#tee-results dd")].every((value) => value.textContent === "—"),
+      "Dividing thumbnail restores dividing mode and clears combining results");
+      choose("tee-combining");
+      doc.querySelector("#tee-fraction").value = "0";
+      submit();
+      assert(doc.querySelector("#tee-branch-flow-result").textContent === "0"
+        && doc.querySelector("#tee-branch-k-result").textContent === "—"
+        && doc.querySelector("#tee-branch-point").hasAttribute("hidden")
+        && doc.querySelector("#tee-straight-k-result").textContent === "2", "Inactive branch does not report a loss");
+      doc.querySelector("#tee-fraction").value = "100";
+      submit();
+      assert(doc.querySelector("#tee-straight-k-result").textContent === "—"
+        && doc.querySelector("#tee-branch-k-result").textContent === "2", "Inactive straight path does not report a loss");
+      doc.querySelector("#tee-diameter").value = "0";
+      submit();
+      assert(!doc.querySelector("#error").hidden
+        && [...doc.querySelectorAll("#tee-results dd")].every((value) => value.textContent === "—"),
+      "Invalid tee geometry shows an error without stale values");
+      doc.querySelector("#tee-diameter").value = "100";
+      doc.querySelector("#flow").value = "0";
+      submit();
+      assert(doc.querySelector("#tee-velocity-result").textContent === "0"
+        && doc.querySelector("#tee-straight-k-result").textContent === "—"
+        && doc.querySelector("#tee-branch-k-result").textContent === "—", "Zero total flow does not report path losses");
+      choose("contraction");
+      assert(!doc.querySelector("#transition-results-panel").hidden && doc.querySelector("#tee-results-panel").hidden
+        && !doc.querySelector("#upstream").disabled && doc.querySelector("#tee-diameter").disabled,
+      "Switching back restores transition controls");
       for (const path of ["tools.html", "index.html"]) {
         const response = await fetch(`../${path}`);
         const page = new DOMParser().parseFromString(await response.text(), "text/html");
