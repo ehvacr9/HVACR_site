@@ -5,7 +5,7 @@
   <h1>Pipe loss regression tests</h1>
   <pre id="results" role="status">Running...</pre>
   <script type="module">
-    import { calculatePipeLoss, calculateTeeLoss, calculateElbowLoss, lossCoefficient, steelPipeInsideDiameter } from "../assets/pipe-loss.js?v=4";
+    import { calculatePipeLoss, calculateTeeLoss, calculateElbowLoss, calculateStandardFittingLoss, standardFittingCoefficient, lossCoefficient, steelPipeInsideDiameter } from "../assets/pipe-loss.js?v=5";
     const output = document.querySelector("#results");
     let checks = 0;
     function assert(condition, label) {
@@ -49,10 +49,10 @@
         assert(rejected, `Reject invalid tee input ${JSON.stringify(change)}`);
       }
       const elbowBase = { kind: "elbow-90", nominalMm: "25", diameterMm: 26.6, flowM3h: 2, density: 998.2 };
-      for (const [nominal, schedule, expected] of [["25", "40", 26.64], ["25", "80", 24.31], ["50", "40", 52.50], ["50", "80", 49.25], ["100", "40", 102.26], ["100", "80", 97.18]]) {
+      for (const [nominal, schedule, expected] of [["8", "40", 9.25], ["8", "80", 7.67], ["10", "40", 12.52], ["10", "80", 10.74], ["15", "40", 15.8], ["15", "80", 13.87], ["20", "40", 20.93], ["20", "80", 18.85], ["25", "40", 26.64], ["25", "80", 24.31], ["32", "40", 35.05], ["32", "80", 32.46], ["40", "40", 40.89], ["40", "80", 38.1], ["50", "40", 52.50], ["50", "80", 49.25], ["65", "40", 62.71], ["65", "80", 59], ["80", "40", 77.93], ["80", "80", 73.66], ["100", "40", 102.26], ["100", "80", 97.18]]) {
         assert(steelPipeInsideDiameter(nominal, schedule) === expected, `Steel pipe DN ${nominal} Schedule ${schedule} inside diameter`);
       }
-      for (const [nominal, schedule] of [["32", "40"], ["25", "custom"], ["__proto__", "40"], ["25", "__proto__"]]) {
+      for (const [nominal, schedule] of [["125", "40"], ["25", "custom"], ["__proto__", "40"], ["25", "__proto__"]]) {
         let rejected = false;
         try { steelPipeInsideDiameter(nominal, schedule); } catch (error) { if (!(error instanceof RangeError)) throw error; rejected = true; }
         assert(rejected, "Unsupported steel pipe size or schedule is rejected");
@@ -60,13 +60,40 @@
       for (const [kind, nominalMm, expected] of [["elbow-90", "25", 1.5], ["elbow-90", "50", 1], ["elbow-90", "100", 0.7], ["elbow-45", "25", 0.34], ["elbow-45", "50", 0.31], ["elbow-45", "100", 0.28]]) {
         assert(calculateElbowLoss({ ...elbowBase, kind, nominalMm }).coefficient === expected, `${kind} DN ${nominalMm} coefficient`);
       }
+      for (const [fitting, nominalMm, expected] of [
+        ["elbow-90-long", "20", 0.92], ["return-180", "50", 1], ["tee-line", "100", 0.9],
+        ["tee-branch", "25", 1.8], ["valve-globe", "25", 9], ["valve-gate", "50", 0.17],
+        ["valve-angle", "100", 1], ["valve-swing-check", "10", 8], ["inlet-bell", "25", 0.05],
+        ["inlet-square", "100", 0.5], ["inlet-projecting", "50", 1], ["outlet-reservoir", "25", 1],
+      ]) assert(standardFittingCoefficient(fitting, nominalMm) === expected,
+        `${fitting} DN ${nominalMm} ASHRAE table coefficient`);
+      for (const [fitting, nominalMm] of [["elbow-90-long", "10"], ["valve-angle", "15"], ["unknown", "25"]]) {
+        let rejected = false;
+        try { standardFittingCoefficient(fitting, nominalMm); } catch (error) {
+          if (!(error instanceof RangeError)) throw error;
+          rejected = true;
+        }
+        assert(rejected, `Reject unsupported fitting ${fitting} DN ${nominalMm}`);
+      }
+      const standardValve = calculateStandardFittingLoss({
+        fitting: "valve-globe", nominalMm: "25", diameterMm: 26.64, flowM3h: 2, density: 998.2,
+      });
+      assert(standardValve.coefficient === 9
+        && near(standardValve.head, 9 * standardValve.velocity ** 2 / (2 * 9.80665))
+        && near(standardValve.pressureLoss, 998.2 * 9.80665 * standardValve.head),
+      "Standard valve loss uses tabulated K and actual pipe velocity");
+      const outlet = calculateStandardFittingLoss({
+        fitting: "outlet-reservoir", nominalMm: "25", diameterMm: 26.64, flowM3h: 2, density: 998.2,
+      });
+      assert(outlet.coefficient === 1 && near(outlet.head, outlet.velocity ** 2 / (2 * 9.80665)),
+        "Reservoir outlet dissipates the pipe velocity head");
       const elbow = calculateElbowLoss(elbowBase);
       assert(near(elbow.velocity, 2 / 3600 / (Math.PI * 0.0266 ** 2 / 4))
         && near(elbow.head, 1.5 * elbow.velocity ** 2 / (2 * 9.80665))
         && near(elbow.pressureLoss, 998.2 * 9.80665 * elbow.head), "Elbow uses actual inner diameter and velocity head");
       assert(near(calculateElbowLoss({ ...elbowBase, flowM3h: 4 }).head, 4 * elbow.head)
         && calculateElbowLoss({ ...elbowBase, flowM3h: 0 }).coefficient === 1.5, "Elbow quadratic scaling and zero flow");
-      for (const change of [{ kind: "other" }, { nominalMm: "32" }, { nominalMm: "__proto__" }, { diameterMm: 0 }, { diameterMm: 1e-300 }, { density: -1 }, { flowM3h: -1 }, { flowM3h: NaN }]) {
+      for (const change of [{ kind: "other" }, { nominalMm: "125" }, { nominalMm: "__proto__" }, { diameterMm: 0 }, { diameterMm: 1e-300 }, { density: -1 }, { flowM3h: -1 }, { flowM3h: NaN }]) {
         let rejected = false;
         try { calculateElbowLoss({ ...elbowBase, ...change }); } catch (error) { if (!(error instanceof RangeError)) throw error; rejected = true; }
         assert(rejected, `Reject invalid elbow input ${JSON.stringify(change)}`);
@@ -77,16 +104,75 @@
       assert(schematicPanel !== doc.querySelector("#loss-form")
         && Boolean(schematicPanel.compareDocumentPosition(doc.querySelector("#loss-form")) & Node.DOCUMENT_POSITION_FOLLOWING),
       "Component selector occupies a separate panel above the condition form");
-      assert(doc.querySelectorAll('.component-choices input[type="radio"]').length === 6
+      assert(doc.querySelectorAll('.component-choices input[type="radio"]').length === 16
+        && doc.querySelectorAll('.component-choices input[data-standard-fitting]').length === 12
+        && !doc.querySelector('.component-choices input[value="tee-line"]')
+        && !doc.querySelector('.component-choices input[value="tee-branch"]')
+        && !doc.querySelector("#fitting-type")
+        && [...doc.querySelectorAll(".component-choice")].every((choice) => choice.querySelector("label svg")
+          && choice.querySelector("label .component-name")?.textContent.trim())
         && doc.querySelector("#kind-contraction").checked
         && !doc.querySelector(".diagram-details")
         && doc.querySelector('label[for="kind-contraction"] svg').textContent.includes("D₁：大管")
         && doc.querySelector('label[for="kind-expansion"] svg').textContent.includes("D₂：大管")
         && doc.querySelector('label[for="kind-tee-dividing"] svg').textContent.includes("共同管口 Q")
         && doc.querySelector('label[for="kind-tee-combining"] svg').textContent.includes("支管 Q支")
+        && [...doc.querySelectorAll('.component-choices input[data-standard-fitting]')].every((input) => {
+          const diagramText = doc.querySelector(`label[for="${input.id}"] svg`).textContent;
+          return diagramText.includes("上游 1") && diagramText.includes("下游 2");
+        })
         && [...doc.querySelectorAll('.component-choices input')].every((input) => input.hasAttribute("aria-label"))
         && !doc.querySelector("#tee-direction"),
       "Component thumbnails include port labels without a separate detailed diagram");
+      const thumbnailHeights = [...doc.querySelectorAll(".component-choice svg")]
+        .map((svg) => svg.getBoundingClientRect().height);
+      assert(Math.max(...thumbnailHeights) - Math.min(...thumbnailHeights) < 1
+        && [...doc.querySelectorAll(".component-choice svg [fill]")].every((shape) =>
+          !["#dcecf0", "#eef5f5"].includes(shape.getAttribute("fill"))),
+      "Component thumbnails use a consistent viewport without pale-blue fills");
+      const standardElbowWalls = doc.querySelector('label[for="kind-elbow-90"] svg').querySelectorAll('path[stroke="#53665e"]')[0].getAttribute("d");
+      const longElbowWalls = doc.querySelector('label[for="kind-elbow-90-long"] svg').querySelectorAll('path[stroke="#53665e"]')[0].getAttribute("d");
+      assert(standardElbowWalls.includes("A26 26 0 0 1 108 66") && standardElbowWalls.includes("A10 10 0 0 1 92 66")
+        && longElbowWalls.includes("A32 32 0 0 1 108 74") && longElbowWalls.includes("A16 16 0 0 1 92 74"),
+      "90-degree elbows use concentric quarter-circles with a 1.5D long-radius centerline");
+      const angleValve = doc.querySelector('label[for="kind-valve-angle"] svg');
+      const gateValve = doc.querySelector('label[for="kind-valve-gate"] svg');
+      const returnBend = doc.querySelector('label[for="kind-return-180"] svg');
+      const squareInlet = doc.querySelector('label[for="kind-inlet-square"] svg');
+      const projectingInlet = doc.querySelector('label[for="kind-inlet-projecting"] svg');
+      const outletReservoir = doc.querySelector('label[for="kind-outlet-reservoir"] svg');
+      assert(angleValve.textContent.includes("閥桿")
+        && angleValve.querySelector('path[stroke="#53665e"]').getAttribute("d") === "M12 48 H72 Q100 48 100 76 V108 M12 72 H68 V108"
+        && angleValve.querySelector('path[stroke="#287b9b"]').getAttribute("d") === "M20 60 H50 M84 86 V102"
+        && angleValve.querySelector('path[stroke="#bd7628"]').getAttribute("d").startsWith("M68 72 H92")
+        && angleValve.querySelector('path[stroke="#bd7628"]').getAttribute("d").includes("M84 56 V28"),
+      "Angle globe valve shows horizontal inlet, downward outlet, seat and vertical stem");
+      assert(returnBend.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("A38 38")
+        && returnBend.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("A22 22")
+        && returnBend.querySelector('path[stroke="#287b9b"]').getAttribute("d").includes("A30 30"),
+      "180-degree return bend has pipe walls spaced wider around its flow path");
+      assert(gateValve.querySelector('path[stroke="#287b9b"]').getAttribute("d") === "M20 60 H50 M130 60 H160"
+        && gateValve.querySelectorAll('path[stroke="#287b9b"]')[1].getAttribute("d") === "M42 54 L50 60 L42 66 M152 54 L160 60 L152 66",
+      "Gate valve flow arrows align with the pipe centerline");
+      assert(squareInlet.textContent.includes("上游 1") && squareInlet.textContent.includes("下游 2")
+        && squareInlet.textContent.includes("槽內流體進入平口")
+        && squareInlet.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("M12 12 V90")
+        && squareInlet.querySelector('path[stroke="#287b9b"]').getAttribute("d").startsWith("M20 60 H154"),
+      "Square inlet shows a larger reservoir and inflow toward the pipe opening");
+      assert(projectingInlet.textContent.includes("上游 1") && projectingInlet.textContent.includes("下游 2")
+        && projectingInlet.textContent.includes("突出管口入口")
+        && projectingInlet.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("M12 18 H112 V46")
+        && projectingInlet.querySelector('path[stroke="#287b9b"]').getAttribute("d").startsWith("M46 64 H154"),
+      "Projecting inlet shows a larger reservoir and inflow toward the pipe opening");
+      assert(outletReservoir.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("M68 24 H168")
+        && outletReservoir.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("V96"),
+      "Reservoir outlet schematic uses a larger tank");
+      const fittingStrokeColors = [...doc.querySelectorAll(".component-choice svg [stroke]")]
+        .map((shape) => shape.getAttribute("stroke"));
+      assert(fittingStrokeColors.every((color) => ["#53665e", "#287b9b", "#bd7628"].includes(color))
+        && [...doc.querySelectorAll(".component-choice svg [stroke]")].every((shape) =>
+          doc.defaultView.getComputedStyle(shape).strokeWidth === "3px"),
+      "All fitting schematics share the same three-color palette and line weight");
       assert(doc.defaultView.getComputedStyle(doc.querySelector(".component-choices")).gridTemplateColumns.split(" ").length === 4,
         "Desktop component grid has four columns");
       assert(Number.parseFloat(doc.defaultView.getComputedStyle(schematicPanel).marginTop) <= 16
@@ -120,61 +206,95 @@
       assert(resultsPanelRect.x === calculatedPanelRect.x && resultsPanelRect.y === calculatedPanelRect.y,
         "Calculation does not shift the results panel");
       const choose = (kind) => doc.querySelector(`label[for="kind-${kind}"]`).click();
+      for (const fitting of doc.querySelectorAll('.component-choices input[data-standard-fitting]')) {
+        fitting.click();
+        assert(fitting.checked && !doc.querySelector("#fitting-results-panel").hidden,
+          `${fitting.value} has its own selectable schematic thumbnail`);
+      }
       choose("elbow-90");
-      assert(!doc.querySelector("#elbow-results-panel").hidden
+      assert(!doc.querySelector("#fitting-results-panel").hidden
         && doc.querySelector("#transition-results-panel").hidden && doc.querySelector("#tee-results-panel").hidden
-        && !doc.querySelector("#elbow-diameter").disabled && doc.querySelector("#upstream").disabled
-        && [...doc.querySelectorAll("#elbow-results dd")].every((value) => value.textContent === "—"),
-      "90-degree elbow selects the correct fields and persistent empty results");
+      && !doc.querySelector("#fitting-diameter").disabled && doc.querySelector("#upstream").disabled
+      && [...doc.querySelectorAll("#fitting-results dd")].every((value) => value.textContent === "—"),
+      "Standard fitting mode selects the correct fields and persistent empty results");
       frame.style.width = "375px";
       assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth
-        && doc.querySelector("#elbow-diameter").getBoundingClientRect().width > 0,
-      "Elbow form fits mobile viewport");
+      && doc.querySelector("#fitting-diameter").getBoundingClientRect().width > 0,
+      "Standard fitting form fits mobile viewport");
       frame.style.width = "1100px";
-      assert(doc.querySelector("#elbow-diameter").value === "26.64" && doc.querySelector("#elbow-diameter").readOnly,
+      assert(doc.querySelector("#fitting-diameter").value === "26.64" && doc.querySelector("#fitting-diameter").readOnly,
         "Default nominal size and schedule provide a read-only reference diameter");
+      doc.querySelector("#fitting-nominal").value = "10";
+      doc.querySelector("#fitting-nominal").dispatchEvent(new Event("change", { bubbles: true }));
+      choose("elbow-90-long");
+      assert(doc.querySelector("#fitting-nominal").value === "20"
+        && doc.querySelector('#fitting-nominal option[value="10"]').disabled
+        && doc.querySelector("#fitting-diameter").value === "20.93",
+      "Unsupported long-radius elbow sizes are disabled and select the first supported size");
+      choose("elbow-90");
+      doc.querySelector("#fitting-nominal").value = "25";
+      doc.querySelector("#fitting-nominal").dispatchEvent(new Event("change", { bubbles: true }));
       submit();
-      assert(doc.querySelector("#elbow-k-result").textContent === "1.5"
-        && doc.querySelector("#elbow-velocity-result").textContent !== "—", "90-degree elbow calculates");
+      assert(doc.querySelector("#fitting-k-result").textContent === "1.5"
+      && doc.querySelector("#fitting-velocity-result").textContent !== "—", "90-degree elbow calculates");
       choose("elbow-45");
-      assert([...doc.querySelectorAll("#elbow-results dd")].every((value) => value.textContent === "—"),
-        "Switching elbow angle clears stale results");
-      doc.querySelector("#elbow-nominal").value = "50";
-      doc.querySelector("#elbow-nominal").dispatchEvent(new Event("change", { bubbles: true }));
-      assert(doc.querySelector("#elbow-diameter").value === "52.5"
-        && [...doc.querySelectorAll("#elbow-results dd")].every((value) => value.textContent === "—"),
+      assert([...doc.querySelectorAll("#fitting-results dd")].every((value) => value.textContent === "—"),
+      "Switching standard fitting clears stale results");
+      doc.querySelector("#fitting-nominal").value = "50";
+      doc.querySelector("#fitting-nominal").dispatchEvent(new Event("change", { bubbles: true }));
+      assert(doc.querySelector("#fitting-diameter").value === "52.5"
+      && [...doc.querySelectorAll("#fitting-results dd")].every((value) => value.textContent === "—"),
       "Changing nominal size updates the reference diameter and clears results");
       submit();
-      assert(doc.querySelector("#elbow-k-result").textContent === "0.31", "45-degree elbow uses selected nominal size");
-      const velocity40 = Number(doc.querySelector("#elbow-velocity-result").textContent.replaceAll(",", ""));
-      doc.querySelector("#elbow-schedule").value = "80";
-      doc.querySelector("#elbow-schedule").dispatchEvent(new Event("change", { bubbles: true }));
-      assert(doc.querySelector("#elbow-diameter").value === "49.25"
-        && [...doc.querySelectorAll("#elbow-results dd")].every((value) => value.textContent === "—"),
+      assert(doc.querySelector("#fitting-k-result").textContent === "0.31", "45-degree elbow uses selected nominal size");
+      const velocity40 = Number(doc.querySelector("#fitting-velocity-result").textContent.replaceAll(",", ""));
+      choose("valve-globe");
+      submit();
+      assert(doc.querySelector("#fitting-k-result").textContent === "7", "Globe valve UI uses nominal-size coefficient");
+      choose("return-180");
+      submit();
+      assert(doc.querySelector("#fitting-k-result").textContent === "1", "180-degree return UI uses tabulated K");
+      choose("inlet-bell");
+      assert(doc.querySelector("#fitting-nominal").disabled
+        && doc.querySelector("#fitting-nominal").closest("[data-standard-fitting-field]").hidden,
+      "Fixed inlet coefficient does not request a fitting nominal size");
+      submit();
+      assert(doc.querySelector("#fitting-k-result").textContent === "0.05", "Bell-mouth inlet UI uses its fixed coefficient");
+      choose("outlet-reservoir");
+      submit();
+      assert(doc.querySelector("#fitting-k-result").textContent === "1", "Reservoir outlet UI uses velocity-head coefficient");
+      choose("elbow-45");
+      doc.querySelector("#fitting-nominal").value = "50";
+      doc.querySelector("#fitting-nominal").dispatchEvent(new Event("change", { bubbles: true }));
+      submit();
+      doc.querySelector("#fitting-schedule").value = "80";
+      doc.querySelector("#fitting-schedule").dispatchEvent(new Event("change", { bubbles: true }));
+      assert(doc.querySelector("#fitting-diameter").value === "49.25"
+      && [...doc.querySelectorAll("#fitting-results dd")].every((value) => value.textContent === "—"),
       "Changing schedule updates inside diameter and clears results");
       submit();
-      assert(doc.querySelector("#elbow-k-result").textContent === "0.31"
-        && Number(doc.querySelector("#elbow-velocity-result").textContent.replaceAll(",", "")) > velocity40,
+      assert(doc.querySelector("#fitting-k-result").textContent === "0.31"
+      && Number(doc.querySelector("#fitting-velocity-result").textContent.replaceAll(",", "")) > velocity40,
       "Schedule changes velocity while preserving nominal-size coefficient");
-      doc.querySelector("#elbow-schedule").value = "custom";
-      doc.querySelector("#elbow-schedule").dispatchEvent(new Event("change", { bubbles: true }));
-      assert(!doc.querySelector("#elbow-diameter").readOnly && doc.querySelector("#elbow-diameter").value === "",
-        "Custom mode requires an independently entered diameter");
-      doc.querySelector("#elbow-diameter").value = "52.5";
+      doc.querySelector("#fitting-schedule").value = "custom";
+      doc.querySelector("#fitting-schedule").dispatchEvent(new Event("change", { bubbles: true }));
+      assert(!doc.querySelector("#fitting-diameter").readOnly && doc.querySelector("#fitting-diameter").value === "",
+      "Custom mode requires an independently entered diameter");
+      doc.querySelector("#fitting-diameter").value = "52.5";
       submit();
-      assert(doc.querySelector("#elbow-k-result").textContent === "0.31", "Custom diameter can be calculated");
-      doc.querySelector("#elbow-nominal").value = "100";
-      doc.querySelector("#elbow-nominal").dispatchEvent(new Event("change", { bubbles: true }));
-      assert(doc.querySelector("#elbow-diameter").value === "", "Changing nominal size clears custom diameter");
-      doc.querySelector("#elbow-diameter").value = "0";
+      assert(doc.querySelector("#fitting-k-result").textContent === "0.31", "Custom diameter can be calculated");
+      doc.querySelector("#fitting-nominal").value = "100";
+      doc.querySelector("#fitting-nominal").dispatchEvent(new Event("change", { bubbles: true }));
+      assert(doc.querySelector("#fitting-diameter").value === "", "Changing nominal size clears custom diameter");
+      doc.querySelector("#fitting-diameter").value = "0";
       submit();
       assert(!doc.querySelector("#error").hidden
-        && [...doc.querySelectorAll("#elbow-results dd")].every((value) => value.textContent === "—"),
-      "Invalid elbow diameter shows an error without stale results");
-      doc.querySelector("#elbow-diameter").value = "26.6";
+      && [...doc.querySelectorAll("#fitting-results dd")].every((value) => value.textContent === "—"),
+      "Invalid fitting diameter shows an error without stale results");
+      doc.querySelector("#fitting-diameter").value = "26.6";
       choose("contraction");
-      assert(doc.querySelector("#elbow-diameter").disabled && doc.querySelector("#elbow-results-panel").hidden,
-        "Leaving elbow mode disables its controls and restores transition");
+      assert(doc.querySelector("#fitting-diameter").disabled && doc.querySelector("#fitting-results-panel").hidden,
+      "Leaving standard fitting mode disables its controls and restores transition");
       choose("expansion");
       assert(doc.querySelector("#kind-expansion").checked && !doc.querySelector("#kind-contraction").checked,
         "Clicking a thumbnail selects only that component");
@@ -254,7 +374,10 @@
       for (const path of ["tools.html", "index.html"]) {
         const response = await fetch(`../${path}`);
         const page = new DOMParser().parseFromString(await response.text(), "text/html");
-        assert(page.querySelector('a[href="pipe-loss.html"]'), `${path} links calculator`);
+        assert(path === "tools.html"
+          ? page.querySelector('a[href="pipe-loss.html"]')
+          : page.querySelector('a.button[href="tools.html"]'),
+        `${path} provides the appropriate calculator navigation`);
       }
       output.textContent = `PASS: ${checks} checks`;
     } catch (error) {

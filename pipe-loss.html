@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="計算圓管突縮、突擴、等徑三通與鋼管彎頭的局部損失。">
+  <meta name="description" content="依 ASHRAE Handbook—Fundamentals 2025 參考係數，估算管路突縮、突擴、彎頭、三通、閥件與入口損失。">
   <title>管路損失係數計算器｜計算工具</title>
   <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
   <link rel="stylesheet" href="assets/scroll-top.css">
   <style>
-    :root { color-scheme: light; --ink: #172b2b; --muted: #5b6c68; --green: #1d6252; --line: #dce2d8; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    :root { color-scheme: light; --ink: #172b2b; --muted: #5b6c68; --green: #1d6252; --line: #dce2d8; --diagram-wall: #53665e; --diagram-flow: #287b9b; --diagram-part: #bd7628; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
     * { box-sizing: border-box; }
     body { margin: 0; background: #f6f5ef; color: var(--ink); line-height: 1.7; }
     a { color: var(--green); text-underline-offset: 3px; }
@@ -41,8 +41,11 @@
     .component-choice label { height: 100%; margin: 0; padding: 10px 12px; border: 2px solid var(--line); border-radius: 8px; background: #fff; text-align: center; cursor: pointer; }
     .component-choice input:checked + label { border-color: var(--green); background: #eef5ed; color: var(--green); }
     .component-choice input:focus-visible + label { outline: 3px solid #9ab952; outline-offset: 3px; }
-    .component-choice svg { width: 100%; max-width: 190px; height: auto; margin: 0 auto 4px; }
+    .component-choice svg { width: 100%; max-width: 190px; height: 120px; margin: 0 auto 4px; }
     .component-choice svg text { fill: var(--muted); font: 12px "Microsoft JhengHei", sans-serif; }
+    .component-choice svg [stroke="#53665e"] { stroke: var(--diagram-wall); stroke-width: 3; stroke-linecap: round; }
+    .component-choice svg [stroke="#287b9b"] { stroke: var(--diagram-flow); stroke-width: 3; stroke-linecap: round; }
+    .component-choice svg [stroke="#bd7628"] { stroke: var(--diagram-part); stroke-width: 3; stroke-linecap: round; }
     .component-name { display: block; }
     .component-note { margin: 10px 0 0; }
     .result-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
@@ -68,12 +71,12 @@
 <body>
   <header class="topbar">
     <a class="brand" href="index.html"><img src="assets/hvacr-learning-logo.svg?v=3" alt=""><span>能源與冷凍空調學習網</span></a>
-    <nav aria-label="主選單"><a href="index.html">首頁</a><a href="about.html">關於我們</a><a href="exam-years.html">技師考題</a><a href="terminology.html">術語辭典</a><a href="columns.html">技術專欄</a><a href="tools.html" aria-current="location">計算工具</a></nav>
+    <nav aria-label="主選單"><a href="index.html">首頁</a><a href="about.html">關於我們</a><a href="exam-years.html">技師考題</a><a href="columns.html">技術專欄</a><a href="tools.html" aria-current="location">計算工具</a></nav>
   </header>
   <main class="wrap">
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="tools.html">計算工具</a> ／ <span aria-current="page">管路損失係數計算器</span></p>
     <h1>管路損失係數計算器</h1>
-    <p>計算圓管突縮、突擴、等徑三通與鋼管彎頭的局部損失，並由流量估算損失水頭與壓力損失。流速採實際內徑計算，下標 1 為上游、2 為下游。</p>
+    <p>計算圓管突縮、突擴、等徑三通，以及依 ASHRAE Handbook 參考係數估算彎頭、閥件、三通與管口的局部損失，並由流量求損失水頭與壓力損失。流速採實際內徑計算，下標 1 為上游、2 為下游。</p>
     <section class="panel" aria-labelledby="diagram-title">
       <h2 id="diagram-title">選擇管路元件</h2>
       <div class="component-choices" role="radiogroup" aria-labelledby="diagram-title">
@@ -83,7 +86,7 @@
             <svg viewBox="0 0 180 120" aria-hidden="true">
               <text x="45" y="13" text-anchor="middle">上游 1</text><text x="135" y="13" text-anchor="middle">下游 2</text>
               <g transform="translate(0 20)">
-              <path d="M10 10 H90 V25 H170 V55 H90 V70 H10 Z" fill="#dcecf0"></path>
+              <path d="M10 10 H90 V25 H170 V55 H90 V70 H10 Z" fill="none"></path>
               <path d="M10 10 H90 V25 H170 M10 70 H90 V55 H170" fill="none" stroke="#53665e" stroke-width="2.5"></path>
               <path d="M20 40 H155 M148 34 L155 40 L148 46" fill="none" stroke="#287b9b" stroke-width="2"></path>
               </g>
@@ -98,7 +101,7 @@
             <svg viewBox="0 0 180 120" aria-hidden="true">
               <text x="45" y="13" text-anchor="middle">上游 1</text><text x="135" y="13" text-anchor="middle">下游 2</text>
               <g transform="translate(0 20)">
-              <path d="M10 25 H90 V10 H170 V70 H90 V55 H10 Z" fill="#dcecf0"></path>
+              <path d="M10 25 H90 V10 H170 V70 H90 V55 H10 Z" fill="none"></path>
               <path d="M10 25 H90 V10 H170 M10 55 H90 V70 H170" fill="none" stroke="#53665e" stroke-width="2.5"></path>
               <path d="M20 40 H155 M148 34 L155 40 L148 46" fill="none" stroke="#287b9b" stroke-width="2"></path>
               </g>
@@ -113,10 +116,10 @@
             <svg viewBox="0 0 180 120" aria-hidden="true">
               <text x="90" y="13" text-anchor="middle">支管 Q支</text>
               <g transform="translate(0 20)">
-              <path d="M10 35 H70 V5 H110 V35 H170 V70 H10 Z" fill="#dcecf0"></path>
+              <path d="M10 35 H70 V5 H110 V35 H170 V70 H10 Z" fill="none"></path>
               <path d="M10 35 H70 V5 M110 5 V35 H170 M10 70 H170" fill="none" stroke="#53665e" stroke-width="2.5"></path>
               <path d="M20 52 H60 M54 47 L60 52 L54 57 M120 52 H160 M154 47 L160 52 L154 57" fill="none" stroke="#287b9b" stroke-width="2"></path>
-              <path d="M90 42 V15 M85 21 L90 15 L95 21" fill="none" stroke="#bd7628" stroke-width="2"></path>
+              <path d="M90 42 V15 M85 21 L90 15 L95 21" fill="none" stroke="#287b9b" stroke-width="2"></path>
               </g>
               <text x="45" y="110" text-anchor="middle">共同管口 Q</text><text x="135" y="110" text-anchor="middle">直通 Q直</text>
             </svg>
@@ -129,10 +132,10 @@
             <svg viewBox="0 0 180 120" aria-hidden="true">
               <text x="90" y="13" text-anchor="middle">支管 Q支</text>
               <g transform="translate(0 20)">
-              <path d="M10 35 H70 V5 H110 V35 H170 V70 H10 Z" fill="#dcecf0"></path>
+              <path d="M10 35 H70 V5 H110 V35 H170 V70 H10 Z" fill="none"></path>
               <path d="M10 35 H70 V5 M110 5 V35 H170 M10 70 H170" fill="none" stroke="#53665e" stroke-width="2.5"></path>
               <path d="M60 52 H20 M26 47 L20 52 L26 57 M160 52 H120 M126 47 L120 52 L126 57" fill="none" stroke="#287b9b" stroke-width="2"></path>
-              <path d="M90 15 V42 M85 36 L90 42 L95 36" fill="none" stroke="#bd7628" stroke-width="2"></path>
+              <path d="M90 15 V42 M85 36 L90 42 L95 36" fill="none" stroke="#287b9b" stroke-width="2"></path>
               </g>
               <text x="45" y="110" text-anchor="middle">共同管口 Q</text><text x="135" y="110" text-anchor="middle">直通 Q直</text>
             </svg>
@@ -140,33 +143,127 @@
           </label>
         </div>
         <div class="component-choice">
-          <input type="radio" name="kind" id="kind-elbow-90" value="elbow-90" aria-label="90 度標準螺紋鋼管彎頭：左側上游，頂部下游">
-          <label for="kind-elbow-90">
-            <svg viewBox="0 0 180 120" aria-hidden="true">
-              <text x="135" y="13" text-anchor="middle">下游 2</text>
-              <path d="M10 55 H90 Q115 55 115 30 V20 H155 V30 Q155 95 90 95 H10 Z" fill="#dcecf0"></path>
-              <path d="M10 55 H90 Q115 55 115 30 V20 M155 20 V30 Q155 95 90 95 H10" fill="none" stroke="#53665e" stroke-width="2.5"></path>
-              <path d="M20 75 H90 Q135 75 135 30 M130 36 L135 30 L140 36" fill="none" stroke="#287b9b" stroke-width="2"></path>
-              <text x="45" y="110" text-anchor="middle">上游 1</text>
-            </svg>
-            <span class="component-name">90° 彎頭</span>
-          </label>
+          <input type="radio" name="kind" id="kind-elbow-90" value="elbow-90" data-standard-fitting aria-label="90 度標準螺紋鋼管彎頭">
+          <label for="kind-elbow-90"><svg viewBox="0 0 180 120" aria-hidden="true">
+            <text x="40" y="30" text-anchor="middle">上游 1</text><text x="140" y="106" text-anchor="middle">下游 2</text>
+            <path d="M12 40 H82 A26 26 0 0 1 108 66 V100 M12 56 H82 A10 10 0 0 1 92 66 V100" fill="none" stroke="#53665e" stroke-width="3"></path>
+            <path d="M20 48 H82 A18 18 0 0 1 100 66 V92" fill="none" stroke="#287b9b" stroke-width="3"></path><path d="M94 85 L100 92 L106 85" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <text x="90" y="114" text-anchor="middle">90°</text>
+          </svg><span class="component-name">90° 標準彎頭</span></label>
         </div>
         <div class="component-choice">
-          <input type="radio" name="kind" id="kind-elbow-45" value="elbow-45" aria-label="45 度螺紋鋼管彎頭：左側上游，右上方下游">
-          <label for="kind-elbow-45">
-            <svg viewBox="0 0 180 120" aria-hidden="true">
-              <text x="145" y="13" text-anchor="middle">下游 2</text>
-              <path d="M10 55 H75 Q85 55 92 48 L125 15 L153 43 L120 76 Q101 95 75 95 H10 Z" fill="#dcecf0"></path>
-              <path d="M10 55 H75 Q85 55 92 48 L125 15 M153 43 L120 76 Q101 95 75 95 H10" fill="none" stroke="#53665e" stroke-width="2.5"></path>
-              <path d="M20 75 H75 Q94 75 106 63 L136 33 M128 34 L136 33 L135 41" fill="none" stroke="#287b9b" stroke-width="2"></path>
-              <text x="45" y="110" text-anchor="middle">上游 1</text>
-            </svg>
-            <span class="component-name">45° 彎頭</span>
-          </label>
+          <input type="radio" name="kind" id="kind-elbow-90-long" value="elbow-90-long" data-standard-fitting aria-label="90 度長半徑螺紋鋼管彎頭">
+          <label for="kind-elbow-90-long"><svg viewBox="0 0 180 120" aria-hidden="true">
+            <text x="40" y="18" text-anchor="middle">上游 1</text><text x="142" y="106" text-anchor="middle">下游 2</text>
+            <path d="M12 42 H76 A32 32 0 0 1 108 74 V100 M12 58 H76 A16 16 0 0 1 92 74 V100" fill="none" stroke="#53665e" stroke-width="3"></path>
+            <path d="M20 50 H76 A24 24 0 0 1 100 74 V92" fill="none" stroke="#287b9b" stroke-width="3"></path><path d="M94 85 L100 92 L106 85" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <text x="90" y="114" text-anchor="middle">R/D = 1.5</text>
+          </svg><span class="component-name">90° 長半徑彎頭</span></label>
+        </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-elbow-45" value="elbow-45" data-standard-fitting aria-label="45 度螺紋鋼管彎頭">
+          <label for="kind-elbow-45"><svg viewBox="0 0 180 120" aria-hidden="true">
+            <text x="40" y="62" text-anchor="middle">上游 1</text><text x="144" y="18" text-anchor="middle">下游 2</text>
+            <path d="M12 70 H72 Q84 70 93 61 L132 22 M12 90 H72 Q96 90 107 79 L146 40" fill="none" stroke="#53665e" stroke-width="3"></path>
+            <path d="M20 80 H70 Q88 80 100 68 L137 31" fill="none" stroke="#287b9b" stroke-width="3"></path><path d="M128 32 L137 31 L136 40" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <text x="90" y="114" text-anchor="middle">D：管內徑</text>
+          </svg><span class="component-name">45° 彎頭</span></label>
+        </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-return-180" value="return-180" data-standard-fitting aria-label="180 度螺紋鋼管回彎">
+          <label for="kind-return-180"><svg viewBox="0 0 180 120" aria-hidden="true">
+            <text x="138" y="14" text-anchor="middle">上游 1</text><text x="138" y="110" text-anchor="middle">下游 2</text>
+            <path d="M116 26 H82 A38 38 0 0 0 82 102 H116 M116 42 H82 A22 22 0 0 0 82 86 H116" fill="none" stroke="#53665e" stroke-width="3"></path>
+            <path d="M154 34 H82 A30 30 0 0 0 82 94 H154" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <path d="M90 29 L82 35 L90 41 M146 87 L154 93 L146 99" fill="none" stroke="#287b9b" stroke-width="3"></path><text x="82" y="66" text-anchor="middle">180°</text>
+          </svg><span class="component-name">180° 回彎</span></label>
+        </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-valve-globe" value="valve-globe" data-standard-fitting aria-label="螺紋鋼管球形閥 Globe Valve">
+          <label for="kind-valve-globe"><svg viewBox="0 0 180 120" aria-hidden="true">
+            <text x="40" y="14" text-anchor="middle">上游 1</text><text x="140" y="14" text-anchor="middle">下游 2</text>
+            <path d="M12 50 H56 L70 36 H110 L124 50 H168 M12 70 H56 L70 84 H110 L124 70 H168" fill="none" stroke="#53665e" stroke-width="3"></path>
+            <path d="M68 70 H112" fill="none" stroke="#53665e" stroke-width="3"></path>
+            <path d="M78 62 H102 L96 54 H84 Z M90 54 V28 M80 28 H100" fill="none" stroke="#bd7628" stroke-width="3"></path>
+            <path d="M20 60 H48 M132 60 H160" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <path d="M42 54 L50 60 L42 66 M152 54 L160 60 L152 66" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <text x="90" y="108" text-anchor="middle">閥瓣離座・流道轉折</text>
+          </svg><span class="component-name">球形閥</span></label>
+        </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-valve-gate" value="valve-gate" data-standard-fitting aria-label="螺紋鋼管閘閥 Gate Valve">
+          <label for="kind-valve-gate"><svg viewBox="0 0 180 120" aria-hidden="true">
+            <text x="40" y="14" text-anchor="middle">上游 1</text><text x="140" y="14" text-anchor="middle">下游 2</text>
+            <path d="M12 52 H58 L68 42 H112 L122 52 H168 M12 68 H58 L68 78 H112 L122 68 H168" fill="none" stroke="#53665e" stroke-width="3"></path>
+            <path d="M68 42 V26 H112 V42 M90 26 V18 M80 18 H100" fill="none" stroke="#bd7628" stroke-width="3"></path>
+            <path d="M20 60 H50 M130 60 H160" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <path d="M42 54 L50 60 L42 66 M152 54 L160 60 L152 66" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <text x="90" y="108" text-anchor="middle">閘板上提・全開</text>
+          </svg><span class="component-name">閘閥</span></label>
+        </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-valve-angle" value="valve-angle" data-standard-fitting aria-label="螺紋鋼管角閥 Angle Valve">
+          <label for="kind-valve-angle"><svg viewBox="0 0 180 120" aria-hidden="true">
+            <text x="35" y="30" text-anchor="middle">上游 1</text><text x="137" y="114" text-anchor="middle">下游 2</text>
+            <path d="M12 48 H72 Q100 48 100 76 V108 M12 72 H68 V108" fill="none" stroke="#53665e" stroke-width="3" stroke-linejoin="round"></path>
+            <path d="M20 60 H50 M84 86 V102" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <path d="M42 54 L50 60 L42 66 M78 96 L84 102 L90 96" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <path d="M68 72 H92 M76 56 H92 L88 68 H80 Z M84 56 V28 M74 28 H94" fill="none" stroke="#bd7628" stroke-width="3"></path>
+            <text x="130" y="48" text-anchor="middle">閥桿</text>
+          </svg><span class="component-name">角閥</span></label>
+        </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-valve-swing-check" value="valve-swing-check" data-standard-fitting aria-label="螺紋鋼管旋啟式止回閥 Swing Check Valve">
+          <label for="kind-valve-swing-check"><svg viewBox="0 0 180 120" aria-hidden="true">
+            <text x="40" y="14" text-anchor="middle">上游 1</text><text x="140" y="14" text-anchor="middle">下游 2</text>
+            <path d="M12 54 H58 Q90 20 122 54 H168 M12 70 H58 Q90 96 122 70 H168" fill="none" stroke="#53665e" stroke-width="3"></path>
+            <path d="M108 38 A8 8 0 1 1 124 38 M116 40 L84 58" fill="none" stroke="#bd7628" stroke-width="3"></path>
+            <path d="M20 62 H50 M130 62 H160" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <path d="M42 56 L50 62 L42 68 M152 56 L160 62 L152 68" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <text x="90" y="108" text-anchor="middle">閥瓣向下游啟開</text>
+          </svg><span class="component-name">旋啟式止回閥</span></label>
+        </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-inlet-bell" value="inlet-bell" data-standard-fitting aria-label="鐘口入口 Bell Mouth Inlet">
+          <label for="kind-inlet-bell"><svg viewBox="0 0 180 120" aria-hidden="true">
+            <text x="42" y="14" text-anchor="middle">上游 1</text><text x="142" y="14" text-anchor="middle">下游 2</text>
+            <path d="M12 30 H48 Q68 30 82 44 H168 M12 90 H48 Q68 90 82 76 H168" fill="none" stroke="#53665e" stroke-width="3"></path>
+            <path d="M22 60 H154" fill="none" stroke="#287b9b" stroke-width="3"></path><path d="M146 54 L154 60 L146 66" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <text x="90" y="108" text-anchor="middle">圓滑擴口入管</text>
+          </svg><span class="component-name">鐘口入口</span></label>
+        </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-inlet-square" value="inlet-square" data-standard-fitting aria-label="方口入口 Square Inlet">
+          <label for="kind-inlet-square"><svg viewBox="0 0 180 120" aria-hidden="true">
+            <text x="48" y="32" text-anchor="middle">上游 1・槽內</text><text x="144" y="14" text-anchor="middle">下游 2</text>
+            <path d="M12 12 V90 M12 12 H100 V42 M12 90 H100 V78 M100 42 H168 M100 78 H168" fill="none" stroke="#53665e" stroke-width="3"></path>
+            <path d="M20 60 H154" fill="none" stroke="#287b9b" stroke-width="3"></path><path d="M146 54 L154 60 L146 66" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <text x="102" y="108" text-anchor="middle">槽內流體進入平口</text>
+          </svg><span class="component-name">方口入口</span></label>
+        </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-inlet-projecting" value="inlet-projecting" data-standard-fitting aria-label="突出管口入口 Projected Inlet">
+          <label for="kind-inlet-projecting"><svg viewBox="0 0 180 120" aria-hidden="true">
+            <path d="M12 18 H112 V46 M112 74 V98 H12 V18" fill="none" stroke="#53665e" stroke-width="3"></path>
+            <path d="M40 46 H168 M40 74 H168" fill="none" stroke="#53665e" stroke-width="3"></path>
+            <path d="M46 64 H154" fill="none" stroke="#287b9b" stroke-width="3"></path><path d="M146 58 L154 64 L146 70" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <text x="45" y="32" text-anchor="middle">上游 1・槽內</text><text x="144" y="32" text-anchor="middle">下游 2</text>
+            <text x="90" y="112" text-anchor="middle">突出管口入口</text>
+          </svg><span class="component-name">突出管口入口</span></label>
+        </div>
+        <div class="component-choice">
+          <input type="radio" name="kind" id="kind-outlet-reservoir" value="outlet-reservoir" data-standard-fitting aria-label="管路出口排入大型槽體">
+          <label for="kind-outlet-reservoir"><svg viewBox="0 0 180 120" aria-hidden="true">
+            <path d="M68 24 H168 V96 H68 Z" fill="none"></path>
+            <path d="M68 24 H168 M168 24 V96 M68 96 H168 M68 24 V48 M68 72 V96" fill="none" stroke="#53665e" stroke-width="3"></path>
+            <path d="M12 48 H96 M12 72 H96" fill="none" stroke="#53665e" stroke-width="4"></path>
+            <path d="M20 60 H88" fill="none" stroke="#287b9b" stroke-width="3"></path><path d="M80 54 L88 60 L80 66" fill="none" stroke="#287b9b" stroke-width="3"></path>
+            <text x="40" y="44" text-anchor="middle">上游 1</text><text x="130" y="44" text-anchor="middle">下游 2</text>
+            <text x="126" y="114" text-anchor="middle">大型槽體</text>
+          </svg><span class="component-name">出口・大型槽體</span></label>
         </div>
       </div>
-      <p class="hint component-note">突縮與突擴為銳邊、同軸突然變徑；三通為等徑 90°；彎頭為螺紋鋼管。圖形不按輸入比例縮放。</p>
+      <p class="hint component-note">示意圖不按比例；深灰線表示管壁與元件邊界，藍綠箭頭表示流向，琥珀線表示閥件活動部。標準管件參考 ASHRAE Handbook—Fundamentals 2025，第 22 章表 3；請依實際產品規格核對。</p>
     </section>
     <form id="loss-form" class="panel" aria-labelledby="conditions-title">
       <h2 id="conditions-title">管路與流體條件</h2>
@@ -176,9 +273,13 @@
         <div data-transition-field><label for="downstream">下游內徑 D₂（mm）</label><input id="downstream" type="number" min="0" step="any" value="50" required></div>
         <div data-tee-field hidden><label for="tee-diameter">三管口內徑 D（mm）</label><input id="tee-diameter" type="number" min="0" step="any" value="100" required disabled></div>
         <div data-tee-field hidden><label for="tee-fraction">支管流量比例（%）</label><input id="tee-fraction" type="number" min="0" max="100" step="any" value="50" required disabled><small>支管流量 ÷ 共同管口總流量。</small></div>
-        <div data-elbow-field hidden><label for="elbow-nominal">彎頭公稱管徑 DN（mm）</label><select id="elbow-nominal" disabled><option value="25">DN 25</option><option value="50">DN 50</option><option value="100">DN 100</option></select><small>依公稱尺寸選取參考 K；非實際內徑。</small></div>
-        <div data-elbow-field hidden><label for="elbow-schedule">鋼管管壁規格</label><select id="elbow-schedule" disabled><option value="40">Schedule 40</option><option value="80">Schedule 80</option><option value="custom">自訂內徑</option></select><small>標準尺寸採鋼管名義值。</small></div>
-        <div data-elbow-field hidden><label for="elbow-diameter">管內徑 D（mm）</label><input id="elbow-diameter" type="number" min="0" step="any" required disabled readonly><small id="elbow-diameter-hint">依公稱管徑與 Schedule 帶入名義內徑；請核對實際管材。</small></div>
+        <div data-standard-fitting-field hidden><label for="fitting-nominal">公稱管徑 DN（mm）</label><select id="fitting-nominal" disabled>
+          <option value="10">DN 10</option><option value="15">DN 15</option><option value="20">DN 20</option><option value="25" selected>DN 25</option>
+          <option value="32">DN 32</option><option value="40">DN 40</option><option value="50">DN 50</option><option value="65">DN 65</option>
+          <option value="80">DN 80</option><option value="100">DN 100</option>
+        </select><small>依公稱尺寸查參考 K；流速採實際內徑。</small></div>
+        <div data-standard-fitting-field hidden><label for="fitting-schedule">鋼管管壁規格</label><select id="fitting-schedule" disabled><option value="40">Schedule 40</option><option value="80">Schedule 80</option><option value="custom">自訂內徑</option></select><small>標準尺寸內徑依 ASHRAE 表 16。</small></div>
+        <div data-standard-fitting-field hidden><label for="fitting-diameter">管內徑 D（mm）</label><input id="fitting-diameter" type="number" min="0" step="any" value="26.64" required disabled readonly><small id="fitting-diameter-hint">依公稱管徑與 Schedule 帶入參考內徑。</small></div>
         <div><label for="flow" id="flow-label">實際體積流量 Q（m³/h）</label><input id="flow" type="number" min="0" step="any" value="10" required><small id="flow-hint">若只查 K，可將流量設為 0。</small></div>
       </div>
       <p id="velocity-basis" class="hint"></p>
@@ -249,18 +350,18 @@
         <p class="hint result-note">係數均以共同管口流速為基準；估算值不代表實際管件性能。三通各路徑之壓力變化可能因動能交換而與局部損失不同，正式設計應查核相應管件資料。</p>
       </div>
     </section>
-    <section id="elbow-results-panel" class="panel" aria-labelledby="elbow-results-title" hidden>
-      <h2 id="elbow-results-title">彎頭計算結果</h2>
-      <p class="hint">按「計算」後顯示數值。係數為所選型式與公稱尺寸的離散參考值，不進行插值。</p>
-      <div id="elbow-results">
+    <section id="fitting-results-panel" class="panel" aria-labelledby="fitting-results-title" hidden>
+      <h2 id="fitting-results-title">標準管件計算結果</h2>
+      <p class="hint">按「計算」後顯示數值。K 依型式和公稱管徑查表，並以管內平均流速為基準。</p>
+      <div id="fitting-results">
         <dl class="metrics">
-          <div><dt>局部損失係數 K</dt><dd id="elbow-k-result">—</dd></div>
-          <div><dt>管內流速 V（m/s）</dt><dd id="elbow-velocity-result">—</dd></div>
-          <div><dt>損失水頭 h<sub>L</sub>（m 流體柱）</dt><dd id="elbow-head-result">—</dd></div>
-          <div><dt>壓力損失 Δp<sub>L</sub>（Pa）</dt><dd id="elbow-pressure-result">—</dd></div>
+          <div><dt>局部損失係數 K</dt><dd id="fitting-k-result">—</dd></div>
+          <div><dt>管內流速 V（m/s）</dt><dd id="fitting-velocity-result">—</dd></div>
+          <div><dt>損失水頭 h<sub>L</sub>（m 流體柱）</dt><dd id="fitting-head-result">—</dd></div>
+          <div><dt>壓力損失 Δp<sub>L</sub>（Pa）</dt><dd id="fitting-pressure-result">—</dd></div>
         </dl>
       </div>
-      <p class="hint">K 以管內平均流速為基準；實際管件可能因尺寸、幾何及流況而異。</p>
+      <p class="hint">參考值為特定螺紋鋼管型式；實際 K 會因產品幾何、尺寸、雷諾數及管件排列而變動，應以製造商資料核實。</p>
     </section>
     <section class="panel" aria-labelledby="method-title">
       <h2 id="method-title">計算方法與適用範圍</h2>
@@ -272,20 +373,22 @@
       <p>突然收縮形成縮流斷面（vena contracta），主要損失來自縮流後的混合與再擴張。若縮流係數 Cc = Ac/A₂，模型為 K = (1/Cc − 1)²；但 Cc 受幾何及流況影響，不能單靠守恆方程式唯一決定。本工具採常用的銳邊簡化近似 K ≈ 0.5(1 − r)，不是精確理論解，也不是圖片曲線的擬合。r → 0 時 K → 0.5；r = 1 時 K = 0。</p>
       <h3>水頭與壓力損失</h3>
       <p class="equation">A = πD²/4；V = Q/A；h<sub>L</sub> = K V<sub>ref</sub>²/(2g)；Δp<sub>L</sub> = ρg h<sub>L</sub></p>
-      <p>使用 g = 9.80665 m/s²，輸入流量換為 m³/s 後計算。K 無因次，兩種構件都以小管流速為基準，不能混用大管流速與此 K。</p>
-      <h3>螺紋鋼管彎頭</h3>
-      <p>參考 <a href="https://handbook.ashrae.org/Handbooks/F21/SI/F21_Ch22/F21_Ch22_si.aspx">ASHRAE Handbook—Fundamentals 2021，第 22 章，表 3</a>（來源為 Hydraulic Institute，1990），選用標準 90° 螺紋彎頭及 45° 螺紋彎頭的 DN 25、50、100 參考係數。這些尺寸以公稱管徑查 K，流速則以實際內徑計算；不適用於不同接頭、材質或長半徑 90° 彎頭。</p>
-      <p>鋼管 Schedule 40／80 的名義內徑取自同章表 16（ASME B36.10M）；可改選自訂內徑以輸入實際值。名義尺寸不包含製造公差、結垢或腐蝕影響，請依實際管材核對；輸入內徑不會改變按公稱尺寸選取的彎頭 K。</p>
+      <p>使用 g = 9.80665 m/s²，輸入流量換為 m³/s 後計算。突縮／突擴的 K 依前述小管流速定義；標準管件 K 以管內平均流速為基準。K 的速度基準須與其定義一致。</p>
+      <h3>標準管件 K 值</h3>
+      <p><a href="https://handbook.ashrae.org/Handbooks/F25/SI/F25_Ch22/F25_Ch22_si.aspx">ASHRAE Handbook—Fundamentals 2025，第 22 章表 3</a>列有螺紋鋼管彎頭、回彎、等徑三通、閥件及入口的係數。本工具提供表列型式及 DN 10–100 的離散值（鐘口、方口及突出管口入口依表列係數，不隨管徑變化）；表 3 資料來源註記為 Hydraulic Institute《Engineering Data Book》(1990)。表 5 亦提醒不同產品間係數可能有明顯差異；未提供的尺寸或型式不進行插值。</p>
+      <p>球形閥、閘閥、角閥及旋啟式止回閥均按表列螺紋鋼管參考 K 選取；閥門開度、內部結構及產品設計不同時，壓損可能顯著不同，應優先採製造商 Cv/Kv 或壓損曲線。</p>
+      <p>直通與支管三通 K 依管徑查表；與下方三通估算模式不同，此處為表列係數，不輸入支管比例。排入大型槽體以出口速度水頭全部耗散計 K = 1；這是能量平衡模型，不是表 3 的入口數值。</p>
+      <p>鋼管 Schedule 40／80 的內徑參考同章表 16；亦可選自訂內徑。K 仍按公稱管徑選取，流速依實際內徑計算。內徑受製造公差、腐蝕及結垢影響，正式計算請核對實際管材。</p>
       <p>參考值供初步估算，流況、製造差異及相鄰管件均可能影響損失；未輸入黏度，無法判斷雷諾數。正式設計請採實際管件製造商資料並確認適用流況。</p>
       <h3>等徑三通：保守上限估算</h3>
-      <p>依 <a href="https://handbook.ashrae.org/Handbooks/F21/SI/F21_Ch22/F21_Ch22_si.aspx">ASHRAE Handbook—Fundamentals 2021，Chapter 22，Tee Fitting Pressure Drop</a> 的上限估算，以進口與出口速度水頭之和估算各路徑損失：h<sub>L</sub> ≈ (V<sub>in</sub>² + V<sub>out</sub>²)/(2g)。此為估算而非實測值，也不能保證涵蓋所有管件與工況。</p>
+      <p>依 <a href="https://handbook.ashrae.org/Handbooks/F25/SI/F25_Ch22/F25_Ch22_si.aspx">ASHRAE Handbook—Fundamentals 2025，第 22 章 Tee Fitting Pressure Drop</a> 的上限估算，以進口與出口速度水頭之和估算各路徑損失：h<sub>L</sub> ≈ (V<sub>in</sub>² + V<sub>out</sub>²)/(2g)。此為估算而非實測值，也不能保證涵蓋所有管件與工況。</p>
       <p>假設三管口等內徑，令 x = Q<sub>支</sub>/Q，並以共同管口流速 V<sub>共</sub> 為基準，直通路徑 K ≈ 1 + (1 − x)²；支管路徑 K ≈ 1 + x²。分流和合流分別按共同管口與各支路的進、出口速度代入；無流量路徑不報告損失。流量為零時比例沒有物理意義，故不顯示路徑係數與損失。</p>
       <p class="hint">適用於穩態、單相、近似不可壓縮、充分紊流的同軸圓管突然變徑估算。不適用於漸縮／漸擴、圓角入口、層流、兩相流、明顯可壓縮或汽蝕情況；不包含直管摩擦與其他管件。因未輸入黏度，本工具不自動判斷雷諾數，請另行確認。正式設計應採與實際構件相符的試驗或供應商 K 資料。</p>
     </section>
   </main>
   <footer><a class="brand" href="index.html">能源與冷凍空調學習網</a><p>Copyright © 2026 能源與冷凍空調學習網. All rights reserved.</p></footer>
   <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
-  <script type="module" src="assets/pipe-loss-ui.js?v=9"></script>
+  <script type="module" src="assets/pipe-loss-ui.js?v=10"></script>
   <script type="module" src="assets/scroll-top.js"></script>
 </body>
 </html>

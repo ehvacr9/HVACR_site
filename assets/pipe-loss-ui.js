@@ -1,9 +1,9 @@
-import { calculatePipeLoss, calculateTeeLoss, calculateElbowLoss, lossCoefficient, steelPipeInsideDiameter } from "./pipe-loss.js?v=4";
+import { calculatePipeLoss, calculateTeeLoss, calculateStandardFittingLoss, standardFittingCoefficient, lossCoefficient, steelPipeInsideDiameter } from "./pipe-loss.js?v=5";
 
 const byId = (id) => document.getElementById(id);
 const selectedKind = () => document.querySelector('input[name="kind"]:checked').value;
 const isTee = () => ["tee-dividing", "tee-combining"].includes(selectedKind());
-const isElbow = () => ["elbow-90", "elbow-45"].includes(selectedKind());
+const isStandardFitting = () => document.querySelector('input[name="kind"]:checked').hasAttribute("data-standard-fitting");
 const form = byId("loss-form");
 const format = new Intl.NumberFormat("zh-TW", { maximumSignificantDigits: 6 });
 const svgNamespace = "http://www.w3.org/2000/svg";
@@ -13,7 +13,7 @@ function reset() {
     byId(id).textContent = "—";
   }
   for (const value of byId("tee-results").querySelectorAll("dd")) value.textContent = "—";
-  for (const value of byId("elbow-results").querySelectorAll("dd")) value.textContent = "—";
+  for (const value of byId("fitting-results").querySelectorAll("dd")) value.textContent = "—";
   byId("current-point").setAttribute("hidden", "");
   byId("tee-straight-point").setAttribute("hidden", "");
   byId("tee-branch-point").setAttribute("hidden", "");
@@ -23,15 +23,20 @@ function reset() {
 
 function draw() {
   const tee = isTee();
-  const elbow = isElbow();
-  for (const field of document.querySelectorAll("[data-transition-field], [data-tee-field], [data-elbow-field]")) {
-    const active = field.hasAttribute(tee ? "data-tee-field" : elbow ? "data-elbow-field" : "data-transition-field");
+  const standardFitting = isStandardFitting();
+  for (const field of document.querySelectorAll("[data-transition-field], [data-tee-field], [data-standard-fitting-field]")) {
+    const active = field.hasAttribute(tee ? "data-tee-field" : standardFitting ? "data-standard-fitting-field" : "data-transition-field");
     field.hidden = !active;
     for (const control of field.querySelectorAll("input, select")) control.disabled = !active;
   }
-  byId("transition-results-panel").hidden = tee || elbow;
+  const fitting = selectedKind();
+  const constantFitting = ["inlet-bell", "inlet-square", "inlet-projecting", "outlet-reservoir"].includes(fitting);
+  const nominalField = byId("fitting-nominal").closest("[data-standard-fitting-field]");
+  nominalField.hidden = !standardFitting || constantFitting;
+  byId("fitting-nominal").disabled = !standardFitting || constantFitting;
+  byId("transition-results-panel").hidden = tee || standardFitting;
   byId("tee-results-panel").hidden = !tee;
-  byId("elbow-results-panel").hidden = !elbow;
+  byId("fitting-results-panel").hidden = !standardFitting;
   byId("flow-label").textContent = tee ? "共同管口總流量 Q（m³/h）" : "實際體積流量 Q（m³/h）";
   byId("flow-hint").textContent = tee
     ? (selectedKind() === "tee-dividing" ? "共同管口為入口，請輸入入口總流量。" : "共同管口為出口，請輸入出口總流量。")
@@ -40,8 +45,10 @@ function draw() {
     byId("velocity-basis").textContent = "三管口等內徑；K 以共同管口總流量對應的流速為基準，為保守上限估算。";
     return;
   }
-  if (elbow) {
-    byId("velocity-basis").textContent = "螺紋鋼管彎頭；K 依彎頭角度及公稱管徑選取，並以實際管內平均流速為基準。";
+  if (standardFitting) {
+    byId("velocity-basis").textContent = constantFitting
+      ? "入口或出口損失以該管口平均流速為基準；排入大型槽體採出口速度水頭全部耗散。"
+      : "ASHRAE 表列螺紋鋼管管件；K 依型式及公稱管徑選取，並以實際管內平均流速為基準。";
     return;
   }
   const expansion = selectedKind() === "expansion";
@@ -101,21 +108,41 @@ document.querySelector(".component-choices").addEventListener("change", () => {
     || (selectedKind() === "contraction" && upstream.valueAsNumber < downstream.valueAsNumber)) {
     [upstream.value, downstream.value] = [downstream.value, upstream.value];
   }
-  draw();
+  if (isStandardFitting()) updateFittingSelection();
+  else draw();
   reset();
 });
-function updateElbowDiameter() {
-  const diameter = byId("elbow-diameter");
-  const schedule = byId("elbow-schedule").value;
+function updateFittingDiameter() {
+  const diameter = byId("fitting-diameter");
+  const schedule = byId("fitting-schedule").value;
   const custom = schedule === "custom";
   diameter.readOnly = !custom;
-  diameter.value = custom ? "" : steelPipeInsideDiameter(byId("elbow-nominal").value, schedule);
-  byId("elbow-diameter-hint").textContent = custom
+  diameter.value = custom ? "" : steelPipeInsideDiameter(byId("fitting-nominal").value, schedule);
+  byId("fitting-diameter-hint").textContent = custom
     ? "請輸入與所選公稱尺寸相符的實際內徑。"
-    : "依公稱管徑與 Schedule 帶入名義內徑；請核對實際管材。";
+    : "依公稱管徑與 Schedule 帶入參考內徑；請核對實際管材。";
 }
-byId("elbow-nominal").addEventListener("change", updateElbowDiameter);
-byId("elbow-schedule").addEventListener("change", updateElbowDiameter);
+function updateFittingSelection() {
+  const fitting = selectedKind();
+  const nominal = byId("fitting-nominal");
+  for (const option of nominal.options) {
+    try {
+      standardFittingCoefficient(fitting, option.value);
+      option.disabled = false;
+    } catch (error) {
+      if (!(error instanceof RangeError)) throw error;
+      option.disabled = true;
+    }
+  }
+  if (nominal.selectedOptions[0].disabled) {
+    nominal.value = [...nominal.options].find((option) => !option.disabled)?.value ?? "";
+  }
+  updateFittingDiameter();
+  draw();
+  reset();
+}
+byId("fitting-nominal").addEventListener("change", () => { updateFittingDiameter(); reset(); });
+byId("fitting-schedule").addEventListener("change", () => { updateFittingDiameter(); reset(); });
 form.addEventListener("input", reset);
 form.addEventListener("change", reset);
 form.addEventListener("invalid", () => {
@@ -126,16 +153,16 @@ form.addEventListener("submit", (event) => {
   event.preventDefault();
   reset();
   try {
-    if (isElbow()) {
-      const result = calculateElbowLoss({
-        kind: selectedKind(),
-        nominalMm: byId("elbow-nominal").value,
-        diameterMm: byId("elbow-diameter").valueAsNumber,
+    if (isStandardFitting()) {
+      const result = calculateStandardFittingLoss({
+        fitting: selectedKind(),
+        nominalMm: byId("fitting-nominal").value,
+        diameterMm: byId("fitting-diameter").valueAsNumber,
         flowM3h: byId("flow").valueAsNumber,
         density: byId("density").valueAsNumber,
       });
       for (const [id, key] of [["k", "coefficient"], ["velocity", "velocity"], ["head", "head"], ["pressure", "pressureLoss"]]) {
-        byId(`elbow-${id}-result`).textContent = format.format(result[key]);
+        byId(`fitting-${id}-result`).textContent = format.format(result[key]);
       }
       byId("status").textContent = "計算完成。";
       return;
@@ -188,5 +215,4 @@ form.addEventListener("submit", (event) => {
     byId("status").textContent = "計算未完成，請檢查條件。";
   }
 });
-updateElbowDiameter();
 draw();
