@@ -153,7 +153,7 @@
       <iframe class="pdf-frame" title="技師考題 PDF 預覽"></iframe>
       <p class="pdf-fallback">若此瀏覽器無法顯示內嵌 PDF，請<a data-open target="_blank" rel="noopener">在新分頁開啟考題 PDF</a>，或<a data-download>下載 PDF</a>。</p>
     </section>
-    <section class="reference-answers" data-reference-answers hidden aria-labelledby="reference-answers-title">
+    <section class="reference-answers" data-reference-answers data-answer-subject="refrigeration" hidden aria-labelledby="reference-answers-title">
       <h2 id="reference-answers-title">參考答案</h2>
       <details class="answer-item">
         <summary>第一題</summary>
@@ -432,6 +432,7 @@
         </div>
         <button class="answer-collapse" type="button">收起答案</button>
       </details>
+
       <details class="answer-item">
         <summary>第三題</summary>
         <div class="answer-content">
@@ -537,6 +538,7 @@
         </div>
         <button class="answer-collapse" type="button">收起答案</button>
       </details>
+
       <details class="answer-item">
         <summary>第四題</summary>
         <div class="answer-content">
@@ -645,6 +647,388 @@
         </div>
         <button class="answer-collapse" type="button">收起答案</button>
       </details>
+
+    </section>
+    <section class="reference-answers" data-reference-answers data-answer-subject="thermodynamics" hidden aria-labelledby="thermodynamics-reference-answers-title">
+      <h2 id="thermodynamics-reference-answers-title">參考答案</h2>
+      <details class="answer-item">
+        <summary>第一題</summary>
+        <div class="answer-content">
+          <div class="answer-step">
+            <h3>1. 已知（Known）</h3>
+            <ul class="answer-list">
+              <li>氫氣（H<sub>2</sub>）作卡諾熱機，熱效率 η = 0.60。</li>
+              <li>低溫熱源溫度 T<sub>L</sub> = 300 K。</li>
+              <li>低溫放熱過程中，氫氣壓力由 90 kPa 升至 120 kPa。</li>
+              <li>以理想氣體、可逆卡諾循環分析；求每單位質量的高溫吸熱、低溫放熱及淨循環功。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>2. 求（Find）</h3>
+            <ul class="answer-list">
+              <li>高溫等溫吸熱量 q<sub>H,in</sub>（kJ/kg）。</li>
+              <li>低溫等溫放熱量 q<sub>L,out</sub>（kJ/kg）。</li>
+              <li>淨循環輸出功 w<sub>net,out</sub>（kJ/kg）。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>3. 示意圖（Schematic）</h3>
+            <figure class="answer-schematic">
+              <svg viewBox="0 0 640 330" role="img" aria-labelledby="hydrogen-carnot-title hydrogen-carnot-desc">
+                <title id="hydrogen-carnot-title">氫氣卡諾熱機 P-v 示意圖</title>
+                <desc id="hydrogen-carnot-desc">1 到 2 為高溫等溫吸熱膨脹，2 到 3 為絕熱膨脹，3 到 4 為低溫等溫放熱壓縮，4 到 1 為絕熱壓縮。</desc>
+                <defs>
+                  <marker id="hydrogen-carnot-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0 0 L8 4 L0 8 Z" fill="#287b9b"></path>
+                  </marker>
+                  <marker id="hydrogen-heat-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0 0 L8 4 L0 8 Z" fill="#bd7628"></path>
+                  </marker>
+                </defs>
+                <path class="work" d="M78 274 V46 M78 274 H576"></path>
+                <text class="label" x="48" y="58">P</text><text class="label" x="580" y="282">v</text>
+                <path class="flow refrigerant-flow" d="M150 82 C240 82 360 104 490 142" marker-end="url(#hydrogen-carnot-arrow)"></path>
+                <path class="flow refrigerant-flow" d="M490 142 C470 190 420 237 356 247" marker-end="url(#hydrogen-carnot-arrow)"></path>
+                <path class="flow refrigerant-flow" d="M356 247 C285 227 220 204 178 185" marker-end="url(#hydrogen-carnot-arrow)"></path>
+                <path class="flow refrigerant-flow" d="M178 185 C153 155 145 117 150 82" marker-end="url(#hydrogen-carnot-arrow)"></path>
+                <circle cx="150" cy="82" r="4" fill="var(--green)"></circle><text class="label" x="128" y="72">1</text>
+                <circle cx="490" cy="142" r="4" fill="var(--green)"></circle><text class="label" x="500" y="146">2</text>
+                <circle cx="356" cy="247" r="4" fill="var(--green)"></circle><text class="label" x="363" y="263">3</text>
+                <circle cx="178" cy="185" r="4" fill="var(--green)"></circle><text class="label" x="158" y="204">4</text>
+                <text class="minor-label" x="268" y="83">T<tspan baseline-shift="sub">H</tspan> 等溫吸熱</text>
+                <text class="minor-label" x="260" y="242">T<tspan baseline-shift="sub">L</tspan> 等溫放熱</text>
+                <path d="M286 48 V75" fill="none" stroke="#bd7628" stroke-width="2.4" marker-end="url(#hydrogen-heat-arrow)"></path>
+                <text class="minor-label" x="300" y="58">q<tspan baseline-shift="sub">H,in</tspan></text>
+                <path d="M286 215 V263" fill="none" stroke="#bd7628" stroke-width="2.4" marker-end="url(#hydrogen-heat-arrow)"></path>
+                <text class="minor-label" x="300" y="225">q<tspan baseline-shift="sub">L,out</tspan></text>
+              </svg>
+              <figcaption>循環方向 1 → 2 → 3 → 4 → 1；題給 90 kPa → 120 kPa 為低溫放熱壓縮段 3 → 4。</figcaption>
+            </figure>
+          </div>
+          <div class="answer-step">
+            <h3>4. 假設（Assumptions）</h3>
+            <ul class="answer-list">
+              <li>氫氣視為理想氣體；卡諾循環四個過程均可逆。</li>
+              <li>卡諾循環的放熱過程為低溫等溫壓縮，因此題目所給壓力由 90 kPa 升至 120 kPa，視為該等溫過程的初、末壓力。</li>
+              <li>熱量以正的大小表示：q<sub>H,in</sub> 為輸入循環的熱，q<sub>L,out</sub> 為排出循環的熱；淨功正值代表熱機輸出功。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>5. 物性（Properties）</h3>
+            <p>氫氣比氣體常數由通用氣體常數與氫氣摩爾質量求得，採 R<sub>u</sub> = 8.314462618 kJ/(kmol·K)、M<sub>H₂</sub> = 2.01588 kg/kmol：</p>
+            <math class="answer-equation-display" display="block" aria-label="氫氣比氣體常數等於8.314462618除以2.01588，約為4.12448千焦每公斤開爾文">
+              <mrow><msub><mi>R</mi><mi>H₂</mi></msub><mo>=</mo><mfrac><msub><mi>R</mi><mi>u</mi></msub><msub><mi>M</mi><mi>H₂</mi></msub></mfrac><mo>=</mo><mfrac><mn>8.314462618</mn><mn>2.01588</mn></mfrac><mo>≈</mo><mn>4.12448</mn><mspace width=".3em"/><mfrac><mtext>kJ</mtext><mrow><mtext>kg·K</mtext></mrow></mfrac></mrow>
+            </math>
+          </div>
+          <div class="answer-step">
+            <h3>6. 分析（Analysis）</h3>
+            <p>先由卡諾熱效率求高溫熱源溫度：</p>
+            <math class="answer-equation-display" display="block" aria-label="卡諾熱效率等於一減低溫除以高溫，因此高溫等於300除以0.4等於750開爾文">
+              <mrow><mi>η</mi><mo>=</mo><mn>1</mn><mo>−</mo><mfrac><msub><mi>T</mi><mi>L</mi></msub><msub><mi>T</mi><mi>H</mi></msub></mfrac><mo>;</mo><mspace width=".6em"/><msub><mi>T</mi><mi>H</mi></msub><mo>=</mo><mfrac><msub><mi>T</mi><mi>L</mi></msub><mrow><mn>1</mn><mo>−</mo><mi>η</mi></mrow></mfrac><mo>=</mo><mfrac><mn>300</mn><mn>0.40</mn></mfrac><mo>=</mo><mn>750</mn><mspace width=".3em"/><mi mathvariant="normal">K</mi></mrow>
+            </math>
+            <p>低溫放熱段為等溫過程。理想氣體等溫時 Δu = 0，故排熱量大小等於壓縮功輸入大小；由 p v = R T 可得：</p>
+            <math class="answer-equation-display" display="block" aria-label="低溫排熱量等於氫氣氣體常數乘低溫乘壓力末值除以初值的自然對數，約355.962千焦每公斤">
+              <mrow><msub><mi>q</mi><mrow><mi>L</mi><mo>,</mo><mi>out</mi></mrow></msub><mo>=</mo><msub><mi>R</mi><mi>H₂</mi></msub><msub><mi>T</mi><mi>L</mi></msub><mi mathvariant="normal">ln</mi><mo>(</mo><mfrac><msub><mi>p</mi><mn>4</mn></msub><msub><mi>p</mi><mn>3</mn></msub></mfrac><mo>)</mo><mo>=</mo><mn>4.12448</mn><mo>×</mo><mn>300</mn><mo>×</mo><mi mathvariant="normal">ln</mi><mo>(</mo><mfrac><mn>120</mn><mn>90</mn></mfrac><mo>)</mo><mo>≈</mo><mn>355.962</mn><mspace width=".3em"/><mfrac><mtext>kJ</mtext><mtext>kg</mtext></mfrac></mrow>
+            </math>
+            <p>可逆卡諾循環滿足 q<sub>L,out</sub>/q<sub>H,in</sub> = T<sub>L</sub>/T<sub>H</sub> = 0.40；亦即 q<sub>L,out</sub> = (1 − η)q<sub>H,in</sub>。因此：</p>
+            <math class="answer-equation-display" display="block" aria-label="高溫吸熱等於355.962除以0.4，約889.905千焦每公斤">
+              <mrow><msub><mi>q</mi><mrow><mi>H</mi><mo>,</mo><mi>in</mi></mrow></msub><mo>=</mo><mfrac><msub><mi>q</mi><mrow><mi>L</mi><mo>,</mo><mi>out</mi></mrow></msub><mrow><mn>1</mn><mo>−</mo><mi>η</mi></mrow></mfrac><mo>=</mo><mfrac><mn>355.962</mn><mn>0.40</mn></mfrac><mo>≈</mo><mn>889.905</mn><mspace width=".3em"/><mfrac><mtext>kJ</mtext><mtext>kg</mtext></mfrac></mrow>
+            </math>
+            <p>每循環淨輸出功為吸熱與放熱量之差：</p>
+            <math class="answer-equation-display" display="block" aria-label="淨循環輸出功等於889.905減355.962，約533.943千焦每公斤">
+              <mrow><msub><mi>w</mi><mrow><mi>net</mi><mo>,</mo><mi>out</mi></mrow></msub><mo>=</mo><msub><mi>q</mi><mrow><mi>H</mi><mo>,</mo><mi>in</mi></mrow></msub><mo>−</mo><msub><mi>q</mi><mrow><mi>L</mi><mo>,</mo><mi>out</mi></mrow></msub><mo>=</mo><mn>889.905</mn><mo>−</mo><mn>355.962</mn><mo>≈</mo><mn>533.943</mn><mspace width=".3em"/><mfrac><mtext>kJ</mtext><mtext>kg</mtext></mfrac></mrow>
+            </math>
+            <p><strong>答案：T<sub>H</sub> = 750 K；高溫吸熱約 889.9 kJ/kg；低溫放熱約 356.0 kJ/kg；淨循環輸出功約 533.9 kJ/kg。</strong></p>
+          </div>
+          <div class="answer-step">
+            <h3>7. 討論（Comments）</h3>
+            <p>能量平衡為 q<sub>H,in</sub> = q<sub>L,out</sub> + w<sub>net,out</sub>；代入後 889.905 ≈ 355.962 + 533.943 kJ/kg。效率亦符合 w<sub>net,out</sub>/q<sub>H,in</sub> ≈ 0.600。</p>
+            <p class="answer-note">低溫段若採「熱量進入系統為正」的符號慣例，則 q<sub>L</sub> = −355.962 kJ/kg；上列 q<sub>L,out</sub> 是排熱量的正值大小。題目未提供偏離理想氣體的修正資料，故採工程上常用的理想氣體模型。</p>
+          </div>
+          <div class="answer-step">
+            <p><strong>參考資料</strong></p>
+            <ul class="answer-list">
+              <li><a href="assets/exam-questions/114180_0607_熱力學與熱傳學.pdf">114 年專技高考熱力學與熱傳學試題 PDF</a>，第一題。</li>
+              <li><a href="https://physics.nist.gov/cgi-bin/cuu/Value?r">NIST CODATA：通用氣體常數 R<sub>u</sub></a>；氫氣摩爾質量採 M<sub>H₂</sub> = 2.01588 kg/kmol。</li>
+            </ul>
+          </div>
+        </div>
+        <button class="answer-collapse" type="button">收起答案</button>
+      </details>
+      <details class="answer-item">
+        <summary>第二題</summary>
+        <div class="answer-content">
+          <div class="answer-step">
+            <h3>1. 已知（Known）</h3>
+            <ul class="answer-list">
+              <li>空氣質量 m = 1 kg，初始壓力 p<sub>1</sub> = 1.5 MPa，初始溫度 T = 1000 K。</li>
+              <li>活塞可自由移動，空氣經可逆等溫膨脹，末壓力為初壓力的 1/5，因此 p<sub>2</sub> = 0.3 MPa。</li>
+              <li>以空氣為理想氣體，採 R = 0.287 kJ/(kg·K)；求空氣熵變 ΔS 及此過程熱傳 Q。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>2. 求（Find）</h3>
+            <ul class="answer-list">
+              <li>系統熵變 ΔS（kJ/K）。</li>
+              <li>傳入空氣的熱量 Q（kJ）；若熱由系統流出，則 Q 為負。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>3. 示意圖（Schematic）</h3>
+            <figure class="answer-schematic">
+              <svg viewBox="0 0 640 230" role="img" aria-labelledby="thermo-second-title thermo-second-desc">
+                <title id="thermo-second-title">空氣在可逆等溫活塞汽缸中膨脹示意圖</title>
+                <desc id="thermo-second-desc">初態空氣在 1.5 MPa、1000 K 下，準靜態推動自由活塞，等溫膨脹至 0.3 MPa，體積增加五倍並吸收熱量。</desc>
+                <defs>
+                  <marker id="thermo-second-work-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0 0 L8 4 L0 8 Z" fill="#287b9b"></path>
+                  </marker>
+                  <marker id="thermo-second-heat-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0 0 L8 4 L0 8 Z" fill="#bd7628"></path>
+                  </marker>
+                </defs>
+                <path d="M154 50 V190 H476 V50" fill="none" stroke="var(--ink)" stroke-width="2.4"></path>
+                <path d="M158 122 H472" fill="none" stroke="var(--ink)" stroke-width="5"></path>
+                <path d="M248 122 V190 H472 V122 Z" fill="#dcecf2" opacity=".8"></path>
+                <path d="M316 116 V70" fill="none" stroke="#287b9b" stroke-width="2.4" marker-end="url(#thermo-second-work-arrow)"></path>
+                <path d="M280 190 V216 M350 190 V216" fill="none" stroke="#bd7628" stroke-width="2.4" marker-end="url(#thermo-second-heat-arrow)"></path>
+                <text class="minor-label" x="195" y="106">活塞</text>
+                <text class="minor-label" x="253" y="159">空氣，T = 1000 K</text>
+                <text class="minor-label" x="220" y="46">準靜態膨脹，V₂ = 5V₁</text>
+                <text class="minor-label" x="170" y="213">Q 進入系統</text>
+                <text class="minor-label" x="489" y="143">初態 p₁ = 1.5 MPa</text>
+                <text class="minor-label" x="489" y="164">末態 p₂ = 0.3 MPa</text>
+              </svg>
+              <figcaption>活塞膨脹時空氣對外作功；等溫理想氣體內能不變，故必須吸熱補充其作功。</figcaption>
+            </figure>
+          </div>
+          <div class="answer-step">
+            <h3>4. 假設（Assumptions）</h3>
+            <ul class="answer-list">
+              <li>空氣視為定比熱理想氣體，過程可逆且溫度維持 1000 K。</li>
+              <li>自由活動的活塞作準靜態移動；忽略汽缸與活塞摩擦、動能及位能變化。</li>
+              <li>熵變以系統（1 kg 空氣）為基準，Q 以熱進入系統為正，W 以系統對外作功為正。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>5. 物性（Properties）</h3>
+            <p>理想氣體狀態方程式給出初、末比體積。等溫時 pV = 常數，因此壓力降為五分之一表示體積增加五倍：</p>
+            <math class="answer-equation-display" display="block" aria-label="初始比體積等於氣體常數乘溫度除以壓力，等於0.19133立方公尺每公斤；末態體積為初態五倍，等於0.95667立方公尺每公斤">
+              <mrow><msub><mi>v</mi><mn>1</mn></msub><mo>=</mo><mfrac><mrow><mi>R</mi><mi>T</mi></mrow><msub><mi>p</mi><mn>1</mn></msub></mfrac><mo>=</mo><mfrac><mrow><mn>0.287</mn><mo>×</mo><mn>1000</mn></mrow><mn>1500</mn></mfrac><mo>≈</mo><mn>0.19133</mn><mspace width=".2em"/><msup><mi mathvariant="normal">m</mi><mn>3</mn></msup><mo>/</mo><mtext>kg</mtext><mo>;</mo><mspace width=".4em"/><msub><mi>v</mi><mn>2</mn></msub><mo>=</mo><mn>5</mn><msub><mi>v</mi><mn>1</mn></msub><mo>≈</mo><mn>0.95667</mn><mspace width=".2em"/><msup><mi mathvariant="normal">m</mi><mn>3</mn></msup><mo>/</mo><mtext>kg</mtext></mrow>
+            </math>
+          </div>
+          <div class="answer-step">
+            <h3>6. 分析（Analysis）</h3>
+            <p>理想氣體熵變式在等溫過程可化為 ΔS = mR ln(V<sub>2</sub>/V<sub>1</sub>) = mR ln(p<sub>1</sub>/p<sub>2</sub>)：</p>
+            <math class="answer-equation-display" display="block" aria-label="空氣熵變等於質量乘氣體常數乘末壓力除以初壓力的自然對數，等於0.46191千焦每開爾文">
+              <mrow><mi>Δ</mi><mi>S</mi><mo>=</mo><mi>m</mi><mi>R</mi><mi mathvariant="normal">ln</mi><mo>(</mo><mfrac><msub><mi>p</mi><mn>1</mn></msub><msub><mi>p</mi><mn>2</mn></msub></mfrac><mo>)</mo><mo>=</mo><mn>1</mn><mo>×</mo><mn>0.287</mn><mi mathvariant="normal">ln</mi><mo>(</mo><mfrac><mn>1.5</mn><mn>0.3</mn></mfrac><mo>)</mo><mo>≈</mo><mn>0.46191</mn><mspace width=".3em"/><mfrac><mtext>kJ</mtext><mtext>K</mtext></mfrac></mrow>
+            </math>
+            <p>可逆過程的系統熵變滿足 ΔS = ∫δQ<sub>rev</sub>/T。由溫度固定，熱量可直接由熵變乘絕對溫度求得；亦可由第一定律驗算，因理想氣體等溫時 ΔU = 0，故 Q = W：</p>
+            <math class="answer-equation-display" display="block" aria-label="傳入空氣的熱量等於溫度乘系統熵變，等於1000乘0.46191，約461.91千焦">
+              <mrow><mi>Q</mi><mo>=</mo><mi>T</mi><mi>Δ</mi><mi>S</mi><mo>=</mo><mn>1000</mn><mo>×</mo><mn>0.46191</mn><mo>≈</mo><mn>461.91</mn><mspace width=".3em"/><mtext>kJ</mtext></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="第一定律驗算：熱量等於內能變化加作功；等溫理想氣體內能變化為零，作功等於質量乘氣體常數乘溫度乘自然對數五，約461.91千焦">
+              <mrow><mi>Q</mi><mo>=</mo><mi>Δ</mi><mi>U</mi><mo>+</mo><mi>W</mi><mo>=</mo><mi>W</mi><mo>=</mo><mi>m</mi><mi>R</mi><mi>T</mi><mi mathvariant="normal">ln</mi><mo>(</mo><mfrac><msub><mi>V</mi><mn>2</mn></msub><msub><mi>V</mi><mn>1</mn></msub></mfrac><mo>)</mo><mo>=</mo><mn>1</mn><mo>×</mo><mn>0.287</mn><mo>×</mo><mn>1000</mn><mi mathvariant="normal">ln</mi><mo>(</mo><mn>5</mn><mo>)</mo><mo>≈</mo><mn>461.91</mn><mspace width=".3em"/><mtext>kJ</mtext></mrow>
+            </math>
+            <p><strong>答案：空氣熵變 ΔS ≈ +0.4619 kJ/K；傳入空氣的熱量 Q ≈ +461.9 kJ。</strong></p>
+          </div>
+          <div class="answer-step">
+            <h3>7. 討論（Comments）</h3>
+            <p>壓力降低五倍、比體積增加五倍，熵變為正；氣體等溫膨脹對活塞作功，因 ΔU = 0，故吸收等量的熱。此為 1 kg 空氣的總熵變；比熵變為 Δs ≈ 0.4619 kJ/(kg·K)。</p>
+            <p class="answer-note">若採「對系統作功為正」的符號慣例，則功為 −461.9 kJ、Q 仍為 +461.9 kJ；此處採熱力學常用的系統對外作功為正。</p>
+          </div>
+          <div class="answer-step">
+            <p><strong>參考資料</strong></p>
+            <ul class="answer-list">
+              <li><a href="assets/exam-questions/114180_0607_熱力學與熱傳學.pdf">114 年專技高考熱力學與熱傳學試題 PDF</a>，第二題。</li>
+            </ul>
+          </div>
+        </div>
+        <button class="answer-collapse" type="button">收起答案</button>
+      </details>
+      <details class="answer-item">
+        <summary>第三題</summary>
+        <div class="answer-content">
+          <div class="answer-step">
+            <h3>1. 已知（Known）</h3>
+            <ul class="answer-list">
+              <li>不鏽鋼圓柱直徑 D = 4 cm = 0.040 m，密度 ρ = 7832 kg/m³，熱傳導係數 k = 68.9 W/(m·K)。</li>
+              <li>初始溫度 T<sub>i</sub> = 850°C，水槽溫度 T<sub>∞</sub> = 50°C，對流熱傳係數 h = 600 W/(m²·K)，冷卻時間 t = 40 s。</li>
+              <li>題目 PDF 所列定壓比熱為 434 kJ/(kg·°C)；此單位疑為誤植，以下先依不鏽鋼常用值 434 J/(kg·K) 計算，並另列照 PDF 字面單位的結果。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>2. 求（Find）</h3>
+            <p>圓柱冷卻 40 s 後的溫度 T(40 s)。</p>
+          </div>
+          <div class="answer-step">
+            <h3>3. 示意圖（Schematic）</h3>
+            <figure class="answer-schematic">
+              <svg viewBox="0 0 640 210" role="img" aria-labelledby="thermo-third-title thermo-third-desc">
+                <title id="thermo-third-title">不鏽鋼圓柱在水槽中冷卻示意圖</title>
+                <desc id="thermo-third-desc">初始溫度 850°C 的不鏽鋼圓柱浸入 50°C 水槽，表面以對流熱傳係數 600 瓦每平方公尺開爾文向水槽放熱。</desc>
+                <defs>
+                  <marker id="thermo-third-heat-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0 0 L8 4 L0 8 Z" fill="#bd7628"></path>
+                  </marker>
+                </defs>
+                <path d="M54 76 V176 H586 V76" fill="none" stroke="var(--ink)" stroke-width="2.4"></path>
+                <path d="M56 102 Q90 94 124 102 T192 102 T260 102 T328 102 T396 102 T464 102 T532 102 T584 102 V174 H56 Z" fill="#dcecf2" stroke="none"></path>
+                <ellipse cx="320" cy="106" rx="112" ry="25" class="equipment"></ellipse>
+                <path d="M208 106 V145 C208 159 258 171 320 171 C382 171 432 159 432 145 V106" class="equipment"></path>
+                <ellipse cx="320" cy="145" rx="112" ry="26" fill="var(--surface)" stroke="var(--ink)" stroke-width="2.2"></ellipse>
+                <path d="M177 129 H127 M463 129 H513" fill="none" stroke="#bd7628" stroke-width="2.4" marker-end="url(#thermo-third-heat-arrow)"></path>
+                <text class="minor-label" x="257" y="52">不鏽鋼圓柱</text>
+                <text class="minor-label" x="247" y="126">T<tspan baseline-shift="sub">i</tspan> = 850°C</text>
+                <text class="minor-label" x="75" y="84">水槽 T<tspan baseline-shift="sub">∞</tspan> = 50°C</text>
+                <text class="minor-label" x="196" y="198">h = 600 W/(m²·K)，D = 40 mm</text>
+              </svg>
+              <figcaption>圓柱向水槽放熱；以 Biot 數檢查後，採集總容量法估算其溫度隨時間變化。</figcaption>
+            </figure>
+          </div>
+          <div class="answer-step">
+            <h3>4. 假設（Assumptions）</h3>
+            <ul class="answer-list">
+              <li>圓柱足夠長，忽略兩端面散熱；側表面積與體積比為 A<sub>s</sub>/V = 4/D，因此特徵長度 L<sub>c</sub> = V/A<sub>s</sub> = D/4。</li>
+              <li>圓柱內部溫度均勻，採集總容量法；水槽溫度及 h 保持不變，忽略輻射與水槽升溫。</li>
+              <li>以 c<sub>p</sub> = 434 J/(kg·K) 作主要計算，將題目所列 kJ 單位視為誤植；若完全照其字面單位，另列結果供比對。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>5. 物性（Properties）</h3>
+            <p>圓柱特徵長度及 Biot 數為：</p>
+            <math class="answer-equation-display" display="block" aria-label="長圓柱特徵長度等於體積除以側表面積等於直徑除以4等於0.010公尺">
+              <mrow><msub><mi>L</mi><mi>c</mi></msub><mo>=</mo><mfrac><mi>V</mi><msub><mi>A</mi><mi>s</mi></msub></mfrac><mo>=</mo><mfrac><mi>D</mi><mn>4</mn></mfrac><mo>=</mo><mfrac><mn>0.040</mn><mn>4</mn></mfrac><mo>=</mo><mn>0.010</mn><mspace width=".3em"/><mtext>m</mtext></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="Biot數等於對流熱傳係數乘特徵長度除以熱傳導係數等於0.0871，小於0.1">
+              <mrow><mi>Bi</mi><mo>=</mo><mfrac><mrow><mi>h</mi><msub><mi>L</mi><mi>c</mi></msub></mrow><mi>k</mi></mfrac><mo>=</mo><mfrac><mrow><mn>600</mn><mo>×</mo><mn>0.010</mn></mrow><mn>68.9</mn></mfrac><mo>≈</mo><mn>0.0871</mn><mo>&lt;</mo><mn>0.1</mn></mrow>
+            </math>
+            <p>Biot 數小於 0.1，內部導熱阻相對較小，符合採用集總容量法的常用判準。</p>
+          </div>
+          <div class="answer-step">
+            <h3>6. 分析（Analysis）</h3>
+            <p>對圓柱作非穩態能量平衡，蓄熱速率等於表面對流放熱速率：</p>
+            <math class="answer-equation-display" display="block" aria-label="密度乘體積乘比熱乘溫度對時間微分，等於負的對流熱傳係數乘表面積乘圓柱與水槽的溫差">
+              <mrow><mi>ρ</mi><mi>V</mi><msub><mi>c</mi><mi>p</mi></msub><mfrac><mrow><mi mathvariant="normal">d</mi><mi>T</mi></mrow><mrow><mi mathvariant="normal">d</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mo>−</mo><mi>h</mi><msub><mi>A</mi><mi>s</mi></msub><mo>(</mo><mi>T</mi><mo>−</mo><msub><mi>T</mi><mi>∞</mi></msub><mo>)</mo></mrow>
+            </math>
+            <p>分離變數並由初始溫度 T<sub>i</sub> 積分至時間 t，可得集總容量法的暫態解；再用 A<sub>s</sub>/V = 1/L<sub>c</sub> 改寫：</p>
+            <math class="answer-equation-display" display="block" aria-label="溫度減水槽溫度除以初溫減水槽溫度，等於指數負的對流係數乘表面積除以密度體積比熱乘時間，也等於指數負的對流係數除以密度比熱特徵長度乘時間">
+              <mrow><mfrac><mrow><mi>T</mi><mo>−</mo><msub><mi>T</mi><mi>∞</mi></msub></mrow><mrow><msub><mi>T</mi><mi>i</mi></msub><mo>−</mo><msub><mi>T</mi><mi>∞</mi></msub></mrow></mfrac><mo>=</mo><msup><mi>e</mi><mrow><mo>−</mo><mfrac><mrow><mi>h</mi><msub><mi>A</mi><mi>s</mi></msub><mi>t</mi></mrow><mrow><mi>ρ</mi><mi>V</mi><msub><mi>c</mi><mi>p</mi></msub></mrow></mfrac></mrow></msup><mo>=</mo><msup><mi>e</mi><mrow><mo>−</mo><mfrac><mrow><mi>h</mi><mi>t</mi></mrow><mrow><mi>ρ</mi><msub><mi>c</mi><mi>p</mi></msub><msub><mi>L</mi><mi>c</mi></msub></mrow></mfrac></mrow></msup></mrow>
+            </math>
+            <p>代入 c<sub>p</sub> = 434 J/(kg·K) 及 t = 40 s：</p>
+            <math class="answer-equation-display" display="block" aria-label="40秒後溫度等於50加上850減50乘以指數負600乘40除以7832乘434乘0.010，約444.9攝氏度">
+              <mrow><mi>T</mi><mo>(</mo><mn>40</mn><mo>)</mo><mo>=</mo><mn>50</mn><mo>+</mo><mo>(</mo><mn>850</mn><mo>−</mo><mn>50</mn><mo>)</mo><msup><mi>e</mi><mrow><mo>−</mo><mfrac><mrow><mn>600</mn><mo>×</mo><mn>40</mn></mrow><mrow><mn>7832</mn><mo>×</mo><mn>434</mn><mo>×</mo><mn>0.010</mn></mrow></mfrac></mrow></msup><mo>≈</mo><mn>444.9</mn><mspace width=".3em"/><mi mathvariant="normal">°C</mi></mrow>
+            </math>
+            <p><strong>答案：依 c<sub>p</sub> = 434 J/(kg·K) 計，40 秒後圓柱溫度約為 444.9°C。</strong></p>
+          </div>
+          <div class="answer-step">
+            <h3>7. 討論（Comments）</h3>
+            <p>題目 PDF 的比熱單位寫作 434 kJ/(kg·°C)，但不鏽鋼常用比熱約為 434 J/(kg·K)，故此處將 kJ 視為單位誤植。若照 PDF 字面採 434 kJ/(kg·K)，同一集總模型會得到 T(40 s) ≈ 849.4°C；比熱相差 1000 倍會顯著改變答案，宜以原始試題或命題單位確認。</p>
+            <p class="answer-note">本題未提供圓柱長度，故以長圓柱模型忽略端面散熱。Bi ≈ 0.087 已接近 0.1 判準，集總法為合理近似；若要求更精確的局部溫度分布，需再使用有限長度幾何資料及非穩態導熱解。</p>
+          </div>
+          <div class="answer-step">
+            <p><strong>參考資料</strong></p>
+            <ul class="answer-list">
+              <li><a href="assets/exam-questions/114180_0607_熱力學與熱傳學.pdf">114 年專技高考熱力學與熱傳學試題 PDF</a>，第三題。</li>
+            </ul>
+          </div>
+        </div>
+        <button class="answer-collapse" type="button">收起答案</button>
+      </details>
+      <details class="answer-item">
+        <summary>第四題</summary>
+        <div class="answer-content">
+          <div class="answer-step">
+            <h3>1. 已知（Known）</h3>
+            <ul class="answer-list">
+              <li>水質量流率 ṁ = 2 kg/s，圓管內徑 D = 40 mm = 0.040 m。</li>
+              <li>水由 T<sub>in</sub> = 25°C 加熱至 T<sub>out</sub> = 75°C；管壁溫度 T<sub>s</sub> = 100°C。</li>
+              <li>C<sub>p</sub> = 4181 J/(kg·K)、μ = 547 × 10<sup>−6</sup> N·s/m²、k = 0.643 W/(m·K)、Pr = 3.56。</li>
+              <li>完全發展紊流，採 Dittus–Boelter 式 Nu<sub>D</sub> = 0.023 Re<sub>D</sub><sup>0.8</sup> Pr<sup>0.4</sup>。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>2. 求（Find）</h3>
+            <p>使管內水由 25°C 加熱至 75°C 所需的管長 L。</p>
+          </div>
+          <div class="answer-step">
+            <h3>3. 示意圖（Schematic）</h3>
+            <figure class="answer-schematic">
+              <svg viewBox="0 0 640 190" role="img" aria-labelledby="thermo-fourth-title thermo-fourth-desc">
+                <title id="thermo-fourth-title">定壁溫圓管內水流加熱示意圖</title>
+                <desc id="thermo-fourth-desc">水以每秒 2 公斤由 25°C 流入內徑 40 毫米的圓管，在 100°C 定溫管壁加熱後，以 75°C 流出。</desc>
+                <defs>
+                  <marker id="thermo-fourth-flow-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0 0 L8 4 L0 8 Z" fill="#287b9b"></path>
+                  </marker>
+                  <marker id="thermo-fourth-heat-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0 0 L8 4 L0 8 Z" fill="#bd7628"></path>
+                  </marker>
+                </defs>
+                <path class="work" d="M142 66 H500 M142 124 H500"></path>
+                <path class="flow refrigerant-flow" d="M64 95 H566" marker-end="url(#thermo-fourth-flow-arrow)"></path>
+                <path d="M235 28 V61 M330 28 V61 M425 28 V61" fill="none" stroke="#bd7628" stroke-width="2.4" marker-end="url(#thermo-fourth-heat-arrow)"></path>
+                <text class="minor-label" x="262" y="23">定壁溫 T<tspan baseline-shift="sub">s</tspan> = 100°C</text>
+                <text class="label" x="18" y="84">入口</text>
+                <text class="minor-label" x="18" y="151">25°C</text>
+                <text class="label" x="520" y="84">出口</text>
+                <text class="minor-label" x="523" y="151">75°C</text>
+                <text class="minor-label" x="228" y="160">ṁ = 2 kg/s，D = 40 mm</text>
+              </svg>
+              <figcaption>管壁維持 100°C，熱量由管壁傳入管內水流。</figcaption>
+            </figure>
+          </div>
+          <div class="answer-step">
+            <h3>4. 假設（Assumptions）</h3>
+            <ul class="answer-list">
+              <li>穩態流動，水的 C<sub>p</sub>、μ、k 與 Pr 採題目所給定值。</li>
+              <li>管壁溫度沿管長均勻維持 100°C；完全發展紊流下以 Dittus–Boelter 式計算之 h 視為常數。</li>
+              <li>忽略管外散熱與動能、位能變化；入口效應不另作修正。</li>
+            </ul>
+          </div>
+          <div class="answer-step">
+            <h3>5. 物性（Properties）</h3>
+            <p>由質量流率直接計算雷諾數，無須另假設水密度；Dittus–Boelter 式適用於本題紊流與水的 Pr 數範圍。</p>
+            <math class="answer-equation-display" display="block" aria-label="雷諾數等於四乘質量流率除以圓周率乘管內徑乘動力黏度，約116383.9">
+              <mrow><msub><mi>Re</mi><mi>D</mi></msub><mo>=</mo><mfrac><mrow><mn>4</mn><mi>ṁ</mi></mrow><mrow><mi>π</mi><mi>D</mi><mi>μ</mi></mrow></mfrac><mo>=</mo><mfrac><mrow><mn>4</mn><mo>×</mo><mn>2</mn></mrow><mrow><mi>π</mi><mo>×</mo><mn>0.040</mn><mo>×</mo><mn>547</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>6</mn></mrow></msup></mrow></mfrac><mo>≈</mo><mn>116384</mn></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="努塞爾數等於0.023乘雷諾數的0.8次方乘普朗特數的0.4次方，約431.54，故對流熱傳係數約6937瓦每平方公尺開爾文">
+              <mrow><msub><mi>Nu</mi><mi>D</mi></msub><mo>=</mo><mn>0.023</mn><msup><msub><mi>Re</mi><mi>D</mi></msub><mn>0.8</mn></msup><msup><mi>Pr</mi><mn>0.4</mn></msup><mo>≈</mo><mn>431.54</mn><mo>;</mo><mspace width=".4em"/><mi>h</mi><mo>=</mo><mfrac><mrow><msub><mi>Nu</mi><mi>D</mi></msub><mi>k</mi></mrow><mi>D</mi></mfrac><mo>≈</mo><mn>6937</mn><mspace width=".3em"/><mfrac><mtext>W</mtext><mrow><msup><mtext>m</mtext><mn>2</mn></msup><mo>·</mo><mtext>K</mtext></mrow></mfrac></mrow>
+            </math>
+          </div>
+          <div class="answer-step">
+            <h3>6. 分析（Analysis）</h3>
+            <p>整段管子的能量平衡先求出水流吸熱量。再取一小段管長 dx 作微分熱平衡：該段管壁傳給水的熱量等於水流的焓增加。</p>
+            <math class="answer-equation-display" display="block" aria-label="水流吸熱量等於質量流率乘比熱乘出口與入口溫差，等於418100瓦">
+              <mrow><mi>Q</mi><mo>=</mo><mi>ṁ</mi><msub><mi>C</mi><mi>p</mi></msub><mo>(</mo><msub><mi>T</mi><mi>out</mi></msub><mo>−</mo><msub><mi>T</mi><mi>in</mi></msub><mo>)</mo><mo>=</mo><mn>2</mn><mo>×</mo><mn>4181</mn><mo>×</mo><mo>(</mo><mn>75</mn><mo>−</mo><mn>25</mn><mo>)</mo><mo>=</mo><mn>418100</mn><mspace width=".3em"/><mtext>W</mtext></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="微分熱平衡：質量流率乘比熱乘水溫微分，等於對流熱傳係數乘圓周率乘管徑乘壁水溫差乘管長微分">
+              <mrow><mi>ṁ</mi><msub><mi>C</mi><mi>p</mi></msub><mi>d</mi><mi>T</mi><mo>=</mo><mi>h</mi><mi>π</mi><mi>D</mi><mo>(</mo><msub><mi>T</mi><mi>s</mi></msub><mo>−</mo><mi>T</mi><mo>)</mo><mi>d</mi><mi>x</mi></mrow>
+            </math>
+            <p>由入口 T<sub>in</sub> 積分至出口 T<sub>out</sub>，同時由 x = 0 積分至 x = L；因 h、T<sub>s</sub> 為常數，整理後可解出管長：</p>
+            <math class="answer-equation-display" display="block" aria-label="積分後：質量流率乘比熱乘壁溫與入口溫差除以壁溫與出口溫差的自然對數，等於對流熱傳係數乘圓周率乘管徑乘管長">
+              <mrow><mi>ṁ</mi><msub><mi>C</mi><mi>p</mi></msub><mi mathvariant="normal">ln</mi><mo>(</mo><mfrac><mrow><msub><mi>T</mi><mi>s</mi></msub><mo>−</mo><msub><mi>T</mi><mi>in</mi></msub></mrow><mrow><msub><mi>T</mi><mi>s</mi></msub><mo>−</mo><msub><mi>T</mi><mi>out</mi></msub></mrow></mfrac><mo>)</mo><mo>=</mo><mi>h</mi><mi>π</mi><mi>D</mi><mi>L</mi></mrow>
+            </math>
+            <math class="answer-equation-display" display="block" aria-label="管長等於質量流率乘比熱除以對流熱傳係數乘圓周率乘管內徑，再乘以壁溫與入口溫差除以壁溫與出口溫差的自然對數；代入數值後約10.538公尺">
+              <mrow><mi>L</mi><mo>=</mo><mfrac><mrow><mi>ṁ</mi><msub><mi>C</mi><mi>p</mi></msub></mrow><mrow><mi>h</mi><mi>π</mi><mi>D</mi></mrow></mfrac><mi mathvariant="normal">ln</mi><mo>(</mo><mfrac><mrow><msub><mi>T</mi><mi>s</mi></msub><mo>−</mo><msub><mi>T</mi><mi>in</mi></msub></mrow><mrow><msub><mi>T</mi><mi>s</mi></msub><mo>−</mo><msub><mi>T</mi><mi>out</mi></msub></mrow></mfrac><mo>)</mo><mo>=</mo><mfrac><mrow><mn>2</mn><mo>×</mo><mn>4181</mn></mrow><mrow><mn>6937</mn><mo>×</mo><mi>π</mi><mo>×</mo><mn>0.040</mn></mrow></mfrac><mi mathvariant="normal">ln</mi><mo>(</mo><mfrac><mrow><mn>100</mn><mo>−</mo><mn>25</mn></mrow><mrow><mn>100</mn><mo>−</mo><mn>75</mn></mrow></mfrac><mo>)</mo><mo>≈</mo><mn>10.54</mn><mspace width=".3em"/><mtext>m</mtext></mrow>
+            </math>
+            <p><strong>答案：所需管長約為 10.54 m。</strong></p>
+          </div>
+          <div class="answer-step">
+            <h3>7. 討論（Comments）</h3>
+            <p>由入口至出口的水溫均低於管壁溫度，熱傳方向一致為管壁至水流；計算所得 Re<sub>D</sub> ≈ 1.16 × 10<sup>5</sup>，符合紊流條件，故採題目指定的 Dittus–Boelter 關係式。</p>
+            <p class="answer-note">結果依題目指定的關聯式與常物性假設計算，未加入入口區或管外熱損失修正。</p>
+          </div>
+          <div class="answer-step">
+            <p><strong>參考資料</strong></p>
+            <ul class="answer-list">
+              <li><a href="assets/exam-questions/114180_0607_熱力學與熱傳學.pdf">114 年專技高考熱力學與熱傳學試題 PDF</a>，第四題。</li>
+            </ul>
+          </div>
+        </div>
+        <button class="answer-collapse" type="button">收起答案</button>
+      </details>
+
     </section>
     <a class="back" data-year-link>← 返回 <span data-year></span> 年考科</a>
     <a class="back" href="exam-years.html">返回年度選單</a>
@@ -674,13 +1058,15 @@
       window.scrollTo({ top: 0, behavior });
       updateScrollTopButton();
     });
-    document.querySelector("[data-reference-answers]").addEventListener("click", (event) => {
-      const collapseButton = event.target.closest(".answer-collapse");
-      if (collapseButton) {
-        const answerItem = collapseButton.closest(".answer-item");
-        answerItem.open = false;
-        answerItem.querySelector("summary").focus({ preventScroll: true });
-      }
+    document.querySelectorAll("[data-reference-answers]").forEach((section) => {
+      section.addEventListener("click", (event) => {
+        const collapseButton = event.target.closest(".answer-collapse");
+        if (collapseButton) {
+          const answerItem = collapseButton.closest(".answer-item");
+          answerItem.open = false;
+          answerItem.querySelector("summary").focus({ preventScroll: true });
+        }
+      });
     });
     updateScrollTopButton();
 
@@ -778,7 +1164,9 @@
       const downloadLink = document.querySelector("[data-download]");
       downloadLink.href = fileUrl;
       downloadLink.download = `${year}年${eventData ? `${eventData.code}_` : ""}${paper.title}考題.pdf`;
-      document.querySelector("[data-reference-answers]").hidden = !(year === "114" && subjectId === "refrigeration");
+      document.querySelectorAll("[data-reference-answers]").forEach((section) => {
+        section.hidden = !(year === "114" && subjectId === section.dataset.answerSubject);
+      });
     }
 
     renderPaper();

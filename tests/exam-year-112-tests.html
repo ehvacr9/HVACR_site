@@ -22,7 +22,7 @@
     };
     const frame = document.createElement("iframe");
     frame.title = "112 exam viewer test";
-    frame.style.cssText = "position:fixed;left:-10000px;width:1100px;height:900px;";
+    frame.style.cssText = "position:fixed;left:-10000px;width:1100px;height:500px;";
     document.body.append(frame);
     try {
       const years = await fetch("../exam-years.html");
@@ -113,6 +113,7 @@
         && absorptionDiagram.querySelector('[data-segment="exchanger-to-generator"]').getAttribute("d")
           .includes("C230 205 230 195 225 195"),
       "114 refrigeration schematic uses restrained inline arrows and a pipe bridge to clarify flow direction and crossings");
+      firstAnswer.open = true;
       const firstEquations = [...firstAnswer.querySelectorAll("math.answer-equation-display")];
       const thermalCop = firstEquations.find((equation) =>
         equation.getAttribute("aria-label").includes("冷凍效果除以發生器驅動熱輸入"));
@@ -206,6 +207,122 @@
       });
       assert(frame.contentDocument.querySelector("[data-reference-answers]")?.hidden,
         "114 refrigeration reference answers are hidden for other subjects");
+      await new Promise((resolve, reject) => {
+        frame.onload = resolve;
+        frame.onerror = () => reject(new Error("Unable to open the 114 thermodynamics paper viewer"));
+        frame.src = `../exam-paper.html?year=114&subject=thermodynamics&test=${Date.now()}`;
+      });
+      const thermoAnswers = frame.contentDocument.querySelector('[data-reference-answers][data-answer-subject="thermodynamics"]');
+      assert(thermoAnswers && !thermoAnswers.hidden
+        && frame.contentDocument.querySelector('[data-reference-answers][data-answer-subject="refrigeration"]').hidden,
+      "114 thermodynamics answers are shown only for the thermodynamics paper");
+      const thermoFirst = thermoAnswers.querySelector(".answer-item");
+      assert(thermoFirst.querySelector("summary").textContent.trim() === "第一題"
+        && thermoFirst.querySelectorAll(".answer-step h3").length === 7
+        && thermoFirst.textContent.includes("氫氣比氣體常數")
+        && thermoFirst.textContent.includes("低溫放熱壓縮"),
+      "114 thermodynamics first-question solution includes assumptions, properties and seven solution steps");
+      const thermoEquations = [...thermoFirst.querySelectorAll("math.answer-equation-display")];
+      assert(thermoEquations.length === 5 && thermoEquations.every((equation) => equation.getBoundingClientRect().height > 0)
+        && thermoEquations.some((equation) => equation.getAttribute("aria-label").includes("889.905"))
+        && thermoEquations.some((equation) => equation.getAttribute("aria-label").includes("533.943")),
+      "Thermodynamics solution renders accessible MathML with calculated heat and work");
+      const thermoDiagram = thermoFirst.querySelector("#hydrogen-carnot-title")?.closest("svg");
+      assert(thermoDiagram?.querySelectorAll(".refrigerant-flow[marker-end]").length === 4
+        && thermoFirst.textContent.includes("90 kPa 升至 120 kPa"),
+      "Carnot diagram depicts all four processes and the low-temperature pressure rise");
+      const molarMass = 2.01588;
+      const universalR = 8.314462618;
+      const specificR = universalR / molarMass;
+      const qLow = specificR * 300 * Math.log(120 / 90);
+      const qHigh = qLow / 0.4;
+      const work = qHigh - qLow;
+      assert(Math.abs(specificR - 4.1244829) < 1e-7
+        && Math.abs(qLow - 355.96194) < 0.00001
+        && Math.abs(qHigh - 889.90484) < 0.00001
+        && Math.abs(work - 533.94291) < 0.00001
+        && Math.abs(work / qHigh - 0.6) < 1e-12,
+      "Independent ideal-gas and Carnot calculations verify heat, work and efficiency");
+      thermoFirst.open = true;
+      thermoFirst.querySelector(".answer-collapse").click();
+      assert(!thermoFirst.open, "Thermodynamics answer collapse button closes the question");
+      const thermoSecond = [...thermoAnswers.querySelectorAll(".answer-item")]
+        .find((item) => item.querySelector("summary").textContent.trim() === "第二題");
+      assert(thermoSecond
+        && thermoSecond.querySelectorAll(".answer-step h3").length === 7
+        && thermoSecond.textContent.includes("可逆等溫膨脹")
+        && thermoSecond.textContent.includes("活塞"),
+      "114 thermodynamics second-question solution includes the stated reversible isothermal process");
+      const thermoSecondEquations = [...thermoSecond.querySelectorAll("math.answer-equation-display")];
+      assert(thermoSecondEquations.length === 4
+        && thermoSecondEquations.every((equation) => equation.getBoundingClientRect().height > 0)
+        && thermoSecondEquations.some((equation) => equation.getAttribute("aria-label").includes("0.46191"))
+        && thermoSecondEquations.some((equation) => equation.getAttribute("aria-label").includes("461.91"))
+        && thermoSecond.querySelector("#thermo-second-title"),
+      "Second-question MathML and piston-cylinder diagram render entropy and heat results");
+      const airGasConstant = 0.287;
+      const airMass = 1;
+      const airTemperature = 1000;
+      const pressureRatio = 5;
+      const airEntropyChange = airMass * airGasConstant * Math.log(pressureRatio);
+      const airHeatTransfer = airTemperature * airEntropyChange;
+      assert(Math.abs(airEntropyChange - 0.4619086809) < 0.0000001
+        && Math.abs(airHeatTransfer - 461.9086809) < 0.0001,
+      "Independent reversible-isothermal ideal-gas calculations verify air entropy change and heat transfer");
+      thermoSecond.open = true;
+      thermoSecond.querySelector(".answer-collapse").click();
+      assert(!thermoSecond.open, "Second-question answer collapse button closes the question");
+      const thermoThird = [...thermoAnswers.querySelectorAll(".answer-item")]
+        .find((item) => item.querySelector("summary").textContent.trim() === "第三題");
+      assert(thermoThird
+        && thermoThird.querySelectorAll(".answer-step h3").length === 7
+        && thermoThird.textContent.includes("Biot")
+        && thermoThird.textContent.includes("444.9°C")
+        && thermoThird.textContent.includes("849.4°C"),
+      "114 thermodynamics third-question solution explains lumped cooling and the printed heat-capacity unit");
+      const thermoThirdEquations = [...thermoThird.querySelectorAll("math.answer-equation-display")];
+      assert(thermoThirdEquations.length === 5
+        && thermoThirdEquations.every((equation) => equation.getBoundingClientRect().height > 0)
+        && thermoThirdEquations.some((equation) => equation.getAttribute("aria-label").includes("0.0871"))
+        && thermoThirdEquations.some((equation) => equation.getAttribute("aria-label").includes("444.9")),
+      "Third-question MathML renders the Biot check and transient temperature calculation");
+      const steelBiot = 600 * (0.04 / 4) / 68.9;
+      const steelTemperature = 50 + (850 - 50) * Math.exp(-600 * 40 / (7832 * 434 * 0.01));
+      const steelLiteralUnitTemperature = 50 + (850 - 50) * Math.exp(-600 * 40 / (7832 * 434000 * 0.01));
+      assert(Math.abs(steelBiot - 0.0870827286) < 1e-10
+        && Math.abs(steelTemperature - 444.8634391) < 0.00001
+        && Math.abs(steelLiteralUnitTemperature - 849.435342) < 0.00001,
+      "Independent lumped-capacitance calculations verify both heat-capacity unit interpretations");
+      thermoThird.open = true;
+      thermoThird.querySelector(".answer-collapse").click();
+      assert(!thermoThird.open, "Third-question answer collapse button closes the question");
+      const thermoFourth = [...thermoAnswers.querySelectorAll(".answer-item")]
+        .find((item) => item.querySelector("summary").textContent.trim() === "第四題");
+      assert(thermoFourth.querySelector("summary").textContent.trim() === "第四題"
+        && thermoFourth.querySelectorAll(".answer-step h3").length === 7
+        && thermoFourth.textContent.includes("Dittus")
+        && thermoFourth.textContent.includes("10.54 m"),
+      "114 thermodynamics fourth-question solution includes seven steps and the required tube length");
+      const thermoFourthEquations = [...thermoFourth.querySelectorAll("math.answer-equation-display")];
+      assert(thermoFourthEquations.length === 6
+        && thermoFourthEquations.every((equation) => equation.getBoundingClientRect().height > 0)
+        && thermoFourthEquations.some((equation) => equation.getAttribute("aria-label").includes("6937"))
+        && thermoFourthEquations.some((equation) => equation.getAttribute("aria-label").includes("微分熱平衡"))
+        && thermoFourthEquations.some((equation) => equation.getAttribute("aria-label").includes("積分後"))
+        && thermoFourthEquations.some((equation) => equation.getAttribute("aria-label").includes("10.538")),
+      "Fourth-question MathML renders the heat balance derivation and calculated tube length");
+      const thermoFourthRe = 4 * 2 / (Math.PI * 0.04 * 547e-6);
+      const thermoFourthNu = 0.023 * thermoFourthRe ** 0.8 * 3.56 ** 0.4;
+      const thermoFourthH = thermoFourthNu * 0.643 / 0.04;
+      const thermoFourthLength = 2 * 4181 / (thermoFourthH * Math.PI * 0.04) * Math.log((100 - 25) / (100 - 75));
+      assert(Math.abs(thermoFourthRe - 116383.87063) < 0.00001
+        && Math.abs(thermoFourthNu - 431.54101) < 0.00001
+        && Math.abs(thermoFourthH - 6937.02172) < 0.00001
+        && Math.abs(thermoFourthLength - 10.53833) < 0.00001,
+      "Independent Dittus-Boelter and constant-wall-temperature calculations verify tube length");
+      thermoFourth.open = true;
+      thermoFourth.querySelector(".answer-collapse").click();
+      assert(!thermoFourth.open, "Fourth-question answer collapse button closes the question");
       for (const [subject, filename] of papers) {
         const card = cards.find((item) =>
           new URL(item.getAttribute("href"), new URL("../exam-year-112.html", location.href)).searchParams.get("subject") === subject);
