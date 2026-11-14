@@ -19,7 +19,7 @@
       "water-refrigerant.html", "humid-air.html", "refrigeration-cycle.html", "fan-laws.html", "duct-pressure.html", "moody-chart.html", "fin-efficiency.html", "pipe-loss.html", "unit-converter.html",
     ];
     const tools = ["water-refrigerant.html", "humid-air.html", "refrigeration-cycle.html", "fan-laws.html", "moody-chart.html", "fin-efficiency.html", "pipe-loss.html", "unit-converter.html"];
-    const names = ["水與冷媒性質", "濕空氣性質", "冷凍循環分析器", "風機定律計算器", "Moody 圖與摩擦因子計算器", "鰭片效率計算器", "管路損失係數計算器", "單位換算"];
+    const names = ["水與冷媒性質", "濕空氣性質", "單段蒸氣壓縮循環", "風機定律計算器", "Moody 圖與摩擦因子計算器", "鰭片效率計算器", "管路損失係數計算器", "單位換算"];
     const frame = document.createElement("iframe");
     frame.title = "Tool navigation layout tests";
     frame.style.cssText = "position:fixed;left:-10000px;width:1100px;height:1000px;";
@@ -41,6 +41,7 @@
         if (tools.includes(path)) {
           const index = tools.indexOf(path);
           assert(doc.querySelector("h1").textContent === names[index], `${path} tool heading`);
+          assert(doc.title.startsWith(names[index]), `${path} document title matches tool name`);
           assert(doc.querySelector('.breadcrumb a[href="tools.html"]'), `${path} return to tools`);
           assert(doc.querySelector('.breadcrumb [aria-current="page"]').textContent === names[index],
             `${path} current breadcrumb`);
@@ -50,9 +51,13 @@
         if (["index.html", "tools.html"].includes(path)) {
           const cards = [...doc.querySelectorAll(".tool-card")];
           assert(cards.length === tools.length, `${path} all tool cards present`);
+          const expectedCardOrder = path === "tools.html"
+            ? [...tools.slice(-1), ...tools.slice(0, 2), ...tools.slice(3, -1), ...tools.slice(2, 3)]
+            : tools;
           cards.forEach((card, index) => {
-            assert(card.getAttribute("href") === tools[index], `${path} tool destination ${index}`);
-            assert(card.querySelector("h2, h3").textContent === names[index], `${path} tool name ${index}`);
+            const toolIndex = tools.indexOf(expectedCardOrder[index]);
+            assert(card.getAttribute("href") === expectedCardOrder[index], `${path} tool destination ${index}`);
+            assert(card.querySelector("h2, h3").textContent === names[toolIndex], `${path} tool name ${index}`);
           });
           if (path === "index.html") {
             assert(doc.querySelectorAll("#tools-link-title").length === 1
@@ -60,18 +65,22 @@
           }
           if (path === "tools.html") {
             const groups = [...doc.querySelectorAll(".tool-group")];
-            assert(groups.length === 3, "Tools has properties, applications and standalone conversion");
+            assert(groups.length === 4, "Tools has unit conversion, properties, common engineering calculations and system analysis");
             groups.forEach((group, index) => {
               const heading = group.querySelector("h2");
-              assert(heading.textContent === ["物性查詢與計算", "工程應用", "單位換算"][index],
+              assert(heading.textContent === ["單位換算", "物性查詢與計算", "常用工程計算", "系統分析"][index],
                 `Tools category heading ${index}`);
               assert(group.getAttribute("aria-labelledby") === heading.id,
                 `Tools category accessible label ${index}`);
               assert([...group.querySelectorAll(".tool-card")].map((card) => card.getAttribute("href")).join("|")
-                === [tools.slice(0, 2), tools.slice(2, -1), tools.slice(-1)][index].join("|"), `Tools category destinations ${index}`);
+                === [tools.slice(-1), tools.slice(0, 2), tools.slice(3, -1), tools.slice(2, 3)][index].join("|"),
+              `Tools category destinations ${index}`);
             });
-            assert(groups[2].querySelectorAll("h2, h3").length === 1,
-              "Standalone conversion has no duplicate heading");
+            assert(groups[0].querySelectorAll("h2, h3").length === 1,
+              "Unit conversion is a standalone category at the top");
+            assert(groups[3].querySelector("h2").textContent === "系統分析"
+              && groups[3].querySelector(".tool-card h3").textContent === "單段蒸氣壓縮循環",
+            "Single-stage vapor-compression cycle is listed under system analysis");
           }
         }
       }
