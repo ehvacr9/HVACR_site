@@ -8,6 +8,17 @@ const form = byId("loss-form");
 const format = new Intl.NumberFormat("zh-TW", { maximumSignificantDigits: 6 });
 const svgNamespace = "http://www.w3.org/2000/svg";
 
+for (const choice of document.querySelectorAll(".component-choice")) {
+  const input = choice.querySelector("input");
+  const diagram = choice.querySelector("svg");
+  diagram.dataset.kind = input.value;
+  diagram.setAttribute("role", "img");
+  diagram.setAttribute("aria-labelledby", "diagram-name");
+  diagram.removeAttribute("aria-hidden");
+  diagram.setAttribute("hidden", "");
+  byId("component-diagram").append(diagram);
+}
+
 function reset() {
   for (const id of ["ratio-result", "k-result", "velocity-result", "v1-result", "v2-result", "head-result", "pressure-result"]) {
     byId(id).textContent = "—";
@@ -22,6 +33,13 @@ function reset() {
 }
 
 function draw() {
+  const input = document.querySelector('input[name="kind"]:checked');
+  const name = input.labels[0].querySelector(".component-name").textContent;
+  byId("selected-component").textContent = `目前元件：${name}`;
+  byId("diagram-name").textContent = name;
+  for (const diagram of byId("component-diagram").querySelectorAll("svg")) {
+    diagram.toggleAttribute("hidden", diagram.dataset.kind !== input.value);
+  }
   const tee = isTee();
   const standardFitting = isStandardFitting();
   for (const field of document.querySelectorAll("[data-transition-field], [data-tee-field], [data-standard-fitting-field]")) {
@@ -48,7 +66,9 @@ function draw() {
   if (standardFitting) {
     byId("velocity-basis").textContent = constantFitting
       ? "入口或出口損失以該管口平均流速為基準；排入大型槽體採出口速度水頭全部耗散。"
-      : "ASHRAE 表列螺紋鋼管管件；K 依型式及公稱管徑選取，並以實際管內平均流速為基準。";
+      : fitting.startsWith("valve-")
+        ? "ASHRAE 表列螺紋鋼管閥件；全開／順向啟開條件，非節流開度模型。K 按公稱管徑查表，流速依實際管內徑計算。"
+        : "ASHRAE 表列螺紋鋼管管件；K 依型式及公稱管徑選取，並以實際管內平均流速為基準。";
     return;
   }
   const expansion = selectedKind() === "expansion";

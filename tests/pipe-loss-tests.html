@@ -100,89 +100,168 @@
       }
       await new Promise((resolve) => { frame.onload = resolve; frame.src = `../pipe-loss.html?test=${Date.now()}`; });
       const doc = frame.contentDocument;
+      const diagram = (kind) => doc.querySelector(`#component-diagram svg[data-kind="${kind}"]`);
+      const choose = (kind) => doc.querySelector(`label[for="kind-${kind}"]`).click();
       const schematicPanel = doc.querySelector("#diagram-title").closest("section");
-      assert(schematicPanel !== doc.querySelector("#loss-form")
-        && Boolean(schematicPanel.compareDocumentPosition(doc.querySelector("#loss-form")) & Node.DOCUMENT_POSITION_FOLLOWING),
-      "Component selector occupies a separate panel above the condition form");
+      const sidebar = doc.querySelector(".component-sidebar");
+      const workspace = doc.querySelector(".calculator-workspace");
+      assert(sidebar.getBoundingClientRect().right < workspace.getBoundingClientRect().left
+        && workspace.children[0] === doc.querySelector("#loss-form")
+        && schematicPanel.closest("form") === doc.querySelector("#loss-form")
+        && workspace.children[1] === doc.querySelector("#transition-results-panel")
+        && workspace.children[2] === doc.querySelector("#tee-results-panel")
+        && workspace.children[3] === doc.querySelector("#fitting-results-panel"),
+      "Left selector accompanies a combined schematic/input panel with results below");
+      assert([sidebar, ...workspace.children].every((block) =>
+          !["sticky", "fixed"].includes(doc.defaultView.getComputedStyle(block).position))
+        && doc.defaultView.getComputedStyle(sidebar).maxHeight === "none"
+        && doc.defaultView.getComputedStyle(sidebar).overflowY === "visible",
+      "Calculator blocks remain in normal document flow without sticky positioning or nested scrolling");
+      assert([...sidebar.querySelectorAll(".component-group h3")].map((heading) => heading.textContent).join("|")
+        === "截面變化|方向變化|分支與匯流|閥件|入口與出口"
+        && [...sidebar.querySelectorAll(".component-branch")].map((branch) => branch.querySelectorAll("input").length).join("|") === "2|4|2|4|4",
+      "Component tree groups all sixteen components into five fixed categories");
+      assert(!sidebar.querySelector("details, summary")
+        && [...sidebar.querySelectorAll(".component-choice label")].every((label) => label.getBoundingClientRect().height > 0),
+      "All component categories stay expanded without collapse controls");
+      assert(sidebar.querySelector(".component-group h3").getBoundingClientRect().height <= 28
+        && doc.querySelector('label[for="kind-contraction"]').getBoundingClientRect().height <= 28
+        && doc.defaultView.getComputedStyle(sidebar.querySelector(".component-branch")).borderLeftStyle === "dotted",
+      "Compact Windows-style tree retains short rows and dotted branches");
       assert(doc.querySelectorAll('.component-choices input[type="radio"]').length === 16
         && doc.querySelectorAll('.component-choices input[data-standard-fitting]').length === 12
         && !doc.querySelector('.component-choices input[value="tee-line"]')
         && !doc.querySelector('.component-choices input[value="tee-branch"]')
         && !doc.querySelector("#fitting-type")
-        && [...doc.querySelectorAll(".component-choice")].every((choice) => choice.querySelector("label svg")
+        && [...doc.querySelectorAll(".component-choice")].every((choice) => diagram(choice.querySelector("input").value)
           && choice.querySelector("label .component-name")?.textContent.trim())
         && doc.querySelector("#kind-contraction").checked
-        && !doc.querySelector(".diagram-details")
-        && doc.querySelector('label[for="kind-contraction"] svg').textContent.includes("D₁：大管")
-        && doc.querySelector('label[for="kind-expansion"] svg').textContent.includes("D₂：大管")
-        && doc.querySelector('label[for="kind-tee-dividing"] svg').textContent.includes("共同管口 Q")
-        && doc.querySelector('label[for="kind-tee-combining"] svg').textContent.includes("支管 Q支")
+        && !sidebar.querySelector("svg")
+        && diagram("contraction").textContent.includes("D₁：大管")
+        && diagram("expansion").textContent.includes("D₂：大管")
+        && diagram("tee-dividing").textContent.includes("共同管口 Q")
+        && diagram("tee-combining").textContent.includes("支管 Q支")
         && [...doc.querySelectorAll('.component-choices input[data-standard-fitting]')].every((input) => {
-          const diagramText = doc.querySelector(`label[for="${input.id}"] svg`).textContent;
+          const diagramText = diagram(input.value).textContent;
           return diagramText.includes("上游 1") && diagramText.includes("下游 2");
         })
         && [...doc.querySelectorAll('.component-choices input')].every((input) => input.hasAttribute("aria-label"))
         && !doc.querySelector("#tee-direction"),
-      "Component thumbnails include port labels without a separate detailed diagram");
-      const thumbnailHeights = [...doc.querySelectorAll(".component-choice svg")]
-        .map((svg) => svg.getBoundingClientRect().height);
-      assert(Math.max(...thumbnailHeights) - Math.min(...thumbnailHeights) < 1
-        && [...doc.querySelectorAll(".component-choice svg [fill]")].every((shape) =>
+      "Tree labels retain accessible component names and schematics retain port labels");
+      const diagramHeights = [];
+      for (const input of sidebar.querySelectorAll("input")) {
+        choose(input.value);
+        const visible = [...doc.querySelectorAll("#component-diagram svg:not([hidden])")];
+        assert(visible.length === 1 && visible[0] === diagram(input.value)
+          && doc.querySelector("#diagram-name").textContent === input.labels[0].textContent.trim()
+          && doc.querySelector("#selected-component").textContent.includes(input.labels[0].textContent.trim())
+          && visible[0].getAttribute("role") === "img"
+          && visible[0].getAttribute("aria-labelledby") === "diagram-name",
+        `${input.value} selection updates the single visible schematic and both labels`);
+        diagramHeights.push(visible[0].getBoundingClientRect().height);
+        const bounds = visible[0].getBoundingClientRect();
+        assert([...visible[0].querySelectorAll("text")].every((text) => {
+          const label = text.getBoundingClientRect();
+          return label.left >= bounds.left - 1 && label.right <= bounds.right + 1
+            && label.top >= bounds.top - 1 && label.bottom <= bounds.bottom + 1;
+        }), `${input.value} labels fit within the compact diagram viewport`);
+      }
+      choose("contraction");
+      doc.querySelector("#fitting-nominal").value = "25";
+      doc.querySelector("#fitting-nominal").dispatchEvent(new Event("change", { bubbles: true }));
+      assert(Math.max(...diagramHeights) - Math.min(...diagramHeights) < 1 && diagramHeights[0] === 160
+        && [...doc.querySelectorAll("#component-diagram svg [fill]")].every((shape) =>
           !["#dcecf0", "#eef5f5"].includes(shape.getAttribute("fill"))),
-      "Component thumbnails use a consistent viewport without pale-blue fills");
-      const standardElbowWalls = doc.querySelector('label[for="kind-elbow-90"] svg').querySelectorAll('path[stroke="#53665e"]')[0].getAttribute("d");
-      const longElbowWalls = doc.querySelector('label[for="kind-elbow-90-long"] svg').querySelectorAll('path[stroke="#53665e"]')[0].getAttribute("d");
+      "Selected schematics use a consistent compact viewport without pale-blue fills");
+      choose("expansion");
+      assert(doc.querySelector("#kind-expansion").checked
+        && [...sidebar.querySelectorAll(".component-choice label")].every((label) => label.getBoundingClientRect().height > 0),
+        "Changing selection leaves every component visible");
+      choose("contraction");
+      const standardElbowWalls = diagram("elbow-90").querySelectorAll('path[stroke="#53665e"]')[0].getAttribute("d");
+      const longElbowWalls = diagram("elbow-90-long").querySelectorAll('path[stroke="#53665e"]')[0].getAttribute("d");
       assert(standardElbowWalls.includes("A26 26 0 0 1 108 66") && standardElbowWalls.includes("A10 10 0 0 1 92 66")
         && longElbowWalls.includes("A32 32 0 0 1 108 74") && longElbowWalls.includes("A16 16 0 0 1 92 74"),
       "90-degree elbows use concentric quarter-circles with a 1.5D long-radius centerline");
-      const angleValve = doc.querySelector('label[for="kind-valve-angle"] svg');
-      const gateValve = doc.querySelector('label[for="kind-valve-gate"] svg');
-      const returnBend = doc.querySelector('label[for="kind-return-180"] svg');
-      const squareInlet = doc.querySelector('label[for="kind-inlet-square"] svg');
-      const projectingInlet = doc.querySelector('label[for="kind-inlet-projecting"] svg');
-      const outletReservoir = doc.querySelector('label[for="kind-outlet-reservoir"] svg');
+      const angleValve = diagram("valve-angle");
+      const gateValve = diagram("valve-gate");
+      const returnBend = diagram("return-180");
+      const squareInlet = diagram("inlet-square");
+      const projectingInlet = diagram("inlet-projecting");
+      const outletReservoir = diagram("outlet-reservoir");
       assert(angleValve.textContent.includes("閥桿")
-        && angleValve.querySelector('path[stroke="#53665e"]').getAttribute("d") === "M12 48 H72 Q100 48 100 76 V108 M12 72 H68 V108"
+        && angleValve.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("V28 M96 28 V40")
         && angleValve.querySelector('path[stroke="#287b9b"]').getAttribute("d") === "M20 60 H50 M84 86 V102"
-        && angleValve.querySelector('path[stroke="#bd7628"]').getAttribute("d").startsWith("M68 72 H92")
-        && angleValve.querySelector('path[stroke="#bd7628"]').getAttribute("d").includes("M84 56 V28"),
+        && angleValve.querySelectorAll('path[stroke="#53665e"]')[1].getAttribute("d") === "M64 76 H76 M92 76 H112"
+        && angleValve.querySelector('path[stroke="#bd7628"]').getAttribute("d").includes("M84 62 V20"),
       "Angle globe valve shows horizontal inlet, downward outlet, seat and vertical stem");
+      const globeValve = diagram("valve-globe");
+      const checkValve = diagram("valve-swing-check");
+      assert(globeValve.querySelectorAll('path[stroke="#53665e"]')[1].getAttribute("d") === "M56 48 V72 H78 M102 72 H124"
+        && checkValve.querySelectorAll('path[stroke="#53665e"]')[1].getAttribute("d") === "M70 40 V48 M70 72 V84"
+        && checkValve.querySelector('path[stroke="#bd7628"]').getAttribute("d").includes("M77 45 L104 52"),
+      "Valve seats retain an open flow passage and swing-check flap opens downstream");
       assert(returnBend.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("A38 38")
         && returnBend.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("A22 22")
         && returnBend.querySelector('path[stroke="#287b9b"]').getAttribute("d").includes("A30 30"),
       "180-degree return bend has pipe walls spaced wider around its flow path");
+      assert(returnBend.querySelectorAll('path[stroke="#287b9b"]')[1].getAttribute("d") === "M90 28 L82 34 L90 40 M146 88 L154 94 L146 100",
+      "Return bend arrowheads connect exactly to the centerline");
       assert(gateValve.querySelector('path[stroke="#287b9b"]').getAttribute("d") === "M20 60 H50 M130 60 H160"
         && gateValve.querySelectorAll('path[stroke="#287b9b"]')[1].getAttribute("d") === "M42 54 L50 60 L42 66 M152 54 L160 60 L152 66",
       "Gate valve flow arrows align with the pipe centerline");
       assert(squareInlet.textContent.includes("上游 1") && squareInlet.textContent.includes("下游 2")
         && squareInlet.textContent.includes("槽內流體進入平口")
-        && squareInlet.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("M12 12 V90")
+        && squareInlet.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("M12 18 V96")
         && squareInlet.querySelector('path[stroke="#287b9b"]').getAttribute("d").startsWith("M20 60 H154"),
       "Square inlet shows a larger reservoir and inflow toward the pipe opening");
       assert(projectingInlet.textContent.includes("上游 1") && projectingInlet.textContent.includes("下游 2")
         && projectingInlet.textContent.includes("突出管口入口")
-        && projectingInlet.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("M12 18 H112 V46")
-        && projectingInlet.querySelector('path[stroke="#287b9b"]').getAttribute("d").startsWith("M46 64 H154"),
+        && projectingInlet.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("M12 18 H108 V48")
+        && projectingInlet.querySelector('path[stroke="#287b9b"]').getAttribute("d").startsWith("M46 60 H154"),
       "Projecting inlet shows a larger reservoir and inflow toward the pipe opening");
       assert(outletReservoir.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("M68 24 H168")
         && outletReservoir.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("V96"),
       "Reservoir outlet schematic uses a larger tank");
-      const fittingStrokeColors = [...doc.querySelectorAll(".component-choice svg [stroke]")]
+      assert(diagram("elbow-45").querySelector('path[stroke="#53665e"]').getAttribute("d").includes("A8 8 0 0 0 77.657 61.657")
+        && diagram("elbow-45").querySelector('path[stroke="#53665e"]').getAttribute("d").includes("A24 24 0 0 0 88.971 72.971")
+        && diagram("elbow-45").querySelector('path[stroke="#287b9b"]').getAttribute("d").includes("A16 16"),
+      "45-degree elbow uses concentric arcs with a constant 16-unit pipe bore");
+      assert(["tee-dividing", "tee-combining"].every((kind) =>
+        diagram(kind).querySelector('path[stroke="#53665e"]').getAttribute("d") === "M12 36 H78 V5 M102 5 V36 H168 M12 60 H168"),
+      "Equal tees use 24-unit bores for all three ports");
+      assert(gateValve.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("V22 H108 V38")
+        && gateValve.querySelector('path[stroke="#bd7628"]').getAttribute("d").startsWith("M80 28 H100 L96 42 H84 Z"),
+      "Gate valve separates its fixed bonnet from the gate lifted above the 48-unit pipe wall");
+      assert(diagram("inlet-bell").querySelector('path[stroke="#53665e"]').getAttribute("d").includes("C60 30 64 48 84 48 H168")
+        && projectingInlet.querySelectorAll('path[stroke="#53665e"]')[1].getAttribute("d") === "M40 48 H168 M40 72 H168"
+        && squareInlet.querySelector('path[stroke="#53665e"]').getAttribute("d").includes("M108 48 H168 M108 72 H168"),
+      "Bell mouth has tangent transitions and reservoir inlets share a 24-unit bore");
+      const fittingStrokeColors = [...doc.querySelectorAll("#component-diagram svg [stroke]")]
         .map((shape) => shape.getAttribute("stroke"));
       assert(fittingStrokeColors.every((color) => ["#53665e", "#287b9b", "#bd7628"].includes(color))
-        && [...doc.querySelectorAll(".component-choice svg [stroke]")].every((shape) =>
+        && [...doc.querySelectorAll("#component-diagram svg [stroke]")].every((shape) =>
           doc.defaultView.getComputedStyle(shape).strokeWidth === "3px"),
       "All fitting schematics share the same three-color palette and line weight");
-      assert(doc.defaultView.getComputedStyle(doc.querySelector(".component-choices")).gridTemplateColumns.split(" ").length === 4,
-        "Desktop component grid has four columns");
+      assert(doc.defaultView.getComputedStyle(doc.querySelector(".calculator-layout")).gridTemplateColumns.split(" ").length === 2,
+        "Desktop calculator has sidebar and workspace columns");
       assert(Number.parseFloat(doc.defaultView.getComputedStyle(schematicPanel).marginTop) <= 16
         && Number.parseFloat(doc.defaultView.getComputedStyle(doc.querySelector("#loss-form")).marginTop) <= 16,
       "Main panels use compact spacing");
-      assert(doc.defaultView.getComputedStyle(doc.querySelector("#loss-form .grid")).gridTemplateColumns.split(" ").length === 3
-        && doc.querySelector("#density").getBoundingClientRect().width < 400,
-      "Desktop input grid uses compact three-column fields");
+      assert(doc.defaultView.getComputedStyle(doc.querySelector("#loss-form .grid")).gridTemplateColumns.split(" ").length === 2
+        && doc.querySelector("#density").getBoundingClientRect().height === 32
+        && doc.defaultView.getComputedStyle(doc.querySelector("#density")).borderRadius === "2px"
+        && doc.querySelector("#loss-form button").getBoundingClientRect().height === 32,
+      "Windows-style inputs use two compact columns, 32px controls and small corner radii");
       assert(doc.querySelector("#curve-chart").closest("section") === doc.querySelector("#results").closest("section"),
         "Curve and numeric results share a panel");
+        assert([...workspace.querySelectorAll(".result-dialog")].length === 3
+          && [...workspace.querySelectorAll(".result-dialog")].every((panel) =>
+            doc.defaultView.getComputedStyle(panel).backgroundColor === doc.defaultView.getComputedStyle(doc.querySelector("#loss-form")).backgroundColor)
+          && doc.defaultView.getComputedStyle(doc.querySelector("#k-result")).borderRadius === "2px"
+          && doc.defaultView.getComputedStyle(doc.querySelector("#tee-straight-k-result")).borderRadius === "2px"
+          && doc.defaultView.getComputedStyle(doc.querySelector("#curve-chart").parentElement).backgroundColor === "rgb(255, 255, 255)",
+        "All result panels share Windows-style dialogs, read-only fields and a white bordered chart area");
       assert(doc.defaultView.getComputedStyle(doc.querySelector(".result-grid")).gridTemplateColumns.split(" ").length === 2,
         "Desktop curve and results use the full two-column panel");
       assert(doc.defaultView.getComputedStyle(doc.querySelector(".result-note")).gridColumnEnd === "-1"
@@ -205,13 +284,39 @@
       const calculatedPanelRect = doc.querySelector("#results").getBoundingClientRect();
       assert(resultsPanelRect.x === calculatedPanelRect.x && resultsPanelRect.y === calculatedPanelRect.y,
         "Calculation does not shift the results panel");
-      const choose = (kind) => doc.querySelector(`label[for="kind-${kind}"]`).click();
       for (const fitting of doc.querySelectorAll('.component-choices input[data-standard-fitting]')) {
         fitting.click();
         assert(fitting.checked && !doc.querySelector("#fitting-results-panel").hidden,
-          `${fitting.value} has its own selectable schematic thumbnail`);
+          `${fitting.value} has its own selectable schematic`);
+        const nominal = doc.querySelector("#fitting-nominal");
+        for (const option of [...nominal.options].filter((option) => !option.disabled)) {
+          if (nominal.disabled && option.value !== nominal.value) continue;
+          nominal.value = option.value;
+          nominal.dispatchEvent(new Event("change", { bubbles: true }));
+          const input = { fitting: fitting.value, nominalMm: option.value,
+            diameterMm: Number(doc.querySelector("#fitting-diameter").value), flowM3h: 10, density: 998.2 };
+          const expected = calculateStandardFittingLoss(input);
+          const doubled = calculateStandardFittingLoss({ ...input, flowM3h: 20 });
+          const zero = calculateStandardFittingLoss({ ...input, flowM3h: 0 });
+          submit();
+          assert(doc.querySelector("#error").hidden
+            && Number(doc.querySelector("#fitting-k-result").textContent.replaceAll(",", "")) === expected.coefficient
+            && [...doc.querySelectorAll("#fitting-results dd")].every((value) => value.textContent !== "—")
+            && near(doubled.head, 4 * expected.head)
+            && near(expected.pressureLoss, 998.2 * 9.80665 * expected.head)
+            && zero.head === 0 && zero.coefficient === expected.coefficient,
+          `${fitting.value} DN ${option.value} calculates in UI with quadratic scaling and zero-flow limit`);
+        }
       }
+      doc.querySelector("#fitting-nominal").value = "25";
+      doc.querySelector("#fitting-nominal").dispatchEvent(new Event("change", { bubbles: true }));
       choose("elbow-90");
+      assert(doc.defaultView.getComputedStyle(doc.querySelector("#fitting-results-panel")).backgroundColor
+          === doc.defaultView.getComputedStyle(doc.querySelector("#loss-form")).backgroundColor
+        && doc.defaultView.getComputedStyle(doc.querySelector("#fitting-results .metrics")).gridTemplateColumns.split(" ").length === 2
+        && doc.defaultView.getComputedStyle(doc.querySelector("#fitting-k-result")).borderRadius === "2px"
+        && doc.querySelector("#fitting-k-result").getBoundingClientRect().height >= 32,
+      "Standard fitting results match the Windows-style input dialog with compact output fields");
       assert(!doc.querySelector("#fitting-results-panel").hidden
         && doc.querySelector("#transition-results-panel").hidden && doc.querySelector("#tee-results-panel").hidden
       && !doc.querySelector("#fitting-diameter").disabled && doc.querySelector("#upstream").disabled
@@ -222,6 +327,16 @@
       && doc.querySelector("#fitting-diameter").getBoundingClientRect().width > 0,
       "Standard fitting form fits mobile viewport");
       frame.style.width = "1100px";
+      const method = doc.querySelector("#method-panel");
+      assert(method.querySelectorAll("tbody tr[data-kind]").length === 16
+        && [...sidebar.querySelectorAll("input")].every((input) => method.querySelector(`tr[data-kind="${input.value}"]`))
+        && method.textContent.includes("不是球閥")
+        && method.textContent.includes("半開閘閥不適用")
+        && method.textContent.includes("自由射流")
+        && method.textContent.includes("不使用表 3 的 Tee-Line")
+        && doc.defaultView.getComputedStyle(method).backgroundColor
+          === doc.defaultView.getComputedStyle(doc.querySelector("#loss-form")).backgroundColor,
+      "Windows-style method dialog documents every component, model source and key limitations");
       assert(doc.querySelector("#fitting-diameter").value === "26.64" && doc.querySelector("#fitting-diameter").readOnly,
         "Default nominal size and schedule provide a read-only reference diameter");
       doc.querySelector("#fitting-nominal").value = "10";
@@ -297,7 +412,7 @@
       "Leaving standard fitting mode disables its controls and restores transition");
       choose("expansion");
       assert(doc.querySelector("#kind-expansion").checked && !doc.querySelector("#kind-contraction").checked,
-        "Clicking a thumbnail selects only that component");
+        "Clicking a tree item selects only that component");
       assert(doc.querySelector("#upstream").value === "50" && doc.querySelector("#downstream").value === "100", "Type switch preserves valid geometry by swapping diameters");
       assert(!doc.querySelector("#results").hidden
         && [...doc.querySelectorAll("#results dd")].every((value) => value.textContent === "—")
@@ -320,8 +435,10 @@
       frame.style.width = "375px";
       assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth
         && doc.defaultView.getComputedStyle(doc.querySelector("#tee-results .metrics")).gridTemplateColumns.split(" ").length === 1
-        && doc.defaultView.getComputedStyle(doc.querySelector(".component-choices")).gridTemplateColumns.split(" ").length === 2,
-      "Tee layout fits mobile viewport with stacked results");
+        && doc.defaultView.getComputedStyle(doc.querySelector(".calculator-layout")).gridTemplateColumns.split(" ").length === 1
+        && doc.defaultView.getComputedStyle(sidebar).position === "static"
+        && sidebar.getBoundingClientRect().bottom <= workspace.getBoundingClientRect().top,
+      "Mobile layout stacks the component tree, inputs, diagram and results without overflow");
       frame.style.width = "1100px";
       doc.querySelector("#tee-fraction").value = "25";
       submit();
@@ -371,6 +488,22 @@
       assert(!doc.querySelector("#transition-results-panel").hidden && doc.querySelector("#tee-results-panel").hidden
         && !doc.querySelector("#upstream").disabled && doc.querySelector("#tee-diameter").disabled,
       "Switching back restores transition controls");
+      for (const width of [320, 768, 1000, 1440]) {
+        frame.style.width = `${width}px`;
+        const columns = doc.defaultView.getComputedStyle(doc.querySelector(".calculator-layout")).gridTemplateColumns.split(" ").length;
+        assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth
+          && columns === (width <= 800 ? 1 : 2),
+        `Calculator sidebar and workspace fit viewport ${width}`);
+        const formBounds = doc.querySelector("#loss-form").getBoundingClientRect();
+        const diagramBounds = schematicPanel.getBoundingClientRect();
+        const resultBounds = doc.querySelector("#transition-results-panel").getBoundingClientRect();
+        const inputBounds = doc.querySelector(".input-section").getBoundingClientRect();
+        assert(formBounds.top <= diagramBounds.top && formBounds.bottom <= resultBounds.top
+          && (width <= 1100 ? diagramBounds.bottom <= inputBounds.top : diagramBounds.right <= inputBounds.left)
+          && diagram("contraction").getBoundingClientRect().width <= diagramBounds.width,
+        `Combined editor arranges schematic and inputs responsively with results below at ${width}`);
+      }
+      frame.style.width = "1100px";
       for (const path of ["tools.html", "index.html"]) {
         const response = await fetch(`../${path}`);
         const page = new DOMParser().parseFromString(await response.text(), "text/html");
