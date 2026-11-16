@@ -21,8 +21,9 @@
       const markup = new DOMParser().parseFromString(await response.text(), "text/html");
       assert(markup.querySelector('[data-category="power"]')?.textContent.trim() === "功率",
         "Power is available as a conversion category");
-      assert(markup.querySelector(".intro").textContent.includes("功率"),
-        "Page introduction lists power conversions");
+      assert(markup.querySelector('[data-category="length"]')?.textContent.trim() === "長度"
+        && markup.querySelector(".intro").textContent.includes("長度"),
+      "Length is available as a conversion category and listed in the introduction");
       document.body.append(frame);
       await new Promise((resolve, reject) => {
         frame.onload = resolve;
@@ -56,6 +57,26 @@
       "W, kW and MW conversions use consistent SI scaling");
       assert(doc.querySelector("#conversion-hint").textContent.includes("12,000 BTU/h"),
         "Refrigeration ton definition is disclosed to users");
+      clickCategory("speed");
+      assert([...doc.querySelector("#from-unit").options, ...doc.querySelector("#to-unit").options]
+        .some((option) => option.value === "ft/min"),
+      "Speed category includes feet per minute");
+      assert(Math.abs(convert(100, "ft/min", "m/s") - 0.508) < 1e-12
+        && Math.abs(convert(1, "m/s", "ft/min") - (60 / 0.3048)) < 1e-5,
+      "Feet-per-minute conversions use the exact foot-to-meter definition");
+      clickCategory("length");
+      assert(doc.querySelector('[data-category="length"]').getAttribute("aria-pressed") === "true"
+        && doc.querySelector("#from-unit").value === "m"
+        && doc.querySelector("#to-unit").value === "ft",
+      "Length category selects useful meter-to-foot defaults");
+      assert(Math.abs(convert(1, "m", "mm") - 1000) < 1e-10
+        && Math.abs(convert(12, "in", "ft") - 1) < 1e-12
+        && Math.abs(convert(1, "mi", "km") - 1.609344) < 1e-12,
+      "Metric and imperial length units use exact conversion factors");
+      doc.querySelector("#conversion-value").value = "-1";
+      doc.querySelector("#conversion-value").dispatchEvent(new Event("input", { bubbles: true }));
+      assert(doc.querySelector("#result-error").textContent.includes("長度不可為負值"),
+        "Negative length input is rejected with a clear message");
       output.dataset.kind = "success";
       output.textContent = JSON.stringify({ status: "PASS", checks }, null, 2);
     } catch (error) {

@@ -528,12 +528,13 @@
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="tools.html">計算工具</a> ／ <span aria-current="page">單位換算</span></p>
     <p class="eyebrow">Unit Converter</p>
     <h1>單位換算</h1>
-    <p class="intro">即時換算常用溫度、壓力、功率、體積、質量、速度、力、絕對黏度與能量單位。壓力換算以絕對壓力為準；若使用表壓，請先加上當地大氣壓。</p>
+    <p class="intro">即時換算常用溫度、壓力、長度、功率、體積、質量、速度、力、絕對黏度與能量單位。壓力換算以絕對壓力為準；若使用表壓，請先加上當地大氣壓。</p>
 
     <section class="converter" aria-label="單位換算器">
       <div class="category-switch" role="group" aria-label="換算類別">
         <button type="button" data-category="temperature" aria-pressed="true">溫度</button>
         <button type="button" data-category="pressure" aria-pressed="false">壓力</button>
+        <button type="button" data-category="length" aria-pressed="false">長度</button>
         <button type="button" data-category="volume" aria-pressed="false">體積</button>
         <button type="button" data-category="mass" aria-pressed="false">質量</button>
         <button type="button" data-category="speed" aria-pressed="false">速度</button>
@@ -616,6 +617,17 @@
         { id: "mmHg", label: "毫米汞柱 (mmHg)", factor: 760 / 101325 },
         { id: "kgf/cm2", label: "公斤力／平方公分 (kgf/cm²)", factor: 1 / 98066.5 },
       ],
+      length: [
+        { id: "um", label: "微米 (µm)", factor: 1e6 },
+        { id: "mm", label: "毫米 (mm)", factor: 1e3 },
+        { id: "cm", label: "公分 (cm)", factor: 1e2 },
+        { id: "m", label: "公尺 (m)", factor: 1 },
+        { id: "km", label: "公里 (km)", factor: 1e-3 },
+        { id: "in", label: "英吋 (in)", factor: 1 / 0.0254 },
+        { id: "ft", label: "英尺 (ft)", factor: 1 / 0.3048 },
+        { id: "yd", label: "碼 (yd)", factor: 1 / 0.9144 },
+        { id: "mi", label: "英哩 (mi)", factor: 1 / 1609.344 },
+      ],
       volume: [
         { id: "m3", label: "立方公尺 (m³)", factor: 1 },
         { id: "dm3", label: "立方分公尺 (dm³)", factor: 1e3 },
@@ -636,6 +648,7 @@
         { id: "km/hr", label: "公里／小時 (km/hr)", factor: 3.6 },
         { id: "in/s", label: "英吋／秒 (in/s)", factor: 1 / 0.0254 },
         { id: "ft/s", label: "英尺／秒 (ft/s)", factor: 1 / 0.3048 },
+        { id: "ft/min", label: "英尺／分 (ft/min)", factor: 60 / 0.3048 },
         { id: "mi/hr", label: "英哩／小時 (mi/hr)", factor: 3600 / (5280 * 12 * 0.0254) },
       ],
       force: [
@@ -740,8 +753,8 @@
         }
         result = kelvinToTemperature(kelvin, toUnit.value);
       } else {
-        if (value < 0 && ["pressure", "volume", "mass", "absolute-viscosity"].includes(activeCategory)) {
-          const categoryNames = { pressure: "壓力", volume: "體積", mass: "質量", "absolute-viscosity": "絕對黏度" };
+        if (value < 0 && ["pressure", "length", "volume", "mass", "absolute-viscosity"].includes(activeCategory)) {
+          const categoryNames = { pressure: "壓力", length: "長度", volume: "體積", mass: "質量", "absolute-viscosity": "絕對黏度" };
           showConversionError(`${categoryNames[activeCategory]}不可為負值。`);
           return;
         }
@@ -778,6 +791,7 @@
       const defaults = {
         temperature: ["C", "F"],
         pressure: ["kPa", "psia"],
+        length: ["m", "ft"],
         volume: ["m3", "L"],
         mass: ["kg", "lbm"],
         speed: ["m/s", "km/hr"],
@@ -793,6 +807,7 @@
       conversionHint.textContent = {
         temperature: "溫度採絕對溫標換算；低於絕對零度的數值不適用。",
         pressure: "壓力單位以絕對壓力換算；表壓數值須先加上當地大氣壓。",
+        length: "長度不可為負值；英制長度依 1 in = 25.4 mm、1 ft = 0.3048 m 換算。",
         volume: "美制液量加侖 (gal) 以 231 立方英吋換算；1 dm³ 等於 1 L。",
         mass: "質量不可為負值。",
         speed: "速度可為負值；正負號表示方向。",
