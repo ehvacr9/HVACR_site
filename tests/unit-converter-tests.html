@@ -24,6 +24,9 @@
       assert(markup.querySelector('[data-category="length"]')?.textContent.trim() === "長度"
         && markup.querySelector(".intro").textContent.includes("長度"),
       "Length is available as a conversion category and listed in the introduction");
+      assert(markup.querySelector('[data-category="volumetric-flow"]')?.textContent.trim() === "體積流率"
+        && markup.querySelector(".intro").textContent.includes("體積流率"),
+      "Volumetric flow rate is available as a category and listed in the introduction");
       document.body.append(frame);
       await new Promise((resolve, reject) => {
         frame.onload = resolve;
@@ -32,6 +35,23 @@
       });
       const doc = frame.contentDocument;
       const clickCategory = (category) => doc.querySelector(`[data-category="${category}"]`).click();
+      const categorySwitch = doc.querySelector(".category-switch");
+      const categoryButton = categorySwitch.querySelector("button");
+      const categoryStyles = doc.defaultView.getComputedStyle(categorySwitch);
+      const categoryButtonStyles = doc.defaultView.getComputedStyle(categoryButton);
+      assert(categoryStyles.display === "grid"
+        && categoryButtonStyles.minHeight === "48px"
+        && Number.parseFloat(categoryStyles.columnGap) >= 10,
+      "Category choices use a spaced grid and comfortably sized individual buttons");
+      frame.style.width = "360px";
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const mobileCategoryGrid = doc.defaultView.getComputedStyle(categorySwitch).gridTemplateColumns;
+      const mobileCategoryButtons = [...categorySwitch.querySelectorAll("button")];
+      assert(mobileCategoryGrid.split(" ").length === 2
+        && mobileCategoryButtons.every((button) => button.getBoundingClientRect().width >= 44
+          && button.getBoundingClientRect().height >= 44),
+      "Category choices remain in two clear, touch-sized columns on mobile");
+      frame.style.width = "1100px";
       const convert = (value, from, to) => {
         doc.querySelector("#conversion-value").value = String(value);
         doc.querySelector("#from-unit").value = from;
@@ -57,6 +77,18 @@
       "W, kW and MW conversions use consistent SI scaling");
       assert(doc.querySelector("#conversion-hint").textContent.includes("12,000 BTU/h"),
         "Refrigeration ton definition is disclosed to users");
+      clickCategory("pressure");
+      assert([...doc.querySelector("#from-unit").options, ...doc.querySelector("#to-unit").options]
+        .some((option) => option.value === "inH2O")
+        && [...doc.querySelector("#from-unit").options, ...doc.querySelector("#to-unit").options]
+          .some((option) => option.value === "mmH2O"),
+      "Pressure category includes inches and millimeters of water column");
+      assert(Math.abs(convert(1, "inH2O", "Pa") - 249.08891) < 1e-8
+        && Math.abs(convert(249.08891, "Pa", "inH2O") - 1) < 1e-10
+        && Math.abs(convert(1, "mmH2O", "Pa") - 9.80665) < 1e-8
+        && Math.abs(convert(1, "inH2O", "mmH2O") - 25.4) < 1e-12
+        && doc.querySelector("#conversion-hint").textContent.includes("4°C 水柱"),
+      "Water-column units use consistent 4°C definitions and exact inch-millimeter scaling");
       clickCategory("speed");
       assert([...doc.querySelector("#from-unit").options, ...doc.querySelector("#to-unit").options]
         .some((option) => option.value === "ft/min"),
@@ -77,6 +109,20 @@
       doc.querySelector("#conversion-value").dispatchEvent(new Event("input", { bubbles: true }));
       assert(doc.querySelector("#result-error").textContent.includes("長度不可為負值"),
         "Negative length input is rejected with a clear message");
+      clickCategory("volumetric-flow");
+      assert(doc.querySelector('[data-category="volumetric-flow"]').getAttribute("aria-pressed") === "true"
+        && doc.querySelector("#from-unit").value === "m3/h"
+        && doc.querySelector("#to-unit").value === "L/s",
+      "Volumetric flow category selects useful m³/h-to-L/s defaults");
+      assert(Math.abs(convert(1, "m3/min", "m3/s") - (1 / 60)) < 1e-8
+        && Math.abs(convert(1, "L/min", "L/s") - (1 / 60)) < 1e-8
+        && Math.abs(convert(1, "gpm", "L/min") - 3.7854118) < 1e-7
+        && Math.abs(convert(1, "ft3/min", "m3/h") - 1.6990108) < 1e-6,
+      "m³/min, L/min, US gpm and CFM use consistent volumetric flow conversions");
+      doc.querySelector("#conversion-value").value = "-1";
+      doc.querySelector("#conversion-value").dispatchEvent(new Event("input", { bubbles: true }));
+      assert(doc.querySelector("#result-error").textContent.includes("體積流率不可為負值"),
+        "Negative volumetric flow input is rejected with a clear message");
       output.dataset.kind = "success";
       output.textContent = JSON.stringify({ status: "PASS", checks }, null, 2);
     } catch (error) {

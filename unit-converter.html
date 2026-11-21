@@ -235,32 +235,38 @@
     }
 
     .category-switch {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
       margin-bottom: 28px;
-      padding: 5px;
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      background: var(--paper);
     }
 
     .category-switch button {
-      flex: 1 1 140px;
-      min-height: 44px;
-      padding: 8px 16px;
-      border: 0;
-      border-radius: 3px;
-      background: transparent;
-      color: var(--muted);
+      min-height: 48px;
+      padding: 9px 12px;
+      border: 1px solid #cbd5ca;
+      border-radius: 5px;
+      background: var(--surface);
+      color: var(--ink);
       font: inherit;
       font-weight: 650;
       cursor: pointer;
+      transition: border-color .16s ease, background-color .16s ease, color .16s ease;
+    }
+
+    .category-switch button:hover {
+      border-color: var(--green);
+      background: #f2f6e9;
     }
 
     .category-switch button[aria-pressed="true"] {
+      border-color: var(--green);
       background: var(--green);
       color: #fff;
+    }
+
+    .category-switch button[aria-pressed="true"]:hover {
+      background: var(--green-dark);
     }
 
     .conversion-fields {
@@ -488,6 +494,15 @@
         gap: 12px;
       }
 
+      .category-switch {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .category-switch button {
+        padding-inline: 8px;
+      }
+
       .swap-button {
         margin: 0 auto;
         transform: rotate(90deg);
@@ -528,13 +543,14 @@
     <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="tools.html">計算工具</a> ／ <span aria-current="page">單位換算</span></p>
     <p class="eyebrow">Unit Converter</p>
     <h1>單位換算</h1>
-    <p class="intro">即時換算常用溫度、壓力、長度、功率、體積、質量、速度、力、絕對黏度與能量單位。壓力換算以絕對壓力為準；若使用表壓，請先加上當地大氣壓。</p>
+    <p class="intro">即時換算常用溫度、壓力、長度、體積流率、功率、體積、質量、速度、力、絕對黏度與能量單位。壓力換算以絕對壓力為準；若使用表壓，請先加上當地大氣壓。</p>
 
     <section class="converter" aria-label="單位換算器">
       <div class="category-switch" role="group" aria-label="換算類別">
         <button type="button" data-category="temperature" aria-pressed="true">溫度</button>
         <button type="button" data-category="pressure" aria-pressed="false">壓力</button>
         <button type="button" data-category="length" aria-pressed="false">長度</button>
+        <button type="button" data-category="volumetric-flow" aria-pressed="false">體積流率</button>
         <button type="button" data-category="volume" aria-pressed="false">體積</button>
         <button type="button" data-category="mass" aria-pressed="false">質量</button>
         <button type="button" data-category="speed" aria-pressed="false">速度</button>
@@ -614,6 +630,8 @@
         { id: "atm", label: "標準大氣壓 (atm)", factor: 1 / 101325 },
         { id: "psia", label: "磅力／平方英吋 (psia)", factor: 0.0254 ** 2 / (9.80665 * 0.45359237) },
         { id: "inHg", label: "英吋汞柱 (inHg)", factor: (76 / 2.54) / 101325 },
+        { id: "inH2O", label: "英吋水柱 (in H₂O)", factor: 1 / 249.08891 },
+        { id: "mmH2O", label: "毫米水柱 (mm H₂O)", factor: 1 / 9.80665 },
         { id: "mmHg", label: "毫米汞柱 (mmHg)", factor: 760 / 101325 },
         { id: "kgf/cm2", label: "公斤力／平方公分 (kgf/cm²)", factor: 1 / 98066.5 },
       ],
@@ -627,6 +645,15 @@
         { id: "ft", label: "英尺 (ft)", factor: 1 / 0.3048 },
         { id: "yd", label: "碼 (yd)", factor: 1 / 0.9144 },
         { id: "mi", label: "英哩 (mi)", factor: 1 / 1609.344 },
+      ],
+      "volumetric-flow": [
+        { id: "m3/s", label: "立方公尺／秒 (m³/s)", factor: 1 },
+        { id: "m3/min", label: "立方公尺／分 (m³/min)", factor: 60 },
+        { id: "m3/h", label: "立方公尺／小時 (m³/h)", factor: 3600 },
+        { id: "L/s", label: "公升／秒 (L/s)", factor: 1e3 },
+        { id: "L/min", label: "公升／分 (L/min)", factor: 60e3 },
+        { id: "gpm", label: "美制加侖／分 (US gpm)", factor: 60 / (0.0254 ** 3 * 231) },
+        { id: "ft3/min", label: "立方英尺／分 (CFM)", factor: 60 / 0.3048 ** 3 },
       ],
       volume: [
         { id: "m3", label: "立方公尺 (m³)", factor: 1 },
@@ -753,8 +780,8 @@
         }
         result = kelvinToTemperature(kelvin, toUnit.value);
       } else {
-        if (value < 0 && ["pressure", "length", "volume", "mass", "absolute-viscosity"].includes(activeCategory)) {
-          const categoryNames = { pressure: "壓力", length: "長度", volume: "體積", mass: "質量", "absolute-viscosity": "絕對黏度" };
+        if (value < 0 && ["pressure", "length", "volumetric-flow", "volume", "mass", "absolute-viscosity"].includes(activeCategory)) {
+          const categoryNames = { pressure: "壓力", length: "長度", "volumetric-flow": "體積流率", volume: "體積", mass: "質量", "absolute-viscosity": "絕對黏度" };
           showConversionError(`${categoryNames[activeCategory]}不可為負值。`);
           return;
         }
@@ -792,6 +819,7 @@
         temperature: ["C", "F"],
         pressure: ["kPa", "psia"],
         length: ["m", "ft"],
+        "volumetric-flow": ["m3/h", "L/s"],
         volume: ["m3", "L"],
         mass: ["kg", "lbm"],
         speed: ["m/s", "km/hr"],
@@ -806,8 +834,9 @@
       }
       conversionHint.textContent = {
         temperature: "溫度採絕對溫標換算；低於絕對零度的數值不適用。",
-        pressure: "壓力單位以絕對壓力換算；表壓數值須先加上當地大氣壓。",
+        pressure: "壓力單位依壓力量值換算；絕對壓力與表壓互換時，須先調整當地大氣壓。in H₂O 依 4°C 水柱定義。",
         length: "長度不可為負值；英制長度依 1 in = 25.4 mm、1 ft = 0.3048 m 換算。",
+        "volumetric-flow": "體積流率不可為負值；gpm 採美制液量加侖，1 US gal = 231 in³。",
         volume: "美制液量加侖 (gal) 以 231 立方英吋換算；1 dm³ 等於 1 L。",
         mass: "質量不可為負值。",
         speed: "速度可為負值；正負號表示方向。",
