@@ -19,7 +19,7 @@
 
     try {
       const [columnsResponse, articleResponse] = await Promise.all([
-        fetch("../columns.html?quantum-test=" + Date.now()),
+        fetch("../selected-reading.html?quantum-test=" + Date.now()),
         fetch("../quantum-computing-hvac.html?quantum-test=" + Date.now()),
       ]);
       assert(columnsResponse.ok, "Engineering columns archive responds");
@@ -27,10 +27,9 @@
 
       const columns = new DOMParser().parseFromString(await columnsResponse.text(), "text/html");
       const article = new DOMParser().parseFromString(await articleResponse.text(), "text/html");
-      assert(columns.querySelector("h1")?.textContent.trim() === "技術專欄"
-        && columns.querySelectorAll("a.column-card").length === 1
-        && columns.querySelector('a[href="quantum-computing-hvac.html"] h2')?.textContent.includes("Quantum Computing"),
-      "Technical columns index lists only the quantum HVAC article");
+      assert(columns.querySelector("h1")?.textContent.trim() === "文章選讀"
+        && columns.querySelector('section[aria-label="文章選讀"] a[href="quantum-computing-hvac.html"] h2')?.textContent.includes("Quantum Computing"),
+      "Selected reading section lists the quantum HVAC article");
       const cover = columns.querySelector('a.column-card[href="quantum-computing-hvac.html"] img.column-cover');
       assert(cover?.getAttribute("src") === "assets/quantum-hvac-cover.svg"
         && cover.getAttribute("width") === "640" && cover.getAttribute("height") === "480",

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Direct-to-chip article tests</title></head>
+<body>
+  <h1>Direct-to-chip article tests</h1>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+    const frame = document.createElement("iframe");
+    frame.title = "Article layout test";
+    frame.style.cssText = "position:fixed;left:-10000px;top:0;width:320px;height:900px;border:0";
+    try {
+      const [indexResponse, articleResponse] = await Promise.all([
+        fetch("../columns.html", { cache: "no-store" }),
+        fetch("../direct-to-chip-liquid-cooling.html", { cache: "no-store" }),
+      ]);
+      assert(indexResponse.ok && articleResponse.ok, "Index and article respond");
+      const parser = new DOMParser();
+      const index = parser.parseFromString(await indexResponse.text(), "text/html");
+      const article = parser.parseFromString(await articleResponse.text(), "text/html");
+      assert(index.querySelector('a.column-card[href="direct-to-chip-liquid-cooling.html"]'), "Article is listed");
+      assert(article.querySelector("h1").textContent.includes("冷卻液水質管理、熱平衡與 PUE"), "Title identifies the full topic");
+      assert(article.querySelectorAll("article section").length === 11, "All article sections are present");
+      assert([...article.querySelectorAll('.toc a[href^="#"]')].every((link) => article.getElementById(link.hash.slice(1))), "Table of contents links resolve");
+      const refs = article.querySelectorAll("#sources ol > li");
+      const citations = [...article.querySelectorAll("article section:not(#sources)")].flatMap((section) => [...section.textContent.matchAll(/\[(\d+)\]/g)].map((match) => Number(match[1])));
+      assert(refs.length === 7 && citations.every((number) => number >= 1 && number <= refs.length)
+        && refs.length === new Set(citations).size, "Citations and references correspond");
+      const mass = 1000 / (4.1813 * 5);
+      assert(Math.abs(mass - 47.83) < 0.01 && Math.abs(mass / 997.05 * 3600 - 172.7) < 0.1, "Thermal calculation is consistent");
+      assert(1450 / 1250 === 1.16 && 1440 / 1250 === 1.152 && 10 * 24 === 240, "Energy and PUE example is consistent");
+      assert(article.querySelector("#sources").textContent.includes("未取得全文")
+        && article.querySelector("#limitations")?.textContent.includes("未取得特定")
+        && article.querySelector("#limitations").nextElementSibling?.id === "sources", "Source access and limitations are disclosed before references");
+      const exampleText = article.querySelector("#example").textContent;
+      assert(["215.9 m³/h", "172.7 m³/h", "143.9 m³/h", "34,800 kWh", "34,560 kWh", "240 kWh"].every((value) => exampleText.includes(value)),
+        "Published example includes flow comparisons and energy calculations");
+      const loaded = new Promise((resolve, reject) => {
+        frame.onload = resolve;
+        frame.onerror = () => reject(new Error("Article could not be loaded"));
+      });
+      frame.src = "../direct-to-chip-liquid-cooling.html?layout-test=1";
+      document.body.append(frame);
+      await loaded;
+      for (const width of [320, 375, 1100]) {
+        frame.style.width = `${width}px`;
+        await new Promise((resolve) => setTimeout(resolve, 60));
+        const doc = frame.contentDocument;
+        assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1, `No page overflow at ${width}px`);
+        const columns = doc.defaultView.getComputedStyle(doc.querySelector(".article-layout")).gridTemplateColumns.split(" ").length;
+        assert(columns === (width <= 900 ? 1 : 2), `Responsive article layout at ${width}px`);
+      }
+      output.textContent = `PASS: ${checks} checks`;
+    } catch (error) {
+      output.textContent = error.stack;
+      console.error(error);
+    } finally {
+      frame.remove();
+    }
+  </script>
+</body>
+</html>

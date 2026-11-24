@@ -37,7 +37,7 @@
       assert(home.querySelector("#columns-link-title")?.textContent.trim() === "技術專欄"
         && home.querySelector('a[href="columns.html"].button')?.textContent.includes("閱讀技術專欄"),
       "Homepage restores the engineering columns entry");
-      assert(columns.querySelectorAll("a.column-card").length === 1
+      assert(columns.querySelector('a.column-card[href="direct-to-chip-liquid-cooling.html"]')
         && !columns.querySelector('a[href="glycol.html"]'),
       "Glycol article remains available by route but is hidden from the technical columns");
 

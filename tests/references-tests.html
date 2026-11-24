@@ -20,8 +20,8 @@
       "index.html", "about.html", "founder.html", "exam-years.html",
       "exam-year-112.html", "exam-year-113.html", "exam-year-114.html", "exam-year-archive.html",
       "exam-paper.html", "humid-air.html", "refrigeration-cycle.html", "tools.html",
-      "unit-converter.html", "fan-laws.html", "duct-pressure.html", "moody-chart.html", "fin-efficiency.html", "water-refrigerant.html", "columns.html", "glycol.html", "chiller.html", "mau.html", "ahu.html",
-      "ahu-project-case.html", "vrf.html", "low-flow-chiller.html", "quantum-computing-hvac.html", "pipe-loss.html",
+      "unit-converter.html", "fan-laws.html", "duct-pressure.html", "moody-chart.html", "fin-efficiency.html", "water-refrigerant.html", "columns.html", "selected-reading.html", "references.html", "glycol.html", "chiller.html", "mau.html", "ahu.html",
+      "ahu-project-case.html", "vrf.html", "low-flow-chiller.html", "quantum-computing-hvac.html", "direct-to-chip-liquid-cooling.html", "pipe-loss.html",
     ];
 
     try {
@@ -31,21 +31,67 @@
         const page = new DOMParser().parseFromString(await response.text(), "text/html");
         assert(page.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "技術專欄",
           `${path} links to the technical columns`);
+        assert(page.querySelector('nav a[href="selected-reading.html"]')?.textContent.trim() === "文章選讀",
+          `${path} links to selected reading`);
         if (path === "columns.html") {
           assert(page.querySelector("h1")?.textContent.trim() === "技術專欄"
-            && page.querySelectorAll("a.column-card").length === 1
-            && page.querySelector('a.column-card[href="quantum-computing-hvac.html"]'),
-          "Technical columns lists only the quantum article");
+            && !page.querySelector('a.column-card[href="quantum-computing-hvac.html"]')
+            && !page.querySelector('a[href="nameplate-rated-power.html"], a[href="rated-design-operating-point.html"]')
+            && page.querySelector('a.column-card[href="direct-to-chip-liquid-cooling.html"]'),
+          "Technical columns lists engineering articles separately");
           assert(!page.querySelector('a[href="glycol.html"], a[href="chiller.html"], a[href="mau.html"], a[href="ahu.html"], a[href="vrf.html"], a[href="low-flow-chiller.html"], a[href="ahu-project-case.html"]'),
             "Other articles are not listed in the technical columns");
         }
+        if (path === "selected-reading.html") {
+          assert(page.querySelector("h1")?.textContent.trim() === "文章選讀"
+            && page.querySelector('nav a[href="selected-reading.html"][aria-current="page"]')
+            && page.querySelector('a.column-card[href="quantum-computing-hvac.html"]')
+            && !page.querySelector('a.column-card[href="direct-to-chip-liquid-cooling.html"]'),
+          "Selected reading has its own page and article");
+        }
+        if (path === "quantum-computing-hvac.html") {
+          assert(page.querySelector('nav a[href="selected-reading.html"][aria-current="page"]')
+            && page.querySelector('.breadcrumb a[href="selected-reading.html"]')
+            && page.querySelector('.back-link[href="selected-reading.html"]'),
+          "Quantum article navigation returns to selected reading");
+        }
         assert(!page.querySelector('nav a[href="references.html"]'),
           `${path} does not expose the bibliography in the site navigation`);
-        if (["columns.html", "glycol.html", "chiller.html", "mau.html", "ahu.html", "duct-pressure.html", "moody-chart.html", "fin-efficiency.html",
-          "ahu-project-case.html", "vrf.html", "low-flow-chiller.html", "quantum-computing-hvac.html"].includes(path)) {
+        if (["columns.html", "selected-reading.html", "glycol.html", "chiller.html", "mau.html", "ahu.html", "duct-pressure.html", "moody-chart.html", "fin-efficiency.html",
+          "ahu-project-case.html", "vrf.html", "low-flow-chiller.html", "quantum-computing-hvac.html", "direct-to-chip-liquid-cooling.html"].includes(path)) {
           assert(page.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
             `${path} includes the scroll-to-top button`);
         }
+      }
+
+      for (const path of ["index.html", "columns.html", "selected-reading.html", "quantum-computing-hvac.html"]) {
+        const frame = document.createElement("iframe");
+        frame.title = `Navigation layout: ${path}`;
+        frame.style.cssText = "position:fixed;left:-10000px;top:0;width:320px;height:900px;border:0";
+        const loaded = new Promise((resolve, reject) => {
+          frame.onload = resolve;
+          frame.onerror = () => reject(new Error(`${path} layout could not load`));
+        });
+        frame.src = `../${path}?layout-test=${Date.now()}`;
+        document.body.append(frame);
+        await loaded;
+        for (const width of [320, 375, 1100]) {
+          frame.style.width = `${width}px`;
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          const nav = frame.contentDocument.querySelector('nav[aria-label="主選單"]');
+          const box = nav.getBoundingClientRect();
+          const links = [...nav.querySelectorAll("a, summary")];
+          assert(links.every((link) => {
+            const rect = link.getBoundingClientRect();
+            return rect.left >= 0 && rect.right <= width && rect.bottom <= box.bottom + 1;
+          }), `${path} navigation fits at ${width}px`);
+          assert(links.every((link, index) => links.slice(index + 1).every((other) => {
+            const a = link.getBoundingClientRect();
+            const b = other.getBoundingClientRect();
+            return a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top;
+          })), `${path} navigation items do not overlap at ${width}px`);
+        }
+        frame.remove();
       }
 
       output.textContent = `PASS: ${checks} checks`;

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="AI 資料中心晶片直接液冷：冷卻液水質、熱平衡、PUE、風險管理與工程算例。">
+  <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
+  <title>AI 高密度資料中心液冷系統：水質、熱平衡與 PUE｜技術專欄</title>
+  <style>
+    :root { color-scheme: light; --ink: #172b2b; --muted: #5b6c68; --paper: #f6f5ef; --surface: #fffefa; --green: #1d6252; --line: #dce2d8; --serif: Georgia, "Noto Serif TC", "PMingLiU", serif; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); line-height: 1.8; }
+    a { color: inherit; text-underline-offset: 3px; overflow-wrap: anywhere; }
+    a:focus-visible, button:focus-visible { outline: 3px solid #9ab952; outline-offset: 4px; }
+    .wrap { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
+    .topbar { position: sticky; top: 0; z-index: 100; display: flex; width: 100%; min-height: 82px; align-items: center; justify-content: space-between; gap: 20px; padding-inline: max(24px, calc((100% - 1120px) / 2)); border-bottom: 1px solid var(--line); background: var(--paper); }
+    .brand { display: inline-flex; align-items: center; gap: 11px; font-size: 15px; font-weight: 750; text-decoration: none; }
+    .brand-mark { width: 34px; height: 34px; flex: 0 0 34px; object-fit: contain; }
+    nav { display: flex; gap: 24px; font-size: 13px; }
+    nav a { color: var(--muted); text-decoration: none; }
+    nav a:hover, nav a[aria-current="page"] { color: var(--green); }
+    .page { padding-block: 54px 84px; }
+    .breadcrumb { margin: 0 0 27px; color: var(--muted); font-size: 13px; }
+    .eyebrow { margin: 0 0 13px; color: var(--green); font-size: 12px; font-weight: 750; letter-spacing: .13em; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { font-family: var(--serif); font-weight: 500; }
+    h1 { max-width: 1000px; font-size: clamp(30px, 4vw, 48px); line-height: 1.35; overflow-wrap: anywhere; }
+    h2 { font-size: clamp(25px, 3vw, 34px); line-height: 1.4; }
+    h3 { font-size: 21px; }
+    .dek { max-width: 850px; color: var(--muted); font-size: 17px; }
+    .byline { color: var(--muted); font-size: 13px; margin-bottom: 36px; }
+    .article-layout { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 48px; align-items: start; }
+    .article-body { min-width: 0; }
+    .article-body section { margin-bottom: 38px; scroll-margin-top: 110px; }
+    .article-body p, .article-body li { color: #304542; }
+    .article-body ul, .article-body ol { padding-left: 1.35em; }
+    .article-body li + li { margin-top: 8px; }
+    .toc { position: sticky; top: 108px; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .toc h2 { font-family: inherit; font-size: 14px; font-weight: 750; }
+    .toc ol { margin: 0; padding-left: 1.25em; color: var(--muted); font-size: 13px; }
+    .toc li + li { margin-top: 6px; }
+    .callout { margin: 20px 0; padding: 17px 19px; border-left: 3px solid var(--green); background: #edf1e7; }
+    .warning { border-left-color: #9c5b22; background: #f7efe5; }
+    .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
+    table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 14px; text-align: left; }
+    th, td { padding: 11px 15px; border-top: 1px solid var(--line); vertical-align: top; }
+    th { background: #edf1e7; }
+    .formula { padding: 16px 18px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .small { color: var(--muted) !important; font-size: 13px; }
+    footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .footer-inner { display: flex; flex-direction: column; align-items: center; gap: 4px; padding-block: 24px; text-align: center; }
+    .footer-brand-link { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-size: 13px; font-weight: 750; text-decoration: none; }
+    .footer-brand-logo { width: 32px; height: 32px; }
+    .scroll-top-button { position: fixed; right: max(24px, env(safe-area-inset-right)); bottom: max(24px, env(safe-area-inset-bottom)); z-index: 110; display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--green); border-radius: 50%; background: var(--green); color: #fffefa; cursor: pointer; }
+    .scroll-top-button[hidden] { display: none; }
+    .scroll-top-icon { width: 11px; height: 11px; margin-top: 5px; transform: rotate(45deg); border-top: 2px solid currentColor; border-left: 2px solid currentColor; }
+    @media (max-width: 900px) { .topbar { flex-wrap: wrap; gap: 10px; padding-block: 12px; } nav { flex-wrap: wrap; gap: 8px 18px; } .article-layout { grid-template-columns: 1fr; gap: 27px; } .toc { position: static; grid-row: 1; } }
+    @media (max-width: 600px) { .wrap { width: calc(100% - 32px); } .topbar { padding-inline: 16px; } .brand { gap: 8px; font-size: 13px; } nav { width: 100%; justify-content: space-between; gap: 6px; font-size: 12px; } .page { padding-block: 38px 58px; } .dek { font-size: 16px; } .scroll-top-button { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="回到能源與冷凍空調學習網首頁"><img class="brand-mark" src="assets/hvacr-learning-logo.svg?v=3" alt=""><span>能源與冷凍空調學習網</span></a>
+    <nav aria-label="主選單"><a href="index.html">首頁</a><a href="about.html">關於我們</a><a href="exam-years.html">技師考題</a><a href="columns.html" aria-current="page">技術專欄</a><a href="selected-reading.html">文章選讀</a><a href="tools.html">計算工具</a></nav>
+  </header>
+  <main class="wrap page">
+    <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="columns.html">技術專欄</a> ／ 資料中心晶片直接液冷</p>
+    <p class="eyebrow">DATA CENTER · DIRECT-TO-CHIP COOLING</p>
+    <h1>AI 高密度資料中心液冷系統（Direct-to-Chip）冷卻液水質管理、熱平衡與 PUE 優化工程實務指南</h1>
+    <p class="dek">從冷板、冷卻液分配單元到設施散熱，分析水質與流量如何影響晶片散熱，並以一致的用電邊界檢視 PUE。</p>
+    <p class="byline">能源與冷凍空調工程實務專題｜參考來源與查閱範圍見文末</p>
+    <div class="article-layout">
+      <article class="article-body">
+        <section id="intro">
+          <h2>前言</h2>
+          <p>人工智慧運算設備的局部熱通量使冷卻設計不只關心整個機房的平均溫度。晶片直接液冷（direct-to-chip liquid cooling, D2C）把液體送入貼近晶片的冷板，將部分熱量帶往冷卻液分配單元及設施散熱系統；伺服器的其他元件仍可能需要空氣冷卻。[1]</p>
+          <p>流道積垢、腐蝕產物或氣泡可能使局部冷卻不均；冷卻液洩漏及低於露點的表面則帶來可靠度風險。另一方面，若以過大的泵流量或過低的供液溫度確保冷卻，可能增加非 IT 用電。本文依序說明系統邊界、熱流原理、水質與監測、控制、算例及維護，並區分工程建議與可查證的標準或法規。</p>
+          <div class="callout warning"><strong>適用範圍：</strong>本文主軸是冷板至冷卻液分配單元的封閉二次迴路。開放式冷卻水塔、設施水及浸沒式液冷有不同介質與風險；不得把其中一者的水質或藥劑條件直接套用到另一者。</div>
+        </section>
+        <section id="architecture">
+          <h2>一、D2C 是什麼？先認識系統與熱量路徑</h2>
+          <div class="callout">晶片 → 冷板 → IT 冷卻液迴路 → CDU 換熱器 → 設施冷卻水迴路 → 最終散熱設備</div>
+          <p>常見液對液系統可由晶片冷板、機櫃歧管、冷卻液分配單元（coolant distribution unit, CDU）、設施側換熱器與最終散熱設備組成。CDU 的具體配置依製造商設計，可能包含循環泵、過濾、監測與控制；有些架構不設液對液隔離，須依實際圖說確認。[1]</p>
+          <div class="table-wrap"><table><thead><tr><th scope="col">邊界</th><th scope="col">功能</th><th scope="col">管理重點</th></tr></thead><tbody>
+            <tr><td>IT 二次迴路</td><td>冷卻液由 CDU／歧管送至冷板並回流</td><td>最小支路流量、材料相容、洩漏及污染</td></tr>
+            <tr><td>設施一次迴路</td><td>接收 CDU 排出的熱量</td><td>供回水溫、流量、換熱與備援；水質依其自身設計</td></tr>
+            <tr><td>最終散熱</td><td>經冷卻水塔、乾式冷卻器或製冷設備排熱</td><td>天氣、用電、用水及適用許可</td></tr>
+            <tr><td>空氣側</td><td>移除未接冷板元件及其他殘餘熱量</td><td>氣流分配、濕度及冷凝風險</td></tr>
+          </tbody></table></div>
+          <p>不同系統的「一次側／二次側」命名可能相反；交付文件應以測點與流向定義，而非只寫名稱。液冷量不等於總 IT 熱量，也不等於整棟建築總散熱量。[1]</p>
+          <p>D2C 的冷卻液在冷板與管路內流動，並不代表整部伺服器浸在液體中。浸沒式液冷的介質與維護方式不同；開放式冷卻水塔的補水、蒸發、排污和藥劑管理也不能直接套用到封閉的 IT 冷卻液迴路。</p>
+        </section>
+        <section id="physics">
+          <h2>二、工作原理與物理機制</h2>
+          <h3>1. 熱傳與液側熱平衡</h3>
+          <p>晶片熱量經封裝、接觸界面及冷板傳入流體，再由 CDU 將熱量傳至設施側。污染附著在換熱面時，可能增加熱阻；狹窄流道內粒子堆積也可能提高壓降、改變支路流量。熱阻、流量與晶片溫度需一起判讀，而不是單看供液溫度。[1]</p>
+          <div class="formula">液側熱平衡：Q̇ = ṁ × c<sub>p</sub> × (T<sub>out</sub> − T<sub>in</sub>)　[1][2]</div>
+          <p>Q̇ 為熱傳率（kW），ṁ 為質量流率（kg/s），c<sub>p</sub> 為定壓比熱（kJ/(kg·K)），T<sub>out</sub>、T<sub>in</sub> 為液體出口與入口溫度（°C）；溫差以 K 或 °C 表示數值相同。式子採穩態、同一量測邊界與近似固定比熱，且忽略管路熱損及儲熱；若有泵浦熱或旁通，須分別納入。[1][2]</p>
+          <h3>流量、壓差與泵浦</h3>
+          <p>泵浦提供壓力能，使液體克服冷板、軟管、接頭、過濾器與管路的流動阻力。離心泵的運轉點取決於泵浦性能及系統阻力，不能只看某一項額定流量。[4]</p>
+          <div class="formula">液體獲得的水力功率：P<sub>hyd</sub> = V̇ × Δp　[4]</div>
+          <p>P<sub>hyd</sub> 為水力功率（W），V̇ 為體積流率（m³/s），Δp 為泵浦兩端壓力差（Pa）。在忽略高程及速度變化的簡化條件下，軸功率還須考慮泵浦效率，電力輸入則進一步受馬達及驅動器效率影響。實際選型仍應使用原廠性能曲線、液體物性及系統阻力。[4]</p>
+          <h3>2. 腐蝕、微生物與冷凝</h3>
+          <p>混合金屬、電解質與溶氧等條件可能促進腐蝕；抑蝕劑濃度、材料與流態則影響其結果。腐蝕產物可能進入冷板流道。電導度只能反映樣品的導電能力，不能單獨證明材料不腐蝕；應以原廠核准配方、材料清單、趨勢與檢驗結果共同判讀。[1]</p>
+          <p>滯留水與生物膜在水系統中需要風險管理。美國 CDC 指出退伍軍人菌在約 25–45°C 的水中具有較有利的生長條件；該資料是建築水系統公共衛生指引，<strong>不是冷板迴路的通用微生物限值</strong>。開放式冷卻水塔若形成氣膠，應另行評估其暴露及維護風險。[3]</p>
+          <p>設備表面低於周圍空氣露點時可能結露；應量測空氣狀態、估算露點，並比較最冷表面溫度及感測誤差。供液溫度不等於每一接頭的表面溫度，須考量保冷、熱橋與動態條件。[1]</p>
+        </section>
+        <section id="parameters">
+          <h2>三、關鍵參數與影響因素</h2>
+          <p>下表為<strong>工程監測建議，不是通用標準或法定限值</strong>。各項容許範圍、分析方法與頻率須由冷板、CDU、冷卻液供應商及場址風險評估共同核定。初期建立基線，事件或補液後加密檢測。[1]</p>
+          <div class="table-wrap"><table><thead><tr><th scope="col">指標</th><th scope="col">範圍與建議頻率</th><th scope="col">工程判讀</th></tr></thead><tbody>
+            <tr><td>供回液溫度、支路流量</td><td>原廠允許範圍；連續記錄、每日檢視</td><td>對照負載與各支路，避免總流量掩蓋局部不足</td></tr>
+            <tr><td>CDU 差壓、泵浦功率</td><td>設備曲線與控制限制；連續記錄</td><td>比較相同流量和閥位下的趨勢，不以差壓單獨認定堵塞</td></tr>
+            <tr><td>pH、電導度、抑蝕劑</td><td>配方與材料核准值；依風險每週／月採樣</td><td>記錄溫度、補液和校正；異常變動需追查來源</td></tr>
+            <tr><td>粒子、濾網差壓、金屬離子</td><td>依冷板允許污染及檢測方法核定；初期與定期採樣</td><td>辨識施工殘屑或腐蝕產物；濾網差壓不能代替粒子計數</td></tr>
+            <tr><td>露點與最冷表面溫度</td><td>裕度由設計風險與儀表誤差決定；連續監測</td><td>避免凝結；不可把某一固定溫差當成普遍安全值</td></tr>
+            <tr><td>洩漏與補液</td><td>依連鎖與應變計畫；連續監測並每日核對</td><td>補液異常應調查排氣、洩漏及儀表，不應只自動補滿</td></tr>
+          </tbody></table></div>
+          <p>水或水溶液的密度、比熱及黏度隨溫度和配方改變。NIST 公開資料中，<strong>純水</strong>在 25°C、0.1 MPa 的密度為 997.05 kg/m³、比熱為 4.1813 kJ/(kg·K)、導熱係數為 0.60652 W/(m·K)；這些值不直接適用於含抑蝕劑或乙二醇的冷卻液。[2]</p>
+        </section>
+        <section id="methods">
+          <h2>四、分析方法、設計方法與技術方案</h2>
+          <h3>冷卻液與過濾</h3>
+          <p>先取得原廠核准的冷卻液、接液金屬、墊片、軟管及材料相容清單，再決定補水與前處理。若採用乙二醇水溶液，必須使用供應商針對實際濃度及溫度的物性、冰點與材料資料；濃度變動會影響流量計算、泵送及換熱，不能僅依防凍需求自行加藥。冷卻水塔常用氧化劑或藥劑不得直接加入冷板迴路。</p>
+          <p>濾材應依冷板容許污染、流量、過濾效率和壓降選擇；單寫公稱粒徑不足以說明效率。施工沖洗應依原廠要求判定冷板是否隔離，避免雜質進入微流道；清洗劑殘留與沖洗驗收方法也須列入交接。</p>
+          <h3>換熱器與控制</h3>
+          <p>液對液 CDU 可隔離兩側流體，但一次側水質及結垢仍會影響換熱。可在相似負載和流量下追蹤逼近溫差：若定義為「二次側供液溫度 − 一次側進水溫度」，增大可能與流量、傳熱、旁通或測點偏差有關；它不是單獨證明結垢的指標。[1]</p>
+          <p>泵浦控制應確認最不利支路最低流量與最大壓差，再評估變頻。提高供液溫度可能降低製冷負擔或增加自然冷卻時數，但也可能使冷板溫度或 CDU 能力越限；必須逐步測試並量測整體變化，不能使用固定的「每升高 1°C 節電百分比」。[1][4]</p>
+          <h3>比較 CDU 兩側熱量</h3>
+          <p>可分別使用兩側的流量、比熱及通過換熱器的溫升估算熱量。以各側流體進、出口為邊界，理想穩態下兩側數值應接近；實際差異可能來自環境散熱、儲熱、設備自身輸入熱量或儀表誤差。溫升較小時，溫度計誤差可能占溫差相當比例，應先核對測點、同步時間、流量計校正及物性，不能直接判定換熱器故障。</p>
+          <div class="formula">Q̇<sub>IT</sub> ≈ ṁ<sub>IT</sub> c<sub>p,IT</sub> (T<sub>IT,out</sub> − T<sub>IT,in</sub>)<br>Q̇<sub>設施</sub> ≈ ṁ<sub>設施</sub> c<sub>p,設施</sub> (T<sub>設施,out</sub> − T<sub>設施,in</sub>)</div>
+          <p>各符號的單位及穩態、近似固定比熱的條件與前述熱平衡相同；兩式分別使用各側流體物性與進出口溫度。</p>
+          <h3>PUE 與計量邊界</h3>
+          <div class="formula">PUE = 同一期間資料中心總用電量 ÷ 同一期間 IT 設備用電量　[5]</div>
+          <p>分子與分母均為同期間的電能（例如 kWh），計量邊界須一致，並揭露共用設施分攤與電表位置。PUE 是設施能源比值，不是晶片效率或運算效率；瞬時功率比不能直接當作年度 PUE。ISO 官方目錄列有 ISO/IEC 30134-2:2016；本文僅核對公開目錄，未取得完整標準，也未確認後續修訂狀態。[5]</p>
+        </section>
+        <section id="example">
+          <h2>五、工程計算案例：1 MW 液側散熱</h2>
+          <p><strong>目的與假設：</strong>以下是虛構的穩態示例，非真實場址或設備選型。IT 電力平均 1,250 kW，其中 1,000 kW 熱量由液側移除，其餘 250 kW 假設由空氣及其他路徑移除。液體假設為純水，取 25°C、0.1 MPa 的 NIST 物性近似整個迴路：密度 997.05 kg/m³、比熱 4.1813 kJ/(kg·K)；此近似並非精確計算 30–35°C 的物性。[2]</p>
+          <p>供液 30°C、回液 35°C，溫升 ΔT = 5 K；暫不計管路散熱、儲熱及泵浦熱進入二次液體。由前節液側熱平衡：</p>
+          <div class="formula">ṁ = 1,000 ÷ (4.1813 × 5) = <strong>47.83 kg/s</strong><br>體積流率 V̇ = ṁ ÷ ρ = 47.83 ÷ 997.05 × 3,600 ≈ <strong>172.7 m³/h</strong></div>
+          <p>其中 ρ 為密度（kg/m³），V̇ 為體積流率；式中 3,600 將 m³/s 換為 m³/h。此值是整個二次迴路的估算，不能作為各冷板的最低流量；實際設計還要檢查各支路流量、壓差、流體性質、儀表不確定度和設備限制。</p>
+          <h3>比較不同溫升的影響</h3>
+          <p>同樣以 1,000 kW 負載與上述物性估算，只有溫升改變時：</p>
+          <div class="table-wrap"><table><thead><tr><th scope="col">液體溫升</th><th scope="col">質量流率</th><th scope="col">約略體積流率</th><th scope="col">判讀</th></tr></thead><tbody>
+            <tr><td>4 K</td><td>59.79 kg/s</td><td>215.9 m³/h</td><td>流量較大；泵送需求仍須依系統曲線確認</td></tr>
+            <tr><td>5 K</td><td>47.83 kg/s</td><td>172.7 m³/h</td><td>本案例基準</td></tr>
+            <tr><td>6 K</td><td>39.86 kg/s</td><td>143.9 m³/h</td><td>流量較小，但回液溫度及各冷板條件須另核對</td></tr>
+          </tbody></table></div>
+          <p>此比較不表示實際設備可任意採用 4–6 K，也不直接給出泵浦節能率；冷板性能、流量分配及供回液溫度限制都可能改變可行範圍。</p>
+          <p><strong>PUE 算例：</strong>若同一完整統計期間平均 IT 功率為 1,250 kW，泵浦平均 40 kW，其餘非 IT 平均 160 kW，則總平均功率 1,450 kW，比例為 1,450 ÷ 1,250 = <strong>1.160</strong>。只有各平均功率對應相同期間且範圍完整，該比值才等於該期間電能的比值；它不是年度 PUE 預測。[5]</p>
+          <p>假設其他負載不變且所有支路仍符合規範，泵浦平均功率從 40 降至 30 kW，持續 24 小時可少用 10 × 24 = <strong>240 kWh</strong>；同期間電能比為 1.152。此為算術示例，不是保證節能量；應檢查冷板溫度、其他冷卻設備功率及負載變化。</p>
+          <p>以上 24 小時的 IT 用電為 30,000 kWh；改善前總用電為 34,800 kWh，改善後為 34,560 kWh。只有在列示設備完整涵蓋同一計量邊界時，這些數值才能用於上述比值。</p>
+        </section>
+        <section id="operations">
+          <h2>六、實務應用、維護與常見問題</h2>
+          <h3>試車、量測與維護</h3>
+          <ol>
+            <li><strong>設計與驗收：</strong>整理冷板進口溫度、支路最低流量、允許壓差、配方、接液材料及洩漏隔離要求；確認設施側與 IT 側量測邊界。</li>
+            <li><strong>日常：</strong>檢視溫度、支路流量、差壓、泵浦、露點、漏液及補液紀錄，並將水質變化與負載、維修事件對照。</li>
+            <li><strong>定期：</strong>依原廠和風險評估採樣 pH、電導度、粒子、金屬離子與抑蝕劑；校正儀表並檢查濾網、接頭和保冷。頻率應依初期趨勢調整，而非照搬固定週期。</li>
+            <li><strong>停機／復機：</strong>依原廠規定決定保留液體、保護循環或排放；復機前檢查液質、漏液及最不利支路，並逐步恢復負載。</li>
+            <li><strong>異常應變：</strong>依預先核定程序隔離漏液、維持必要冷卻並通知 IT 與機電人員；不得擅自旁路保護。任何帶電工作應依職安規定由合格人員執行。[6]</li>
+          </ol>
+          <p>以下時間尺度是規劃示例，<strong>不是通用規定</strong>；試車初期、補液後或發生異常時可能需要加密檢查，實際頻率依原廠及風險評估決定。</p>
+          <div class="table-wrap"><table><thead><tr><th scope="col">時間尺度</th><th scope="col">可納入工作</th><th scope="col">目的與限制</th></tr></thead><tbody>
+            <tr><td>日常</td><td>檢視溫度、流量、差壓、漏液警報及補液量</td><td>及早發現異常；警報值依設備核定</td></tr>
+            <tr><td>每週／每月</td><td>檢查趨勢、濾網差壓，依計畫採樣</td><td>比較相同工況；頻率依配方與風險調整</td></tr>
+            <tr><td>季度</td><td>檢討儀表校正、支路平衡、警報與控制紀錄</td><td>釐清變化是否來自設備、負載或量測</td></tr>
+            <tr><td>年度或計畫停機</td><td>檢查接頭、保冷、備援與必要設備維護</td><td>依原廠程序安排，避免非必要開放迴路</td></tr>
+          </tbody></table></div>
+          <h3>台灣場址與法規邊界</h3>
+          <p>應實際調查水源、季節水質及氣象，不宜用行政區直接推定硬度；沿海鹽霧和高濕環境需分別評估室外設備腐蝕、保冷與露點控制。若設置開放式水塔，應另評估補水、排污、藥劑與公共衛生；封閉 D2C 迴路不適用水塔濃縮倍數的直接套用。[1][3]</p>
+          <p>涉及台灣場址排水時，應確認《水污染防治法》及適用的相關規定；是否列管及數值限值，須依事業分類、排放去向、主管機關許可及現行附表確認。本次未確認特定場址之限值，因此不提供通用法定數字；廢冷卻液分類與職安責任亦應向主管機關及合格專業人員確認。[6][7]</p>
+          <p><strong>常見誤解：</strong>「低電導度就無腐蝕」、「供液越冷一定越節能」、「PUE 下降一定表示運算效率上升」，都忽略了材料與流體相容性、冷凝、設備邊界及 IT 負載變動。</p>
+        </section>
+        <section id="trends">
+          <h2>七、發展方向與評估限制</h2>
+          <p>提高可用液溫可能有利於自然冷卻或熱回收，但可行時數取決於場址逐時氣象、設備能力、熱用戶需求和供液限制；回收的理論熱量不等於實際可利用熱量。[1] 自動化監控可用於偵測支路異常與改善設定，但應保留安全上限、失效回退及人工覆核；不能用演算法取代原廠保護。</p>
+          <p>能源、用水和冷卻液更換須共同評估：只看 PUE 可能漏掉水耗、熱回收邊界或冷卻液生命週期。台灣的電價及排放係數須採適用契約、盤查年度及主管機關發布資料，不能由示例推定未來排碳量。[7]</p>
+        </section>
+        <section id="conclusion">
+          <h2>結語與重點整理</h2>
+          <p>D2C 冷卻需以熱平衡理解散熱，並把水質、各支路流量、溫度、露點和材料相容性作為同一系統管理。PUE 只有在用電範圍、時間及 IT 負載可比較時才有判讀意義；實際選型、供液重設及維護須以原廠規格、現場量測與法規許可為準。</p>
+          <ul><li>分清冷板、設施迴路與最終散熱設備，不混用水質要求。</li><li>以流量、比熱與溫升估算熱量時，須交代物性、穩態假設及邊界。</li><li>水質須結合材料相容、配方、污染物及歷史趨勢判讀。</li><li>總流量達標不代表每個支路都達標；供液溫度也不等於所有表面溫度。</li><li>PUE 使用同期間、邊界一致的電能，不代表運算效率或所有環境影響。</li></ul>
+        </section>
+        <section id="limitations">
+          <h2>資料限制</h2>
+          <p>未取得特定冷板、CDU 或冷卻液的原廠文件，因此無法提供通用的水質限值、藥劑劑量或支路流量。ISO 標準僅查閱公開目錄，未取得全文或確認後續修訂狀態；算例不構成符合標準的正式報告。純水物性為近似，實際設計須依配方與工作條件重新計算。本文亦不判定特定台灣場址的排放許可及職安要求。</p>
+        </section>
+        <section id="sources">
+          <h2>參考文獻</h2>
+          <ol>
+            <li>ASHRAE, <cite>2023 ASHRAE Handbook—HVAC Applications</cite>, Chapter 20, “Data Centers and Telecommunication Facilities”. <a href="https://handbook.ashrae.org/Handbooks/A23/SI/A23_Ch20/a23_ch20_si.aspx">ASHRAE Handbook 公開網頁</a>。已查閱可取得的章節網頁，用於系統架構與資料中心冷卻背景；不代表已核對所有專屬水質標準。</li>
+            <li>NIST, <cite>NIST Chemistry WebBook: Thermophysical Properties of Fluid Systems</cite>。<a href="https://webbook.nist.gov/cgi/fluid.cgi?Action=Data&amp;Wide=on&amp;ID=C7732185&amp;Type=IsoBar&amp;TLow=25&amp;THigh=25&amp;TInc=1&amp;P=0.1&amp;RefState=DEF&amp;TUnit=C&amp;PUnit=MPa&amp;DUnit=kg%2Fm3&amp;HUnit=kJ%2Fkg&amp;WUnit=m%2Fs&amp;VisUnit=uPa%2As&amp;STUnit=N%2Fm">25°C、0.1 MPa 純水資料</a>；已查閱查詢結果，支持案例物性。</li>
+            <li>CDC, <cite>Monitor Building Water</cite>。<a href="https://www.cdc.gov/control-legionella/php/guidance/monitor-water-guidance.html">公開指引</a>；已查閱溫度與滯留水段落，僅用於公共衛生背景。</li>
+            <li>ASHRAE, <cite>2020 ASHRAE Handbook—HVAC Systems and Equipment</cite>, Chapter 44, “Centrifugal Pumps”。<a href="https://handbook.ashrae.org/Handbooks/S20/SI/S20_Ch44/S20_Ch44_si.aspx">公開章節網頁</a>；已查閱可取得內容，作為泵浦及水系統背景。</li>
+            <li>ISO/IEC, <cite>ISO/IEC 30134-2:2016, Information technology — Data centres — Key performance indicators — Part 2: Power usage effectiveness (PUE)</cite>。<a href="https://www.iso.org/standard/63451.html">ISO 官方目錄</a>；僅查閱公開標題，未取得全文或確認其後續版本。</li>
+            <li>勞動部職業安全衛生署，<a href="https://www.osha.gov.tw/">官方網站</a>；職業安全及化學品管理資訊入口，實務仍須確認適用規定。</li>
+            <li>法務部，<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=O0040001">水污染防治法</a>；已查閱公開條文中的名詞定義，未完成個案許可及限值判定。</li>
+          </ol>
+          <a href="columns.html">← 返回技術專欄</a>
+        </section>
+      </article>
+      <aside class="toc" aria-label="本文目錄"><h2>本文目錄</h2><ol>
+        <li><a href="#intro">前言</a></li><li><a href="#architecture">系統架構</a></li><li><a href="#physics">工作原理</a></li><li><a href="#parameters">關鍵參數</a></li><li><a href="#methods">分析與技術方案</a></li><li><a href="#example">工程案例</a></li><li><a href="#operations">操作與維護</a></li><li><a href="#trends">發展方向</a></li><li><a href="#conclusion">結語</a></li><li><a href="#limitations">資料限制</a></li><li><a href="#sources">參考文獻</a></li>
+      </ol></aside>
+    </div>
+  </main>
+  <footer><div class="wrap footer-inner"><a class="footer-brand-link" href="index.html" aria-label="能源與冷凍空調學習網首頁"><img class="footer-brand-logo" src="assets/hvacr-learning-logo.svg?v=3" alt=""><span>能源與冷凍空調學習網</span></a><span>以學習、交流與實務應用為目的</span></div></footer>
+  <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
+  <script>
+    const scrollTopButton = document.querySelector(".scroll-top-button");
+    function updateScrollTopButton() { scrollTopButton.hidden = window.scrollY <= 0; }
+    window.addEventListener("scroll", updateScrollTopButton, { passive: true });
+    scrollTopButton.addEventListener("click", () => {
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      window.scrollTo({ top: 0, behavior });
+    });
+    updateScrollTopButton();
+  </script>
+</body>
+</html>

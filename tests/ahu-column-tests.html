@@ -33,7 +33,7 @@
       assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "技術專欄",
         "Main navigation links to engineering columns");
       assert(columns.querySelector("h1")?.textContent.trim() === "技術專欄"
-        && columns.querySelectorAll("a.column-card").length === 1
+        && columns.querySelector('a.column-card[href="direct-to-chip-liquid-cooling.html"]')
         && !columns.querySelector('a[href="ahu.html"]'),
       "AHU article remains available by route but is hidden from the technical columns");
       assert(!columns.querySelector('a[href="vrf.html"], a[href="low-flow-chiller.html"], a[href="ahu-project-case.html"]'),

@@ -34,7 +34,7 @@
         "Chiller article includes the scroll-to-top button");
       assert(home.querySelector('nav a[href="columns.html"]')?.textContent.trim() === "技術專欄",
         "Main navigation links to the engineering columns");
-      assert(columns.querySelectorAll("a.column-card").length === 1
+      assert(columns.querySelector('a.column-card[href="direct-to-chip-liquid-cooling.html"]')
         && !columns.querySelector('a[href="chiller.html"]'),
       "Chiller article remains available by route but is hidden from the technical columns");
 
