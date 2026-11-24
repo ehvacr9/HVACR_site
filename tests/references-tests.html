@@ -21,7 +21,7 @@
       "exam-year-112.html", "exam-year-113.html", "exam-year-114.html", "exam-year-archive.html",
       "exam-paper.html", "humid-air.html", "refrigeration-cycle.html", "tools.html",
       "unit-converter.html", "fan-laws.html", "duct-pressure.html", "moody-chart.html", "fin-efficiency.html", "water-refrigerant.html", "columns.html", "selected-reading.html", "references.html", "glycol.html", "chiller.html", "mau.html", "ahu.html",
-      "ahu-project-case.html", "vrf.html", "low-flow-chiller.html", "quantum-computing-hvac.html", "direct-to-chip-liquid-cooling.html", "pipe-loss.html",
+      "ahu-project-case.html", "vrf.html", "low-flow-chiller.html", "quantum-computing-hvac.html", "direct-to-chip-liquid-cooling.html", "magnetic-bearing-chiller.html", "pipe-loss.html",
     ];
 
     try {
@@ -37,6 +37,7 @@
           assert(page.querySelector("h1")?.textContent.trim() === "技術專欄"
             && !page.querySelector('a.column-card[href="quantum-computing-hvac.html"]')
             && !page.querySelector('a[href="nameplate-rated-power.html"], a[href="rated-design-operating-point.html"]')
+            && page.querySelector('a.column-card[href="magnetic-bearing-chiller.html"]')
             && page.querySelector('a.column-card[href="direct-to-chip-liquid-cooling.html"]'),
           "Technical columns lists engineering articles separately");
           assert(!page.querySelector('a[href="glycol.html"], a[href="chiller.html"], a[href="mau.html"], a[href="ahu.html"], a[href="vrf.html"], a[href="low-flow-chiller.html"], a[href="ahu-project-case.html"]'),
@@ -49,6 +50,11 @@
             && !page.querySelector('a.column-card[href="direct-to-chip-liquid-cooling.html"]'),
           "Selected reading has its own page and article");
         }
+        if (["columns.html", "selected-reading.html"].includes(path)) {
+          assert(page.querySelector("footer .footer-brand-link span")?.textContent.trim()
+            === "Copyright © 2026 能源與冷凍空調學習網. All rights reserved.",
+          `${path} displays the requested copyright`);
+        }
         if (path === "quantum-computing-hvac.html") {
           assert(page.querySelector('nav a[href="selected-reading.html"][aria-current="page"]')
             && page.querySelector('.breadcrumb a[href="selected-reading.html"]')
@@ -58,7 +64,7 @@
         assert(!page.querySelector('nav a[href="references.html"]'),
           `${path} does not expose the bibliography in the site navigation`);
         if (["columns.html", "selected-reading.html", "glycol.html", "chiller.html", "mau.html", "ahu.html", "duct-pressure.html", "moody-chart.html", "fin-efficiency.html",
-          "ahu-project-case.html", "vrf.html", "low-flow-chiller.html", "quantum-computing-hvac.html", "direct-to-chip-liquid-cooling.html"].includes(path)) {
+          "ahu-project-case.html", "vrf.html", "low-flow-chiller.html", "quantum-computing-hvac.html", "direct-to-chip-liquid-cooling.html", "magnetic-bearing-chiller.html"].includes(path)) {
           assert(page.querySelector(".scroll-top-button[aria-label='捲動到最上方']"),
             `${path} includes the scroll-to-top button`);
         }

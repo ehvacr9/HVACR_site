@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>磁懸浮冰水主機專欄測試</title></head>
+<body>
+  <h1>磁懸浮冰水主機專欄測試</h1>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+    const frame = document.createElement("iframe");
+    frame.title = "Article layout test";
+    frame.style.cssText = "position:fixed;left:-10000px;top:0;width:320px;height:900px;border:0";
+    try {
+      const [indexResponse, articleResponse] = await Promise.all([
+        fetch("../columns.html", { cache: "no-store" }),
+        fetch("../magnetic-bearing-chiller.html", { cache: "no-store" }),
+      ]);
+      assert(indexResponse.ok && articleResponse.ok, "Index and article respond");
+      const parser = new DOMParser();
+      const index = parser.parseFromString(await indexResponse.text(), "text/html");
+      const article = parser.parseFromString(await articleResponse.text(), "text/html");
+      const title = "磁懸浮無油變頻離心式冰水主機 IPLV 迷思破解、喘振（Surge）防制與全生命週期效益實務指南";
+      assert(article.querySelector("h1")?.textContent === title
+        && index.querySelector('a.column-card[href="magnetic-bearing-chiller.html"] h2')?.textContent === title,
+      "Index links to the full article title");
+      const sections = [...article.querySelectorAll("article > section")];
+      const links = [...article.querySelectorAll(".toc a")];
+      assert(sections.length === 11 && links.length === sections.length && links.every((link, i) =>
+        link.getAttribute("href") === `#${sections[i].id}` && link.textContent === sections[i].querySelector("h2").textContent),
+      "Contents match every article section");
+      const references = article.querySelectorAll("#sources ol > li");
+      const cited = new Set([...article.querySelector("article").textContent.matchAll(/\[(\d+)\]/g)].map((match) => Number(match[1])));
+      assert(references.length === 4 && [...cited].sort().join() === "1,2,3,4",
+        "References correspond to citations");
+      const example = article.querySelector("#example").textContent;
+      assert(["903,000 kWh", "957,000 kWh", "54,000 kWh", "1,650,000 RTh", "36,000 kWh",
+        "18,000 kWh", "63,000", "−105,354 元"].every((value) => example.includes(value)),
+      "Full teaching example is present");
+      const energyA = 900 * 0.66 * 500 + 600 * 0.50 * 1500 + 300 * 0.52 * 1000;
+      const energyB = 900 * 0.62 * 500 + 600 * 0.54 * 1500 + 300 * 0.64 * 1000;
+      const npv = -800000 + 83000 * (1 - 1.06 ** -10) / 0.06 + 150000 / 1.06 ** 10;
+      assert(energyA === 903000 && energyB === 957000 && energyB - energyA - 12 * 3000 === 18000
+        && Math.round(npv) === -105354, "Energy and discounted cost results are consistent");
+      assert(article.querySelector("#limitations").nextElementSibling.id === "sources"
+        && article.querySelector("#limitations").textContent.includes("未取得並核對"),
+      "Source limitations precede references");
+      const loaded = new Promise((resolve, reject) => {
+        frame.onload = resolve;
+        frame.onerror = () => reject(new Error("Article could not be loaded"));
+      });
+      frame.src = "../magnetic-bearing-chiller.html?layout-test=1";
+      document.body.append(frame);
+      await loaded;
+      for (const width of [320, 375, 1100]) {
+        frame.style.width = `${width}px`;
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        const doc = frame.contentDocument;
+        assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1, `No page overflow at ${width}px`);
+        for (const link of doc.querySelectorAll(".toc a")) {
+          link.click();
+          await new Promise((resolve) => setTimeout(resolve, 30));
+          const heading = doc.getElementById(link.hash.slice(1)).querySelector("h2");
+          const gap = heading.getBoundingClientRect().top - doc.querySelector(".topbar").getBoundingClientRect().bottom;
+          assert(doc.defaultView.location.hash === link.hash && gap >= 15 && gap <= 18,
+            `${link.hash} scrolls to the visible heading at ${width}px (gap: ${gap})`);
+        }
+      }
+      output.textContent = `PASS: ${checks} checks`;
+    } catch (error) {
+      output.textContent = error.stack;
+      console.error(error);
+    } finally {
+      frame.remove();
+    }
+  </script>
+</body>
+</html>

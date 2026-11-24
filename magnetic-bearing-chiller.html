@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="磁懸浮無油變頻離心式冰水主機：IPLV、喘振防制、年度用電與全生命週期成本。">
+  <link rel="icon" type="image/svg+xml" href="assets/hvacr-learning-logo.svg?v=3">
+  <title>磁懸浮無油變頻離心式冰水主機｜技術專欄</title>
+  <style>
+    :root { color-scheme: light; --ink: #172b2b; --muted: #5b6c68; --paper: #f6f5ef; --surface: #fffefa; --green: #1d6252; --line: #dce2d8; --header-height: 82px; --serif: Georgia, "Noto Serif TC", "PMingLiU", serif; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); line-height: 1.8; }
+    a { color: inherit; text-underline-offset: 3px; overflow-wrap: anywhere; }
+    a:focus-visible, button:focus-visible { outline: 3px solid #9ab952; outline-offset: 4px; }
+    .wrap { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
+    .topbar { position: sticky; top: 0; z-index: 100; display: flex; width: 100%; min-height: 82px; align-items: center; justify-content: space-between; gap: 20px; padding-inline: max(24px, calc((100% - 1120px) / 2)); border-bottom: 1px solid var(--line); background: var(--paper); }
+    .brand { display: inline-flex; align-items: center; gap: 11px; font-size: 15px; font-weight: 750; text-decoration: none; }
+    .brand-mark { width: 34px; height: 34px; flex: 0 0 34px; object-fit: contain; }
+    nav { display: flex; gap: 24px; font-size: 13px; }
+    nav a { color: var(--muted); text-decoration: none; }
+    nav a:hover, nav a[aria-current="page"] { color: var(--green); }
+    .page { padding-block: 54px 84px; }
+    .breadcrumb { margin: 0 0 27px; color: var(--muted); font-size: 13px; }
+    .eyebrow { margin: 0 0 13px; color: var(--green); font-size: 12px; font-weight: 750; letter-spacing: .13em; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { font-family: var(--serif); font-weight: 500; }
+    h1 { max-width: 1000px; font-size: clamp(30px, 4vw, 48px); line-height: 1.35; overflow-wrap: anywhere; }
+    h2 { font-size: clamp(25px, 3vw, 34px); line-height: 1.4; }
+    h3 { font-size: 21px; }
+    .dek { max-width: 850px; color: var(--muted); font-size: 17px; }
+    .byline { color: var(--muted); font-size: 13px; margin-bottom: 36px; }
+    .article-layout { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 48px; align-items: start; }
+    .article-body { min-width: 0; }
+    .article-body section { margin-bottom: 38px; scroll-margin-top: calc(var(--header-height) + 16px); }
+    .article-body section:last-child { min-height: calc(100vh - var(--header-height) - 16px); }
+    .article-body p, .article-body li { color: #304542; }
+    .article-body ul, .article-body ol { padding-left: 1.35em; }
+    .article-body li + li { margin-top: 8px; }
+    .toc { position: sticky; top: calc(var(--header-height) + 16px); max-height: calc(100vh - var(--header-height) - 32px); overflow-y: auto; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .toc h2 { font-family: inherit; font-size: 14px; font-weight: 750; }
+    .toc ol { margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: 13px; }
+    .toc li + li { margin-top: 6px; }
+    .callout { margin: 20px 0; padding: 17px 19px; border-left: 3px solid var(--green); background: #edf1e7; }
+    .warning { border-left-color: #9c5b22; background: #f7efe5; }
+    .system-figure { margin: 24px 0; }
+    .diagram-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .system-diagram { display: block; width: 100%; min-width: 760px; height: auto; }
+    .diagram-caption { margin-top: 10px; color: var(--muted); font-size: 13px; }
+    .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
+    table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 14px; text-align: left; }
+    th, td { padding: 11px 15px; border-top: 1px solid var(--line); vertical-align: top; }
+    th { background: #edf1e7; }
+    .formula { padding: 16px 18px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .small { color: var(--muted) !important; font-size: 13px; }
+    footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .footer-inner { display: flex; flex-direction: column; align-items: center; gap: 4px; padding-block: 24px; text-align: center; }
+    .footer-brand-link { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-size: 13px; font-weight: 750; text-decoration: none; }
+    .footer-brand-logo { width: 32px; height: 32px; }
+    .scroll-top-button { position: fixed; right: max(24px, env(safe-area-inset-right)); bottom: max(24px, env(safe-area-inset-bottom)); z-index: 110; display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--green); border-radius: 50%; background: var(--green); color: #fffefa; cursor: pointer; }
+    .scroll-top-button[hidden] { display: none; }
+    .scroll-top-icon { width: 11px; height: 11px; margin-top: 5px; transform: rotate(45deg); border-top: 2px solid currentColor; border-left: 2px solid currentColor; }
+    @media (max-width: 900px) { :root { --header-height: 150px; } .topbar { flex-wrap: wrap; gap: 10px; padding-block: 12px; } nav { flex-wrap: wrap; gap: 8px 18px; } .article-layout { grid-template-columns: 1fr; gap: 27px; } .toc { position: static; grid-row: 1; max-height: none; } }
+    @media (max-width: 600px) { .wrap { width: calc(100% - 32px); } .topbar { padding-inline: 16px; } .brand { gap: 8px; font-size: 13px; } nav { width: 100%; justify-content: space-between; gap: 6px; font-size: 12px; } .page { padding-block: 38px 58px; } .dek { font-size: 16px; } .scroll-top-button { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="回到能源與冷凍空調學習網首頁"><img class="brand-mark" src="assets/hvacr-learning-logo.svg?v=3" alt=""><span>能源與冷凍空調學習網</span></a>
+    <nav aria-label="主選單"><a href="index.html">首頁</a><a href="about.html">關於我們</a><a href="exam-years.html">技師考題</a><a href="columns.html" aria-current="page">技術專欄</a><a href="selected-reading.html">文章選讀</a><a href="tools.html">計算工具</a></nav>
+  </header>
+  <main class="wrap page">
+    <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="columns.html">技術專欄</a> ／ 磁懸浮離心式冰水主機</p>
+    <p class="eyebrow">CHILLER · ENERGY PERFORMANCE</p>
+    <h1>磁懸浮無油變頻離心式冰水主機 IPLV 迷思破解、喘振（Surge）防制與全生命週期效益實務指南</h1>
+    <p class="dek">從 IPLV、喘振防制到系統用電與全生命週期成本，理解冰水主機選型的實務判斷。</p>
+    <p class="byline">能源與冷凍空調工程實務專題｜參考來源與查閱範圍見文末</p>
+    <div class="article-layout">
+      <article class="article-body">
+        <section id="intro">
+          <h2>前言</h2>
+          <p>選購冰水主機時，常見的問題是：「某台磁懸浮無油主機的 IPLV 比較好，是不是裝上去就一定比較省電？」</p>
+          <p>答案不能只看一個數字。冰水主機的實際耗電會隨冷房負載、冰水溫度、冷卻水溫度及控制方式變化；如果冷卻水塔、泵浦和主機之間沒有協調好，即使主機在標準條件下表現優異，也不代表整座冰水系統的年度費用最低。[1][2]</p>
+          <p>另一個重要問題是<strong>喘振</strong>。離心式壓縮機在低流量、高壓力需求等不利條件下，可能進入不穩定運轉區域。變頻與磁懸浮各自解決不同問題，並不能單憑設備名稱推論「不會喘振」。[1]</p>
+          <p>本文以<strong>水冷式、磁懸浮無油變頻離心式冰水主機及其冷卻水系統</strong>為主要討論範圍，從基本原理說明 IPLV 的用途、喘振形成條件、系統控制，以及如何用假設案例比較全生命週期成本。實際設備能力、控制邊界及維護要求仍須以原廠文件與專案條件為準。</p>
+        </section>
+        <section id="architecture">
+          <h2>一、先認識設備：磁懸浮、無油、變頻與離心式各代表什麼？</h2>
+          <p>這四個名詞分別描述不同技術面向，不宜視為同義詞。</p>
+          <div class="table-wrap"><table><thead><tr><th scope="col">名稱</th><th scope="col">描述的技術</th><th scope="col">主要作用</th><th scope="col">不代表什麼</th></tr></thead><tbody>
+            <tr><td>離心式</td><td>壓縮機的壓縮方式</td><td>葉輪對冷媒做功，配合擴散器提高壓力</td><td>在所有流量與壓力條件下都能穩定運轉</td></tr>
+            <tr><td>變頻</td><td>馬達轉速控制方式</td><td>隨需求調整壓縮機轉速與能力</td><td>所有負載下都比其他方案省電</td></tr>
+            <tr><td>磁懸浮</td><td>轉子支撐方式</td><td>以磁力控制轉子位置，正常懸浮運轉時減少軸承接觸</td><td>沒有控制系統、備用支撐或維修需求</td></tr>
+            <tr><td>無油</td><td>設備特定潤滑與冷媒迴路設計</td><td>避免傳統潤滑油在指定冷媒迴路中循環</td><td>所有零組件皆不需維護，或所有故障都可避免</td></tr>
+          </tbody></table></div>
+          <p><strong>磁懸浮的基本概念</strong>是利用磁力支撐轉子，並藉由位置感測與控制維持轉子位置。實際磁軸承配置、停電時的轉子支撐、保護電源及故障處置方式，依壓縮機設計不同；採購時應向製造商確認，不能只憑「磁懸浮」三個字推定。</p>
+          <p><strong>無油</strong>的具體定義也要看設備文件。對使用者而言，應確認供應商所說的「無油」涵蓋哪些部位、冷媒迴路及正常操作條件，並確認保養項目與備品要求。</p>
+          <h3>1. 冰水主機與外部系統的邊界</h3>
+          <p>水冷式冰水主機通常與兩個外部水迴路相連：</p>
+          <ol><li><strong>冰水迴路：</strong>冰水泵使水流經蒸發器及空調負載，將建築物熱量送回主機。</li><li><strong>冷卻水迴路：</strong>冷卻水泵使水流經冷凝器及冷卻水塔，將冷凝器熱量排至環境。</li></ol>
+          <p>主機、冰水泵、冷卻水泵與水塔風扇的電力應分別量測。<strong>主機效率不等於整座冰水系統效率</strong>：若為了改善主機效率而增加水塔風扇或泵浦耗電，必須把增加的用電一起計算。[1][2]</p>
+          <h3>2. 冷媒如何完成循環？</h3>
+          <p>在簡化的蒸氣壓縮式冷凍循環中：</p>
+          <ol><li><strong>蒸發器：</strong>冷媒從冰水吸熱並蒸發，產生冷卻效果。</li><li><strong>離心式壓縮機：</strong>葉輪對冷媒做功，提高冷媒壓力。</li><li><strong>冷凝器：</strong>較高壓力的冷媒向冷卻水放熱並冷凝。</li><li><strong>節流裝置：</strong>液態冷媒降壓後回到蒸發器，繼續循環。</li></ol>
+          <p>冷凝器排出的熱量不只有冰水帶來的熱，還包括壓縮機等進入冷媒系統的能量。因此，冷凝器負載與冷卻水塔負載不能直接視為與蒸發器冷量完全相同。[1]</p>
+        </section>
+        <section id="surge">
+          <h2>二、離心式壓縮機、溫度提升與喘振</h2>
+          <h3>1. 什麼是溫度提升（lift）？</h3>
+          <p>離心式冰水主機需要讓冷媒從蒸發器的較低壓力，提升到冷凝器所需的較高壓力。</p>
+          <p>工程上常用冷凝與蒸發條件之間的差距，理解壓縮機必須克服的「提升」程度。可用冷媒飽和溫度差作為直觀比較：</p>
+          <div class="formula">ΔT<sub>lift</sub> = T<sub>cond,sat</sub> − T<sub>evap,sat</sub></div>
+          <p>其中 T<sub>cond,sat</sub> 為依冷凝壓力換算的冷媒飽和溫度（°C）；T<sub>evap,sat</sub> 為依蒸發壓力換算的冷媒飽和溫度（°C）；ΔT<sub>lift</sub> 為兩者溫差（K）。</p>
+          <p>這是<strong>有助理解的溫差指標</strong>，不是所有壓縮機性能都可由單一溫差決定的完整公式。冷媒性質、實際流量、換熱器溫差、壓力損失及壓縮機效率仍會影響結果。</p>
+          <p>一般來說，在其他條件相近時，較低的冷凝溫度或較高的蒸發溫度，可能降低壓縮機所需克服的提升；但不能忽略設備的供液要求、最小冷卻水溫度及其他操作限制。[1]</p>
+          <h3>2. 變頻如何影響離心式壓縮機？</h3>
+          <p>變頻器調整馬達與葉輪轉速，使壓縮機能力能隨系統需求變化。ASHRAE 說明，變速可配合導葉控制，讓壓縮機在較廣的負載範圍內尋找合適的運轉狀態；效果仍受實際冷凝條件與設備設計影響。[1]</p>
+          <p>轉速降低時，壓縮機提供流量與提升的能力也會改變。若冷凝側要求的壓力提升仍很高，單純降低轉速不一定足以穩定運轉。</p>
+          <div class="callout"><strong>工程重點：</strong>變頻有助於調整運轉點，但不能脫離壓縮機性能曲線、最低穩定流量及主機保護邊界討論。</div>
+          <h3>3. 喘振是什麼？</h3>
+          <p>喘振（surge）是壓縮機系統在特定條件下出現的<strong>整體流動不穩定</strong>。簡化來說，當壓縮機在當前流量及轉速下，無法持續提供系統所需的壓力提升時，流量與壓力可能出現週期性波動，嚴重時可能伴隨短暫逆流、振動或保護停機。[1]</p>
+          <p>不應把喘振簡化成「只要低負載就一定發生」。真正要看的是多個因素的組合，例如：</p>
+          <ul><li>冷媒流量；</li><li>壓縮機轉速及導葉位置；</li><li>冷凝與蒸發壓力；</li><li>換熱器水側流量與汙垢；</li><li>冷卻水塔能力；</li><li>原廠定義的穩定運轉範圍。</li></ul>
+          <p>ASHRAE 列舉可能提高所需提升或冷凝壓力的原因，包括冷凝器或蒸發器水側汙垢、冷卻水塔性能不足、冷凝器內不凝結氣體，以及冷凝器流量低於設計條件。[1]</p>
+          <h3>4. 喘振與局部失速不是完全相同的現象</h3>
+          <p>壓縮機內局部流動可能先產生不穩定，但「局部失速」與整個壓縮系統的「喘振」不應在沒有進一步資料時完全等同。現場聽到噪音、觀察到電流波動或冷量不穩，也不能只憑單一現象就判定一定是喘振；應結合原廠控制器事件紀錄及操作資料分析。</p>
+          <p><strong>不要為了驗證喘振而刻意讓主機進入不穩定區。</strong>若有疑慮，應由原廠或合格維護人員依設備保護程序確認。</p>
+        </section>
+        <section id="iplv">
+          <h2>三、IPLV 是什麼？它能回答什麼，不能回答什麼？</h2>
+          <h3>1. 從滿載效率到部分負載表現</h3>
+          <p>冰水主機不一定全年都在設計滿載運轉。為了比較設備在部分負載下的表現，產業會使用<strong>綜合部分負載值</strong>（integrated part-load value，IPLV）。</p>
+          <p>IPLV 的目的，是在指定的標準化測試或計算條件下，將數個負載點的性能整理成一個比較指標。它對於<strong>同一標準、同一版本及相同設備分類</strong>下比較主機有參考價值。但它不是某棟建築實際全年耗電的直接量測值。</p>
+          <h3>2. 為什麼 IPLV 不能直接等於年度效率？</h3>
+          <p>標準化指標的條件，可能與專案的實際運轉分布不同：</p>
+          <div class="table-wrap"><table><thead><tr><th scope="col">比較面向</th><th scope="col">標準化部分負載指標</th><th scope="col">實際場址</th></tr></thead><tbody>
+            <tr><td>負載分布</td><td>依指定方法選取或加權</td><td>受建築使用、季節、生產排程影響</td></tr><tr><td>冷卻水溫度</td><td>依標準條件</td><td>受濕球溫度、水塔能力與控制影響</td></tr><tr><td>冰水溫度</td><td>依指定條件</td><td>可能固定或依需求重設</td></tr><tr><td>主機台數</td><td>依設備評定方式</td><td>可能多台輪替、並聯及備援</td></tr><tr><td>輔助設備</td><td>依評定邊界</td><td>水泵、水塔風扇、控制設備皆可能耗電</td></tr><tr><td>啟停與故障</td><td>未必能反映特定場址全部事件</td><td>受控制策略、最低負載與維護狀態影響</td></tr>
+          </tbody></table></div>
+          <p>所以，IPLV 好的主機<strong>可能</strong>在某個場址節能，但不能只憑 IPLV 就保證該場址年電費最低。</p>
+          <h3>3. 容易混淆的幾個觀念</h3>
+          <h4>迷思一：IPLV 越低，任何情況都越省電</h4>
+          <p>如果指標單位是 <strong>kW/RT</strong>，在相同定義下通常是數值越低代表每冷凍噸所需功率越低；但如果使用 <strong>COP</strong>，則相反，是越高越好。比較前必須先核對單位、定義及條件。</p>
+          <h4>迷思二：把各負載點的 kW/RT 直接算術平均，就是年度 kW/RT</h4>
+          <p>不一定。要計算實際期間的平均單位冷量耗電，應以<strong>總電能除以總冷量</strong>：</p>
+          <div class="formula">e<sub>annual</sub> = E<sub>chiller</sub> ÷ Q<sub>annual</sub></div>
+          <p>其中 e<sub>annual</sub> 為統計期間平均單位冷量耗電（kWh/RTh，可數值對應 kW/RT）；E<sub>chiller</sub> 為同期間主機電能（kWh）；Q<sub>annual</sub> 為同期間供應的冷量，冷凍噸時（RTh）。若各時段冷量不同，不能單純將每個時段的 kW/RT 用運轉小時作一般算術平均，而不考慮各時段提供多少冷量。</p>
+          <h4>迷思三：磁懸浮無油就不需要維護</h4>
+          <p>無油設計可能改變傳統油路相關維護內容，但壓縮機、磁軸承控制、變頻器、感測器、換熱器、冷媒、電力及保護系統仍需依原廠要求檢查。水側結垢也不會因為壓縮機無油而自動消失。[1]</p>
+          <h4>迷思四：主機功率最低時，整座冰水站也一定最低</h4>
+          <p>冷卻水溫度降低，可能有助於降低壓縮機功率；但水塔風扇可能因此增加耗電。正確做法是比較：</p>
+          <div class="formula">P<sub>plant</sub> = P<sub>chiller</sub> + P<sub>CHW pump</sub> + P<sub>CW pump</sub> + P<sub>tower fan</sub> + P<sub>other</sub></div>
+          <p>各項皆為同時刻電功率，單位 kW。此式是所選設備邊界內的功率加總；實際評估還須註明哪些設備納入或排除。</p>
+          <h3>4. 關於 IPLV 權重與標準版本</h3>
+          <p>常見資料會列出不同負載點及加權方式，但其適用條件、單位形式、設備分類及版本都需要核實。</p>
+          <p><strong>本次未取得並核對相關 AHRI 標準全文與最新修訂狀態，因此不在本文列出特定版本的 IPLV 加權係數，也不將本文案例稱作標準 IPLV 計算。</strong>採購或認證比較時，應要求供應商提供所依據的標準版本、設備分類、評定條件及性能資料。</p>
+          <p>AHRI 官方表示，其產品性能認證計畫是自願性計畫，用於確認受涵蓋產品符合製造商公布的性能聲明；是否認證及其涵蓋範圍，仍應查核特定型號。[3]</p>
+        </section>
+        <section id="prevention">
+          <h2>四、如何降低喘振風險？</h2>
+          <h3>1. 從源頭降低不必要的壓力提升</h3>
+          <p>在符合原廠限制下，應檢查造成冷凝壓力升高或蒸發壓力降低的原因。[1]</p>
+          <div class="table-wrap"><table><thead><tr><th scope="col">檢查項目</th><th scope="col">對運轉的可能影響</th><th scope="col">工程處置方向</th></tr></thead><tbody>
+            <tr><td>冷卻水進水溫度偏高</td><td>冷凝溫度與所需提升可能增加</td><td>檢查室外條件、水塔能力、風扇及水量</td></tr><tr><td>冷凝器水側結垢</td><td>傳熱變差，可能需要較高冷凝溫度排熱</td><td>比較端差與歷史趨勢，依程序檢查及清洗</td></tr><tr><td>冷凝器流量不足</td><td>換熱條件改變，可能增加冷凝壓力</td><td>確認流量、過濾器、閥位及泵浦狀態</td></tr><tr><td>蒸發器水側問題</td><td>可能改變蒸發溫度及壓力</td><td>檢查冰水流量、水質、端差與負載</td></tr><tr><td>不凝結氣體</td><td>可能提高冷凝壓力</td><td>依冷媒型式及原廠程序檢查</td></tr><tr><td>冷媒流量或負載過低</td><td>操作點可能接近穩定邊界</td><td>檢查最低負載、主機組合及控制紀錄</td></tr>
+          </tbody></table></div>
+          <p>上表是<strong>排查方向</strong>，不是各項異常的唯一原因。採取處置前，應先確認感測器、流量量測及操作紀錄是否可信。</p>
+          <h3>2. 利用原廠性能曲線與控制保護</h3>
+          <p>有效的防喘振設計，需要供應商提供：</p>
+          <ul><li>不同轉速、負載及冷凝條件下的可操作範圍；</li><li>最低穩定負載或最低穩定流量的定義；</li><li>導葉、變頻與其他卸載裝置的控制方式；</li><li>冷卻水及冰水的允許溫度與流量；</li><li>喘振偵測、警報、限載及保護動作；</li><li>多壓縮機或多主機運轉時的控制限制。</li></ul>
+          <p>實際穩定邊界是設備及工況相關的結果，<strong>本文不提供通用的「最低負載百分比」</strong>。</p>
+          <h3>3. 水塔控制不能只追求最低出水溫度</h3>
+          <p>ASHRAE 指出，在符合製造商建議最低冷卻水溫度的前提下，降低冷卻水溫度有助於降低主機功率；其所述水塔應用亦提醒，不能以任意降低冷凝器水流量取代適當的溫度控制。[1]</p>
+          <p>實際最佳設定值應同時考慮：</p>
+          <ol><li>主機冷凝壓力與穩定運轉；</li><li>原廠最低冷卻水溫度及流量；</li><li>水塔風扇與冷卻水泵功率；</li><li>室外濕球溫度與水塔能力；</li><li>水質、結垢與控制穩定性。</li></ol>
+          <p>例如，較低冷卻水溫使主機省下 10 kW，但水塔風扇多用 15 kW，在其他設備不變時，整體反而增加 5 kW。這只是說明計算邏輯的假設，不是特定設備的實測結果。</p>
+          <h3>4. 多台主機與最低負載</h3>
+          <p>若最低負載時間長，工程方案可能包括調整主機台數、適當分配負載、使用較小容量設備或依原廠設計採其他卸載方式。</p>
+          <p>熱氣旁通可能使系統在較低外部負載下維持運轉，但不代表主機功率會隨有效冷量等比例降低。ASHRAE 對熱氣旁通的說明指出，旁通啟用後，功率可能維持在接近啟用前的水準。[1] 因此，應同時評估穩定性與能耗，而不是只看「能否繼續運轉」。</p>
+        </section>
+        <section id="energy">
+          <h2>五、如何估算實際年度用電？</h2>
+          <h3>1. 以負載時段建立計算表</h3>
+          <p>若已取得主機在各代表性工況的性能資料，可先用分時段方法估算：</p>
+          <div class="formula">E<sub>chiller</sub> = Σ<sub>i</sub> (Q<sub>i</sub> × e<sub>i</sub> × h<sub>i</sub>)</div>
+          <p>其中 E<sub>chiller</sub> 為估算期間主機電能（kWh）；Q<sub>i</sub> 為第 i 個時段的冷量（RT）；e<sub>i</sub> 為該時段主機單位冷量功率（kW/RT）；h<sub>i</sub> 為該時段運轉時間（h）。因為 Q<sub>i</sub> × e<sub>i</sub> 的單位為 kW，再乘以小時得到 kWh。</p>
+          <p><strong>適用條件：</strong>每個時段的 e<sub>i</sub> 必須對應同一時段的冷量、冰水條件、冷卻水條件及主機運轉組合。若負載與氣象變化大，僅用少數時段可能不夠，應改用更細的逐時資料或經校正的模擬。</p>
+          <h3>2. 年度冷量與主機平均效率</h3>
+          <p>同期間的總冷量為：</p>
+          <div class="formula">Q<sub>annual</sub> = Σ<sub>i</sub> Q<sub>i</sub> h<sub>i</sub></div>
+          <p>其中 Q<sub>annual</sub> 的單位是 RTh。再以主機總用電除以總冷量，可得到該假設期間的主機平均 kWh/RTh。</p>
+          <p>若要評估<strong>全系統</strong>，還應另外加上冰水泵、冷卻水泵、水塔風扇及所選邊界內其他設備的電能。不能把主機的標準性能數據與整站電表結果混為同一個指標。</p>
+        </section>
+        <section id="example">
+          <h2>六、假設案例：比較主機耗電與全生命週期成本</h2>
+          <div class="callout"><strong>以下為說明原理所建立的假設案例，並非實際設備的測試結果。</strong>兩方案均假設能在所列工況下安全運轉，數值不是任何產品的規格，也不是標準 IPLV 計算。</div>
+          <h3>1. 已知條件</h3>
+          <p>假設比較 A、B 兩套各具 <strong>1,000 RT</strong> 額定冷量的方案。為了只說明計算方法，先假設已確認兩方案的供冷能力、備援與安全條件均符合需求。</p>
+          <div class="table-wrap"><table><thead><tr><th scope="col">代表工況</th><th scope="col">冷量 Q<sub>i</sub></th><th scope="col">時數 h<sub>i</sub></th><th scope="col">A 主機功率指標</th><th scope="col">B 主機功率指標</th></tr></thead><tbody>
+            <tr><td>高負載</td><td>900 RT</td><td>500 h</td><td>0.66 kW/RT</td><td>0.62 kW/RT</td></tr><tr><td>中負載</td><td>600 RT</td><td>1,500 h</td><td>0.50 kW/RT</td><td>0.54 kW/RT</td></tr><tr><td>低負載</td><td>300 RT</td><td>1,000 h</td><td>0.52 kW/RT</td><td>0.64 kW/RT</td></tr>
+          </tbody></table></div>
+          <p>上述功率指標假設已分別對應各工況的冰水與冷卻水條件。總運轉時間為 3,000 h；停機時能源暫不計入。</p>
+          <h3>2. 計算主機年度電能</h3>
+          <p>方案 A：</p>
+          <div class="formula">E<sub>A</sub> = 900 × 0.66 × 500 + 600 × 0.50 × 1,500 + 300 × 0.52 × 1,000<br>= 297,000 + 450,000 + 156,000 = <strong>903,000 kWh</strong></div>
+          <p>方案 B：</p>
+          <div class="formula">E<sub>B</sub> = 900 × 0.62 × 500 + 600 × 0.54 × 1,500 + 300 × 0.64 × 1,000<br>= 279,000 + 486,000 + 192,000 = <strong>957,000 kWh</strong></div>
+          <p>在這組假設下，A 主機比 B 主機少用 957,000 − 903,000 = <strong>54,000 kWh</strong>。</p>
+          <p>雖然 B 在表列高負載點較省電，但 A 在中、低負載的優勢，加上假設的時數分布，使 A 的<strong>主機年度估算用電</strong>較低。換一組負載或冷卻水條件，結果可能不同。</p>
+          <h3>3. 計算同期間的平均主機效率</h3>
+          <p>兩方案供應的總冷量相同：</p>
+          <div class="formula">Q<sub>annual</sub> = 900 × 500 + 600 × 1,500 + 300 × 1,000 = 1,650,000 RTh</div>
+          <p>因此：</p>
+          <div class="formula">e<sub>A</sub> = 903,000 ÷ 1,650,000 ≈ 0.547 kWh/RTh<br>e<sub>B</sub> = 957,000 ÷ 1,650,000 = 0.580 kWh/RTh</div>
+          <p>這是<strong>本假設期間</strong>的平均主機指標，不是 IPLV。</p>
+          <h3>4. 加入輔助設備後，差距可能改變</h3>
+          <p>假設方案 A 為維持其所列工況，冷卻水塔及泵浦合計平均比 B <strong>多用 12 kW</strong>，持續 3,000 h：</p>
+          <div class="formula">E<sub>aux,extra</sub> = 12 × 3,000 = 36,000 kWh</div>
+          <p>則 A 相對 B 的全系統電能節省為 54,000 − 36,000 = <strong>18,000 kWh</strong>。</p>
+          <p>若假設兩方案其他設備用電相同，且平均電能費率均為 <strong>NT$3.5/kWh</strong>：</p>
+          <div class="formula">18,000 × 3.5 = <strong>NT$63,000／年</strong></div>
+          <p>此費率僅為教學假設，不代表台灣現行電價或任何用戶契約。案例也未納入契約容量、需量電費、尖離峰差異及停機待機用電。</p>
+          <h3>5. 全生命週期成本：多付的初期費用是否值得？</h3>
+          <p>全生命週期成本（life-cycle cost，LCC）比較的重點，是將不同時間發生的投資、能源、維護、更換及期末價值，換算到相同的比較基準。NIST 的建築生命週期成本工具即用於比較初期投資與後續操作成本不同的方案。[4]</p>
+          <p>本例只比較 A 相對 B 的<strong>增量成本與增量效益</strong>，假設：</p>
+          <div class="table-wrap"><table><thead><tr><th scope="col">項目</th><th scope="col">假設</th></tr></thead><tbody><tr><td>A 比 B 多出的初期投資</td><td>NT$800,000</td></tr><tr><td>A 每年電費節省</td><td>NT$63,000</td></tr><tr><td>A 每年維護費用淨節省</td><td>NT$20,000</td></tr><tr><td>每年總淨節省</td><td>NT$83,000</td></tr><tr><td>分析期間</td><td>10 年</td></tr><tr><td>實質折現率</td><td>每年 6%</td></tr><tr><td>第 10 年 A 相對 B 的額外殘值</td><td>NT$150,000</td></tr><tr><td>其他費用</td><td>假設兩者相同</td></tr></tbody></table></div>
+          <p>以每年年末節省金額相同為假設，增量淨現值為：</p>
+          <div class="formula">NPV = −ΔC<sub>0</sub> + S × [1 − (1 + r)<sup>−n</sup>] / r + ΔR<sub>n</sub> / (1 + r)<sup>n</sup></div>
+          <p>其中 ΔC<sub>0</sub> 為 A 相對 B 的額外初期投資（NT$）；S 為每年淨節省（NT$/年）；r 為每年折現率；n 為分析年數；ΔR<sub>n</sub> 為第 n 年的額外殘值（NT$）。</p>
+          <p>代入後：</p>
+          <div class="formula">NPV = −800,000 + 83,000 × [1 − (1.06)<sup>−10</sup>] / 0.06 + 150,000 / (1.06)<sup>10</sup><br>≈ −800,000 + 610,887 + 83,759 = <strong>−105,354 元</strong></div>
+          <p>以此假設判斷，A 雖然每年節省能源與維護費用，但在 10 年、6% 折現率下，所估增量效益的現值仍不足以抵銷額外初期投資。</p>
+          <p>這<strong>不是說磁懸浮方案不值得採用</strong>。案例沒有將 A、B 指定為任何壓縮機型式，也沒有計入所有可能的可靠度、停機、需量電費、更換費用或環境成本；換用實際資料後，結論可能不同。</p>
+          <h3>6. 敏感度分析應問什麼？</h3>
+          <p>至少應改變以下假設，觀察方案排名是否改變：</p>
+          <ul><li>電價及尖離峰用電分布；</li><li>年運轉時數與低負載比例；</li><li>冷卻水溫度與水塔功率；</li><li>維護合約及主要零組件更換費用；</li><li>折現率、分析年數與期末殘值；</li><li>故障停機的發生機率及可量化損失。</li></ul>
+          <p>若在合理範圍內小幅改變假設就會使結論反轉，代表選型結果對資料不確定性敏感，應優先補強量測與報價資料。</p>
+        </section>
+        <section id="practice">
+          <h2>七、實務選型、驗收與維護</h2>
+          <h3>1. 設計與採購前</h3>
+          <p>除了額定冷量和 IPLV，應要求供應商在<strong>同一組專案工況</strong>下提供：</p>
+          <ul><li>滿載及多個部分負載點的冷量、功率及操作限制；</li><li>冰水與冷卻水供回溫、流量及水側壓降；</li><li>高冷卻水溫、低負載及不同轉速下的穩定運轉資料；</li><li>主機功率計量邊界：是否包含變頻器、控制及相關輔助設備；</li><li>磁軸承、停電支撐及保護功能的設備資料；</li><li>預防保養項目、保固條件、備品及預期更換項目；</li><li>冷媒種類、現場安全需求與維修支援。</li></ul>
+          <p>若不同廠商提供的資料採用不同流量、溫度或功率邊界，應先統一條件再比較，否則單看數值可能產生錯誤結論。</p>
+          <h3>2. 試車與驗收</h3>
+          <p>驗收時應確認感測器、電表及流量量測位置，並在安全操作範圍內記錄：</p>
+          <ul><li>主機輸入功率與冷量；</li><li>冰水及冷卻水進、出口溫度；</li><li>各水迴路流量與壓差；</li><li>冷媒蒸發、冷凝壓力及對應溫度；</li><li>壓縮機轉速、導葉位置及控制模式；</li><li>原廠警報、保護與事件紀錄。</li></ul>
+          <p>現場測試與型錄評定的條件不一定相同。若要判斷是否符合契約性能，應先訂明測試條件、穩態判準、量測不確定度與修正方法。</p>
+          <h3>3. 維護與故障排查</h3>
+          <p>建議在初始試車時建立可比較的運轉基線，再依原廠維護計畫及現場風險進行檢查。[1]</p>
+          <p>當出現功率上升、冷量不足或壓力波動時，可依序確認：</p>
+          <ol><li>感測器與電表是否正常、校正是否有效。</li><li>實際負載及冰水設定是否改變。</li><li>冷卻水溫度、流量及水塔狀態是否異常。</li><li>換熱器端差是否在可比較條件下改變。</li><li>冷媒系統、控制器及原廠事件紀錄是否顯示異常。</li><li>是否有支路閥位、泵浦或主機台數切換造成的瞬態。</li></ol>
+          <p>磁懸浮、變頻器及冷媒系統的拆修與保護測試，應由具設備資格的人員依原廠程序執行。</p>
+        </section>
+        <section id="conclusion">
+          <h2>結語與重點整理</h2>
+          <p>磁懸浮無油變頻離心式冰水主機，把轉子支撐、潤滑方式、轉速控制及離心壓縮技術整合在同一設備中。這些技術可能改變部分負載性能與維護需求，但不能取代對冷卻水條件、穩定運轉範圍及整站能源的分析。</p>
+          <p>IPLV 適合用於符合相同評定條件的設備比較；真正的投資決策，仍應使用場址負載、設備性能、輔助設備用電及可追溯的生命週期費用資料。</p>
+          <p><strong>應記住的五點：</strong></p>
+          <ol><li><strong>磁懸浮、無油、變頻與離心式描述不同技術；任何一項都不等於「不會喘振」。</strong></li><li>喘振風險與流量、轉速及所需壓力提升共同相關，應確認原廠穩定運轉範圍。</li><li>IPLV 是標準化比較指標，不是某棟建築的實際年度耗電保證。</li><li>估算節能時，應把冰水泵、冷卻水泵與水塔風扇納入一致的系統邊界。</li><li>全生命週期比較應納入初期投資、電價、維護、更換及殘值，並檢查不確定性。</li></ol>
+        </section>
+        <section id="limitations">
+          <h2>資料限制</h2>
+          <ul><li>本次未取得並核對相關 <strong>AHRI IPLV 標準全文、特定版本計算條件及最新修訂狀態</strong>，因此未列標準權重、測試點條件或聲稱本文示例符合正式 IPLV 計算。</li><li>未取得特定磁懸浮壓縮機的原廠操作圖、喘振邊界、停電支撐設計、保養合約或備品成本；因此無法給出通用最低負載、維護費用或節能率。</li><li>本文算例的效率、時數、電價、輔助設備功率與成本均為教學假設，不代表實際產品、台灣電價或真實工程績效。</li><li>來源中的美國聯邦採購與冷媒制度不直接等同台灣要求。本文未核實特定台灣場址適用的法規或電價契約，實務上應另行查證。</li></ul>
+        </section>
+        <section id="sources">
+          <h2>參考文獻</h2>
+          <ol>
+            <li>ASHRAE。《<cite>2020 ASHRAE Handbook—HVAC Systems and Equipment</cite>》，Chapter 43, “Liquid Chillers”。<a href="https://handbook.ashrae.org/Handbooks/S20/SI/S20_Ch43/S20_Ch43_si.aspx">ASHRAE 公開章節網頁</a>。已查閱可取得的離心式主機性能、變速控制、喘振、冷卻水條件與維護內容；本文未將其視為特定產品的操作曲線。</li>
+            <li>U.S. Department of Energy, Federal Energy Management Program。《<cite>Purchasing Energy-Efficient Electric Chillers</cite>》。<a href="https://www.energy.gov/cmei/femp/purchasing-energy-efficient-electric-chillers">美國能源部公開資料</a>。已查閱公開頁面中對冰水主機比較與生命週期評估的說明；美國採購或冷媒規定不直接適用於台灣。</li>
+            <li>Air-Conditioning, Heating, and Refrigeration Institute（AHRI）。《<cite>Certification</cite>》。<a href="https://www.ahrinet.org/certification">AHRI 官方認證介紹</a>。已查閱認證計畫的公開介紹；未據此聲稱所有主機皆經認證，也未查閱特定 IPLV 標準全文。</li>
+            <li>National Institute of Standards and Technology（NIST）。《<cite>Building Life Cycle Cost Programs</cite>》。<a href="https://www.nist.gov/services-resources/software/building-life-cycle-cost-programs">NIST 官方資料</a>。已查閱其建築系統生命週期成本比較用途；本文折現算例為自行建立的教學示例。</li>
+          </ol>
+          <a href="columns.html">← 返回技術專欄</a>
+        </section>
+      </article>
+      <aside class="toc" aria-label="本文目錄"><h2>本文目錄</h2><ol>
+        <li><a href="#intro">前言</a></li>
+        <li><a href="#architecture">一、先認識設備：磁懸浮、無油、變頻與離心式各代表什麼？</a></li>
+        <li><a href="#surge">二、離心式壓縮機、溫度提升與喘振</a></li>
+        <li><a href="#iplv">三、IPLV 是什麼？它能回答什麼，不能回答什麼？</a></li>
+        <li><a href="#prevention">四、如何降低喘振風險？</a></li>
+        <li><a href="#energy">五、如何估算實際年度用電？</a></li>
+        <li><a href="#example">六、假設案例：比較主機耗電與全生命週期成本</a></li>
+        <li><a href="#practice">七、實務選型、驗收與維護</a></li>
+        <li><a href="#conclusion">結語與重點整理</a></li>
+        <li><a href="#limitations">資料限制</a></li>
+        <li><a href="#sources">參考文獻</a></li>
+      </ol></aside>
+    </div>
+  </main>
+  <footer><div class="wrap footer-inner"><a class="footer-brand-link" href="index.html" aria-label="能源與冷凍空調學習網首頁"><img class="footer-brand-logo" src="assets/hvacr-learning-logo.svg?v=3" alt=""><span>能源與冷凍空調學習網</span></a><span>以學習、交流與實務應用為目的</span></div></footer>
+  <button class="scroll-top-button" type="button" aria-label="捲動到最上方" hidden><span class="scroll-top-icon" aria-hidden="true"></span></button>
+  <script>
+    const header = document.querySelector(".topbar");
+    function updateHeaderHeight() {
+      document.documentElement.style.setProperty("--header-height", `${header.getBoundingClientRect().height}px`);
+    }
+    updateHeaderHeight();
+    window.addEventListener("resize", updateHeaderHeight);
+    if ("ResizeObserver" in window) new ResizeObserver(updateHeaderHeight).observe(header);
+    document.querySelector(".toc").addEventListener("click", (event) => {
+      if (event.target.closest('a[href^="#"]')) updateHeaderHeight();
+    });
+    const scrollTopButton = document.querySelector(".scroll-top-button");
+    function updateScrollTopButton() { scrollTopButton.hidden = window.scrollY <= 0; }
+    window.addEventListener("scroll", updateScrollTopButton, { passive: true });
+    scrollTopButton.addEventListener("click", () => {
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      window.scrollTo({ top: 0, behavior });
+    });
+    updateScrollTopButton();
+  </script>
+</body>
+</html>
