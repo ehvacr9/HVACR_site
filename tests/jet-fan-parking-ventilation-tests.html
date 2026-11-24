@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>停車場誘導通風專欄測試</title></head>
+<body>
+  <h1>停車場誘導通風專欄測試</h1>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => {
+      checks += 1;
+      if (!condition) throw new Error(`FAIL: ${label}`);
+    };
+    const frame = document.createElement("iframe");
+    frame.title = "Article layout test";
+    frame.style.cssText = "position:fixed;left:-10000px;top:0;width:320px;height:900px;border:0";
+    try {
+      const responses = await Promise.all(["../columns.html", "../jet-fan-parking-ventilation.html"].map(url => fetch(url, { cache: "no-store" })));
+      assert(responses.every(response => response.ok), "Index and article respond");
+      const parser = new DOMParser();
+      const [index, article] = await Promise.all(responses.map(async response => parser.parseFromString(await response.text(), "text/html")));
+      const title = "大型地下停車場誘導式通風（Jet Fan）CO 濃度連動變頻控制與緊急排煙整合工程實務指南";
+      assert(article.querySelector("h1")?.textContent === title
+        && index.querySelector('a.column-card[href="jet-fan-parking-ventilation.html"] h2')?.textContent === title, "Index links to article");
+      const sections = [...article.querySelectorAll("article > section")];
+      const links = [...article.querySelectorAll(".toc a")];
+      assert(sections.length === 10 && links.length === sections.length && links.every((link, i) =>
+        link.getAttribute("href") === `#${sections[i].id}` && link.textContent === sections[i].querySelector("h2").textContent), "Contents match sections");
+      const references = article.querySelectorAll("#references ol > li");
+      const cited = new Set([...article.querySelector("article").textContent.matchAll(/\[(\d+)\]/g)].map(match => Number(match[1])));
+      assert(references.length === 6 && [...cited].sort().join() === "1,2,3,4,5,6", "Citations match references");
+      assert(article.querySelector("#limitations").nextElementSibling.id === "references", "Limitations precede references");
+      assert(article.querySelector("#fire").textContent.includes("連動停止空氣調節及通風設備")
+        && article.querySelector("#fire").textContent.includes("適用範圍"), "Fire regulation scope and stop requirement are explicit");
+      assert(2 + 0.30 / 15000 * 1e6 === 22 && 2 + 0.30 / 30000 * 1e6 === 12
+        && Math.abs(30000 * 12e-6 - (0.30 + 30000 * 2e-6)) < 1e-12
+        && Math.round((2 + 10 * (1 - Math.exp(-1))) * 10) / 10 === 8.3, "Example preserves mass and units");
+      const loaded = new Promise((resolve, reject) => {
+        frame.onload = resolve;
+        frame.onerror = () => reject(new Error("Article could not be loaded"));
+      });
+      frame.src = "../jet-fan-parking-ventilation.html?layout-test=1";
+      document.body.append(frame);
+      await loaded;
+      for (const width of [320, 375, 700, 1100]) {
+        frame.style.width = `${width}px`;
+        await new Promise(resolve => setTimeout(resolve, 300));
+        const doc = frame.contentDocument;
+        assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1, `No page overflow at ${width}px`);
+        for (const link of doc.querySelectorAll(".toc a")) {
+          link.click();
+          await new Promise(resolve => setTimeout(resolve, 40));
+          const heading = doc.getElementById(link.hash.slice(1)).querySelector("h2");
+          const gap = heading.getBoundingClientRect().top - doc.querySelector(".topbar").getBoundingClientRect().bottom;
+          assert(doc.defaultView.location.hash === link.hash && gap >= 0 && gap <= 72,
+            `${link.hash} scrolls to the visible heading at ${width}px (gap: ${gap})`);
+        }
+      }
+      output.textContent = `PASS: ${checks} checks`;
+    } catch (error) {
+      output.textContent = error.stack;
+      console.error(error);
+    } finally {
+      frame.remove();
+    }
+  </script>
+</body>
+</html>
