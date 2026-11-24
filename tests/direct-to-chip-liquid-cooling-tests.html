@@ -38,6 +38,14 @@
       assert([...article.querySelectorAll(".toc a")].every((link) =>
         link.textContent.trim() === article.getElementById(link.hash.slice(1)).querySelector("h2").textContent.trim()),
       "Table of contents labels match their section headings");
+      const diagram = article.querySelector("#architecture figure svg[role='img']");
+      assert(diagram?.querySelector("title#d2c-diagram-title")
+        && diagram.querySelector("desc#d2c-diagram-desc")
+        && ["晶片", "冷板", "CDU", "換熱器", "最終散熱設備", "IT 供液", "IT 回液", "設施側供液", "設施側回液", "熱量方向"]
+          .every((label) => diagram.textContent.includes(label))
+        && diagram.querySelectorAll("[marker-end]").length >= 7
+        && !article.querySelector("#architecture").textContent.includes("建議圖示："),
+      "Accessible diagram shows the components, fluid flows and heat flow");
       const refs = article.querySelectorAll("#sources ol > li");
       const citations = [...article.querySelectorAll("article section:not(#sources)")].flatMap((section) => [...section.textContent.matchAll(/\[(\d+)\]/g)].map((match) => Number(match[1])));
       assert(refs.length === 5 && citations.every((number) => number >= 1 && number <= refs.length)
@@ -63,6 +71,9 @@
         await new Promise((resolve) => setTimeout(resolve, 300));
         const doc = frame.contentDocument;
         assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1, `No page overflow at ${width}px`);
+        const diagramScroller = doc.querySelector(".diagram-scroll");
+        assert(diagramScroller.clientWidth > 0 && (width >= 1100 || diagramScroller.scrollWidth > diagramScroller.clientWidth),
+          `Diagram is visible and scrollable when narrow at ${width}px`);
         const columns = doc.defaultView.getComputedStyle(doc.querySelector(".article-layout")).gridTemplateColumns.split(" ").length;
         assert(columns === (width <= 900 ? 1 : 2), `Responsive article layout at ${width}px`);
         for (const link of doc.querySelectorAll(".toc a")) {

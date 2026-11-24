@@ -43,6 +43,10 @@
     .toc li + li { margin-top: 6px; }
     .callout { margin: 20px 0; padding: 17px 19px; border-left: 3px solid var(--green); background: #edf1e7; }
     .warning { border-left-color: #9c5b22; background: #f7efe5; }
+    .system-figure { margin: 24px 0; }
+    .diagram-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .system-diagram { display: block; width: 100%; min-width: 760px; height: auto; }
+    .diagram-caption { margin-top: 10px; color: var(--muted); font-size: 13px; }
     .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
     table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 14px; text-align: left; }
     th, td { padding: 11px 15px; border-top: 1px solid var(--line); vertical-align: top; }
@@ -98,7 +102,64 @@
           <h3>2. D2C、浸沒式液冷與冷卻水塔有何不同？</h3>
           <p>D2C 的冷卻液在冷板及管路內流動，並不代表整部伺服器浸在液體中。浸沒式液冷則讓設備直接接觸專用浸沒液，介質選擇、材料相容及維護方式可能不同。</p>
           <p>另一方面，冷卻水塔是<strong>設施側可能採用的最終散熱設備</strong>，不是冷板本身。開放式冷卻水塔的補水、蒸發、排污及藥劑管理，不能直接套用到封閉的 IT 冷卻液迴路。</p>
-          <div class="callout"><strong>建議圖示：</strong>畫出晶片、冷板、IT 冷卻液供回管、CDU 換熱器、設施側管路及最終散熱設備；用箭頭分別標示兩個液體迴路的流向與熱量由晶片向外傳遞的方向。</div>
+          <figure class="system-figure">
+            <div class="diagram-scroll" role="region" aria-label="液冷系統示意圖，可左右捲動" tabindex="0">
+              <svg class="system-diagram" viewBox="0 0 960 500" role="img" aria-labelledby="d2c-diagram-title d2c-diagram-desc" xmlns="http://www.w3.org/2000/svg">
+                <title id="d2c-diagram-title">晶片直接液冷系統及熱量路徑示意圖</title>
+                <desc id="d2c-diagram-desc">晶片向冷板傳熱。IT 冷卻液由 CDU 換熱器供至冷板，吸熱後回到 CDU；設施側冷卻液由最終散熱設備供至 CDU，吸熱後回到散熱設備。CDU 換熱器隔離兩個液體迴路，熱量由 IT 側傳至設施側，再排至環境。</desc>
+                <defs>
+                  <marker id="d2c-it-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#28759b"/></marker>
+                  <marker id="d2c-facility-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#34785b"/></marker>
+                  <marker id="d2c-heat-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#b85c2a"/></marker>
+                </defs>
+                <rect width="960" height="500" fill="#fffefa"/>
+                <g font-family="'Microsoft JhengHei', 'Noto Sans TC', sans-serif" fill="#172b2b" font-size="16">
+                  <text x="480" y="38" text-anchor="middle" font-size="21" font-weight="700">晶片直接液冷：液體迴路與熱量路徑</text>
+                  <rect x="28" y="65" width="270" height="300" rx="14" fill="#f3f8fa" stroke="#c7dce5"/>
+                  <text x="163" y="95" text-anchor="middle" font-weight="700">伺服器</text>
+                  <rect x="88" y="186" width="150" height="124" rx="10" fill="#e1edf3" stroke="#28759b" stroke-width="2"/>
+                  <text x="163" y="253" text-anchor="middle" font-size="19" font-weight="700">冷板</text>
+                  <rect x="108" y="390" width="110" height="50" rx="6" fill="#f9e7d8" stroke="#b85c2a" stroke-width="2"/>
+                  <text x="163" y="421" text-anchor="middle" font-size="19" font-weight="700">晶片</text>
+                  <rect x="352" y="122" width="256" height="252" rx="14" fill="#edf1e7" stroke="#91aa95" stroke-width="2"/>
+                  <text x="480" y="151" text-anchor="middle" font-size="19" font-weight="700">CDU 冷卻液分配單元</text>
+                  <rect x="405" y="177" width="150" height="142" rx="8" fill="#fffefa" stroke="#648876" stroke-width="2"/>
+                  <path d="M480 181 V315" stroke="#91aa95" stroke-width="2" stroke-dasharray="5 5"/>
+                  <text x="480" y="201" text-anchor="middle" font-weight="700">換熱器</text>
+                  <text x="442" y="298" text-anchor="middle" font-size="13">IT 側</text>
+                  <text x="518" y="298" text-anchor="middle" font-size="13">設施側</text>
+                  <rect x="690" y="186" width="160" height="124" rx="10" fill="#e6f1e8" stroke="#34785b" stroke-width="2"/>
+                  <text x="770" y="239" text-anchor="middle" font-size="18" font-weight="700">最終散熱設備</text>
+                  <text x="770" y="264" text-anchor="middle" font-size="13">例如乾式冷卻器</text>
+                  <text x="322" y="186" text-anchor="middle" fill="#28759b" font-size="14">IT 回液</text>
+                  <text x="322" y="328" text-anchor="middle" fill="#28759b" font-size="14">IT 供液</text>
+                  <text x="635" y="186" text-anchor="middle" fill="#34785b" font-size="14">設施側回液</text>
+                  <text x="635" y="328" text-anchor="middle" fill="#34785b" font-size="14">設施側供液</text>
+                  <text x="163" y="350" text-anchor="middle" fill="#a14c20" font-size="14">晶片熱量</text>
+                  <text x="480" y="247" text-anchor="middle" fill="#a14c20" font-size="14">熱</text>
+                  <text x="887" y="218" text-anchor="middle" fill="#a14c20" font-size="14">排熱至</text>
+                  <text x="887" y="239" text-anchor="middle" fill="#a14c20" font-size="14">環境</text>
+                </g>
+                <g fill="none" stroke-width="5" stroke-linecap="round">
+                  <path d="M238 220 H405" stroke="#28759b" marker-end="url(#d2c-it-arrow)"/>
+                  <path d="M405 282 H238" stroke="#28759b" marker-end="url(#d2c-it-arrow)"/>
+                  <path d="M555 220 H690" stroke="#34785b" marker-end="url(#d2c-facility-arrow)"/>
+                  <path d="M690 282 H555" stroke="#34785b" marker-end="url(#d2c-facility-arrow)"/>
+                </g>
+                <g fill="none" stroke="#b85c2a" stroke-width="3" stroke-dasharray="7 5" marker-end="url(#d2c-heat-arrow)">
+                  <path d="M163 386 V316"/>
+                  <path d="M445 263 H514"/>
+                  <path d="M850 250 H916"/>
+                </g>
+                <g font-family="'Microsoft JhengHei', 'Noto Sans TC', sans-serif" font-size="14" fill="#304542">
+                  <path d="M245 463 H282" stroke="#28759b" stroke-width="4" marker-end="url(#d2c-it-arrow)"/><text x="293" y="468">IT 冷卻液流向</text>
+                  <path d="M444 463 H481" stroke="#34785b" stroke-width="4" marker-end="url(#d2c-facility-arrow)"/><text x="492" y="468">設施側液體流向</text>
+                  <path d="M659 463 H696" stroke="#b85c2a" stroke-width="3" stroke-dasharray="7 5" marker-end="url(#d2c-heat-arrow)"/><text x="707" y="468">熱量方向</text>
+                </g>
+              </svg>
+            </div>
+            <figcaption class="diagram-caption">液對液 D2C 系統概念圖：兩側流體在 CDU 換熱器內隔離，箭頭分別表示流體與熱量方向。圖中未繪出泵浦、閥件與所有支路；最終散熱設備及實際接管依系統設計而定。手機可左右滑動圖面。</figcaption>
+          </figure>
         </section>
         <section id="physics">
           <h2>二、冷板如何帶走熱量？</h2>
