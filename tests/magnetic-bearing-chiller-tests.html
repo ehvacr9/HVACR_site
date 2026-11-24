@@ -36,6 +36,15 @@
       const cited = new Set([...article.querySelector("article").textContent.matchAll(/\[(\d+)\]/g)].map((match) => Number(match[1])));
       assert(references.length === 4 && [...cited].sort().join() === "1,2,3,4",
         "References correspond to citations");
+      const figure = article.querySelector("#architecture figure");
+      const image = figure?.querySelector("img");
+      assert(image?.getAttribute("alt").includes("節流裝置") && figure.querySelector("figcaption")?.textContent.includes("未繪出所有接管"),
+        "Cycle diagram has accessible text and scope");
+      const svgResponse = await fetch(`../${image.getAttribute("src")}`);
+      assert(svgResponse.ok, "Chiller cycle diagram responds");
+      const svg = parser.parseFromString(await svgResponse.text(), "image/svg+xml");
+      assert(!svg.querySelector("parsererror") && ["蒸發器", "離心式壓縮機", "磁軸承", "冷凝器", "節流裝置", "冰水迴路", "冷卻水迴路"].every(text => svg.documentElement.textContent.includes(text)),
+        "Cycle SVG contains equipment and flow boundaries");
       const example = article.querySelector("#example").textContent;
       assert(["903,000 kWh", "957,000 kWh", "54,000 kWh", "1,650,000 RTh", "36,000 kWh",
         "18,000 kWh", "63,000", "−105,354 元"].every((value) => example.includes(value)),
@@ -60,6 +69,10 @@
         await new Promise((resolve) => setTimeout(resolve, 300));
         const doc = frame.contentDocument;
         assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1, `No page overflow at ${width}px`);
+        const diagram = doc.querySelector(".system-diagram");
+        const scroller = doc.querySelector(".diagram-scroll");
+        assert(diagram.complete && diagram.naturalWidth > 0 && scroller.clientWidth > 0
+          && (width === 1100 || scroller.scrollWidth > scroller.clientWidth), `Diagram renders and fits scroll region at ${width}px`);
         for (const link of doc.querySelectorAll(".toc a")) {
           link.click();
           await new Promise((resolve) => setTimeout(resolve, 30));

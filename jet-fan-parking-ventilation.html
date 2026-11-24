@@ -40,6 +40,10 @@
     .toc h2 { font-family:inherit; font-size:14px; font-weight:750; }
     .toc ol { margin:0; padding:0; list-style:none; color:var(--muted); font-size:13px; }
     .toc li + li { margin-top:6px; }
+    .system-figure { margin:24px 0; }
+    .diagram-scroll { overflow-x:auto; border:1px solid var(--line); border-radius:8px; background:var(--surface); }
+    .system-diagram { display:block; width:100%; min-width:760px; height:auto; }
+    .diagram-caption { margin-top:10px; color:var(--muted); font-size:13px; }
     .table-wrap { overflow-x:auto; margin:18px 0; border:1px solid var(--line); border-radius:7px; background:var(--surface); }
     table { width:100%; min-width:600px; border-collapse:collapse; text-align:left; font-size:14px; }
     th, td { padding:11px 15px; border-top:1px solid var(--line); vertical-align:top; }
@@ -78,6 +82,12 @@
         <section id="architecture">
           <h2>一、系統架構：誘導風機不是排風出口</h2>
           <p>誘導風機（jet fan）在空間內形成具有動量的射流，帶動周圍空氣朝預定方向移動。它本身通常不把空氣排到室外；真正帶走污染物的是連通室外的排風路徑，而補充空氣必須有可用的進風路徑。風機原理與流量、壓力之間的關係可參考 ASHRAE 風機章節。[2]</p>
+          <figure class="system-figure">
+            <div class="diagram-scroll" tabindex="0" role="region" aria-label="停車場日常通風與 CO 控制示意圖，可左右捲動">
+              <img class="system-diagram" src="assets/jet-fan-ventilation-diagram.svg" width="960" height="570" alt="外氣經進風路徑進入停車場，誘導風機推動氣流，由排風機排至室外；CO 偵測器將訊號送至控制器，依設計調節風機。此圖不表示火災連動。">
+            </div>
+            <figcaption class="diagram-caption">日常通風概念圖：實線為空氣流向，虛線為感測與控制訊號。火災運轉須依適用法規及核准圖說，不能由此圖推定。手機可左右滑動圖面。</figcaption>
+          </figure>
           <div class="table-wrap"><table><thead><tr><th>元件</th><th>作用</th><th>主要限制</th></tr></thead><tbody>
             <tr><td>進風口或補風設備</td><td>提供外氣與氣流入口</td><td>須考慮入口位置、阻力與排氣回吸。</td></tr>
             <tr><td>誘導風機</td><td>推動局部氣流，減少死角</td><td>受梁柱、車輛、噪音和配置方向影響；不等於外氣量。</td></tr>

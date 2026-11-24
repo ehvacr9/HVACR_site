@@ -37,6 +37,15 @@
       assert(article.querySelector("#limitations").nextElementSibling.id === "references", "Limitations precede references");
       assert(article.querySelector("#fire").textContent.includes("連動停止空氣調節及通風設備")
         && article.querySelector("#fire").textContent.includes("適用範圍"), "Fire regulation scope and stop requirement are explicit");
+      const figure = article.querySelector("#architecture figure");
+      const image = figure?.querySelector("img");
+      assert(image?.getAttribute("alt").includes("不表示火災連動")
+        && figure.querySelector("figcaption")?.textContent.includes("核准圖說"), "Daily ventilation diagram has accessible description and fire limitations");
+      const svgResponse = await fetch(`../${image.getAttribute("src")}`);
+      assert(svgResponse.ok, "Ventilation diagram responds");
+      const svg = parser.parseFromString(await svgResponse.text(), "image/svg+xml");
+      assert(!svg.querySelector("parsererror") && ["室外空氣", "誘導風機", "排風機", "CO 偵測器", "通風控制器", "火災"].every(text => svg.documentElement.textContent.includes(text)),
+        "Ventilation SVG contains flow, control and fire-boundary labels");
       assert(2 + 0.30 / 15000 * 1e6 === 22 && 2 + 0.30 / 30000 * 1e6 === 12
         && Math.abs(30000 * 12e-6 - (0.30 + 30000 * 2e-6)) < 1e-12
         && Math.round((2 + 10 * (1 - Math.exp(-1))) * 10) / 10 === 8.3, "Example preserves mass and units");
@@ -52,6 +61,10 @@
         await new Promise(resolve => setTimeout(resolve, 300));
         const doc = frame.contentDocument;
         assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1, `No page overflow at ${width}px`);
+        const diagram = doc.querySelector(".system-diagram");
+        const scroller = doc.querySelector(".diagram-scroll");
+        assert(diagram.complete && diagram.naturalWidth > 0 && scroller.clientWidth > 0
+          && (width >= 1100 || scroller.scrollWidth > scroller.clientWidth), `Diagram renders and fits scroll region at ${width}px`);
         for (const link of doc.querySelectorAll(".toc a")) {
           link.click();
           await new Promise(resolve => setTimeout(resolve, 40));

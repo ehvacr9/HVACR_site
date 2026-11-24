@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-labelledby="title description">
+  <title id="title">磁懸浮離心式冰水主機簡化冷媒循環</title>
+  <desc id="description">冷媒由蒸發器流向變頻離心式壓縮機，再流至冷凝器、節流裝置並返回蒸發器。蒸發器吸收冰水迴路熱量，冷凝器向冷卻水迴路放熱；磁軸承支撐壓縮機轉子。</desc>
+  <defs>
+    <marker id="refrigerant-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#1d6252"/></marker>
+    <marker id="heat-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#b46d32"/></marker>
+    <style>text{font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif;fill:#173c36} .heading{font-size:23px;font-weight:700} .label{font-size:20px;font-weight:700} .small{font-size:15px;fill:#4c615b} .device{fill:#fffefa;stroke:#8daea0;stroke-width:2} .refrigerant{fill:none;stroke:#1d6252;stroke-width:5;marker-end:url(#refrigerant-arrow)} .heat{fill:none;stroke:#b46d32;stroke-width:4;stroke-dasharray:8 5;marker-end:url(#heat-arrow)}</style>
+  </defs>
+  <rect width="960" height="600" rx="12" fill="#f7faf6"/>
+  <text x="36" y="45" class="heading">水冷式主機：冷媒循環與熱量傳遞</text>
+  <rect x="225" y="135" width="510" height="345" rx="14" fill="#edf4ee" stroke="#b8cdbd" stroke-width="2"/>
+  <text x="245" y="162" class="small">冰水主機邊界（概念示意）</text>
+  <rect class="device" x="260" y="185" width="175" height="95" rx="8"/>
+  <text x="347" y="221" text-anchor="middle" class="label">蒸發器</text><text x="347" y="250" text-anchor="middle" class="small">冷媒吸熱蒸發</text>
+  <rect class="device" x="525" y="185" width="175" height="95" rx="8"/>
+  <text x="612" y="215" text-anchor="middle" class="label">離心式壓縮機</text><text x="612" y="241" text-anchor="middle" class="small">變頻驅動・磁軸承</text><text x="612" y="262" text-anchor="middle" class="small">提高冷媒壓力</text>
+  <rect class="device" x="525" y="345" width="175" height="95" rx="8"/>
+  <text x="612" y="382" text-anchor="middle" class="label">冷凝器</text><text x="612" y="411" text-anchor="middle" class="small">冷媒放熱冷凝</text>
+  <rect class="device" x="260" y="345" width="175" height="95" rx="8"/>
+  <text x="347" y="382" text-anchor="middle" class="label">節流裝置</text><text x="347" y="411" text-anchor="middle" class="small">冷媒降壓</text>
+  <path class="refrigerant" d="M435 233H515"/>
+  <path class="refrigerant" d="M612 280V335"/>
+  <path class="refrigerant" d="M525 393H445"/>
+  <path class="refrigerant" d="M347 345V290"/>
+  <rect class="device" x="24" y="195" width="150" height="80" rx="8"/>
+  <text x="99" y="228" text-anchor="middle" class="label">冰水迴路</text><text x="99" y="252" text-anchor="middle" class="small">建築負載與泵浦</text>
+  <path class="heat" d="M174 235H250"/>
+  <rect class="device" x="785" y="353" width="150" height="80" rx="8"/>
+  <text x="860" y="386" text-anchor="middle" class="label">冷卻水迴路</text><text x="860" y="410" text-anchor="middle" class="small">泵浦與冷卻水塔</text>
+  <path class="heat" d="M700 393H775"/>
+  <path class="heat" d="M612 103V175"/><text x="630" y="116" class="small">壓縮機輸入功</text>
+  <path d="M42 524H116" class="refrigerant"/><text x="130" y="530" class="small">冷媒流向</text>
+  <path d="M308 524H382" class="heat"/><text x="396" y="530" class="small">熱量／輸入功方向</text>
+  <text x="36" y="572" class="small">示意圖非設備接管圖；磁軸承支撐轉子，未繪各水迴路內的供回水路徑。</text>
+</svg>

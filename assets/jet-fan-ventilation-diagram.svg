@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 570" role="img" aria-labelledby="title description">
+  <title id="title">停車場日常誘導通風與 CO 控制示意</title>
+  <desc id="description">外氣由進風口進入停車空間，誘導風機推動氣流，排風機將空氣排至室外；CO 偵測器將訊號送至控制器，控制器依設計調節風機。火災操作須依核准方案，圖中不表示火災連動。</desc>
+  <defs>
+    <marker id="air-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#287b9b"/></marker>
+    <marker id="signal-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#a36a2d"/></marker>
+    <style>text{font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif;fill:#173c36} .heading{font-size:23px;font-weight:700} .label{font-size:19px;font-weight:700} .small{font-size:15px;fill:#4c615b} .box{fill:#fffefa;stroke:#9cb7a5;stroke-width:2} .air{fill:none;stroke:#287b9b;stroke-width:5;marker-end:url(#air-arrow)} .signal{fill:none;stroke:#a36a2d;stroke-width:3;stroke-dasharray:8 5;marker-end:url(#signal-arrow)}</style>
+  </defs>
+  <rect width="960" height="570" rx="12" fill="#f7faf6"/>
+  <text x="36" y="46" class="heading">日常通風：外氣交換與 CO 濃度控制</text>
+  <rect x="194" y="97" width="556" height="208" rx="10" fill="#eef4ef" stroke="#9cb7a5" stroke-width="2"/>
+  <text x="212" y="126" class="small">地下停車空間</text>
+  <rect class="box" x="30" y="159" width="128" height="83" rx="7"/>
+  <text x="94" y="193" text-anchor="middle" class="label">室外空氣</text><text x="94" y="219" text-anchor="middle" class="small">進風／補風</text>
+  <path class="air" d="M158 200H275"/>
+  <rect x="286" y="166" width="132" height="68" rx="7" fill="#d9eee8" stroke="#478a7a" stroke-width="2"/>
+  <text x="352" y="194" text-anchor="middle" class="label">誘導風機</text><text x="352" y="217" text-anchor="middle" class="small">推動室內氣流</text>
+  <path class="air" d="M418 200H608"/>
+  <rect class="box" x="620" y="166" width="110" height="68" rx="7"/>
+  <text x="675" y="193" text-anchor="middle" class="label">排風機</text><text x="675" y="217" text-anchor="middle" class="small">排出室外</text>
+  <path class="air" d="M730 200H798"/>
+  <rect class="box" x="804" y="159" width="126" height="83" rx="7"/>
+  <text x="867" y="193" text-anchor="middle" class="label">室外排放</text><text x="867" y="219" text-anchor="middle" class="small">避免回吸</text>
+  <text x="480" y="151" text-anchor="middle" class="small">車輛廢氣與 CO 隨氣流輸送；實際流場可能有死角</text>
+  <rect x="206" y="341" width="195" height="82" rx="7" fill="#fff7eb" stroke="#c28c54" stroke-width="2"/>
+  <text x="303" y="374" text-anchor="middle" class="label">CO 偵測器</text><text x="303" y="399" text-anchor="middle" class="small">代表位置的濃度訊號</text>
+  <rect x="520" y="341" width="210" height="82" rx="7" fill="#fff7eb" stroke="#c28c54" stroke-width="2"/>
+  <text x="625" y="374" text-anchor="middle" class="label">通風控制器</text><text x="625" y="399" text-anchor="middle" class="small">依設計分段或變頻控制</text>
+  <path class="signal" d="M401 382H509"/>
+  <path class="signal" d="M580 341V321H352V246"/>
+  <path class="signal" d="M671 341V246"/>
+  <path d="M42 468H116" class="air"/><text x="130" y="474" class="small">空氣流向</text>
+  <path d="M308 468H382" class="signal"/><text x="397" y="474" class="small">感測／控制訊號</text>
+  <text x="36" y="520" class="small">此圖僅示意日常通風；火災時的風機狀態須依適用法規與核准圖說確認。</text>
+  <text x="36" y="545" class="small">實際設備、偵測分區及補風控制依個案設計，不代表標準配置。</text>
+</svg>
