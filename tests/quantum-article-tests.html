@@ -52,6 +52,11 @@
       "Article omits the removed introductory dictionary description");
       assert(article.querySelector("h1")?.textContent.includes("Quantum Computing & The HVAC Industry"),
         "Article has its original title");
+      assert(article.querySelector('nav a[href="selected-reading.html"][aria-current="location"]')?.textContent.trim() === "文章選讀"
+        && article.querySelector('.breadcrumb a[href="index.html"]')?.textContent.trim() === "首頁"
+        && article.querySelector('.breadcrumb a[href="selected-reading.html"]')?.textContent.trim() === "文章選讀"
+        && article.querySelector('.breadcrumb [aria-current="page"]')?.textContent.trim() === article.querySelector("h1").textContent.trim(),
+      "Navigation and breadcrumb show selected reading and the article title");
       const abstract = article.querySelector(".article-abstract");
       assert(abstract?.querySelector("#abstract-title")?.textContent === "Abstract"
         && abstract.querySelector("#abstract-zh-title")?.textContent === "摘要"

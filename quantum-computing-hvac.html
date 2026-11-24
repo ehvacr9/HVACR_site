@@ -36,8 +36,9 @@
     .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); font-size: 15px; font-weight: 750; letter-spacing: .04em; text-decoration: none; }
     .brand-mark { width: 34px; height: 34px; flex: 0 0 34px; object-fit: contain; }
     nav { display: flex; gap: 24px; font-size: 13px; }
-    nav a { color: var(--muted); text-decoration: none; }
-    nav a:hover, nav a[aria-current="page"] { color: var(--green); }
+    nav a { flex: 0 0 auto; color: var(--muted); text-decoration: none; white-space: nowrap; }
+    nav a:hover, nav a[aria-current="location"] { color: var(--green); }
+    nav a[aria-current="location"] { font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
     .page { padding-block: 54px 84px; }
     .breadcrumb { margin: 0 0 27px; color: var(--muted); font-size: 13px; }
     .eyebrow { display: flex; align-items: center; gap: 10px; margin: 0 0 13px; color: var(--green); font-size: 12px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
@@ -103,7 +104,7 @@
     }
     .scroll-top-button[hidden] { display: none; }
     .scroll-top-icon { width: 11px; height: 11px; margin-top: 5px; transform: rotate(45deg); border-top: 2px solid currentColor; border-left: 2px solid currentColor; }
-    @media (max-width: 900px) { .topbar { flex-wrap: wrap; gap: 10px; padding-block: 12px; } nav { flex-wrap: wrap; gap: 8px 18px; } }
+    @media (max-width: 900px) { .topbar { flex-wrap: wrap; gap: 10px; padding-block: 12px; } nav { width: 100%; flex-wrap: wrap; gap: 8px 18px; } }
     @media (max-width: 600px) {
       .wrap { width: calc(100% - 32px); }
       .topbar { padding-inline: 16px; }
@@ -129,12 +130,12 @@
       <a href="exam-years.html">技師考題</a>
 
       <a href="columns.html">技術專欄</a>
-      <a href="selected-reading.html" aria-current="page">文章選讀</a>
+      <a href="selected-reading.html" aria-current="location">文章選讀</a>
       <a href="tools.html">計算工具</a>
     </nav>
   </header>
   <main class="wrap page">
-    <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="selected-reading.html">文章選讀</a> ／ 量子運算與 HVAC 產業</p>
+    <p class="breadcrumb"><a href="index.html">首頁</a> ／ <a href="selected-reading.html">文章選讀</a> ／ <span aria-current="page">Quantum Computing &amp; The HVAC Industry</span></p>
     <p class="eyebrow">ASHRAE JOURNAL · ENGLISH ARTICLE</p>
     <h1>Quantum Computing &amp; The HVAC Industry</h1>
     <p class="byline">Mario Mendoza, P.E., BCXP, HFDP; Yelissa Lopez; Ronald Diaz, P.E.; Adrian Johannes Menssen, Ph.D.｜ASHRAE Journal, November 2026, pp. 24–30</p>

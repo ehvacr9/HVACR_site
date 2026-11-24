@@ -22,6 +22,11 @@
       const title = "大型地下停車場誘導式通風（Jet Fan）CO 濃度連動變頻控制與緊急排煙整合工程實務指南";
       assert(article.querySelector("h1")?.textContent === title
         && index.querySelector('a.column-card[href="jet-fan-parking-ventilation.html"] h2')?.textContent === title, "Index links to article");
+      const notice = index.querySelector(".educational-notice");
+      assert(notice?.querySelector("h2")?.textContent === "內容使用說明"
+        && notice.textContent.includes("現行法規")
+        && notice.textContent.includes("專業人員")
+        && !notice.textContent.includes("外部字典"), "Columns notice is relevant to engineering use");
       const sections = [...article.querySelectorAll("article > section")];
       const links = [...article.querySelectorAll(".toc a")];
       assert(sections.length === 10 && links.length === sections.length && links.every((link, i) =>
