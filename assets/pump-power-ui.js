@@ -1,12 +1,14 @@
 import { calculatePumpPower } from "./pump-power.js";
 
 const form = document.querySelector("#pump-form");
-const result = document.querySelector("#result");
+const hydraulicPower = document.querySelector("#hydraulic-power");
+const shaftPower = document.querySelector("#shaft-power");
 const error = document.querySelector("#error");
 const status = document.querySelector("#status");
 
 function clearResult() {
-  result.hidden = true;
+  hydraulicPower.textContent = "";
+  shaftPower.textContent = "";
   error.hidden = true;
   status.textContent = "輸入條件已變更，請按計算更新結果。";
 }
@@ -37,8 +39,7 @@ form.addEventListener("submit", event => {
     return;
   }
   const format = value => String(Number(value.toPrecision(6)));
-  document.querySelector("#hydraulic-power").textContent = `${format(power.hydraulicPowerKw)} kW`;
-  document.querySelector("#shaft-power").textContent = `${format(power.shaftPowerKw)} kW`;
-  result.hidden = false;
+  hydraulicPower.textContent = `${format(power.hydraulicPowerKw)} kW`;
+  shaftPower.textContent = `${format(power.shaftPowerKw)} kW`;
   status.textContent = "計算完成。";
 });

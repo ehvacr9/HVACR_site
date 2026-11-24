@@ -50,31 +50,45 @@
         && style(form.querySelector("input")).borderRadius === "2px"
         && style(form.querySelector("button")).borderRadius === "2px"
         && style(form.querySelector("h2")).borderBottomStyle === "solid", "Calculator uses compact dialog styling");
+      const result = doc.querySelector("#result");
+      const hydraulic = doc.querySelector("#hydraulic-power");
+      const shaft = doc.querySelector("#shaft-power");
+      const blank = () => hydraulic.textContent === "" && shaft.textContent === "";
+      assert(!result.hidden && result.getBoundingClientRect().width > 0 && blank()
+        && hydraulic.getBoundingClientRect().height > 0 && shaft.getBoundingClientRect().height > 0,
+      "Empty result fields are visible before calculation");
+      assert(result.getBoundingClientRect().left >= form.getBoundingClientRect().right
+        && Math.abs(result.getBoundingClientRect().top - form.getBoundingClientRect().top) < 1,
+      "Input and result panels sit side by side on desktop");
       const set = (name, value) => { form.elements[name].value = value; form.elements[name].dispatchEvent(new frame.contentWindow.Event("input", { bubbles: true })); };
       set("pressure", "180"); set("flow", "36"); set("efficiency", "75");
       form.requestSubmit();
-      assert(!doc.querySelector("#result").hidden && doc.querySelector("#shaft-power").textContent === "2.4 kW"
+      assert(!result.hidden && doc.querySelector("#shaft-power").textContent === "2.4 kW"
         && doc.querySelector("#hydraulic-power").textContent === "1.8 kW", "Form calculates and displays both powers");
       assert(style(doc.querySelector("#shaft-power")).backgroundColor === "rgb(233, 236, 232)"
         && style(doc.querySelector("#shaft-power")).borderStyle === "solid", "Result uses read-only dialog field styling");
       set("pressure", "200");
-      assert(doc.querySelector("#result").hidden && doc.querySelector("#status").textContent.includes("已變更"), "Editing clears stale result");
+      assert(!result.hidden && blank() && doc.querySelector("#status").textContent.includes("已變更"), "Editing clears stale result");
       set("efficiency", "0"); form.requestSubmit();
-      assert(doc.querySelector("#result").hidden && !doc.querySelector("#error").hidden, "Zero efficiency rejected visibly");
+      assert(!result.hidden && blank() && !doc.querySelector("#error").hidden, "Zero efficiency rejected visibly");
       set("efficiency", "101"); form.requestSubmit();
-      assert(doc.querySelector("#result").hidden && doc.querySelector("#status").textContent.includes("無效"), "Out of range efficiency rejected");
+      assert(!result.hidden && blank() && doc.querySelector("#status").textContent.includes("無效"), "Out of range efficiency rejected");
       set("efficiency", "75"); set("pressure", ""); form.requestSubmit();
-      assert(doc.querySelector("#result").hidden && doc.querySelector("#status").textContent.includes("缺漏"), "Missing input rejected");
+      assert(!result.hidden && blank() && doc.querySelector("#status").textContent.includes("缺漏"), "Missing input rejected");
       set("pressure", "180"); form.requestSubmit();
       form.elements.flowUnit.value = "L/min";
       form.elements.flowUnit.dispatchEvent(new frame.contentWindow.Event("change", { bubbles: true }));
-      assert(doc.querySelector("#result").hidden, "Unit change invalidates previous result");
+      assert(!result.hidden && blank(), "Unit change invalidates previous result");
       set("flow", "600"); form.requestSubmit();
       assert(doc.querySelector("#shaft-power").textContent === "2.4 kW", "Alternate units calculate correctly");
       for (const width of [320, 375, 768, 1100]) {
         frame.style.width = `${width}px`;
         await new Promise(resolve => setTimeout(resolve, 60));
         assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1, `No overflow at ${width}px`);
+        const inputBox = form.getBoundingClientRect();
+        const outputBox = result.getBoundingClientRect();
+        assert(width <= 760 ? outputBox.top >= inputBox.bottom : outputBox.left >= inputBox.right,
+          `Responsive panel arrangement at ${width}px`);
       }
       output.textContent = `PASS: ${checks} checks`;
     } catch (error) {
