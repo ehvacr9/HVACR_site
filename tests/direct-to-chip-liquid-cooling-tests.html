@@ -26,10 +26,21 @@
       assert(index.querySelector('a.column-card[href="direct-to-chip-liquid-cooling.html"]'), "Article is listed");
       assert(article.querySelector("h1").textContent.includes("冷卻液水質管理、熱平衡與 PUE"), "Title identifies the full topic");
       assert(article.querySelectorAll("article section").length === 11, "All article sections are present");
+      const expectedHeadings = [
+        "前言", "一、D2C 是什麼？先認識系統與熱量路徑", "二、冷板如何帶走熱量？",
+        "三、為什麼冷卻液水質會影響 D2C？", "四、如何同時評估熱性能與 PUE？",
+        "五、假設案例：估算 1 MW 液冷負載的流量", "六、設計、操作與維護的實務判斷",
+        "七、後續評估方向：自然冷卻與熱回收", "結語與重點整理", "資料限制", "參考文獻",
+      ];
+      assert(JSON.stringify([...article.querySelectorAll("article section > h2")].map((heading) => heading.textContent.trim()))
+        === JSON.stringify(expectedHeadings), "Published article uses the latest version and section order");
       assert([...article.querySelectorAll('.toc a[href^="#"]')].every((link) => article.getElementById(link.hash.slice(1))), "Table of contents links resolve");
+      assert([...article.querySelectorAll(".toc a")].every((link) =>
+        link.textContent.trim() === article.getElementById(link.hash.slice(1)).querySelector("h2").textContent.trim()),
+      "Table of contents labels match their section headings");
       const refs = article.querySelectorAll("#sources ol > li");
       const citations = [...article.querySelectorAll("article section:not(#sources)")].flatMap((section) => [...section.textContent.matchAll(/\[(\d+)\]/g)].map((match) => Number(match[1])));
-      assert(refs.length === 7 && citations.every((number) => number >= 1 && number <= refs.length)
+      assert(refs.length === 5 && citations.every((number) => number >= 1 && number <= refs.length)
         && refs.length === new Set(citations).size, "Citations and references correspond");
       const mass = 1000 / (4.1813 * 5);
       assert(Math.abs(mass - 47.83) < 0.01 && Math.abs(mass / 997.05 * 3600 - 172.7) < 0.1, "Thermal calculation is consistent");
@@ -49,11 +60,21 @@
       await loaded;
       for (const width of [320, 375, 1100]) {
         frame.style.width = `${width}px`;
-        await new Promise((resolve) => setTimeout(resolve, 60));
+        await new Promise((resolve) => setTimeout(resolve, 300));
         const doc = frame.contentDocument;
         assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1, `No page overflow at ${width}px`);
         const columns = doc.defaultView.getComputedStyle(doc.querySelector(".article-layout")).gridTemplateColumns.split(" ").length;
         assert(columns === (width <= 900 ? 1 : 2), `Responsive article layout at ${width}px`);
+        for (const link of doc.querySelectorAll(".toc a")) {
+          link.click();
+          await new Promise((resolve) => setTimeout(resolve, 30));
+          const heading = doc.getElementById(link.hash.slice(1)).querySelector("h2");
+          const headerBottom = doc.querySelector(".topbar").getBoundingClientRect().bottom;
+          const gap = heading.getBoundingClientRect().top - headerBottom;
+          const sectionGap = doc.getElementById(link.hash.slice(1)).getBoundingClientRect().top - headerBottom;
+          assert(doc.defaultView.location.hash === link.hash && gap >= 15 && gap <= 18,
+            `${link.hash} scrolls to the visible heading at ${width}px (gap: ${gap}, section: ${sectionGap}, header variable: ${doc.defaultView.getComputedStyle(doc.documentElement).getPropertyValue("--header-height")})`);
+        }
       }
       output.textContent = `PASS: ${checks} checks`;
     } catch (error) {
