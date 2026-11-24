@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>泵浦功率計算器測試</title></head>
+<body>
+  <h1>泵浦功率計算器測試</h1>
+  <pre id="results" role="status">Running...</pre>
+  <script type="module">
+    import { calculatePumpPower } from "../assets/pump-power.js";
+    const output = document.querySelector("#results");
+    let checks = 0;
+    const assert = (condition, label) => { checks++; if (!condition) throw new Error(`FAIL: ${label}`); };
+    const close = (actual, expected, label) => assert(Math.abs(actual - expected) < 1e-10, label);
+    const base = { pressure: 180, pressureUnit: "kPa", flow: 36, flowUnit: "m³/h", efficiency: 75 };
+    const frame = document.createElement("iframe");
+    frame.title = "泵浦計算器互動測試";
+    frame.style.cssText = "position:fixed;left:-10000px;top:0;width:1100px;height:900px;border:0";
+    try {
+      const sample = calculatePumpPower(base);
+      close(sample.hydraulicPowerKw, 1.8, "Hydraulic power");
+      close(sample.shaftPowerKw, 2.4, "Shaft power");
+      for (const [pressure, pressureUnit] of [[180, "kPa"], [180000, "Pa"], [1.8, "bar"], [180000 / 98066.5, "kgf/cm²"]]) {
+        for (const [flow, flowUnit] of [[36, "m³/h"], [600, "L/min"], [10, "L/s"], [.01, "m³/s"]]) {
+          close(calculatePumpPower({ ...base, pressure, pressureUnit, flow, flowUnit }).shaftPowerKw, 2.4, `${pressureUnit} and ${flowUnit}`);
+        }
+      }
+      for (const change of [
+        { pressure: 0 }, { pressure: -1 }, { pressure: NaN }, { flow: 0 }, { flow: -1 },
+        { flow: Infinity }, { efficiency: 0 }, { efficiency: -1 }, { efficiency: 101 },
+        { efficiency: NaN }, { pressureUnit: "unknown" }, { flowUnit: "unknown" },
+        { pressure: 1e308 }, { flow: 1e-323 },
+      ]) {
+        let rejected = false;
+        try { calculatePumpPower({ ...base, ...change }); } catch (error) { rejected = error instanceof RangeError; }
+        assert(rejected, `Reject invalid or unrepresentable input ${JSON.stringify(change)}`);
+      }
+      close(calculatePumpPower({ ...base, efficiency: 100 }).shaftPowerKw, 1.8, "100% efficiency");
+      const index = new DOMParser().parseFromString(await (await fetch("../tools.html")).text(), "text/html");
+      assert(index.querySelector('[aria-labelledby="engineering-title"] a[href="pump-power.html"] h3')?.textContent === "泵浦功率計算器", "Tool entry");
+      const loaded = new Promise((resolve, reject) => {
+        frame.onload = resolve;
+        frame.onerror = () => reject(new Error("Unable to load calculator"));
+      });
+      frame.src = "../pump-power.html";
+      document.body.append(frame);
+      await loaded;
+      const doc = frame.contentDocument;
+      const form = doc.querySelector("#pump-form");
+      const style = frame.contentWindow.getComputedStyle.bind(frame.contentWindow);
+      assert(style(form).backgroundColor === "rgb(243, 244, 242)"
+        && style(form.querySelector("input")).borderRadius === "2px"
+        && style(form.querySelector("button")).borderRadius === "2px"
+        && style(form.querySelector("h2")).borderBottomStyle === "solid", "Calculator uses compact dialog styling");
+      const set = (name, value) => { form.elements[name].value = value; form.elements[name].dispatchEvent(new frame.contentWindow.Event("input", { bubbles: true })); };
+      set("pressure", "180"); set("flow", "36"); set("efficiency", "75");
+      form.requestSubmit();
+      assert(!doc.querySelector("#result").hidden && doc.querySelector("#shaft-power").textContent === "2.4 kW"
+        && doc.querySelector("#hydraulic-power").textContent === "1.8 kW", "Form calculates and displays both powers");
+      assert(style(doc.querySelector("#shaft-power")).backgroundColor === "rgb(233, 236, 232)"
+        && style(doc.querySelector("#shaft-power")).borderStyle === "solid", "Result uses read-only dialog field styling");
+      set("pressure", "200");
+      assert(doc.querySelector("#result").hidden && doc.querySelector("#status").textContent.includes("已變更"), "Editing clears stale result");
+      set("efficiency", "0"); form.requestSubmit();
+      assert(doc.querySelector("#result").hidden && !doc.querySelector("#error").hidden, "Zero efficiency rejected visibly");
+      set("efficiency", "101"); form.requestSubmit();
+      assert(doc.querySelector("#result").hidden && doc.querySelector("#status").textContent.includes("無效"), "Out of range efficiency rejected");
+      set("efficiency", "75"); set("pressure", ""); form.requestSubmit();
+      assert(doc.querySelector("#result").hidden && doc.querySelector("#status").textContent.includes("缺漏"), "Missing input rejected");
+      set("pressure", "180"); form.requestSubmit();
+      form.elements.flowUnit.value = "L/min";
+      form.elements.flowUnit.dispatchEvent(new frame.contentWindow.Event("change", { bubbles: true }));
+      assert(doc.querySelector("#result").hidden, "Unit change invalidates previous result");
+      set("flow", "600"); form.requestSubmit();
+      assert(doc.querySelector("#shaft-power").textContent === "2.4 kW", "Alternate units calculate correctly");
+      for (const width of [320, 375, 768, 1100]) {
+        frame.style.width = `${width}px`;
+        await new Promise(resolve => setTimeout(resolve, 60));
+        assert(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1, `No overflow at ${width}px`);
+      }
+      output.textContent = `PASS: ${checks} checks`;
+    } catch (error) {
+      output.textContent = error.stack;
+      console.error(error);
+    } finally { frame.remove(); }
+  </script>
+</body>
+</html>
